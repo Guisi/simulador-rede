@@ -22,7 +22,6 @@ public class SimuladorRede extends Application {
         	Pane node = loader.load(getClass().getResourceAsStream("/fxml/SimuladorRede.fxml"));
 			Scene scene = new Scene(node);
 			stage.setScene(scene);
-			stage.setMaximized(true);
 			stage.show();
 			
 			loader.getController();

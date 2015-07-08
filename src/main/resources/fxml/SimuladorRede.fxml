@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-<?import br.com.guisi.simulador.view.*?>
+<?import br.com.guisi.simulador.rede.view.*?>
 
 <VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1000.0" spacing="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.SimuladorRedeViewController">
    <padding>
@@ -15,12 +15,12 @@
          <content>
             <VBox>
                <children>
-                  <Button fx:id="btnCreateNetwork" mnemonicParsing="false" onAction="#createRandomNetwork" prefHeight="25.0" prefWidth="120.0" text="Gerar ambiente" />
-                  <Pane fx:id="networkPane" prefHeight="500.0">
+                  <Button fx:id="btnCreateNetwork" mnemonicParsing="false" onAction="#createRandomNetwork" prefHeight="25.0" prefWidth="120.0" text="Gerar ambiente">
                      <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </Pane>
+                        <Insets bottom="10.0" />
+                     </VBox.margin></Button>
+                  <NetworkPane fx:id="networkPane" prefHeight="500.0">
+                  </NetworkPane>
                </children>
             </VBox>
          </content>
