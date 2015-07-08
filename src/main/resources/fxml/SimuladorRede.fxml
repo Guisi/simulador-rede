@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import br.com.guisi.simulador.view.*?>
+
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1000.0" spacing="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.SimuladorRedeViewController">
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+   <children>
+      <ScrollPane prefHeight="800.0" style="-fx-border-color: transparent; -fx-background-color: transparent; -fx-control-inner-background: transparent;">
+         <content>
+            <VBox>
+               <children>
+                  <Button fx:id="btnCreateNetwork" mnemonicParsing="false" onAction="#createRandomNetwork" prefHeight="25.0" prefWidth="120.0" text="Gerar ambiente" />
+                  <Pane fx:id="networkPane" prefHeight="500.0">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Pane>
+               </children>
+            </VBox>
+         </content>
+      </ScrollPane>
+   </children>
+</VBox>
