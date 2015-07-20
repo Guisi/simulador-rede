@@ -15,11 +15,11 @@
          <content>
             <VBox>
                <children>
-                  <Button fx:id="btnCreateNetwork" mnemonicParsing="false" onAction="#createRandomNetwork" prefHeight="25.0" prefWidth="120.0" text="Gerar ambiente">
+                  <Button fx:id="btnImportNetwork" mnemonicParsing="false" onAction="#openNetworkFile" prefHeight="25.0" prefWidth="166.0" text="Importar rede de arquivo">
                      <VBox.margin>
                         <Insets bottom="10.0" />
                      </VBox.margin></Button>
-                  <NetworkPane fx:id="networkPane" prefHeight="500.0">
+                  <NetworkPane fx:id="networkPane" prefHeight="500.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
                   </NetworkPane>
                </children>
             </VBox>

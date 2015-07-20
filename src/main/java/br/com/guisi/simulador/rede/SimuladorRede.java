@@ -2,6 +2,7 @@ package br.com.guisi.simulador.rede;
 
 import java.io.IOException;
 
+import br.com.guisi.simulador.rede.view.SimuladorRedeViewController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -24,7 +25,8 @@ public class SimuladorRede extends Application {
 			stage.setScene(scene);
 			stage.show();
 			
-			loader.getController();
+			SimuladorRedeViewController controller = (SimuladorRedeViewController) loader.getController();
+			controller.setMainStage(stage);
         } catch (IOException e) {
         	throw new RuntimeException("Unable to load FXML file", e);
         }

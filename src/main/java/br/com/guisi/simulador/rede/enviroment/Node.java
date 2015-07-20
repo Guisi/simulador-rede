@@ -1,31 +1,39 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+
 public class Node {
 
-	private final int x;
-	private final int y;
-	private final double powerLoad;
+	private final int environmentSize;
+	private final int loadNum;
+	private final double loadPower;
 
-	public Node(int x, int y, double powerLoad) {
-		this.x = x;
-		this.y = y;
-		this.powerLoad = powerLoad;
+	public Node(int environmentSize, int loadNum, double powerLoad) {
+		this.environmentSize = environmentSize;
+		this.loadNum = loadNum;
+		this.loadPower = powerLoad;
+	}
+
+	public int getLoadNum() {
+		return loadNum;
+	}
+
+	public double getLoadPower() {
+		return loadPower;
 	}
 
 	public int getX() {
-		return x;
+		return Math.floorMod(loadNum-1, environmentSize);
 	}
 
 	public int getY() {
-		return y;
+		return Math.floorDiv(loadNum-1, environmentSize);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + x;
-		result = prime * result + y;
+		result = prime * result + loadNum;
 		return result;
 	}
 
@@ -38,15 +46,13 @@ public class Node {
 		if (getClass() != obj.getClass())
 			return false;
 		Node other = (Node) obj;
-		if (x != other.x)
-			return false;
-		if (y != other.y)
+		if (loadNum != other.loadNum)
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "(x: " + x + ", y: " + y + ", powerLoad: " + powerLoad + ")";
+		return "(loadNum: " + loadNum + ", x: " + getX() + ", y: " + getY() + ", loadPower: " + loadPower + ")";
 	}
 }
