@@ -1,15 +1,21 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+import br.com.guisi.simulador.rede.constants.NodeType;
+
 
 public class Node {
 
-	private final int environmentSize;
+	private final NodeType nodeType;
 	private final int loadNum;
+	private final int x;
+	private final int y;
 	private final double loadPower;
 
-	public Node(int environmentSize, int loadNum, double powerLoad) {
-		this.environmentSize = environmentSize;
+	public Node(NodeType nodeType, int loadNum, int x, int y, double powerLoad) {
+		this.nodeType = nodeType;
 		this.loadNum = loadNum;
+		this.x = x;
+		this.y = y;
 		this.loadPower = powerLoad;
 	}
 
@@ -20,13 +26,25 @@ public class Node {
 	public double getLoadPower() {
 		return loadPower;
 	}
-
+	
 	public int getX() {
-		return Math.floorMod(loadNum-1, environmentSize);
+		return x;
 	}
 
 	public int getY() {
-		return Math.floorDiv(loadNum-1, environmentSize);
+		return y;
+	}
+
+	public NodeType getNodeType() {
+		return nodeType;
+	}
+	
+	public boolean isFeeder() {
+		return NodeType.FEEDER.equals(nodeType);
+	}
+	
+	public boolean isLoad() {
+		return NodeType.LOAD.equals(nodeType);
 	}
 
 	@Override

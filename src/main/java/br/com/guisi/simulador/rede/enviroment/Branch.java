@@ -7,15 +7,23 @@ public class Branch {
 	private Integer branchNum;
 	private Node node1;
 	private Node node2;
+	private double branchPower;
 	private BranchStatus status;
 	
-	public Branch(Integer branchNum, Node node1, Node node2, BranchStatus status) {
+	public Branch(Integer branchNum, Node node1, Node node2, double branchPower, BranchStatus status) {
 		this.branchNum = branchNum;
 		this.node1 = node1;
 		this.node2 = node2;
+		this.branchPower = branchPower;
 		this.status = status;
 	}
 
+	public double getBranchPower() {
+		return branchPower;
+	}
+	public void setBranchPower(double branchPower) {
+		this.branchPower = branchPower;
+	}
 	public Integer getBranchNum() {
 		return branchNum;
 	}

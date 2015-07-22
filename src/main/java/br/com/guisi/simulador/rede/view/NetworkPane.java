@@ -2,12 +2,14 @@ package br.com.guisi.simulador.rede.view;
 
 import java.text.DecimalFormat;
 
-import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.StrokeType;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 import br.com.guisi.simulador.rede.Constants;
 import br.com.guisi.simulador.rede.constants.BranchStatus;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -23,10 +25,10 @@ public class NetworkPane extends Pane {
 	public void drawNetworkFromEnvironment(Environment environment) {
 		this.setVisible(true);
 		
-		this.setPrefWidth(environment.getSize() * Constants.NETWORK_GRID_SIZE_PX);
-		this.setPrefHeight(environment.getSize() * Constants.NETWORK_GRID_SIZE_PX - 10);
-		this.setMaxWidth(environment.getSize() * Constants.NETWORK_GRID_SIZE_PX);
-		this.setMaxHeight(environment.getSize() * Constants.NETWORK_GRID_SIZE_PX - 10);
+		this.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX);
+		this.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10);
+		this.setMaxWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX);
+		this.setMaxHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10);
 		
 		this.getChildren().clear();
 
@@ -41,29 +43,32 @@ public class NetworkPane extends Pane {
 	
 	public void drawNode(Node node) {
 		Circle c = new Circle();
-		int centerX = node.getX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
-		int centerY = node.getY() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
-		c.setCenterX(centerX);
-		c.setCenterY(centerY);
-		c.setFill(Color.WHITE);
+		c.setFill(node.isLoad() ? Color.WHITE : Color.YELLOW);
 		c.setStroke(Color.BLACK);
 		c.setRadius(Constants.LOAD_RADIUS_PX);
-		getChildren().add(c);
 
-		Label l = new Label();
-		l.setText(DecimalFormat.getNumberInstance().format(node.getLoadPower()));
-		l.setLayoutX(centerX - (Constants.LOAD_RADIUS_PX/2));
-		l.setLayoutY(centerY - (Constants.LOAD_RADIUS_PX/2)-2);
-		l.toFront();
-		getChildren().add(l);
+		Text text = new Text(DecimalFormat.getNumberInstance().format(node.getLoadPower()));
+		text.setBoundsType(TextBoundsType.VISUAL); 
+		StackPane stack = new StackPane();
+		stack.getChildren().addAll(c, text);
+		
+		int centerX = (node.getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
+		int centerY = (node.getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
+		stack.setLayoutX(centerX);
+		stack.setLayoutY(centerY);
+		
+		//c.setCenterX(centerX);
+		//c.setCenterY(centerY);
+		
+		getChildren().add(stack);
 	}
 	
 	public void drawBranch(Branch branch) {
 		Line l = new Line();
-		l.setStartX(branch.getNode1().getX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-		l.setStartY(branch.getNode1().getY() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-		l.setEndX(branch.getNode2().getX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-		l.setEndY(branch.getNode2().getY() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
+		l.setStartX((branch.getNode1().getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING+15);
+		l.setStartY((branch.getNode1().getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING+15);
+		l.setEndX((branch.getNode2().getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING+15);
+		l.setEndY((branch.getNode2().getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING+15);
 		l.setStroke(Color.BLACK);
 		l.setStrokeType(StrokeType.CENTERED);
 		l.getStrokeDashArray().clear();
