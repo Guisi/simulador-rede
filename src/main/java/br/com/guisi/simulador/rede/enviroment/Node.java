@@ -6,45 +6,55 @@ import br.com.guisi.simulador.rede.constants.NodeType;
 public class Node {
 
 	private final NodeType nodeType;
-	private final int loadNum;
-	private final int x;
-	private final int y;
+	private final Integer loadNum;
+	private Integer feeder; 
+	private final Integer x;
+	private final Integer y;
 	private final double loadPower;
 
-	public Node(NodeType nodeType, int loadNum, int x, int y, double powerLoad) {
+	public Node(NodeType nodeType, Integer loadNum, Integer feeder, Integer x, Integer y, double powerLoad) {
 		this.nodeType = nodeType;
 		this.loadNum = loadNum;
+		this.feeder = feeder;
 		this.x = x;
 		this.y = y;
 		this.loadPower = powerLoad;
 	}
 
-	public int getLoadNum() {
-		return loadNum;
-	}
-
-	public double getLoadPower() {
-		return loadPower;
-	}
-	
-	public int getX() {
-		return x;
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public NodeType getNodeType() {
-		return nodeType;
-	}
-	
 	public boolean isFeeder() {
 		return NodeType.FEEDER.equals(nodeType);
 	}
 	
 	public boolean isLoad() {
 		return NodeType.LOAD.equals(nodeType);
+	}
+
+	public Integer getFeeder() {
+		return feeder;
+	}
+
+	public void setFeeder(Integer feeder) {
+		this.feeder = feeder;
+	}
+
+	public NodeType getNodeType() {
+		return nodeType;
+	}
+
+	public Integer getLoadNum() {
+		return loadNum;
+	}
+
+	public Integer getX() {
+		return x;
+	}
+
+	public Integer getY() {
+		return y;
+	}
+
+	public double getLoadPower() {
+		return loadPower;
 	}
 
 	@Override

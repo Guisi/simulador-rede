@@ -36,20 +36,25 @@ public class EnvironmentUtils {
 			//tipo, feeder ou load
 			NodeType nodeType = "F".equals(colunas[0]) ? NodeType.FEEDER : NodeType.LOAD;
 			
+			//feeder do load
+			Integer feeder = null;
+			if (nodeType.equals(NodeType.LOAD)) {
+				feeder = Integer.valueOf(colunas[1]);
+			}
+			
 			//numero da carga
-			Integer loadNum = Integer.parseInt(colunas[2]);
+			Integer loadNum = Integer.valueOf(colunas[2]);
 			
 			//posicao X
-			int x = Integer.parseInt(colunas[3]);
+			Integer x = Integer.valueOf(colunas[3]);
 			
 			//posicao Y
-			int y = Integer.parseInt(colunas[4]);
+			Integer y = Integer.valueOf(colunas[4]);
 			
 			//potencia
 			double loadPower = Double.parseDouble(colunas[5]);
 			
-			
-			Node node = new Node(nodeType, loadNum, x, y, loadPower);
+			Node node = new Node(nodeType, loadNum, feeder, x, y, loadPower);
 			
 			nodeMap.put(loadNum, node);
 		}

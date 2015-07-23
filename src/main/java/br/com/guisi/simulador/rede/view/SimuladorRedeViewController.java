@@ -4,8 +4,11 @@ import java.io.File;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import br.com.guisi.simulador.rede.Constants;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 
@@ -17,9 +20,16 @@ public class SimuladorRedeViewController {
 	private NetworkPane networkPane;
 	@FXML
 	private Button btnImportNetwork;
+	@FXML
+	private VBox boxInfo;
+	@FXML
+	private Label lblNumber;
+	
+	private Environment environment;
 
 	public void initialize() {
 		networkPane.initialize();
+		boxInfo.setVisible(false);
 	}
 
 	public void createRandomNetwork() {
@@ -35,12 +45,25 @@ public class SimuladorRedeViewController {
 		
 		if (csvFile != null) {
 			try {
-				Environment environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
+				environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
 				networkPane.drawNetworkFromEnvironment(environment);
+				this.updateLayout();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private void updateLayout() {
+		networkPane.setVisible(true);
+		networkPane.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX);
+		networkPane.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10);
+		networkPane.setMaxWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX);
+		networkPane.setMaxHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10);
+
+		boxInfo.setVisible(true);
+		boxInfo.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10);
+		boxInfo.setMaxHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10);
 	}
 
 	public Stage getMainStage() {
