@@ -3,7 +3,6 @@ package br.com.guisi.simulador.rede.view;
 import java.text.DecimalFormat;
 
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -16,6 +15,7 @@ import br.com.guisi.simulador.rede.constants.BranchStatus;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Node;
+import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
 
 public class NetworkPane extends Pane {
 
@@ -43,7 +43,7 @@ public class NetworkPane extends Pane {
 
 		Text text = new Text(DecimalFormat.getNumberInstance().format(node.getLoadPower()));
 		text.setBoundsType(TextBoundsType.VISUAL); 
-		StackPane stack = new StackPane();
+		LoadStackPane stack = new LoadStackPane(node.getLoadNum());
 		stack.getChildren().addAll(c, text);
 		
 		int centerX = (node.getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
@@ -52,6 +52,10 @@ public class NetworkPane extends Pane {
 		stack.setLayoutY(centerY);
 		
 		getChildren().add(stack);
+		
+		System.out.println(getParent());
+		/*stack.setOnMouseClicked(arg0);
+		r.setOnMouseClicked((event) -> { if (!disabled) { drawAgent((StateRectangle)event.getSource());} });*/
 	}
 	
 	public void drawBranch(Branch branch) {
