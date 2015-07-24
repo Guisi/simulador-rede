@@ -13,29 +13,13 @@ import javafx.scene.text.TextBoundsType;
 import br.com.guisi.simulador.rede.Constants;
 import br.com.guisi.simulador.rede.constants.BranchStatus;
 import br.com.guisi.simulador.rede.enviroment.Branch;
-import br.com.guisi.simulador.rede.enviroment.Environment;
-import br.com.guisi.simulador.rede.enviroment.Node;
+import br.com.guisi.simulador.rede.enviroment.Load;
+import br.com.guisi.simulador.rede.view.layout.BranchText;
 import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
 
 public class NetworkPane extends Pane {
 
-	public void initialize() {
-		this.setVisible(false);
-	}
-	
-	public void drawNetworkFromEnvironment(Environment environment) {
-		this.getChildren().clear();
-
-		for (Node node : environment.getNodeMap().values()) {
-			this.drawNode(node);
-		}
-		
-		for (Branch branch : environment.getBranchMap().values()) {
-			this.drawBranch(branch);
-		}
-	}
-	
-	public void drawNode(Node node) {
+	public LoadStackPane drawNode(Load node) {
 		Circle c = new Circle();
 		c.setFill(node.isLoad() ? Color.WHITE : Color.YELLOW);
 		c.setStroke(Color.BLACK);
@@ -50,15 +34,12 @@ public class NetworkPane extends Pane {
 		int centerY = (node.getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
 		stack.setLayoutX(centerX);
 		stack.setLayoutY(centerY);
-		
 		getChildren().add(stack);
 		
-		System.out.println(getParent());
-		/*stack.setOnMouseClicked(arg0);
-		r.setOnMouseClicked((event) -> { if (!disabled) { drawAgent((StateRectangle)event.getSource());} });*/
+		return stack;
 	}
 	
-	public void drawBranch(Branch branch) {
+	public BranchText drawBranch(Branch branch) {
 		Line l = new Line();
 		l.setStartX((branch.getNode1().getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
 		l.setStartY((branch.getNode1().getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
@@ -74,56 +55,24 @@ public class NetworkPane extends Pane {
 		getChildren().add(l);
 		l.toBack();
 		
-		Text text = new Text("(" + DecimalFormat.getNumberInstance().format(branch.getBranchPower()) + ")");
+		String power = "(" + DecimalFormat.getNumberInstance().format(branch.getBranchPower()) + ")";
+		BranchText text = new BranchText(branch.getBranchNum(), power);
 		text.setFont(Font.font(11));
 		text.setBoundsType(TextBoundsType.VISUAL);
 		
-		double x = (l.getEndX() - l.getStartX()) / 2 + l.getStartX();
-		double y = (l.getEndY() - l.getStartY()) / 2 + l.getStartY();
-		x += (l.getEndX() != l.getStartX() ? -10 : -22) + (l.getEndX() != l.getStartX() && l.getEndY() != l.getStartY() ? 10 : 0);
-		y += (l.getEndY() != l.getStartY() ? 5 : -5) - (l.getEndX() != l.getStartX() && l.getEndY() != l.getStartY() ? 10 : 0);
+		double x = (l.getEndX() - l.getStartX()) / 2 + l.getStartX() + (l.getEndX() != l.getStartX() ? -10 : -22);
+		double y = (l.getEndY() - l.getStartY()) / 2 + l.getStartY() + (l.getEndY() != l.getStartY() ? 5 : -5);
+		
+		//se esta na diagonal
+		if (l.getEndX() != l.getStartX() && l.getEndY() != l.getStartY()) {
+			x += l.getEndX() > l.getStartX() ? 12 : -12;
+			y -= 5;
+		}
+
 		text.setLayoutX(x);
 		text.setLayoutY(y);
 		getChildren().add(text);
+		
+		return text;
 	}
-	
-	/*public void createRandomNetwork() {
-		this.getChildren().clear();
-
-		for (int x = 0; x < Constants.NETWORK_SIZE_X; x++) {
-			for (int y = 0; y < Constants.NETWORK_SIZE_Y; y++) {
-				if (x < Constants.NETWORK_SIZE_X - 1) {
-					Line l = new Line();
-					l.setStartX(x * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-					l.setStartY(y * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-					l.setEndX((x+1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-					l.setEndY(y * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-					l.setStroke(Color.BLACK);
-					l.setStrokeType(StrokeType.CENTERED);
-					l.setStrokeWidth(1);
-					getChildren().add(l);
-				}
-				
-				if (y < Constants.NETWORK_SIZE_Y - 1) {
-					Line l = new Line();
-					l.setStartX(x * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-					l.setStartY(y * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-					l.setEndX(x * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-					l.setEndY((y+1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-					l.setStroke(Color.BLACK);
-					l.setStrokeType(StrokeType.CENTERED);
-					l.setStrokeWidth(1);
-					getChildren().add(l);
-				}
-				
-				Circle c = new Circle();
-				c.setCenterX(x * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-				c.setCenterY(y * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-				c.setFill(Color.WHITE);
-				c.setStroke(Color.BLACK);
-				c.setRadius(Constants.LOAD_RADIUS_PX);
-				getChildren().add(c);
-			}
-		}
-	}*/
 }

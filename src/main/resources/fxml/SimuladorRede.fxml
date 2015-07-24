@@ -27,16 +27,16 @@
                   </NetworkPane>
                      </children>
                   </VBox>
-                  <VBox fx:id="boxInfo" alignment="TOP_CENTER" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
+                  <VBox fx:id="boxLoadInfo" alignment="TOP_CENTER" prefWidth="140.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
                      <children>
-                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" style="-fx-font-weight: bold;" text="Load" textAlignment="CENTER">
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" style="-fx-font-weight: bold; -fx-font-size: 15px;" text="Load" textAlignment="CENTER">
                            <font>
-                              <Font size="14.0" />
+                              <Font size="16.0" />
                            </font></Label>
-                        <GridPane>
+                        <GridPane hgap="10.0">
                           <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="84.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="116.0" minWidth="10.0" prefWidth="116.0" />
+                            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="66.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="116.0" minWidth="10.0" prefWidth="62.0" />
                           </columnConstraints>
                           <rowConstraints>
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -44,17 +44,111 @@
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Label style="-fx-font-weight: bold;" text="Nº:" />
-                              <Label fx:id="lblNumber" GridPane.columnIndex="1" />
+                              <Label fx:id="lblLoadNumber" GridPane.columnIndex="1" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Nº:" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Feeder:" GridPane.rowIndex="1" />
+                              <Label fx:id="lblLoadFeeder" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Potência:" GridPane.rowIndex="2" />
+                              <Label fx:id="lblLoadPower" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                            </children>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
                         </GridPane>
                      </children>
                      <HBox.margin>
-                        <Insets left="10.0" top="35.0" />
+                        <Insets left="5.0" top="35.0" />
                      </HBox.margin>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
+                  </VBox>
+                  <VBox fx:id="boxFeederInfo" alignment="TOP_CENTER" prefWidth="140.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" style="-fx-font-weight: bold; -fx-font-size: 15px;" text="Feeder" textAlignment="CENTER">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <GridPane hgap="10.0">
+                           <children>
+                              <Label fx:id="lblFeederNumber" GridPane.columnIndex="1" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Nº:" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Potência:" GridPane.rowIndex="1" />
+                              <Label fx:id="lblFeederPower" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                           </children>
+                           <columnConstraints>
+                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="66.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="116.0" minWidth="10.0" prefWidth="62.0" />
+                           </columnConstraints>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </GridPane>
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets left="5.0" top="35.0" />
+                     </HBox.margin>
+                  </VBox>
+                  <VBox fx:id="boxBranchInfo" alignment="TOP_CENTER" prefWidth="160.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" style="-fx-font-weight: bold; -fx-font-size: 15px;" text="Branch" textAlignment="CENTER">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <GridPane hgap="10.0">
+                           <children>
+                              <Label fx:id="lblBranchNumber" GridPane.columnIndex="1" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Nº:" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="De:" GridPane.rowIndex="1" />
+                              <Label fx:id="lblBranchDe" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Para:" GridPane.rowIndex="2" />
+                              <Label fx:id="lblBranchPara" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Potência Máx:" GridPane.rowIndex="3" />
+                              <Label fx:id="lblBranchPower" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Status:" GridPane.rowIndex="4" />
+                              <Label fx:id="lblBranchStatus" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                           </children>
+                           <columnConstraints>
+                              <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="88.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="116.0" minWidth="10.0" prefWidth="60.0" />
+                           </columnConstraints>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </GridPane>
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets left="5.0" top="35.0" />
+                     </HBox.margin>
                   </VBox>
                </children>
             </HBox>

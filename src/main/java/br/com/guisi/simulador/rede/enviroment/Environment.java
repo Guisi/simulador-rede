@@ -6,18 +6,26 @@ public class Environment {
 
 	private final int sizeX;
 	private final int sizeY;
-	private final Map<Integer, Node> nodeMap;
+	private final Map<Integer, Load> nodeMap;
 	private final Map<Integer, Branch> branchMap;
 	
-	public Environment(int sizeX, int sizeY, Map<Integer, Node> nodeMap, Map<Integer, Branch> branchMap) {
+	public Environment(int sizeX, int sizeY, Map<Integer, Load> nodeMap, Map<Integer, Branch> branchMap) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		this.nodeMap = nodeMap;
 		this.branchMap = branchMap;
 	}
 	
-	public Map<Integer, Node> getNodeMap() {
+	public Map<Integer, Load> getNodeMap() {
 		return nodeMap;
+	}
+	
+	public Load getNode(Integer loadNum) {
+		return nodeMap.get(loadNum);
+	}
+	
+	public Branch getBranch(Integer branchNum) {
+		return branchMap.get(branchNum);
 	}
 
 	public int getSizeX() {

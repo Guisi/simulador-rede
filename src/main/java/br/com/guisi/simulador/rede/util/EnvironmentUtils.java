@@ -17,7 +17,7 @@ import br.com.guisi.simulador.rede.constants.BranchStatus;
 import br.com.guisi.simulador.rede.constants.NodeType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
-import br.com.guisi.simulador.rede.enviroment.Node;
+import br.com.guisi.simulador.rede.enviroment.Load;
 
 public class EnvironmentUtils {
 
@@ -28,7 +28,7 @@ public class EnvironmentUtils {
 		List<String> lines = Files.readAllLines(Paths.get(csvFile.getAbsolutePath()), Charset.forName("ISO-8859-1"));
 		
 		//carrega os loads e feeders
-		Map<Integer, Node> nodeMap = new HashMap<>();
+		Map<Integer, Load> nodeMap = new HashMap<>();
 		List<String> loadLines = getLoadLines(lines);
 		for (String line : loadLines) {
 			String[] colunas = line.split(";");
@@ -54,7 +54,7 @@ public class EnvironmentUtils {
 			//potencia
 			double loadPower = Double.parseDouble(colunas[5]);
 			
-			Node node = new Node(nodeType, loadNum, feeder, x, y, loadPower);
+			Load node = new Load(nodeType, loadNum, feeder, x, y, loadPower);
 			
 			nodeMap.put(loadNum, node);
 		}
@@ -70,11 +70,11 @@ public class EnvironmentUtils {
 			
 			//numero da carga de
 			Integer loadFrom = Integer.parseInt(colunas[1]);
-			Node node1 = nodeMap.get(loadFrom);
+			Load node1 = nodeMap.get(loadFrom);
 			
 			//numero da carga para
 			Integer loadTo = Integer.parseInt(colunas[2]);
-			Node node2 = nodeMap.get(loadTo);
+			Load node2 = nodeMap.get(loadTo);
 			
 			//potencia maxima
 			double branchPower = Double.parseDouble(colunas[3]);

@@ -5,17 +5,21 @@ import br.com.guisi.simulador.rede.constants.BranchStatus;
 public class Branch {
 
 	private Integer branchNum;
-	private Node node1;
-	private Node node2;
+	private Load node1;
+	private Load node2;
 	private double branchPower;
 	private BranchStatus status;
 	
-	public Branch(Integer branchNum, Node node1, Node node2, double branchPower, BranchStatus status) {
+	public Branch(Integer branchNum, Load node1, Load node2, double branchPower, BranchStatus status) {
 		this.branchNum = branchNum;
 		this.node1 = node1;
 		this.node2 = node2;
 		this.branchPower = branchPower;
 		this.status = status;
+	}
+	
+	public boolean isOn() {
+		return BranchStatus.ON.equals(status);
 	}
 
 	public double getBranchPower() {
@@ -30,16 +34,16 @@ public class Branch {
 	public void setBranchNum(Integer branchNum) {
 		this.branchNum = branchNum;
 	}
-	public Node getNode1() {
+	public Load getNode1() {
 		return node1;
 	}
-	public void setNode1(Node node1) {
+	public void setNode1(Load node1) {
 		this.node1 = node1;
 	}
-	public Node getNode2() {
+	public Load getNode2() {
 		return node2;
 	}
-	public void setNode2(Node node2) {
+	public void setNode2(Load node2) {
 		this.node2 = node2;
 	}
 	public BranchStatus getStatus() {
