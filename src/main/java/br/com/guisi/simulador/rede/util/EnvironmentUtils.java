@@ -30,6 +30,7 @@ public class EnvironmentUtils {
 		//carrega os loads e feeders
 		Map<Integer, Load> nodeMap = new HashMap<>();
 		List<String> loadLines = getLoadLines(lines);
+		int loadCont = 1;
 		for (String line : loadLines) {
 			String[] colunas = line.split(";");
 			
@@ -39,7 +40,11 @@ public class EnvironmentUtils {
 			//feeder do load
 			Integer feeder = null;
 			if (nodeType.equals(NodeType.LOAD)) {
-				feeder = Integer.valueOf(colunas[1]);
+				try {
+					feeder = Integer.valueOf(colunas[1]);
+				} catch (NumberFormatException e) {
+					throw new Exception("Valor \"" + colunas[1] + "\" inválido para número do load na linha " + loadCont, e);
+				}
 			}
 			
 			//numero da carga
@@ -57,6 +62,8 @@ public class EnvironmentUtils {
 			Load node = new Load(nodeType, loadNum, feeder, x, y, loadPower);
 			
 			nodeMap.put(loadNum, node);
+			
+			loadCont++;
 		}
 		
 		//carrega os branches

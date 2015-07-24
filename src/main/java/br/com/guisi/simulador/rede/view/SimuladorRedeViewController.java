@@ -4,6 +4,8 @@ import java.io.File;
 import java.text.DecimalFormat;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -100,7 +102,10 @@ public class SimuladorRedeViewController {
 				environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
 				this.drawNetworkFromEnvironment();
 			} catch (Exception e) {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setContentText(e.getMessage());
 				e.printStackTrace();
+				alert.showAndWait();
 			}
 		}
 	}
