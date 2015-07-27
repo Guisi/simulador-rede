@@ -142,7 +142,7 @@ public class SimuladorRedeViewController {
 	private void updateLoadInformationBox(LoadStackPane loadStackPane) {
 		Load node = environment.getNode(loadStackPane.getLoadNum());
 		lblLoadNumber.setText(node.getLoadNum().toString());
-		lblLoadFeeder.setText(node.getFeeder().toString());
+		lblLoadFeeder.setText(node.getFeeder() != null ? node.getFeeder().toString() : "");
 		lblLoadPower.setText(DecimalFormat.getNumberInstance().format(node.getLoadPower()));
 	}
 	

@@ -1,6 +1,8 @@
 package br.com.guisi.simulador.rede.view;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -18,25 +20,45 @@ import br.com.guisi.simulador.rede.view.layout.BranchText;
 import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
 
 public class NetworkPane extends Pane {
+	
+	private Map<Integer, LoadStackPane> loadPaneMap = new HashMap<Integer, LoadStackPane>();
 
-	public LoadStackPane drawNode(Load node) {
+	public LoadStackPane drawNode(Load load) {
 		Circle c = new Circle();
-		c.setFill(node.isLoad() ? Color.WHITE : Color.YELLOW);
 		c.setStroke(Color.BLACK);
 		c.setRadius(Constants.LOAD_RADIUS_PX);
 
-		Text text = new Text(DecimalFormat.getNumberInstance().format(node.getLoadPower()));
+		Text text = new Text(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
 		text.setBoundsType(TextBoundsType.VISUAL); 
-		LoadStackPane stack = new LoadStackPane(node.getLoadNum());
+		LoadStackPane stack = new LoadStackPane(load.getLoadNum());
 		stack.getChildren().addAll(c, text);
 		
-		int centerX = (node.getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
-		int centerY = (node.getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
+		int centerX = (load.getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
+		int centerY = (load.getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
 		stack.setLayoutX(centerX);
 		stack.setLayoutY(centerY);
 		getChildren().add(stack);
 		
+		loadPaneMap.put(load.getLoadNum(), stack);
+		this.setLoadColor(load);
+		
 		return stack;
+	}
+	
+	public void setLoadColor(Load load) {
+		LoadStackPane loadPane = loadPaneMap.get(load.getLoadNum());
+		
+		Color c;
+		if (load.isFeeder()) {
+			c = Color.YELLOW;
+		} else {
+			if (load.getFeeder() == null) {
+				c = Color.RED;
+			} else {
+				c = Color.WHITE;
+			}
+		}
+		loadPane.getLoadCircle().setFill(c);
 	}
 	
 	public BranchText drawBranch(Branch branch) {

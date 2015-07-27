@@ -16,16 +16,16 @@ public class Environment {
 		this.branchMap = branchMap;
 	}
 	
-	public Map<Integer, Load> getNodeMap() {
-		return nodeMap;
-	}
-	
 	public Load getNode(Integer loadNum) {
 		return nodeMap.get(loadNum);
 	}
 	
 	public Branch getBranch(Integer branchNum) {
 		return branchMap.get(branchNum);
+	}
+	
+	public Map<Integer, Load> getNodeMap() {
+		return nodeMap;
 	}
 
 	public int getSizeX() {

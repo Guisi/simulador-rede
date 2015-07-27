@@ -40,10 +40,13 @@ public class EnvironmentUtils {
 			//feeder do load
 			Integer feeder = null;
 			if (nodeType.equals(NodeType.LOAD)) {
-				try {
-					feeder = Integer.valueOf(colunas[1]);
-				} catch (NumberFormatException e) {
-					throw new Exception("Valor \"" + colunas[1] + "\" inválido para número do load na linha " + loadCont, e);
+				String strFeeder = colunas[1];
+				if (StringUtils.isNotBlank(strFeeder)) {
+					try {
+						feeder = Integer.valueOf(strFeeder);
+					} catch (NumberFormatException e) {
+						throw new Exception("Valor \"" + colunas[1] + "\" inválido para número do load na linha " + loadCont, e);
+					}
 				}
 			}
 			
