@@ -2,12 +2,12 @@ package br.com.guisi.simulador.rede;
 
 import java.io.IOException;
 
-import br.com.guisi.simulador.rede.view.SimuladorRedeViewController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import br.com.guisi.simulador.rede.view.SimuladorRedeViewController;
 
 public class SimuladorRede extends Application {
 
@@ -23,6 +23,7 @@ public class SimuladorRede extends Application {
         	Pane node = loader.load(getClass().getResourceAsStream("/fxml/SimuladorRede.fxml"));
 			Scene scene = new Scene(node);
 			stage.setScene(scene);
+			scene.getStylesheets().add("/css/estilo.css");
 			stage.show();
 			
 			SimuladorRedeViewController controller = (SimuladorRedeViewController) loader.getController();
