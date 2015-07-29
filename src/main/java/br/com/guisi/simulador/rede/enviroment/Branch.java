@@ -5,21 +5,33 @@ import br.com.guisi.simulador.rede.constants.BranchStatus;
 public class Branch {
 
 	private Integer branchNum;
-	private Load node1;
-	private Load node2;
+	private Load load1;
+	private Load load2;
 	private double branchPower;
+	private double distance;
 	private BranchStatus status;
 	
-	public Branch(Integer branchNum, Load node1, Load node2, double branchPower, BranchStatus status) {
+	public Branch(Integer branchNum, Load load1, Load load2, double branchPower, double distance, BranchStatus status) {
 		this.branchNum = branchNum;
-		this.node1 = node1;
-		this.node2 = node2;
+		this.load1 = load1;
+		this.load2 = load2;
 		this.branchPower = branchPower;
+		this.distance = distance;
 		this.status = status;
 	}
 	
 	public boolean isOn() {
 		return BranchStatus.ON.equals(status);
+	}
+	
+	/**
+	 * Retorna o load conectado por esta branch
+	 * ao load passado como parametro
+	 * @param load
+	 * @return
+	 */
+	public Load getConnectedLoad(Load load) {
+		return load1.equals(load) ? load2 : load1;
 	}
 
 	public double getBranchPower() {
@@ -34,23 +46,54 @@ public class Branch {
 	public void setBranchNum(Integer branchNum) {
 		this.branchNum = branchNum;
 	}
-	public Load getNode1() {
-		return node1;
+	public Load getLoad1() {
+		return load1;
 	}
-	public void setNode1(Load node1) {
-		this.node1 = node1;
+	public void setLoad1(Load load1) {
+		this.load1 = load1;
 	}
-	public Load getNode2() {
-		return node2;
+	public Load getLoad2() {
+		return load2;
 	}
-	public void setNode2(Load node2) {
-		this.node2 = node2;
+	public void setLoad2(Load load2) {
+		this.load2 = load2;
 	}
 	public BranchStatus getStatus() {
 		return status;
 	}
 	public void setStatus(BranchStatus status) {
 		this.status = status;
+	}
+	public double getDistance() {
+		return distance;
+	}
+	public void setDistance(double distance) {
+		this.distance = distance;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((branchNum == null) ? 0 : branchNum.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Branch other = (Branch) obj;
+		if (branchNum == null) {
+			if (other.branchNum != null)
+				return false;
+		} else if (!branchNum.equals(other.branchNum))
+			return false;
+		return true;
 	}
 	
 }

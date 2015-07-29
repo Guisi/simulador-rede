@@ -23,7 +23,7 @@ public class NetworkPane extends Pane {
 	
 	private Map<Integer, LoadStackPane> loadPaneMap = new HashMap<Integer, LoadStackPane>();
 
-	public LoadStackPane drawNode(Load load) {
+	public LoadStackPane drawNode(Load load, int sizeY) {
 		Circle c = new Circle();
 		c.setStroke(Color.BLACK);
 		c.setRadius(Constants.LOAD_RADIUS_PX);
@@ -34,7 +34,7 @@ public class NetworkPane extends Pane {
 		stack.getChildren().addAll(c, text);
 		
 		int centerX = (load.getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
-		int centerY = (load.getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
+		int centerY = (sizeY - load.getY()) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
 		stack.setLayoutX(centerX);
 		stack.setLayoutY(centerY);
 		getChildren().add(stack);
@@ -61,19 +61,19 @@ public class NetworkPane extends Pane {
 		loadPane.getLoadCircle().setFill(c);
 	}
 	
-	public BranchText drawBranch(Branch branch) {
+	public BranchText drawBranch(Branch branch, int sizeY) {
 		Line l = new Line();
-		l.setStartX((branch.getNode1().getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
-		l.setStartY((branch.getNode1().getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
-		l.setEndX((branch.getNode2().getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
-		l.setEndY((branch.getNode2().getY()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
+		l.setStartX((branch.getLoad1().getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
+		l.setStartY((sizeY - branch.getLoad1().getY()) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
+		l.setEndX((branch.getLoad2().getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
+		l.setEndY((sizeY - branch.getLoad2().getY()) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX);
 		l.setStroke(Color.BLACK);
 		l.setStrokeType(StrokeType.CENTERED);
 		l.getStrokeDashArray().clear();
 		if (branch.getStatus().equals(BranchStatus.OFF)) {
 			l.getStrokeDashArray().addAll(2d, 5d);
 		}
-		l.setStrokeWidth(1);
+		l.setStrokeWidth(1.3);
 		getChildren().add(l);
 		l.toBack();
 		
@@ -87,8 +87,8 @@ public class NetworkPane extends Pane {
 		
 		//se esta na diagonal
 		if (l.getEndX() != l.getStartX() && l.getEndY() != l.getStartY()) {
-			x += l.getEndX() > l.getStartX() ? 12 : -12;
-			y -= 5;
+			x += l.getEndX() > l.getStartX() ? 15 : -12;
+			y += 2;
 		}
 
 		text.setLayoutX(x);
@@ -96,5 +96,57 @@ public class NetworkPane extends Pane {
 		getChildren().add(text);
 		
 		return text;
+	}
+	
+	/**
+	 * Desenha um grid para facilitar a visualização do plano cartesiano
+	 */
+	public void drawGrid(int sizeX, int sizeY) {
+		
+		for (int x = 0; x < sizeX; x++) {
+			Line l = new Line();
+			int posX = x * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX;
+			l.setStartX(posX);
+			l.setStartY(0);
+			l.setEndX(posX);
+			l.setEndY(sizeY * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
+			l.setStroke(Color.LIGHTGRAY);
+			l.setStrokeType(StrokeType.CENTERED);
+			l.setStrokeWidth(0.8);
+			getChildren().add(l);
+			l.toBack();
+			
+			Text text = new Text(String.valueOf(x + 1));
+			text.setFont(Font.font(10));
+			text.setFill(Color.GRAY);
+			text.setBoundsType(TextBoundsType.VISUAL);
+			text.setLayoutX(posX + 3);
+			text.setLayoutY(sizeY * Constants.NETWORK_GRID_SIZE_PX - 15 + Constants.NETWORK_PANE_PADDING);
+			getChildren().add(text);
+			text.toBack();
+		}
+		
+		for (int y = 0; y < sizeY; y++) {
+			Line l = new Line();
+			l.setStartX(0);
+			int posY = y * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX;
+			l.setStartY(posY);
+			l.setEndX(sizeX * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
+			l.setEndY(posY);
+			l.setStroke(Color.LIGHTGRAY);
+			l.setStrokeType(StrokeType.CENTERED);
+			l.setStrokeWidth(0.8);
+			getChildren().add(l);
+			l.toBack();
+			
+			Text text = new Text(String.valueOf(sizeY - y));
+			text.setFont(Font.font(10));
+			text.setFill(Color.GRAY);
+			text.setBoundsType(TextBoundsType.VISUAL);
+			text.setLayoutX(3);
+			text.setLayoutY(posY - 3);
+			getChildren().add(text);
+			text.toBack();
+		}
 	}
 }

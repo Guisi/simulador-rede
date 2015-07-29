@@ -56,6 +56,8 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblBranchPower;
 	@FXML
+	private Label lblBranchDistance;
+	@FXML
 	private Label lblBranchStatus;
 	
 	private Environment environment;
@@ -81,6 +83,7 @@ public class SimuladorRedeViewController {
 		lblBranchDe.setText("");
 		lblBranchPara.setText("");
 		lblBranchPower.setText("");
+		lblBranchDistance.setText("");
 		lblBranchStatus.setText("");
 	}
 
@@ -112,18 +115,19 @@ public class SimuladorRedeViewController {
 	
 	private void drawNetworkFromEnvironment() {
 		networkPane.setVisible(true);
-		networkPane.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX);
-		networkPane.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10);
-		networkPane.setMaxWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX);
-		networkPane.setMaxHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10);
+		networkPane.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
+		networkPane.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
+		networkPane.setMaxWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
+		networkPane.setMaxHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10  + Constants.NETWORK_PANE_PADDING);
+		
 		boxLoadInfo.setVisible(true);
 		boxFeederInfo.setVisible(true);
 		boxBranchInfo.setVisible(true);
 
 		networkPane.getChildren().clear();
 
-		for (Load node : environment.getNodeMap().values()) {
-			LoadStackPane loadStack = networkPane.drawNode(node);
+		for (Load node : environment.getLoadMap().values()) {
+			LoadStackPane loadStack = networkPane.drawNode(node, environment.getSizeY());
 			loadStack.setOnMouseClicked((event) -> {
 				if (node.isLoad()) { 
 					updateLoadInformationBox((LoadStackPane)event.getSource()); 
@@ -134,30 +138,35 @@ public class SimuladorRedeViewController {
 		}
 		
 		for (Branch branch : environment.getBranchMap().values()) {
-			Text text = networkPane.drawBranch(branch);
+			Text text = networkPane.drawBranch(branch, environment.getSizeY());
 			text.setOnMouseClicked((event) -> updateBranchInformationBox((BranchText)event.getSource()));
 		}
+		
+		networkPane.drawGrid(environment.getSizeX(), environment.getSizeY());
+		networkPane.setSnapToPixel(false);
 	}
 	
 	private void updateLoadInformationBox(LoadStackPane loadStackPane) {
-		Load node = environment.getNode(loadStackPane.getLoadNum());
-		lblLoadNumber.setText(node.getLoadNum().toString());
-		lblLoadFeeder.setText(node.getFeeder() != null ? node.getFeeder().toString() : "");
-		lblLoadPower.setText(DecimalFormat.getNumberInstance().format(node.getLoadPower()));
+		Load load = environment.getLoad(loadStackPane.getLoadNum());
+		lblLoadNumber.setText(load.getLoadNum().toString());
+		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().toString() : "");
+		lblLoadPower.setText(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
 	}
 	
 	private void updateFeederInformationBox(LoadStackPane loadStackPane) {
-		Load node = environment.getNode(loadStackPane.getLoadNum());
-		lblFeederNumber.setText(node.getLoadNum().toString());
-		lblFeederPower.setText(DecimalFormat.getNumberInstance().format(node.getLoadPower()));
+		Load load = environment.getLoad(loadStackPane.getLoadNum());
+		lblFeederNumber.setText(load.getLoadNum().toString());
+		lblFeederPower.setText(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
+		
 	}
 	
 	private void updateBranchInformationBox(BranchText branchText) {
 		Branch branch = environment.getBranch(branchText.getBranchNum());
 		lblBranchNumber.setText(branch.getBranchNum().toString());
-		lblBranchDe.setText(branch.getNode1().getLoadNum().toString());
-		lblBranchPara.setText(branch.getNode2().getLoadNum().toString());
+		lblBranchDe.setText(branch.getLoad1().getLoadNum().toString());
+		lblBranchPara.setText(branch.getLoad2().getLoadNum().toString());
 		lblBranchPower.setText(DecimalFormat.getNumberInstance().format(branch.getBranchPower()));
+		lblBranchDistance.setText(DecimalFormat.getNumberInstance().format(branch.getDistance()));
 		lblBranchStatus.setText(branch.isOn() ? "Ligado" : "Desligado");
 	}
 

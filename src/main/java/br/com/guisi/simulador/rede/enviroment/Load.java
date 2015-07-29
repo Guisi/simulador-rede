@@ -1,5 +1,8 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import br.com.guisi.simulador.rede.constants.NodeType;
 
 
@@ -11,6 +14,7 @@ public class Load {
 	private final Integer x;
 	private final Integer y;
 	private final double loadPower;
+	private Set<Branch> branches = new HashSet<>();
 
 	public Load(NodeType nodeType, Integer loadNum, Integer feeder, Integer x, Integer y, double powerLoad) {
 		this.nodeType = nodeType;
@@ -20,13 +24,27 @@ public class Load {
 		this.y = y;
 		this.loadPower = powerLoad;
 	}
-
+	
+	public void addBranch(Branch branch) {
+		branches.add(branch);
+	}
+	
 	public boolean isFeeder() {
 		return NodeType.FEEDER.equals(nodeType);
 	}
 	
 	public boolean isLoad() {
 		return NodeType.LOAD.equals(nodeType);
+	}
+	
+	public Set<Load> getConnectedLoads() {
+		Set<Load> loads = new HashSet<>();
+		branches.forEach((branch) -> {
+			if (branch.isOn()) {
+				loads.add(branch.getConnectedLoad(this));
+			}
+		});
+		return loads;
 	}
 
 	public Integer getFeeder() {
@@ -55,6 +73,10 @@ public class Load {
 
 	public double getLoadPower() {
 		return loadPower;
+	}
+
+	public Set<Branch> getBranches() {
+		return branches;
 	}
 
 	@Override

@@ -89,12 +89,19 @@ public class EnvironmentUtils {
 			//potencia maxima
 			double branchPower = Double.parseDouble(colunas[3]);
 			
+			//distancia
+			double distance = Double.parseDouble(colunas[4]);
+			
 			//status do branch
-			int branchStatus = Integer.parseInt(colunas[4]);
+			int branchStatus = Integer.parseInt(colunas[5]);
 			
 			BranchStatus status = branchStatus == 0 ? BranchStatus.OFF : BranchStatus.ON;
-			Branch branch = new Branch(branchNum, node1, node2, branchPower, status);
+			Branch branch = new Branch(branchNum, node1, node2, branchPower, distance, status);
 			branchMap.put(branchNum, branch);
+			
+			//adiciona a branch nos dois loads os quais ela conecta
+			node1.addBranch(branch);
+			node2.addBranch(branch);
 		}
 		
 		int sizeX = nodeMap.values().stream().max(Comparator.comparing(node -> node.getX())).get().getX();
