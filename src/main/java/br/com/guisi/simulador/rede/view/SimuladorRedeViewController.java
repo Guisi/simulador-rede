@@ -103,6 +103,7 @@ public class SimuladorRedeViewController {
 
 			try {
 				environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
+				environment.validateEnvironment();
 				this.drawNetworkFromEnvironment();
 			} catch (Exception e) {
 				Alert alert = new Alert(AlertType.ERROR);

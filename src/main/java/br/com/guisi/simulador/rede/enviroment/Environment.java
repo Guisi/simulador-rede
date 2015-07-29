@@ -21,33 +21,47 @@ public class Environment {
 	 * Valida se a rede esta configurada corretamente
 	 * Por exemplo, se existe algum ciclo fechado ou isolamento
 	 */
-	private void validateEnvironment() {
+	public void validateEnvironment() throws IllegalStateException {
 		loadMap.values().forEach((entry) -> {
 			
 		});
 		
 		for (Load load : loadMap.values()) {
 			if (load.isLoad()) {
-				
+				checkFeederConnection(load);
 			}
 		}
 	}
 	
-	private void checkFeederConnection(Load load) {
+	private void checkFeederConnection(Load load) throws IllegalStateException {
 		Load feeder = null;
 		
 		Set<Load> connectedLoads = load.getConnectedLoads();
 		for (Load connectedLoad : connectedLoads) {
+			//valida se existe um ciclo
+			if (connectedLoad.equals(load)) {
+				throw new IllegalStateException("O load " + load.getLoadNum() + " está fechado em um ciclo.");
+			}
+			
+			//guarda o primeiro feeder que encontrar
 			if (connectedLoad.isFeeder()) {
-				feeder = connectedLoad;
-				break;
+				if (feeder == null) {
+					feeder = connectedLoad;
+				} else {
+					throw new IllegalStateException("O load " + load.getLoadNum() + " está conectado a mais de um feeder.");
+				}
+			} else {
 			}
 		}
 		
-		Load settedFeeder = loadMap.get(load.getFeeder());
+		if (feeder == null) {
+			throw new IllegalStateException("O load " + load.getLoadNum() + " não está conectado a nenhum feeder.");
+		}
+		
+		/*Load settedFeeder = loadMap.get(load.getFeeder());
 		if (feeder == null || !feeder.equals(settedFeeder)) {
 			throw new IllegalStateException("O feeder do load " + load.getLoadNum() + " é inválido.");
-		}
+		}*/
 	}
 	
 	public Load getLoad(Integer loadNum) {
