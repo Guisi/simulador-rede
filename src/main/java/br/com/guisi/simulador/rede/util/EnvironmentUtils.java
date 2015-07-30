@@ -161,35 +161,44 @@ public class EnvironmentUtils {
 		
 		for (Load load : loadMap.values()) {
 			if (load.isLoad()) {
-				checkFeederConnection(load);
+				Load feeder = checkFeederConnection(load, load, null);
+				
+				if (feeder == null) {
+					//throw new IllegalStateException("O load " + load.getLoadNum() + " não está conectado a nenhum feeder.");
+				}
 			}
 		}
 	}
 	
-	private static void checkFeederConnection(Load load) throws IllegalStateException {
+	private static Load checkFeederConnection(Load observedLoad, Load connectedLoad, Load lastConnectedLoad) throws IllegalStateException {
 		Load feeder = null;
 		
-		Set<Load> connectedLoads = load.getConnectedLoads();
-		for (Load connectedLoad : connectedLoads) {
+		Set<Load> connectedLoads = connectedLoad.getConnectedLoads();
+		connectedLoads.remove(lastConnectedLoad);
+		for (Load load : connectedLoads) {
 			//valida se existe um ciclo
-			if (connectedLoad.equals(load)) {
-				throw new IllegalStateException("O load " + load.getLoadNum() + " está fechado em um ciclo.");
+			if (load.equals(observedLoad)) {
+				throw new IllegalStateException("O load " + observedLoad.getLoadNum() + " está fechado em um ciclo.");
 			}
 			
-			//guarda o primeiro feeder que encontrar
-			if (connectedLoad.isFeeder()) {
+			if (load.isLoad()) {
+				Load f = checkFeederConnection(observedLoad, load, connectedLoad);
+			}
+			
+			/*//guarda o primeiro feeder que encontrar
+			if (load.isFeeder()) {
 				if (feeder == null) {
-					feeder = connectedLoad;
+					feeder = load;
 				} else {
-					throw new IllegalStateException("O load " + load.getLoadNum() + " está conectado a mais de um feeder.");
+					throw new IllegalStateException("O load " + observedLoad.getLoadNum() + " está conectado a mais de um feeder.");
 				}
 			} else {
-			}
+				
+			}*/
 		}
 		
-		if (feeder == null) {
-			throw new IllegalStateException("O load " + load.getLoadNum() + " não está conectado a nenhum feeder.");
-		}
+		return feeder;
+		
 		
 		/*Load settedFeeder = loadMap.get(load.getFeeder());
 		if (feeder == null || !feeder.equals(settedFeeder)) {

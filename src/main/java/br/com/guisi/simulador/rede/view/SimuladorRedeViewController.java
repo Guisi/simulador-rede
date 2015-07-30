@@ -67,6 +67,9 @@ public class SimuladorRedeViewController {
 		this.resetScreen();
 	}
 	
+	/**
+	 * Volta a tela ao estado original
+	 */
 	public void resetScreen() {
 		networkPane.setVisible(false);
 		
@@ -88,9 +91,9 @@ public class SimuladorRedeViewController {
 		lblBranchStatus.setText("");
 	}
 
-	public void createRandomNetwork() {
-	}
-
+	/**
+	 * Abre diálogo de seleção de arquivo
+	 */
 	public void openNetworkFile() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open CSV File");
@@ -104,7 +107,7 @@ public class SimuladorRedeViewController {
 
 			try {
 				environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
-				//EnvironmentUtils.validateEnvironment(environment);
+				EnvironmentUtils.validateEnvironment(environment);
 				this.drawNetworkFromEnvironment();
 			} catch (Exception e) {
 				Alert alert = new Alert(AlertType.ERROR);
@@ -115,7 +118,13 @@ public class SimuladorRedeViewController {
 		}
 	}
 	
+	/**
+	 * Desenha o ambiente na tela
+	 */
 	private void drawNetworkFromEnvironment() {
+		networkPane.getChildren().clear();
+		
+		//Seta visibilidade e tamanho dos panes da tela
 		networkPane.setVisible(true);
 		networkPane.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
 		networkPane.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
@@ -126,8 +135,7 @@ public class SimuladorRedeViewController {
 		boxFeederInfo.setVisible(true);
 		boxBranchInfo.setVisible(true);
 
-		networkPane.getChildren().clear();
-
+		//Desenha loads
 		for (Load node : environment.getLoadMap().values()) {
 			LoadStackPane loadStack = networkPane.drawNode(node, environment.getSizeY());
 			loadStack.setOnMouseClicked((event) -> {
@@ -139,15 +147,21 @@ public class SimuladorRedeViewController {
 			});
 		}
 		
+		//Desenha Branches
 		for (Branch branch : environment.getBranchMap().values()) {
 			EventHandler<MouseEvent> mouseClicked = (event) -> updateBranchInformationBox((BranchNode)event.getSource());
 			networkPane.drawBranch(branch, environment.getSizeX(), environment.getSizeY(), mouseClicked);
 		}
 		
+		//Desenha grid
 		networkPane.drawGrid(environment.getSizeX(), environment.getSizeY());
 		networkPane.setSnapToPixel(false);
 	}
 	
+	/**
+	 * Exibe na tela as informações do Load selecionado
+	 * @param loadStackPane
+	 */
 	private void updateLoadInformationBox(LoadStackPane loadStackPane) {
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblLoadNumber.setText(load.getLoadNum().toString());
@@ -156,6 +170,10 @@ public class SimuladorRedeViewController {
 		lblLoadPower.setText(df.format(load.getLoadPower()));
 	}
 	
+	/**
+	 * Exibe na tela as informações do Feeder selecionado
+	 * @param loadStackPane
+	 */
 	private void updateFeederInformationBox(LoadStackPane loadStackPane) {
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblFeederNumber.setText(load.getLoadNum().toString());
@@ -164,6 +182,10 @@ public class SimuladorRedeViewController {
 		
 	}
 	
+	/**
+	 * Exibe na tela as informações do Branch selecionado
+	 * @param branchNode
+	 */
 	private void updateBranchInformationBox(BranchNode branchNode) {
 		Branch branch = environment.getBranch(branchNode.getBranchNum());
 		lblBranchNumber.setText(branch.getBranchNum().toString());
