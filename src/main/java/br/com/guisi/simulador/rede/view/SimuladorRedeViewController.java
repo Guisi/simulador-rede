@@ -107,7 +107,7 @@ public class SimuladorRedeViewController {
 
 			try {
 				environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
-				EnvironmentUtils.validateEnvironment(environment);
+				//EnvironmentUtils.validateEnvironment(environment);
 				this.drawNetworkFromEnvironment();
 			} catch (Exception e) {
 				Alert alert = new Alert(AlertType.ERROR);
@@ -166,7 +166,7 @@ public class SimuladorRedeViewController {
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblLoadNumber.setText(load.getLoadNum().toString());
 		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().toString() : "");
-		DecimalFormat df = new DecimalFormat("00.0");
+		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblLoadPower.setText(df.format(load.getLoadPower()));
 	}
 	
@@ -177,7 +177,7 @@ public class SimuladorRedeViewController {
 	private void updateFeederInformationBox(LoadStackPane loadStackPane) {
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblFeederNumber.setText(load.getLoadNum().toString());
-		DecimalFormat df = new DecimalFormat("00.0");
+		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblFeederPower.setText(df.format(load.getLoadPower()));
 		
 	}
@@ -191,7 +191,7 @@ public class SimuladorRedeViewController {
 		lblBranchNumber.setText(branch.getBranchNum().toString());
 		lblBranchDe.setText(branch.getLoad1().getLoadNum().toString());
 		lblBranchPara.setText(branch.getLoad2().getLoadNum().toString());
-		DecimalFormat df = new DecimalFormat("00.0");
+		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblBranchPower.setText(df.format(branch.getBranchPower()));
 		lblBranchDistance.setText(DecimalFormat.getNumberInstance().format(branch.getDistance()));
 		lblBranchStatus.setText(branch.isOn() ? "Ligado" : "Desligado");

@@ -1,7 +1,6 @@
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,8 +13,14 @@ public class Teste {
 
 		//loadFromFile();
 		
-		DecimalFormat df = new DecimalFormat("00.0");
-		System.out.println(df.format(20.55));
+		int x1 = 0;
+		int y1 = 0;
+		int x2 = 10;
+		int y2 = 20;
+		
+		float xDiff = x2 - x1;
+        float yDiff = y2 - y1;
+        System.out.println(Math.atan2(yDiff, xDiff) * (180 / Math.PI));
 	}
 
 	public static void loadFromFile() throws Exception {

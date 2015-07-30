@@ -8,7 +8,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -36,7 +35,8 @@ public class NetworkPane extends Pane {
 		c.setRadius(Constants.LOAD_RADIUS_PX);
 
 		Text text = new Text(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
-		text.setBoundsType(TextBoundsType.VISUAL); 
+		text.setBoundsType(TextBoundsType.VISUAL);
+		text.setFont(Font.font(11));
 		LoadStackPane stack = new LoadStackPane(load.getLoadNum());
 		stack.getChildren().addAll(c, text);
 		
@@ -87,8 +87,8 @@ public class NetworkPane extends Pane {
 			startY -= Constants.BRANCH_TYPE_PX * 1.5;
 			endY -= Constants.BRANCH_TYPE_PX * 1.5;
 		} else if (x1 == x2) {
-			startX -= Constants.BRANCH_TYPE_PX * 2.8;
-			endX -= Constants.BRANCH_TYPE_PX * 2.8;
+			startX -= Constants.BRANCH_TYPE_PX * 1.5;
+			endX -= Constants.BRANCH_TYPE_PX * 1.5;
 		}
 		
 		/** Linha branch */
@@ -110,7 +110,7 @@ public class NetworkPane extends Pane {
 		sp.setLayoutY(Math.min(l.getEndY(), l.getStartY()));
 
 		/** Label branch */
-		DecimalFormat df = new DecimalFormat("00.0");
+		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		String power = " (" + df.format(branch.getBranchPower()) + ")";
 		BranchText text = new BranchText(branch.getBranchNum(), power);
 		text.setFont(Font.font(10));
@@ -119,40 +119,37 @@ public class NetworkPane extends Pane {
 		
 		/** Tipo branch */
 		BranchRectangle r = new BranchRectangle(branch.getBranchNum());
-		r.setWidth(Constants.BRANCH_TYPE_PX);
+		r.setWidth(Constants.BRANCH_TYPE_PX * 2);
 		r.setHeight(Constants.BRANCH_TYPE_PX);
 		r.setOnMouseClicked(mouseClicked);
 		r.setFill(branch.isOn() ? Color.BLACK : Color.WHITE);
 		if (!branch.isOn()) {
-			r.setStroke(Color.LIGHTGRAY);
+			r.setStroke(Color.GRAY);
 			r.setStrokeWidth(1);
 		}
 		/*r.setVisible(branch.isSwitchBranch() && branch.isOn());*/
 		r.setVisible(branch.isSwitchBranch());
 		
 		/** agrupa rectangle e text */
-		if (x1 == x2) {
-			HBox box = new HBox();
-			box.setAlignment(Pos.CENTER);
-			if (x1 < sizeX / 2) {
-				box.getChildren().add(text);
-				box.getChildren().add(r);
-				box.setPadding(new Insets(0, Constants.BRANCH_TYPE_PX * 2.3, 0, 0));
-			} else {
-				box.getChildren().add(r);
-				box.getChildren().add(text);
-				box.setPadding(new Insets(0, 0, 0, Constants.BRANCH_TYPE_PX * 2.3));
-			}
-			sp.getChildren().add(box);
-			box.toFront();
-		} else {
-			VBox box = new VBox();
-			box.setPadding(new Insets(0, 0, Constants.BRANCH_TYPE_PX, 0));
-			box.setAlignment(Pos.CENTER);
-			box.getChildren().add(text);
-			box.getChildren().add(r);
-			sp.getChildren().add(box);
-			box.toFront();
+		VBox box = new VBox();
+		box.setPadding(new Insets(0, 0, Constants.BRANCH_TYPE_PX, 0));
+		box.setAlignment(Pos.CENTER);
+		box.setSpacing(2);
+		box.getChildren().add(text);
+		box.getChildren().add(r);
+		sp.getChildren().add(box);
+		box.toFront();
+
+		if (y1 != y2) {
+			double xDiff = x2 - x1;
+	        double yDiff = y2 - y1;
+	        double angle = Math.atan2(yDiff, xDiff) * (180 / Math.PI);
+	        
+	        //se inclinou mais que 90 graus, ou é linha na vertical do lado esquerdo, inverte
+	        if (angle > 90 || (x1 == x2 && x1 < sizeX / 2)) {
+	        	angle -= 180;
+	        }
+			box.setRotate(angle);
 		}
 	}
 	
