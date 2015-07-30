@@ -1,6 +1,7 @@
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,9 @@ public class Teste {
 	public static void main(String[] args) throws Exception {
 
 		//loadFromFile();
+		
+		DecimalFormat df = new DecimalFormat("00.0");
+		System.out.println(df.format(20.55));
 	}
 
 	public static void loadFromFile() throws Exception {

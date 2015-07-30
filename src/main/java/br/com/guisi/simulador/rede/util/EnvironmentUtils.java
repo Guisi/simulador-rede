@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -95,8 +96,10 @@ public class EnvironmentUtils {
 			//status do branch
 			int branchStatus = Integer.parseInt(colunas[5]);
 			
+			boolean switchBranch = Integer.parseInt(colunas[6]) == 1;
+			
 			BranchStatus status = branchStatus == 0 ? BranchStatus.OFF : BranchStatus.ON;
-			Branch branch = new Branch(branchNum, node1, node2, branchPower, distance, status);
+			Branch branch = new Branch(branchNum, node1, node2, branchPower, distance, status, switchBranch);
 			branchMap.put(branchNum, branch);
 			
 			//adiciona a branch nos dois loads os quais ela conecta
@@ -144,5 +147,53 @@ public class EnvironmentUtils {
 	
 	private static boolean isEmptyLine(String line) {
 		return StringUtils.replace(line, ";", "").isEmpty();
+	}
+	
+	/**
+	 * Valida se a rede esta configurada corretamente
+	 * Por exemplo, se existe algum ciclo fechado ou isolamento
+	 */
+	public static void validateEnvironment(Environment environment) throws IllegalStateException {
+		Map<Integer, Load> loadMap = environment.getLoadMap();
+		loadMap.values().forEach((entry) -> {
+			
+		});
+		
+		for (Load load : loadMap.values()) {
+			if (load.isLoad()) {
+				checkFeederConnection(load);
+			}
+		}
+	}
+	
+	private static void checkFeederConnection(Load load) throws IllegalStateException {
+		Load feeder = null;
+		
+		Set<Load> connectedLoads = load.getConnectedLoads();
+		for (Load connectedLoad : connectedLoads) {
+			//valida se existe um ciclo
+			if (connectedLoad.equals(load)) {
+				throw new IllegalStateException("O load " + load.getLoadNum() + " está fechado em um ciclo.");
+			}
+			
+			//guarda o primeiro feeder que encontrar
+			if (connectedLoad.isFeeder()) {
+				if (feeder == null) {
+					feeder = connectedLoad;
+				} else {
+					throw new IllegalStateException("O load " + load.getLoadNum() + " está conectado a mais de um feeder.");
+				}
+			} else {
+			}
+		}
+		
+		if (feeder == null) {
+			throw new IllegalStateException("O load " + load.getLoadNum() + " não está conectado a nenhum feeder.");
+		}
+		
+		/*Load settedFeeder = loadMap.get(load.getFeeder());
+		if (feeder == null || !feeder.equals(settedFeeder)) {
+			throw new IllegalStateException("O feeder do load " + load.getLoadNum() + " é inválido.");
+		}*/
 	}
 }

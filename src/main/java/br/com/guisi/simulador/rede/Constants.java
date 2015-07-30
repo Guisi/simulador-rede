@@ -8,5 +8,6 @@ public interface Constants {
 	int NETWORK_PANE_PADDING = 30;
 	int NETWORK_GRID_SIZE_PX = 70;
 	int LOAD_RADIUS_PX = 15;
+	int BRANCH_TYPE_PX = 10;
 	
 }

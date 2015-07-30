@@ -10,14 +10,16 @@ public class Branch {
 	private double branchPower;
 	private double distance;
 	private BranchStatus status;
+	private boolean switchBranch;
 	
-	public Branch(Integer branchNum, Load load1, Load load2, double branchPower, double distance, BranchStatus status) {
+	public Branch(Integer branchNum, Load load1, Load load2, double branchPower, double distance, BranchStatus status, boolean switchBranch) {
 		this.branchNum = branchNum;
 		this.load1 = load1;
 		this.load2 = load2;
 		this.branchPower = branchPower;
 		this.distance = distance;
 		this.status = status;
+		this.switchBranch = switchBranch;
 	}
 	
 	public boolean isOn() {
@@ -69,6 +71,12 @@ public class Branch {
 	}
 	public void setDistance(double distance) {
 		this.distance = distance;
+	}
+	public boolean isSwitchBranch() {
+		return switchBranch;
+	}
+	public void setSwitchBranch(boolean switchBranch) {
+		this.switchBranch = switchBranch;
 	}
 
 	@Override

@@ -3,13 +3,14 @@ package br.com.guisi.simulador.rede.view;
 import java.io.File;
 import java.text.DecimalFormat;
 
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import br.com.guisi.simulador.rede.Constants;
@@ -17,7 +18,7 @@ import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
-import br.com.guisi.simulador.rede.view.layout.BranchText;
+import br.com.guisi.simulador.rede.view.layout.BranchNode;
 import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
 
 public class SimuladorRedeViewController {
@@ -103,7 +104,7 @@ public class SimuladorRedeViewController {
 
 			try {
 				environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
-				environment.validateEnvironment();
+				//EnvironmentUtils.validateEnvironment(environment);
 				this.drawNetworkFromEnvironment();
 			} catch (Exception e) {
 				Alert alert = new Alert(AlertType.ERROR);
@@ -139,8 +140,8 @@ public class SimuladorRedeViewController {
 		}
 		
 		for (Branch branch : environment.getBranchMap().values()) {
-			Text text = networkPane.drawBranch(branch, environment.getSizeY());
-			text.setOnMouseClicked((event) -> updateBranchInformationBox((BranchText)event.getSource()));
+			EventHandler<MouseEvent> mouseClicked = (event) -> updateBranchInformationBox((BranchNode)event.getSource());
+			networkPane.drawBranch(branch, environment.getSizeX(), environment.getSizeY(), mouseClicked);
 		}
 		
 		networkPane.drawGrid(environment.getSizeX(), environment.getSizeY());
@@ -151,22 +152,25 @@ public class SimuladorRedeViewController {
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblLoadNumber.setText(load.getLoadNum().toString());
 		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().toString() : "");
-		lblLoadPower.setText(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
+		DecimalFormat df = new DecimalFormat("00.0");
+		lblLoadPower.setText(df.format(load.getLoadPower()));
 	}
 	
 	private void updateFeederInformationBox(LoadStackPane loadStackPane) {
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblFeederNumber.setText(load.getLoadNum().toString());
-		lblFeederPower.setText(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
+		DecimalFormat df = new DecimalFormat("00.0");
+		lblFeederPower.setText(df.format(load.getLoadPower()));
 		
 	}
 	
-	private void updateBranchInformationBox(BranchText branchText) {
-		Branch branch = environment.getBranch(branchText.getBranchNum());
+	private void updateBranchInformationBox(BranchNode branchNode) {
+		Branch branch = environment.getBranch(branchNode.getBranchNum());
 		lblBranchNumber.setText(branch.getBranchNum().toString());
 		lblBranchDe.setText(branch.getLoad1().getLoadNum().toString());
 		lblBranchPara.setText(branch.getLoad2().getLoadNum().toString());
-		lblBranchPower.setText(DecimalFormat.getNumberInstance().format(branch.getBranchPower()));
+		DecimalFormat df = new DecimalFormat("00.0");
+		lblBranchPower.setText(df.format(branch.getBranchPower()));
 		lblBranchDistance.setText(DecimalFormat.getNumberInstance().format(branch.getDistance()));
 		lblBranchStatus.setText(branch.isOn() ? "Ligado" : "Desligado");
 	}

@@ -1,13 +1,12 @@
 package br.com.guisi.simulador.rede.view.layout;
 
-import javafx.scene.text.Text;
+import javafx.scene.shape.Rectangle;
 
-public class BranchText extends Text implements BranchNode {
+public class BranchRectangle extends Rectangle implements BranchNode {
 
 	private final Integer branchNum;
 
-	public BranchText(Integer branchNum, String text) {
-		super(text);
+	public BranchRectangle(Integer branchNum) {
 		this.branchNum = branchNum;
 	}
 	
