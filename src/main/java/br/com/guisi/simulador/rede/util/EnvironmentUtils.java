@@ -63,7 +63,13 @@ public class EnvironmentUtils {
 			//potencia
 			double loadPower = Double.parseDouble(colunas[5]);
 			
-			Load node = new Load(nodeType, loadNum, feeder, x, y, loadPower);
+			//prioridade
+			int loadPriority = 0;
+			if (nodeType.equals(NodeType.LOAD)) {
+				 loadPriority = Integer.valueOf(colunas[6]);
+			}
+			
+			Load node = new Load(nodeType, loadNum, feeder, x, y, loadPower, loadPriority);
 			
 			nodeMap.put(loadNum, node);
 			

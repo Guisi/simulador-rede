@@ -10,6 +10,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -29,6 +30,8 @@ public class SimuladorRedeViewController {
 	private NetworkPane networkPane;
 	@FXML
 	private Button btnImportNetwork;
+	@FXML
+	private Pane labelPanel;
 
 	@FXML
 	private VBox boxLoadInfo;
@@ -38,6 +41,8 @@ public class SimuladorRedeViewController {
 	private Label lblLoadFeeder;
 	@FXML
 	private Label lblLoadPower;
+	@FXML
+	private Label lblLoadPriority;
 	
 	@FXML
 	private VBox boxFeederInfo;
@@ -72,11 +77,13 @@ public class SimuladorRedeViewController {
 	 */
 	public void resetScreen() {
 		networkPane.setVisible(false);
+		labelPanel.setVisible(false);
 		
 		boxLoadInfo.setVisible(false);
 		lblLoadNumber.setText("");
 		lblLoadFeeder.setText("");
 		lblLoadPower.setText("");
+		lblLoadPriority.setText("");
 		
 		boxFeederInfo.setVisible(false);
 		lblFeederNumber.setText("");
@@ -131,6 +138,8 @@ public class SimuladorRedeViewController {
 		networkPane.setMaxWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
 		networkPane.setMaxHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10  + Constants.NETWORK_PANE_PADDING);
 		
+		labelPanel.setVisible(true);
+		
 		boxLoadInfo.setVisible(true);
 		boxFeederInfo.setVisible(true);
 		boxBranchInfo.setVisible(true);
@@ -168,6 +177,7 @@ public class SimuladorRedeViewController {
 		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().toString() : "");
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblLoadPower.setText(df.format(load.getLoadPower()));
+		lblLoadPriority.setText(String.valueOf(load.getLoadPriority()));
 	}
 	
 	/**
@@ -179,7 +189,6 @@ public class SimuladorRedeViewController {
 		lblFeederNumber.setText(load.getLoadNum().toString());
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblFeederPower.setText(df.format(load.getLoadPower()));
-		
 	}
 	
 	/**

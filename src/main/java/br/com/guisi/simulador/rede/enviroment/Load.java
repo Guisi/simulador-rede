@@ -14,15 +14,17 @@ public class Load {
 	private final Integer x;
 	private final Integer y;
 	private final double loadPower;
+	private final int loadPriority;
 	private Set<Branch> branches = new HashSet<>();
 
-	public Load(NodeType nodeType, Integer loadNum, Integer feeder, Integer x, Integer y, double powerLoad) {
+	public Load(NodeType nodeType, Integer loadNum, Integer feeder, Integer x, Integer y, double powerLoad, int loadPriority) {
 		this.nodeType = nodeType;
 		this.loadNum = loadNum;
 		this.feeder = feeder;
 		this.x = x;
 		this.y = y;
 		this.loadPower = powerLoad;
+		this.loadPriority = loadPriority;
 	}
 	
 	public void addBranch(Branch branch) {
@@ -69,6 +71,10 @@ public class Load {
 
 	public Integer getY() {
 		return y;
+	}
+
+	public int getLoadPriority() {
+		return loadPriority;
 	}
 
 	public double getLoadPower() {
