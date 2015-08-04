@@ -9,6 +9,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -27,11 +28,13 @@ public class SimuladorRedeViewController {
 	private Stage mainStage;
 
 	@FXML
-	private NetworkPane networkPane;
+	private VBox networkBox;
 	@FXML
 	private Button btnImportNetwork;
 	@FXML
 	private Pane labelPanel;
+	@FXML
+	private Slider zoomSlider;
 
 	@FXML
 	private VBox boxLoadInfo;
@@ -67,6 +70,8 @@ public class SimuladorRedeViewController {
 	private Label lblBranchStatus;
 	
 	private Environment environment;
+	private ZoomingPane zoomingPane;
+	private NetworkPane networkPane;
 
 	public void initialize() {
 		this.resetScreen();
@@ -76,8 +81,18 @@ public class SimuladorRedeViewController {
 	 * Volta a tela ao estado original
 	 */
 	public void resetScreen() {
-		networkPane.setVisible(false);
+		zoomSlider.setValue(1);
+		
+		networkPane = new NetworkPane();
+		zoomingPane = new ZoomingPane(networkPane);
+		zoomingPane.getStyleClass().add("networkPane");
+		zoomingPane.zoomFactorProperty().bind(zoomSlider.valueProperty());
+		networkBox.getChildren().clear();
+		networkBox.getChildren().add(zoomingPane);
+
+		zoomingPane.setVisible(false);
 		labelPanel.setVisible(false);
+		zoomSlider.setVisible(false);
 		
 		boxLoadInfo.setVisible(false);
 		lblLoadNumber.setText("");
@@ -129,24 +144,27 @@ public class SimuladorRedeViewController {
 	 * Desenha o ambiente na tela
 	 */
 	private void drawNetworkFromEnvironment() {
-		networkPane.getChildren().clear();
 		
 		//Seta visibilidade e tamanho dos panes da tela
-		networkPane.setVisible(true);
-		networkPane.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-		networkPane.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
-		networkPane.setMaxWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-		networkPane.setMaxHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10  + Constants.NETWORK_PANE_PADDING);
+		zoomingPane.setVisible(true);
+		zoomingPane.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
+		zoomingPane.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
+		zoomingPane.setContentWidth(zoomingPane.getPrefWidth());
+		zoomingPane.setContentHeight(zoomingPane.getPrefHeight());
 		
 		labelPanel.setVisible(true);
+		zoomSlider.setVisible(true);
 		
 		boxLoadInfo.setVisible(true);
 		boxFeederInfo.setVisible(true);
 		boxBranchInfo.setVisible(true);
 
+		//limpa o desenho anterior
+		networkPane.getChildren().clear();
+		
 		//Desenha loads
 		for (Load node : environment.getLoadMap().values()) {
-			LoadStackPane loadStack = networkPane.drawNode(node, environment.getSizeY());
+			LoadStackPane loadStack = networkPane.drawNode(node, environment);
 			loadStack.setOnMouseClicked((event) -> {
 				if (node.isLoad()) { 
 					updateLoadInformationBox((LoadStackPane)event.getSource()); 

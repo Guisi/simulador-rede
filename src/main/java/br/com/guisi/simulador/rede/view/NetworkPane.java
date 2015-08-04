@@ -14,60 +14,69 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 import br.com.guisi.simulador.rede.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.view.layout.BranchRectangle;
 import br.com.guisi.simulador.rede.view.layout.BranchText;
 import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
 
 public class NetworkPane extends Pane {
-	
+
 	private Map<Integer, LoadStackPane> loadPaneMap = new HashMap<Integer, LoadStackPane>();
 
-	public LoadStackPane drawNode(Load load, int sizeY) {
-		Circle c = new Circle();
-		c.setStroke(Color.BLACK);
-		c.setRadius(Constants.LOAD_RADIUS_PX);
-
+	public LoadStackPane drawNode(Load load, Environment environment) {
 		Text text = new Text(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
 		text.setBoundsType(TextBoundsType.VISUAL);
 		text.setFont(Font.font(11));
 		LoadStackPane stack = new LoadStackPane(load.getLoadNum());
-		stack.getChildren().addAll(c, text);
 		
-		int centerX = (load.getX()-1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
-		int centerY = (sizeY - load.getY()) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
+		if (load.isLoad()) {
+			Circle c = new Circle();
+			c.setStroke(Color.BLACK);
+			c.setRadius(Constants.LOAD_RADIUS_PX);
+			stack.getChildren().addAll(c, text);
+		} else {
+			Rectangle r = new Rectangle();
+			r.setStroke(Color.BLACK);
+			r.setWidth(Constants.LOAD_RADIUS_PX * 2);
+			r.setHeight(Constants.LOAD_RADIUS_PX * 2);
+			r.setArcHeight(5);
+			r.setArcWidth(5);
+			stack.getChildren().addAll(r, text);
+		}
+
+		int centerX = (load.getX() - 1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
+		int centerY = (environment.getSizeY() - load.getY()) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
 		stack.setLayoutX(centerX);
 		stack.setLayoutY(centerY);
 		getChildren().add(stack);
-		
+
 		loadPaneMap.put(load.getLoadNum(), stack);
-		this.setLoadColor(load);
-		
+		this.setLoadColor(load, environment);
+
 		return stack;
 	}
-	
-	public void setLoadColor(Load load) {
+
+	public void setLoadColor(Load load, Environment environment) {
 		LoadStackPane loadPane = loadPaneMap.get(load.getLoadNum());
-		
+
 		Color c;
-		if (load.isFeeder()) {
-			c = Color.YELLOW;
+		if (load.isLoad()) {
+			Load feeder = environment.getLoad(load.getFeeder());
+			c = Color.web(feeder.getLoadColor());
 		} else {
-			if (load.getFeeder() == null) {
-				c = Color.RED;
-			} else {
-				c = Color.WHITE;
-			}
+			c = Color.web(load.getFeederColor());
 		}
-		loadPane.getLoadCircle().setFill(c);
+		loadPane.getLoadShape().setFill(c);
 	}
-	
+
 	public void drawBranch(Branch branch, int sizeX, int sizeY, EventHandler<MouseEvent> mouseClicked) {
 		StackPane sp = new StackPane();
 		getChildren().add(sp);
@@ -77,12 +86,12 @@ public class NetworkPane extends Pane {
 		int y1 = sizeY - branch.getLoad2().getY();
 		int x2 = branch.getLoad1().getX() - 1;
 		int y2 = sizeY - branch.getLoad1().getY();
-		
+
 		int startX = x1 * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX;
 		int startY = y1 * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX;
 		int endX = x2 * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX;
 		int endY = y2 * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX;
-		
+
 		if (y1 == y2) {
 			startY -= Constants.BRANCH_TYPE_PX * 1.5;
 			endY -= Constants.BRANCH_TYPE_PX * 1.5;
@@ -90,7 +99,7 @@ public class NetworkPane extends Pane {
 			startX -= Constants.BRANCH_TYPE_PX * 1.5;
 			endX -= Constants.BRANCH_TYPE_PX * 1.5;
 		}
-		
+
 		/** Linha branch */
 		Line l = new Line();
 		l.setStartX(startX);
@@ -100,9 +109,9 @@ public class NetworkPane extends Pane {
 		l.setStroke(Color.BLACK);
 		l.setStrokeType(StrokeType.CENTERED);
 		l.getStrokeDashArray().clear();
-		/*if (!branch.isOn()) {
+		if (!branch.isOn()) {
 			l.getStrokeDashArray().addAll(2d, 5d);
-		}*/
+		}
 		l.setStrokeWidth(1.3);
 		sp.getChildren().add(l);
 		l.toBack();
@@ -116,7 +125,7 @@ public class NetworkPane extends Pane {
 		text.setFont(Font.font(10));
 		text.setBoundsType(TextBoundsType.VISUAL);
 		text.setOnMouseClicked(mouseClicked);
-		
+
 		/** Tipo branch */
 		BranchRectangle r = new BranchRectangle(branch.getBranchNum());
 		r.setWidth(Constants.BRANCH_TYPE_PX * 2);
@@ -127,9 +136,9 @@ public class NetworkPane extends Pane {
 			r.setStroke(Color.GRAY);
 			r.setStrokeWidth(1);
 		}
-		/*r.setVisible(branch.isSwitchBranch() && branch.isOn());*/
+		/* r.setVisible(branch.isSwitchBranch() && branch.isOn()); */
 		r.setVisible(branch.isSwitchBranch());
-		
+
 		/** agrupa rectangle e text */
 		VBox box = new VBox();
 		box.setPadding(new Insets(0, 0, Constants.BRANCH_TYPE_PX, 0));
@@ -142,22 +151,23 @@ public class NetworkPane extends Pane {
 
 		if (y1 != y2) {
 			double xDiff = x2 - x1;
-	        double yDiff = y2 - y1;
-	        double angle = Math.atan2(yDiff, xDiff) * (180 / Math.PI);
-	        
-	        //se inclinou mais que 90 graus, ou é linha na vertical do lado esquerdo, inverte
-	        if (angle > 90 || (x1 == x2 && x1 < sizeX / 2)) {
-	        	angle -= 180;
-	        }
+			double yDiff = y2 - y1;
+			double angle = Math.atan2(yDiff, xDiff) * (180 / Math.PI);
+
+			// se inclinou mais que 90 graus, ou é linha na vertical do lado
+			// esquerdo, inverte
+			if (angle > 90 || (x1 == x2 && x1 < sizeX / 2)) {
+				angle -= 180;
+			}
 			box.setRotate(angle);
 		}
 	}
-	
+
 	/**
 	 * Desenha um grid para facilitar a visualização do plano cartesiano
 	 */
 	public void drawGrid(int sizeX, int sizeY) {
-		
+
 		for (int x = 0; x < sizeX; x++) {
 			Line l = new Line();
 			int posX = x * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX;
@@ -170,7 +180,7 @@ public class NetworkPane extends Pane {
 			l.setStrokeWidth(0.8);
 			getChildren().add(l);
 			l.toBack();
-			
+
 			Text text = new Text(String.valueOf(x + 1));
 			text.setFont(Font.font(10));
 			text.setFill(Color.GRAY);
@@ -180,7 +190,7 @@ public class NetworkPane extends Pane {
 			getChildren().add(text);
 			text.toBack();
 		}
-		
+
 		for (int y = 0; y < sizeY; y++) {
 			Line l = new Line();
 			l.setStartX(0);
@@ -193,7 +203,7 @@ public class NetworkPane extends Pane {
 			l.setStrokeWidth(0.8);
 			getChildren().add(l);
 			l.toBack();
-			
+
 			Text text = new Text(String.valueOf(sizeY - y));
 			text.setFont(Font.font(10));
 			text.setFill(Color.GRAY);

@@ -37,10 +37,11 @@ public class EnvironmentUtils {
 			
 			//tipo, feeder ou load
 			NodeType nodeType = "F".equals(colunas[0]) ? NodeType.FEEDER : NodeType.LOAD;
+			boolean isLoad = nodeType.equals(NodeType.LOAD);
 			
 			//feeder do load
 			Integer feeder = null;
-			if (nodeType.equals(NodeType.LOAD)) {
+			if (isLoad) {
 				String strFeeder = colunas[1];
 				if (StringUtils.isNotBlank(strFeeder)) {
 					try {
@@ -65,11 +66,18 @@ public class EnvironmentUtils {
 			
 			//prioridade
 			int loadPriority = 0;
-			if (nodeType.equals(NodeType.LOAD)) {
+			if (isLoad) {
 				 loadPriority = Integer.valueOf(colunas[6]);
 			}
 			
-			Load node = new Load(nodeType, loadNum, feeder, x, y, loadPower, loadPriority);
+			String feederColor = null;
+			String loadColor = null;
+			if (colunas.length > 7) {
+				feederColor = StringUtils.isNotBlank(colunas[7]) ? colunas[7] : "#FFFFFF";
+				loadColor = StringUtils.isNotBlank(colunas[8]) ? colunas[8] : "#FFFFFF";
+			}
+			
+			Load node = new Load(nodeType, loadNum, feeder, x, y, loadPower, loadPriority, feederColor, loadColor);
 			
 			nodeMap.put(loadNum, node);
 			

@@ -5,7 +5,6 @@ import java.util.Set;
 
 import br.com.guisi.simulador.rede.constants.NodeType;
 
-
 public class Load {
 
 	private final NodeType nodeType;
@@ -15,9 +14,11 @@ public class Load {
 	private final Integer y;
 	private final double loadPower;
 	private final int loadPriority;
+	private final String feederColor;
+	private final String loadColor;
 	private Set<Branch> branches = new HashSet<>();
 
-	public Load(NodeType nodeType, Integer loadNum, Integer feeder, Integer x, Integer y, double powerLoad, int loadPriority) {
+	public Load(NodeType nodeType, Integer loadNum, Integer feeder, Integer x, Integer y, double powerLoad, int loadPriority, String feederColor, String loadColor) {
 		this.nodeType = nodeType;
 		this.loadNum = loadNum;
 		this.feeder = feeder;
@@ -25,6 +26,8 @@ public class Load {
 		this.y = y;
 		this.loadPower = powerLoad;
 		this.loadPriority = loadPriority;
+		this.feederColor = feederColor;
+		this.loadColor = loadColor;
 	}
 	
 	public void addBranch(Branch branch) {
@@ -83,6 +86,14 @@ public class Load {
 
 	public Set<Branch> getBranches() {
 		return branches;
+	}
+	
+	public String getFeederColor() {
+		return feederColor;
+	}
+
+	public String getLoadColor() {
+		return loadColor;
 	}
 
 	@Override
