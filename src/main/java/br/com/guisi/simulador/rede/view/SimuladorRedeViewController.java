@@ -13,6 +13,8 @@ import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import br.com.guisi.simulador.rede.Constants;
@@ -72,6 +74,10 @@ public class SimuladorRedeViewController {
 	private Environment environment;
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
+	
+	private Shape selectedLoad;
+	private Shape selectedFeeder;
+	private Shape selectedBranch;
 
 	public void initialize() {
 		this.resetScreen();
@@ -190,6 +196,14 @@ public class SimuladorRedeViewController {
 	 * @param loadStackPane
 	 */
 	private void updateLoadInformationBox(LoadStackPane loadStackPane) {
+		if (selectedLoad != null) {
+			selectedLoad.setStroke(Color.BLACK);
+			selectedLoad.setStrokeWidth(1);
+		}
+		selectedLoad = loadStackPane.getLoadShape();
+		selectedLoad.setStroke(Color.TOMATO);
+		selectedLoad.setStrokeWidth(2);
+		
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblLoadNumber.setText(load.getLoadNum().toString());
 		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().toString() : "");
@@ -203,6 +217,14 @@ public class SimuladorRedeViewController {
 	 * @param loadStackPane
 	 */
 	private void updateFeederInformationBox(LoadStackPane loadStackPane) {
+		if (selectedFeeder != null) {
+			selectedFeeder.setStroke(Color.BLACK);
+			selectedFeeder.setStrokeWidth(1);
+		}
+		selectedFeeder = loadStackPane.getLoadShape();
+		selectedFeeder.setStroke(Color.TOMATO);
+		selectedFeeder.setStrokeWidth(2);
+		
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblFeederNumber.setText(load.getLoadNum().toString());
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
@@ -214,6 +236,14 @@ public class SimuladorRedeViewController {
 	 * @param branchNode
 	 */
 	private void updateBranchInformationBox(BranchNode branchNode) {
+		if (selectedBranch != null) {
+			selectedBranch.setStroke(Color.BLACK);
+			selectedBranch.setStrokeWidth(1);
+		}
+		selectedBranch = branchNode.getBranchLine();
+		selectedBranch.setStroke(Color.TOMATO);
+		selectedBranch.setStrokeWidth(2);
+
 		Branch branch = environment.getBranch(branchNode.getBranchNum());
 		lblBranchNumber.setText(branch.getBranchNum().toString());
 		lblBranchDe.setText(branch.getLoad1().getLoadNum().toString());
@@ -223,7 +253,7 @@ public class SimuladorRedeViewController {
 		lblBranchDistance.setText(DecimalFormat.getNumberInstance().format(branch.getDistance()));
 		lblBranchStatus.setText(branch.isOn() ? "Ligado" : "Desligado");
 	}
-
+	
 	public Stage getMainStage() {
 		return mainStage;
 	}

@@ -1,16 +1,13 @@
 package br.com.guisi.simulador.rede.view.layout;
 
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 
-public class BranchRectangle extends Rectangle implements BranchNode {
+public class BranchLine extends Line implements BranchNode {
 
 	private final Integer branchNum;
-	private final Line branchLine;
 
-	public BranchRectangle(Integer branchNum, Line branchLine) {
+	public BranchLine(Integer branchNum) {
 		this.branchNum = branchNum;
-		this.branchLine = branchLine;
 	}
 	
 	@Override
@@ -20,7 +17,7 @@ public class BranchRectangle extends Rectangle implements BranchNode {
 
 	@Override
 	public Line getBranchLine() {
-		return branchLine;
+		return this;
 	}
 	
 }

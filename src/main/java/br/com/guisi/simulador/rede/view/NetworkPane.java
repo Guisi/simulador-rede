@@ -23,6 +23,7 @@ import br.com.guisi.simulador.rede.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Load;
+import br.com.guisi.simulador.rede.view.layout.BranchLine;
 import br.com.guisi.simulador.rede.view.layout.BranchRectangle;
 import br.com.guisi.simulador.rede.view.layout.BranchText;
 import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
@@ -101,7 +102,7 @@ public class NetworkPane extends Pane {
 		}
 
 		/** Linha branch */
-		Line l = new Line();
+		BranchLine l = new BranchLine(branch.getBranchNum());
 		l.setStartX(startX);
 		l.setStartY(startY);
 		l.setEndX(endX);
@@ -113,6 +114,7 @@ public class NetworkPane extends Pane {
 			l.getStrokeDashArray().addAll(2d, 5d);
 		}
 		l.setStrokeWidth(1.3);
+		l.setOnMouseClicked(mouseClicked);
 		sp.getChildren().add(l);
 		l.toBack();
 		sp.setLayoutX(Math.min(l.getEndX(), l.getStartX()));
@@ -121,13 +123,13 @@ public class NetworkPane extends Pane {
 		/** Label branch */
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		String power = " (" + df.format(branch.getBranchPower()) + ")";
-		BranchText text = new BranchText(branch.getBranchNum(), power);
+		BranchText text = new BranchText(branch.getBranchNum(), l, power);
 		text.setFont(Font.font(10));
 		text.setBoundsType(TextBoundsType.VISUAL);
 		text.setOnMouseClicked(mouseClicked);
 
 		/** Tipo branch */
-		BranchRectangle r = new BranchRectangle(branch.getBranchNum());
+		BranchRectangle r = new BranchRectangle(branch.getBranchNum(), l);
 		r.setWidth(Constants.BRANCH_TYPE_PX * 2);
 		r.setHeight(Constants.BRANCH_TYPE_PX);
 		r.setOnMouseClicked(mouseClicked);
@@ -147,20 +149,23 @@ public class NetworkPane extends Pane {
 		box.getChildren().add(text);
 		box.getChildren().add(r);
 		sp.getChildren().add(box);
-		box.toFront();
 
 		if (y1 != y2) {
 			double xDiff = x2 - x1;
 			double yDiff = y2 - y1;
 			double angle = Math.atan2(yDiff, xDiff) * (180 / Math.PI);
-
+			
 			// se inclinou mais que 90 graus, ou é linha na vertical do lado
 			// esquerdo, inverte
-			if (angle > 90 || (x1 == x2 && x1 < sizeX / 2)) {
+			if (angle > 90) {
 				angle -= 180;
+			} else if (angle < -90) {
+				angle += 180;
 			}
 			box.setRotate(angle);
 		}
+		
+		box.toFront();
 	}
 
 	/**

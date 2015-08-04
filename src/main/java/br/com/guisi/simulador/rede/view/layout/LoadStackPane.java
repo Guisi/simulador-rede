@@ -24,6 +24,6 @@ public class LoadStackPane extends StackPane {
 				return (Shape) node;
 			}
 		}
-		throw new IllegalStateException("No way! A LoadStackPane always have a Circle!");
+		throw new IllegalStateException("No way! A LoadStackPane always have a Circle or a Rectangle!");
 	}
 }
