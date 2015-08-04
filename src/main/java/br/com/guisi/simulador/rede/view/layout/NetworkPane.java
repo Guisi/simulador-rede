@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view;
+package br.com.guisi.simulador.rede.view.layout;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -23,10 +23,6 @@ import br.com.guisi.simulador.rede.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Load;
-import br.com.guisi.simulador.rede.view.layout.BranchLine;
-import br.com.guisi.simulador.rede.view.layout.BranchRectangle;
-import br.com.guisi.simulador.rede.view.layout.BranchText;
-import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
 
 public class NetworkPane extends Pane {
 

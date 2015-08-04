@@ -9,6 +9,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -24,13 +25,15 @@ import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.view.layout.BranchNode;
 import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
+import br.com.guisi.simulador.rede.view.layout.NetworkPane;
+import br.com.guisi.simulador.rede.view.layout.ZoomingPane;
 
 public class SimuladorRedeViewController {
 
 	private Stage mainStage;
 
 	@FXML
-	private VBox networkBox;
+	private ScrollPane networkScrollPane;
 	@FXML
 	private Button btnImportNetwork;
 	@FXML
@@ -93,9 +96,10 @@ public class SimuladorRedeViewController {
 		zoomingPane = new ZoomingPane(networkPane);
 		zoomingPane.getStyleClass().add("networkPane");
 		zoomingPane.zoomFactorProperty().bind(zoomSlider.valueProperty());
-		networkBox.getChildren().clear();
-		networkBox.getChildren().add(zoomingPane);
+		networkScrollPane.setContent(zoomingPane);
+		networkScrollPane.getStyleClass().add("networkPane");
 
+		networkScrollPane.setVisible(false);
 		zoomingPane.setVisible(false);
 		labelPanel.setVisible(false);
 		zoomSlider.setVisible(false);
@@ -152,6 +156,7 @@ public class SimuladorRedeViewController {
 	private void drawNetworkFromEnvironment() {
 		
 		//Seta visibilidade e tamanho dos panes da tela
+		networkScrollPane.setVisible(true);
 		zoomingPane.setVisible(true);
 		zoomingPane.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
 		zoomingPane.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
