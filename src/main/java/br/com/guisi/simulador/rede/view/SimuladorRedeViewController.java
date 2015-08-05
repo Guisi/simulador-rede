@@ -2,6 +2,8 @@ package br.com.guisi.simulador.rede.view;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -51,6 +53,10 @@ public class SimuladorRedeViewController {
 	private Label lblLoadPower;
 	@FXML
 	private Label lblLoadPriority;
+	@FXML
+	private Button btnPreviousLoad;
+	@FXML
+	private Button btnNextLoad;
 	
 	@FXML
 	private VBox boxFeederInfo;
@@ -58,6 +64,10 @@ public class SimuladorRedeViewController {
 	private Label lblFeederNumber;
 	@FXML
 	private Label lblFeederPower;
+	@FXML
+	private Button btnPreviousFeeder;
+	@FXML
+	private Button btnNextFeeder;
 	
 	@FXML
 	private VBox boxBranchInfo;
@@ -78,9 +88,10 @@ public class SimuladorRedeViewController {
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
 	
-	private Shape selectedLoad;
-	private Shape selectedFeeder;
 	private Shape selectedBranch;
+	
+	private Integer selectedLoad;
+	private Integer selectedFeeder;
 
 	public void initialize() {
 		this.resetScreen();
@@ -121,8 +132,10 @@ public class SimuladorRedeViewController {
 		lblBranchPower.setText("");
 		lblBranchDistance.setText("");
 		lblBranchStatus.setText("");
+		
+		selectedLoad = null;
 	}
-
+	
 	/**
 	 * Abre diálogo de seleção de arquivo
 	 */
@@ -135,7 +148,7 @@ public class SimuladorRedeViewController {
 		File csvFile = fileChooser.showOpenDialog(null);
 		
 		if (csvFile != null) {
-			this.initialize();
+			this.resetScreen();
 
 			try {
 				environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
@@ -202,12 +215,14 @@ public class SimuladorRedeViewController {
 	 */
 	private void updateLoadInformationBox(LoadStackPane loadStackPane) {
 		if (selectedLoad != null) {
-			selectedLoad.setStroke(Color.BLACK);
-			selectedLoad.setStrokeWidth(1);
+			Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getLoadShape();
+			shape.setStroke(Color.BLACK);
+			shape.setStrokeWidth(1);
 		}
-		selectedLoad = loadStackPane.getLoadShape();
-		selectedLoad.setStroke(Color.TOMATO);
-		selectedLoad.setStrokeWidth(2);
+		selectedLoad = loadStackPane.getLoadNum();
+		Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getLoadShape();
+		shape.setStroke(Color.TOMATO);
+		shape.setStrokeWidth(2);
 		
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblLoadNumber.setText(load.getLoadNum().toString());
@@ -223,12 +238,14 @@ public class SimuladorRedeViewController {
 	 */
 	private void updateFeederInformationBox(LoadStackPane loadStackPane) {
 		if (selectedFeeder != null) {
-			selectedFeeder.setStroke(Color.BLACK);
-			selectedFeeder.setStrokeWidth(1);
+			Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getLoadShape();
+			shape.setStroke(Color.BLACK);
+			shape.setStrokeWidth(1);
 		}
-		selectedFeeder = loadStackPane.getLoadShape();
-		selectedFeeder.setStroke(Color.TOMATO);
-		selectedFeeder.setStrokeWidth(2);
+		selectedFeeder = loadStackPane.getLoadNum();
+		Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getLoadShape();
+		shape.setStroke(Color.TOMATO);
+		shape.setStrokeWidth(2);
 		
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		lblFeederNumber.setText(load.getLoadNum().toString());
@@ -257,6 +274,80 @@ public class SimuladorRedeViewController {
 		lblBranchPower.setText(df.format(branch.getBranchPower()));
 		lblBranchDistance.setText(DecimalFormat.getNumberInstance().format(branch.getDistance()));
 		lblBranchStatus.setText(branch.isOn() ? "Ligado" : "Desligado");
+	}
+	
+	/**
+	 * Seleciona o load anterior
+	 */
+	public void previousLoad() {
+		List<Integer> loadKeySet = new ArrayList<Integer>(networkPane.getLoadPaneMap().keySet());
+		Integer selected = selectedLoad;
+		
+		do {
+			if (selected == null) {
+				selected = loadKeySet.get(loadKeySet.size()-1);
+			} else {
+				int previousIndex = loadKeySet.indexOf(selected) - 1;
+				selected = (previousIndex < 0) ? loadKeySet.get(loadKeySet.size()-1) : loadKeySet.get(previousIndex);
+			}
+		} while (environment.getLoad(selected).isFeeder());
+
+		this.updateLoadInformationBox(networkPane.getLoadPaneMap().get(selected));
+	}
+	
+	/**
+	 * Seleciona o próximo load
+	 */
+	public void nextLoad() {
+		List<Integer> loadKeySet = new ArrayList<Integer>(networkPane.getLoadPaneMap().keySet());
+		Integer selected = selectedLoad;
+		do {
+			if (selected == null) {
+				selected = loadKeySet.get(0);
+			} else {
+				int nextIndex = loadKeySet.indexOf(selected) + 1;
+				selected = (nextIndex == loadKeySet.size()) ? loadKeySet.get(0) : loadKeySet.get(nextIndex);
+			}
+		} while (environment.getLoad(selected).isFeeder());
+
+		this.updateLoadInformationBox(networkPane.getLoadPaneMap().get(selected));
+	}
+	
+	/**
+	 * Seleciona o feeder anterior
+	 */
+	public void previousFeeder() {
+		List<Integer> loadKeySet = new ArrayList<Integer>(networkPane.getLoadPaneMap().keySet());
+		Integer selected = selectedFeeder;
+		
+		do {
+			if (selected == null) {
+				selected = loadKeySet.get(loadKeySet.size()-1);
+			} else {
+				int previousIndex = loadKeySet.indexOf(selected) - 1;
+				selected = (previousIndex < 0) ? loadKeySet.get(loadKeySet.size()-1) : loadKeySet.get(previousIndex);
+			}
+		} while (environment.getLoad(selected).isLoad());
+
+		this.updateFeederInformationBox(networkPane.getLoadPaneMap().get(selected));
+	}
+	
+	/**
+	 * Seleciona o próximo feeder
+	 */
+	public void nextFeeder() {
+		List<Integer> loadKeySet = new ArrayList<Integer>(networkPane.getLoadPaneMap().keySet());
+		Integer selected = selectedFeeder;
+		do {
+			if (selected == null) {
+				selected = loadKeySet.get(0);
+			} else {
+				int nextIndex = loadKeySet.indexOf(selected) + 1;
+				selected = (nextIndex == loadKeySet.size()) ? loadKeySet.get(0) : loadKeySet.get(nextIndex);
+			}
+		} while (environment.getLoad(selected).isLoad());
+
+		this.updateFeederInformationBox(networkPane.getLoadPaneMap().get(selected));
 	}
 	
 	public Stage getMainStage() {

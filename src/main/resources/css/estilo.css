@@ -12,3 +12,15 @@
 	-fx-border-width: 1;
 	-fx-border-color: #CECECE;
 }
+
+.btnNext {
+	-fx-background-image: url("../img/arrow-right.png");
+	-fx-background-repeat: no-repeat;
+	-fx-background-position: center;
+}
+
+.btnPrevious {
+	-fx-background-image: url("../img/arrow-left.png");
+	-fx-background-repeat: no-repeat;
+	-fx-background-position: center;
+}

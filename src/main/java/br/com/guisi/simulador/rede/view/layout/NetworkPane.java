@@ -215,4 +215,8 @@ public class NetworkPane extends Pane {
 			text.toBack();
 		}
 	}
+
+	public Map<Integer, LoadStackPane> getLoadPaneMap() {
+		return loadPaneMap;
+	}
 }
