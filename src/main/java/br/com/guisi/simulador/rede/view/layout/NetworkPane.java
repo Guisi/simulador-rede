@@ -9,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -27,6 +26,7 @@ import br.com.guisi.simulador.rede.enviroment.Load;
 public class NetworkPane extends Pane {
 
 	private Map<Integer, LoadStackPane> loadPaneMap = new HashMap<Integer, LoadStackPane>();
+	private Map<Integer, BranchStackPane> branchPaneMap = new HashMap<Integer, BranchStackPane>();
 
 	public LoadStackPane drawNode(Load load, Environment environment) {
 		Text text = new Text(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
@@ -75,7 +75,8 @@ public class NetworkPane extends Pane {
 	}
 
 	public void drawBranch(Branch branch, int sizeX, int sizeY, EventHandler<MouseEvent> mouseClicked) {
-		StackPane sp = new StackPane();
+		BranchStackPane sp = new BranchStackPane(branch.getBranchNum());
+		branchPaneMap.put(branch.getBranchNum(), sp);
 		getChildren().add(sp);
 		sp.toBack();
 
@@ -98,7 +99,7 @@ public class NetworkPane extends Pane {
 		}
 
 		/** Linha branch */
-		BranchLine l = new BranchLine(branch.getBranchNum());
+		Line l = new Line();
 		l.setStartX(startX);
 		l.setStartY(startY);
 		l.setEndX(endX);
@@ -119,13 +120,13 @@ public class NetworkPane extends Pane {
 		/** Label branch */
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		String power = " (" + df.format(branch.getBranchPower()) + ")";
-		BranchText text = new BranchText(branch.getBranchNum(), l, power);
+		Text text = new Text(power);
 		text.setFont(Font.font(10));
 		text.setBoundsType(TextBoundsType.VISUAL);
 		text.setOnMouseClicked(mouseClicked);
 
 		/** Tipo branch */
-		BranchRectangle r = new BranchRectangle(branch.getBranchNum(), l);
+		Rectangle r = new Rectangle();
 		r.setWidth(Constants.BRANCH_TYPE_PX * 2);
 		r.setHeight(Constants.BRANCH_TYPE_PX);
 		r.setOnMouseClicked(mouseClicked);
@@ -218,5 +219,9 @@ public class NetworkPane extends Pane {
 
 	public Map<Integer, LoadStackPane> getLoadPaneMap() {
 		return loadPaneMap;
+	}
+
+	public Map<Integer, BranchStackPane> getBranchPaneMap() {
+		return branchPaneMap;
 	}
 }

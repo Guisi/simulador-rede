@@ -29,7 +29,7 @@
                         <ScrollPane fx:id="networkScrollPane" prefHeight="9999.0" prefWidth="9999.0" styleClass="scrollPane" />
                      </children>
                   </VBox>
-                  <VBox fx:id="boxLoadInfo" alignment="TOP_CENTER" minWidth="140.0" prefWidth="140.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
+                  <VBox fx:id="boxLoadInfo" alignment="TOP_CENTER" minWidth="150.0" prefWidth="150.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
                      <children>
                         <HBox alignment="CENTER" spacing="10.0">
                            <children>
@@ -53,7 +53,6 @@
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Label fx:id="lblLoadNumber" GridPane.columnIndex="1" />
                               <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Nº:" />
                               <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Feeder:" GridPane.rowIndex="1" />
                               <Label fx:id="lblLoadFeeder" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -61,6 +60,7 @@
                               <Label fx:id="lblLoadPower" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                               <Label alignment="CENTER" prefHeight="17.0" style="-fx-font-weight: bold;" text="Priority:" GridPane.rowIndex="3" />
                               <Label fx:id="lblLoadPriority" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <ComboBox fx:id="cbLoadNumber" onAction="#changeCbLoadNumber" GridPane.columnIndex="1" />
                            </children>
                            <opaqueInsets>
                               <Insets />
@@ -86,7 +86,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </VBox>
-                  <VBox fx:id="boxFeederInfo" alignment="TOP_CENTER" minWidth="140.0" prefWidth="140.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
+                  <VBox fx:id="boxFeederInfo" alignment="TOP_CENTER" minWidth="150.0" prefWidth="150.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
                      <children>
                         <HBox alignment="CENTER" spacing="10.0">
                            <children>
@@ -100,10 +100,10 @@
                         </HBox>
                         <GridPane hgap="10.0">
                            <children>
-                              <Label fx:id="lblFeederNumber" GridPane.columnIndex="1" />
                               <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Nº:" />
                               <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Power:" GridPane.rowIndex="1" />
                               <Label fx:id="lblFeederPower" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <ComboBox fx:id="cbFeederNumber" onAction="#changeCbFeederNumber" GridPane.columnIndex="1" />
                            </children>
                            <columnConstraints>
                               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="66.0" />
@@ -137,7 +137,7 @@
                         <Insets left="5.0" />
                      </HBox.margin>
                   </VBox>
-                  <VBox fx:id="boxBranchInfo" alignment="TOP_CENTER" minWidth="160.0" prefWidth="160.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
+                  <VBox fx:id="boxBranchInfo" alignment="TOP_CENTER" minWidth="170.0" prefWidth="170.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
                      <children>
                         <HBox alignment="CENTER" spacing="10.0">
                            <children>
@@ -151,7 +151,6 @@
                         </HBox>
                         <GridPane hgap="10.0">
                            <children>
-                              <Label fx:id="lblBranchNumber" GridPane.columnIndex="1" />
                               <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Nº:" />
                               <Label alignment="CENTER" style="-fx-font-weight: bold;" text="From:" GridPane.rowIndex="1" />
                               <Label fx:id="lblBranchDe" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -163,6 +162,7 @@
                               <Label fx:id="lblBranchDistance" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                               <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Status:" GridPane.rowIndex="5" />
                               <Label fx:id="lblBranchStatus" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                              <ComboBox fx:id="cbBranchNumber" onAction="#changeCbBranchNumber" GridPane.columnIndex="1" />
                            </children>
                            <columnConstraints>
                               <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="88.0" />
@@ -183,6 +183,15 @@
                               <Insets top="10.0" />
                            </VBox.margin>
                         </GridPane>
+                        <HBox alignment="CENTER" spacing="20.0">
+                           <children>
+                              <Button fx:id="btnPreviousBranch" mnemonicParsing="false" onAction="#previousBranch" prefHeight="25.0" prefWidth="25.0" styleClass="btnPrevious" />
+                              <Button fx:id="btnNextBranch" mnemonicParsing="false" onAction="#nextBranch" prefHeight="25.0" prefWidth="25.0" styleClass="btnNext" />
+                           </children>
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </HBox>
                      </children>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

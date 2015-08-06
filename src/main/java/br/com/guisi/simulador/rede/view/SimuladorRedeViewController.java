@@ -5,11 +5,14 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
@@ -17,6 +20,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -25,7 +29,7 @@ import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
-import br.com.guisi.simulador.rede.view.layout.BranchNode;
+import br.com.guisi.simulador.rede.view.layout.BranchStackPane;
 import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkPane;
 import br.com.guisi.simulador.rede.view.layout.ZoomingPane;
@@ -46,7 +50,7 @@ public class SimuladorRedeViewController {
 	@FXML
 	private VBox boxLoadInfo;
 	@FXML
-	private Label lblLoadNumber;
+	private ComboBox<Integer> cbLoadNumber;
 	@FXML
 	private Label lblLoadFeeder;
 	@FXML
@@ -61,7 +65,7 @@ public class SimuladorRedeViewController {
 	@FXML
 	private VBox boxFeederInfo;
 	@FXML
-	private Label lblFeederNumber;
+	private ComboBox<Integer> cbFeederNumber;
 	@FXML
 	private Label lblFeederPower;
 	@FXML
@@ -72,7 +76,7 @@ public class SimuladorRedeViewController {
 	@FXML
 	private VBox boxBranchInfo;
 	@FXML
-	private Label lblBranchNumber;
+	private ComboBox<Integer> cbBranchNumber;
 	@FXML
 	private Label lblBranchDe;
 	@FXML
@@ -83,16 +87,19 @@ public class SimuladorRedeViewController {
 	private Label lblBranchDistance;
 	@FXML
 	private Label lblBranchStatus;
+	@FXML
+	private Button btnPreviousBranch;
+	@FXML
+	private Button btnNextBranch;
 	
 	private Environment environment;
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
 	
-	private Shape selectedBranch;
-	
 	private Integer selectedLoad;
 	private Integer selectedFeeder;
-
+	private Integer selectedBranch;
+	
 	public void initialize() {
 		this.resetScreen();
 	}
@@ -116,17 +123,17 @@ public class SimuladorRedeViewController {
 		zoomSlider.setVisible(false);
 		
 		boxLoadInfo.setVisible(false);
-		lblLoadNumber.setText("");
+		cbLoadNumber.setValue(null);
 		lblLoadFeeder.setText("");
 		lblLoadPower.setText("");
 		lblLoadPriority.setText("");
 		
 		boxFeederInfo.setVisible(false);
-		lblFeederNumber.setText("");
+		cbFeederNumber.setValue(null);
 		lblFeederPower.setText("");
 		
 		boxBranchInfo.setVisible(false);
-		lblBranchNumber.setText("");
+		cbBranchNumber.setValue(null);
 		lblBranchDe.setText("");
 		lblBranchPara.setText("");
 		lblBranchPower.setText("");
@@ -134,6 +141,8 @@ public class SimuladorRedeViewController {
 		lblBranchStatus.setText("");
 		
 		selectedLoad = null;
+		selectedFeeder = null;
+		selectedBranch = null;
 	}
 	
 	/**
@@ -187,6 +196,9 @@ public class SimuladorRedeViewController {
 		networkPane.getChildren().clear();
 		
 		//Desenha loads
+		cbLoadNumber.setItems(FXCollections.observableArrayList());
+		cbFeederNumber.setItems(FXCollections.observableArrayList());
+		cbBranchNumber.setItems(FXCollections.observableArrayList());
 		for (Load node : environment.getLoadMap().values()) {
 			LoadStackPane loadStack = networkPane.drawNode(node, environment);
 			loadStack.setOnMouseClicked((event) -> {
@@ -196,12 +208,24 @@ public class SimuladorRedeViewController {
 					updateFeederInformationBox((LoadStackPane)event.getSource());	
 				}
 			});
+			if (node.isLoad()) {
+				cbLoadNumber.getItems().add(node.getLoadNum());
+			} else {
+				cbFeederNumber.getItems().add(node.getLoadNum());
+			}
 		}
 		
 		//Desenha Branches
 		for (Branch branch : environment.getBranchMap().values()) {
-			EventHandler<MouseEvent> mouseClicked = (event) -> updateBranchInformationBox((BranchNode)event.getSource());
+			EventHandler<MouseEvent> mouseClicked = (event) -> {
+				Node node = (Node) event.getSource();
+				while (!(node instanceof BranchStackPane)) {
+					node = node.getParent();
+				}
+				updateBranchInformationBox((BranchStackPane) node);
+			};
 			networkPane.drawBranch(branch, environment.getSizeX(), environment.getSizeY(), mouseClicked);
+			cbBranchNumber.getItems().add(branch.getBranchNum());
 		}
 		
 		//Desenha grid
@@ -225,7 +249,6 @@ public class SimuladorRedeViewController {
 		shape.setStrokeWidth(2);
 		
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
-		lblLoadNumber.setText(load.getLoadNum().toString());
 		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().toString() : "");
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblLoadPower.setText(df.format(load.getLoadPower()));
@@ -248,7 +271,6 @@ public class SimuladorRedeViewController {
 		shape.setStrokeWidth(2);
 		
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
-		lblFeederNumber.setText(load.getLoadNum().toString());
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblFeederPower.setText(df.format(load.getLoadPower()));
 	}
@@ -257,17 +279,18 @@ public class SimuladorRedeViewController {
 	 * Exibe na tela as informações do Branch selecionado
 	 * @param branchNode
 	 */
-	private void updateBranchInformationBox(BranchNode branchNode) {
+	private void updateBranchInformationBox(BranchStackPane branchStackPane) {
 		if (selectedBranch != null) {
-			selectedBranch.setStroke(Color.BLACK);
-			selectedBranch.setStrokeWidth(1);
+			Line l = networkPane.getBranchPaneMap().get(selectedBranch).getBranchLine();
+			l.setStroke(Color.BLACK);
+			l.setStrokeWidth(1);
 		}
-		selectedBranch = branchNode.getBranchLine();
-		selectedBranch.setStroke(Color.TOMATO);
-		selectedBranch.setStrokeWidth(2);
+		selectedBranch = branchStackPane.getBranchNum();
+		Line l = networkPane.getBranchPaneMap().get(selectedBranch).getBranchLine();
+		l.setStroke(Color.TOMATO);
+		l.setStrokeWidth(2);
 
-		Branch branch = environment.getBranch(branchNode.getBranchNum());
-		lblBranchNumber.setText(branch.getBranchNum().toString());
+		Branch branch = environment.getBranch(branchStackPane.getBranchNum());
 		lblBranchDe.setText(branch.getLoad1().getLoadNum().toString());
 		lblBranchPara.setText(branch.getLoad2().getLoadNum().toString());
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
@@ -285,13 +308,14 @@ public class SimuladorRedeViewController {
 		
 		do {
 			if (selected == null) {
-				selected = loadKeySet.get(loadKeySet.size()-1);
+				selected = loadKeySet.get(loadKeySet.size() - 1);
 			} else {
 				int previousIndex = loadKeySet.indexOf(selected) - 1;
 				selected = (previousIndex < 0) ? loadKeySet.get(loadKeySet.size()-1) : loadKeySet.get(previousIndex);
 			}
 		} while (environment.getLoad(selected).isFeeder());
 
+		cbLoadNumber.setValue(selected);
 		this.updateLoadInformationBox(networkPane.getLoadPaneMap().get(selected));
 	}
 	
@@ -310,7 +334,17 @@ public class SimuladorRedeViewController {
 			}
 		} while (environment.getLoad(selected).isFeeder());
 
+		cbLoadNumber.setValue(selected);
 		this.updateLoadInformationBox(networkPane.getLoadPaneMap().get(selected));
+	}
+	
+	/**
+	 * Listener da ação de alteração da combo do número do load
+	 */
+	public void changeCbLoadNumber() {
+		if (cbLoadNumber.valueProperty().get() != null) {
+			this.updateLoadInformationBox(networkPane.getLoadPaneMap().get(cbLoadNumber.valueProperty().get()));
+		}
 	}
 	
 	/**
@@ -322,13 +356,14 @@ public class SimuladorRedeViewController {
 		
 		do {
 			if (selected == null) {
-				selected = loadKeySet.get(loadKeySet.size()-1);
+				selected = loadKeySet.get(loadKeySet.size() - 1);
 			} else {
 				int previousIndex = loadKeySet.indexOf(selected) - 1;
 				selected = (previousIndex < 0) ? loadKeySet.get(loadKeySet.size()-1) : loadKeySet.get(previousIndex);
 			}
 		} while (environment.getLoad(selected).isLoad());
 
+		cbFeederNumber.setValue(selected);
 		this.updateFeederInformationBox(networkPane.getLoadPaneMap().get(selected));
 	}
 	
@@ -347,7 +382,62 @@ public class SimuladorRedeViewController {
 			}
 		} while (environment.getLoad(selected).isLoad());
 
+		cbFeederNumber.setValue(selected);
 		this.updateFeederInformationBox(networkPane.getLoadPaneMap().get(selected));
+	}
+	
+	/**
+	 * Listener da ação de alteração da combo do número do feeder
+	 */
+	public void changeCbFeederNumber() {
+		if (cbFeederNumber.valueProperty().get() != null) {
+			this.updateFeederInformationBox(networkPane.getLoadPaneMap().get(cbFeederNumber.valueProperty().get()));
+		}
+	}
+	
+	/**
+	 * Seleciona o branch anterior
+	 */
+	public void previousBranch() {
+		List<Integer> branchKeySet = new ArrayList<Integer>(networkPane.getBranchPaneMap().keySet());
+		Integer selected = selectedBranch;
+		
+		if (selected == null) {
+			selected = branchKeySet.get(branchKeySet.size() - 1);
+		} else {
+			int previousIndex = branchKeySet.indexOf(selected) - 1;
+			selected = (previousIndex < 0) ? branchKeySet.get(branchKeySet.size()-1) : branchKeySet.get(previousIndex);
+		}
+
+		cbBranchNumber.setValue(selected);
+		this.updateBranchInformationBox(networkPane.getBranchPaneMap().get(selected));
+	}
+	
+	/**
+	 * Seleciona o próximo branch
+	 */
+	public void nextBranch() {
+		List<Integer> branchKeySet = new ArrayList<Integer>(networkPane.getBranchPaneMap().keySet());
+		Integer selected = selectedBranch;
+		
+		if (selected == null) {
+			selected = branchKeySet.get(0);
+		} else {
+			int nextIndex = branchKeySet.indexOf(selected) + 1;
+			selected = (nextIndex == branchKeySet.size()) ? branchKeySet.get(0) : branchKeySet.get(nextIndex);
+		}
+
+		cbBranchNumber.setValue(selected);
+		this.updateBranchInformationBox(networkPane.getBranchPaneMap().get(selected));
+	}
+	
+	/**
+	 * Listener da ação de alteração da combo do número da branch
+	 */
+	public void changeCbBranchNumber() {
+		if (cbBranchNumber.valueProperty().get() != null) {
+			this.updateBranchInformationBox(networkPane.getBranchPaneMap().get(cbBranchNumber.valueProperty().get()));
+		}
 	}
 	
 	public Stage getMainStage() {
