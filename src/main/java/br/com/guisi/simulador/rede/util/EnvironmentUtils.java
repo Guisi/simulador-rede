@@ -14,11 +14,13 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import br.com.guisi.simulador.rede.constants.BranchStatus;
 import br.com.guisi.simulador.rede.constants.NodeType;
+import br.com.guisi.simulador.rede.constants.Status;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Load;
+
+
 
 public class EnvironmentUtils {
 
@@ -31,7 +33,6 @@ public class EnvironmentUtils {
 		//carrega os loads e feeders
 		Map<Integer, Load> nodeMap = new HashMap<>();
 		List<String> loadLines = getLoadLines(lines);
-		int loadCont = 1;
 		for (String line : loadLines) {
 			String[] colunas = line.split(";");
 			
@@ -39,49 +40,37 @@ public class EnvironmentUtils {
 			NodeType nodeType = "F".equals(colunas[0]) ? NodeType.FEEDER : NodeType.LOAD;
 			boolean isLoad = nodeType.equals(NodeType.LOAD);
 			
-			//feeder do load
-			Integer feeder = null;
-			if (isLoad) {
-				String strFeeder = colunas[1];
-				if (StringUtils.isNotBlank(strFeeder)) {
-					try {
-						feeder = Integer.valueOf(strFeeder);
-					} catch (NumberFormatException e) {
-						throw new Exception("Valor \"" + colunas[1] + "\" inválido para número do load na linha " + loadCont, e);
-					}
-				}
-			}
-			
 			//numero da carga
-			Integer loadNum = Integer.valueOf(colunas[2]);
+			Integer loadNum = Integer.valueOf(colunas[1]);
 			
 			//posicao X
-			Integer x = Integer.valueOf(colunas[3]);
+			Integer x = Integer.valueOf(colunas[2]);
 			
 			//posicao Y
-			Integer y = Integer.valueOf(colunas[4]);
+			Integer y = Integer.valueOf(colunas[3]);
 			
 			//potencia
-			double loadPower = Double.parseDouble(colunas[5]);
+			double loadPower = Double.parseDouble(colunas[4]);
+			
+			double loadMinPower = StringUtils.isNotBlank(colunas[5]) ? Double.parseDouble(colunas[5]) : 0;
+			
+			double loadMaxPower = StringUtils.isNotBlank(colunas[6]) ? Double.parseDouble(colunas[6]) : 0;
 			
 			//prioridade
 			int loadPriority = 0;
 			if (isLoad) {
-				 loadPriority = Integer.valueOf(colunas[6]);
+				 loadPriority = Integer.valueOf(colunas[7]);
 			}
 			
-			String feederColor = null;
-			String loadColor = null;
-			if (colunas.length > 7) {
-				feederColor = StringUtils.isNotBlank(colunas[7]) ? colunas[7] : "#FFFFFF";
-				loadColor = StringUtils.isNotBlank(colunas[8]) ? colunas[8] : "#FFFFFF";
-			}
+			String feederColor = StringUtils.isNotBlank(colunas[8]) ? colunas[8] : "#FFFFFF";
+			String loadColor = StringUtils.isNotBlank(colunas[9]) ? colunas[9] : "#FFFFFF";
 			
-			Load node = new Load(nodeType, loadNum, feeder, x, y, loadPower, loadPriority, feederColor, loadColor);
+			boolean loadStatus = Integer.parseInt(colunas[10]) == 1;
+			Status status = loadStatus ? Status.ON : Status.OFF;
+			
+			Load node = new Load(nodeType, loadNum, x, y, loadPower, loadMinPower, loadMaxPower, loadPriority, feederColor, loadColor, status);
 			
 			nodeMap.put(loadNum, node);
-			
-			loadCont++;
 		}
 		
 		//carrega os branches
@@ -109,10 +98,10 @@ public class EnvironmentUtils {
 			
 			//status do branch
 			int branchStatus = Integer.parseInt(colunas[5]);
+			Status status = branchStatus == 0 ? Status.OFF : Status.ON;
 			
 			boolean switchBranch = Integer.parseInt(colunas[6]) == 1;
 			
-			BranchStatus status = branchStatus == 0 ? BranchStatus.OFF : BranchStatus.ON;
 			Branch branch = new Branch(branchNum, node1, node2, branchPower, distance, status, switchBranch);
 			branchMap.put(branchNum, branch);
 			
@@ -167,56 +156,123 @@ public class EnvironmentUtils {
 	 * Valida se a rede esta configurada corretamente
 	 * Por exemplo, se existe algum ciclo fechado ou isolamento
 	 */
-	public static void validateEnvironment(Environment environment) throws IllegalStateException {
-		Map<Integer, Load> loadMap = environment.getLoadMap();
-		loadMap.values().forEach((entry) -> {
-			
-		});
+	public static String validateEnvironment(Environment environment) throws IllegalStateException {
+		StringBuilder msgs = new StringBuilder();
 		
-		for (Load load : loadMap.values()) {
+		//primeiro valida se rede está radial
+		msgs.append( validateRadialState(environment) );
+		
+		//depois, verifica se todos os loads estão conectados a algum feeder
+		environment.getLoadMap().values().forEach((load) -> {
 			if (load.isLoad()) {
-				Load feeder = checkFeederConnection(load, load, null);
-				
+				Load feeder = getFeeder(load);
+				load.setFeeder(feeder);
 				if (feeder == null) {
-					//throw new IllegalStateException("O load " + load.getLoadNum() + " não está conectado a nenhum feeder.");
+					msgs.append("O load " + load.getLoadNum() + " não está ligado a nenhum feeder.").append("\n");
 				}
 			}
+		});
+		
+		return msgs.toString();
+	}
+	
+	/**
+	 * Valida se existe algum ciclo fechado na rede
+	 * @param environment
+	 * @throws IllegalStateException
+	 */
+	private static String validateRadialState(Environment environment) {
+		StringBuilder msgs = new StringBuilder();
+		
+		environment.getLoadMap().values().forEach((load) -> {
+			try {
+				validateRadialStateRecursive(load, load, null, new ArrayList<>());
+				
+				if (load.isFeeder()) {
+					checkIfExistsConnectedFeeders(load, load, null);
+				}
+			} catch (IllegalStateException e) {
+				msgs.append(e.getMessage()).append("\n");
+			}
+		});
+		
+		return msgs.toString();
+	}
+
+	/**
+	 * Navega recursivamente na rede validando ciclos fechados 
+	 * @param observedLoad
+	 * @param connectedLoad
+	 * @param lastConnectedLoad
+	 * @param checkedLoads
+	 * @throws IllegalStateException
+	 */
+	private static void validateRadialStateRecursive(Load observedLoad, Load connectedLoad, Load lastConnectedLoad, List<Load> checkedLoads) {
+		checkedLoads.add(connectedLoad);
+
+		Set<Load> connectedLoads = connectedLoad.getConnectedLoads();
+		connectedLoads.remove(lastConnectedLoad);
+		
+		for (Load load : connectedLoads) {
+			if (checkedLoads.contains(load)) {
+				throw new IllegalStateException("Existe algum ciclo fechado no qual o " + (observedLoad.isFeeder() ? "feeder " : "load ") + observedLoad.getLoadNum() + " está incluso.");
+			}
+			
+			validateRadialStateRecursive(observedLoad, load, connectedLoad, checkedLoads);
 		}
 	}
 	
-	private static Load checkFeederConnection(Load observedLoad, Load connectedLoad, Load lastConnectedLoad) throws IllegalStateException {
-		Load feeder = null;
-		
+	/**
+	 * Verifica se existe algum feeder conectado a outro dentro da rede,
+	 * ou seja, nesse caso alguns loads estariam sendo alimentados por mais de um feeder
+	 * @param observedFeeder
+	 * @param connectedLoad
+	 * @param lastConnectedLoad
+	 * @throws IllegalStateException
+	 */
+	private static void checkIfExistsConnectedFeeders(Load observedFeeder, Load connectedLoad, Load lastConnectedLoad) throws IllegalStateException {
 		Set<Load> connectedLoads = connectedLoad.getConnectedLoads();
 		connectedLoads.remove(lastConnectedLoad);
-		for (Load load : connectedLoads) {
-			//valida se existe um ciclo
-			if (load.equals(observedLoad)) {
-				throw new IllegalStateException("O load " + observedLoad.getLoadNum() + " está fechado em um ciclo.");
-			}
-			
-			if (load.isLoad()) {
-				Load f = checkFeederConnection(observedLoad, load, connectedLoad);
-			}
-			
-			/*//guarda o primeiro feeder que encontrar
+
+		connectedLoads.forEach((load) -> {
 			if (load.isFeeder()) {
-				if (feeder == null) {
-					feeder = load;
-				} else {
-					throw new IllegalStateException("O load " + observedLoad.getLoadNum() + " está conectado a mais de um feeder.");
-				}
-			} else {
-				
-			}*/
+				throw new IllegalStateException("Os feeders " + observedFeeder.getLoadNum() + " e " + load.getLoadNum() + " estão conectados.");
+			}
+			checkIfExistsConnectedFeeders(observedFeeder, load, connectedLoad);
+		});
+	}
+	
+	/**
+	 * Recupera o feeder do load
+	 * @param environment
+	 * @throws IllegalStateException
+	 */
+	public static Load getFeeder(Load load) throws IllegalStateException {
+		return searchFeederRecursive(load, load, null);
+	}
+	
+	/**
+	 * Procura pelo feeder do load recursivamente
+	 * @param observedLoad
+	 * @param connectedLoad
+	 * @param lastConnectedLoad
+	 * @return
+	 * @throws IllegalStateException
+	 */
+	private static Load searchFeederRecursive(Load observedLoad, Load connectedLoad, Load lastConnectedLoad) throws IllegalStateException {
+		Set<Load> connectedLoads = connectedLoad.getConnectedLoads();
+		connectedLoads.remove(lastConnectedLoad);
+
+		for (Load load : connectedLoads) {
+			if (load.isFeeder()) {
+				return load;
+			}
+
+			Load feeder = searchFeederRecursive(observedLoad, load, connectedLoad);
+			if (feeder != null) {
+				return feeder;
+			}
 		}
-		
-		return feeder;
-		
-		
-		/*Load settedFeeder = loadMap.get(load.getFeeder());
-		if (feeder == null || !feeder.equals(settedFeeder)) {
-			throw new IllegalStateException("O feeder do load " + load.getLoadNum() + " é inválido.");
-		}*/
+		return null;
 	}
 }

@@ -66,8 +66,12 @@ public class NetworkPane extends Pane {
 
 		Color c;
 		if (load.isLoad()) {
-			Load feeder = environment.getLoad(load.getFeeder());
-			c = Color.web(feeder.getLoadColor());
+			if (load.isOn()) {
+				Load feeder = load.getFeeder();
+				c = (feeder != null) ? Color.web(feeder.getLoadColor()) : Color.WHITE;
+			} else {
+				c = Color.BLACK;
+			}
 		} else {
 			c = Color.web(load.getFeederColor());
 		}

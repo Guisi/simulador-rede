@@ -1,6 +1,6 @@
 package br.com.guisi.simulador.rede.enviroment;
 
-import br.com.guisi.simulador.rede.constants.BranchStatus;
+import br.com.guisi.simulador.rede.constants.Status;
 
 public class Branch {
 
@@ -9,10 +9,10 @@ public class Branch {
 	private Load load2;
 	private double branchPower;
 	private double distance;
-	private BranchStatus status;
+	private Status status;
 	private boolean switchBranch;
 	
-	public Branch(Integer branchNum, Load load1, Load load2, double branchPower, double distance, BranchStatus status, boolean switchBranch) {
+	public Branch(Integer branchNum, Load load1, Load load2, double branchPower, double distance, Status status, boolean switchBranch) {
 		this.branchNum = branchNum;
 		this.load1 = load1;
 		this.load2 = load2;
@@ -23,7 +23,7 @@ public class Branch {
 	}
 	
 	public boolean isOn() {
-		return BranchStatus.ON.equals(status);
+		return Status.ON.equals(status);
 	}
 	
 	/**
@@ -60,10 +60,10 @@ public class Branch {
 	public void setLoad2(Load load2) {
 		this.load2 = load2;
 	}
-	public BranchStatus getStatus() {
+	public Status getStatus() {
 		return status;
 	}
-	public void setStatus(BranchStatus status) {
+	public void setStatus(Status status) {
 		this.status = status;
 	}
 	public double getDistance() {

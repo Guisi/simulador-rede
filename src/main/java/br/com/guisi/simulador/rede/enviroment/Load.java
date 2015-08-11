@@ -4,30 +4,37 @@ import java.util.HashSet;
 import java.util.Set;
 
 import br.com.guisi.simulador.rede.constants.NodeType;
+import br.com.guisi.simulador.rede.constants.Status;
 
 public class Load {
 
 	private final NodeType nodeType;
 	private final Integer loadNum;
-	private Integer feeder; 
+	private Load feeder; 
 	private final Integer x;
 	private final Integer y;
 	private final double loadPower;
+	private final double loadMinPower;
+	private final double loadMaxPower;
 	private final int loadPriority;
 	private final String feederColor;
 	private final String loadColor;
+	private Status loadStatus;
 	private Set<Branch> branches = new HashSet<>();
 
-	public Load(NodeType nodeType, Integer loadNum, Integer feeder, Integer x, Integer y, double powerLoad, int loadPriority, String feederColor, String loadColor) {
+	public Load(NodeType nodeType, Integer loadNum, Integer x, Integer y, double loadPower, double loadMinPower, double loadMaxPower,
+			int loadPriority, String feederColor, String loadColor, Status loadStatus) {
 		this.nodeType = nodeType;
 		this.loadNum = loadNum;
-		this.feeder = feeder;
 		this.x = x;
 		this.y = y;
-		this.loadPower = powerLoad;
+		this.loadPower = loadPower;
+		this.loadMinPower = loadMinPower;
+		this.loadMaxPower = loadMaxPower;
 		this.loadPriority = loadPriority;
 		this.feederColor = feederColor;
 		this.loadColor = loadColor;
+		this.loadStatus = loadStatus;
 	}
 	
 	public void addBranch(Branch branch) {
@@ -51,12 +58,16 @@ public class Load {
 		});
 		return loads;
 	}
+	
+	public boolean isOn() {
+		return Status.ON.equals(loadStatus);
+	}
 
-	public Integer getFeeder() {
+	public Load getFeeder() {
 		return feeder;
 	}
 
-	public void setFeeder(Integer feeder) {
+	public void setFeeder(Load feeder) {
 		this.feeder = feeder;
 	}
 
@@ -84,6 +95,14 @@ public class Load {
 		return loadPower;
 	}
 
+	public double getLoadMinPower() {
+		return loadMinPower;
+	}
+
+	public double getLoadMaxPower() {
+		return loadMaxPower;
+	}
+
 	public Set<Branch> getBranches() {
 		return branches;
 	}
@@ -94,6 +113,14 @@ public class Load {
 
 	public String getLoadColor() {
 		return loadColor;
+	}
+
+	public Status getLoadStatus() {
+		return loadStatus;
+	}
+
+	public void setLoadStatus(Status loadStatus) {
+		this.loadStatus = loadStatus;
 	}
 
 	@Override

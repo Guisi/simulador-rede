@@ -24,6 +24,9 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import org.apache.commons.lang3.StringUtils;
+
 import br.com.guisi.simulador.rede.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
@@ -58,6 +61,8 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblLoadPriority;
 	@FXML
+	private Label lblLoadStatus;
+	@FXML
 	private Button btnPreviousLoad;
 	@FXML
 	private Button btnNextLoad;
@@ -68,6 +73,10 @@ public class SimuladorRedeViewController {
 	private ComboBox<Integer> cbFeederNumber;
 	@FXML
 	private Label lblFeederPower;
+	@FXML
+	private Label lblFeederMinPower;
+	@FXML
+	private Label lblFeederMaxPower;
 	@FXML
 	private Button btnPreviousFeeder;
 	@FXML
@@ -127,10 +136,13 @@ public class SimuladorRedeViewController {
 		lblLoadFeeder.setText("");
 		lblLoadPower.setText("");
 		lblLoadPriority.setText("");
+		lblLoadStatus.setText("");
 		
 		boxFeederInfo.setVisible(false);
 		cbFeederNumber.setValue(null);
 		lblFeederPower.setText("");
+		lblFeederMinPower.setText("");
+		lblFeederMaxPower.setText("");
 		
 		boxBranchInfo.setVisible(false);
 		cbBranchNumber.setValue(null);
@@ -161,13 +173,23 @@ public class SimuladorRedeViewController {
 
 			try {
 				environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
-				//EnvironmentUtils.validateEnvironment(environment);
-				this.drawNetworkFromEnvironment();
 			} catch (Exception e) {
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setContentText(e.getMessage());
 				e.printStackTrace();
 				alert.showAndWait();
+			}
+			
+			if (environment != null) {
+				String msgs = EnvironmentUtils.validateEnvironment(environment);
+				
+				if (StringUtils.isNotEmpty(msgs)) {
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setContentText(msgs);
+					alert.show();
+				}
+				
+				this.drawNetworkFromEnvironment();
 			}
 		}
 	}
@@ -249,10 +271,12 @@ public class SimuladorRedeViewController {
 		shape.setStrokeWidth(2);
 		
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
-		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().toString() : "");
+		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().getLoadNum().toString() : "");
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblLoadPower.setText(df.format(load.getLoadPower()));
 		lblLoadPriority.setText(String.valueOf(load.getLoadPriority()));
+		lblLoadStatus.setText(load.isOn() ? "On" : "Off");
+		cbLoadNumber.setValue(load.getLoadNum());
 	}
 	
 	/**
@@ -273,6 +297,9 @@ public class SimuladorRedeViewController {
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblFeederPower.setText(df.format(load.getLoadPower()));
+		lblFeederMinPower.setText(df.format(load.getLoadMinPower()));
+		lblFeederMaxPower.setText(df.format(load.getLoadMaxPower()));
+		cbFeederNumber.setValue(load.getLoadNum());
 	}
 	
 	/**
@@ -296,7 +323,8 @@ public class SimuladorRedeViewController {
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblBranchPower.setText(df.format(branch.getBranchPower()));
 		lblBranchDistance.setText(DecimalFormat.getNumberInstance().format(branch.getDistance()));
-		lblBranchStatus.setText(branch.isOn() ? "Ligado" : "Desligado");
+		lblBranchStatus.setText(branch.isOn() ? "On" : "Off");
+		cbBranchNumber.setValue(branch.getBranchNum());
 	}
 	
 	/**
