@@ -5,6 +5,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 
 public class LoadStackPane extends StackPane {
 	
@@ -25,5 +26,14 @@ public class LoadStackPane extends StackPane {
 			}
 		}
 		throw new IllegalStateException("No way! A LoadStackPane always have a Circle or a Rectangle!");
+	}
+	
+	public Text getLoadText() {
+		for (Node node : getChildren()) {
+			if (node instanceof Text) {
+				return (Text) node;
+			}
+		}
+		throw new IllegalStateException("No way! A LoadStackPane always have a Text!");
 	}
 }

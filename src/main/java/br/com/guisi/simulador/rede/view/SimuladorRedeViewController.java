@@ -222,12 +222,12 @@ public class SimuladorRedeViewController {
 		cbFeederNumber.setItems(FXCollections.observableArrayList());
 		cbBranchNumber.setItems(FXCollections.observableArrayList());
 		for (Load node : environment.getLoadMap().values()) {
-			LoadStackPane loadStack = networkPane.drawNode(node, environment);
+			LoadStackPane loadStack = networkPane.drawLoad(node, environment);
 			loadStack.setOnMouseClicked((event) -> {
 				if (node.isLoad()) { 
-					updateLoadInformationBox((LoadStackPane)event.getSource()); 
+					cbLoadNumber.setValue(((LoadStackPane)event.getSource()).getLoadNum());
 				} else {
-					updateFeederInformationBox((LoadStackPane)event.getSource());	
+					cbFeederNumber.setValue(((LoadStackPane)event.getSource()).getLoadNum());
 				}
 			});
 			if (node.isLoad()) {
@@ -244,7 +244,7 @@ public class SimuladorRedeViewController {
 				while (!(node instanceof BranchStackPane)) {
 					node = node.getParent();
 				}
-				updateBranchInformationBox((BranchStackPane) node);
+				cbBranchNumber.setValue(((BranchStackPane) node).getBranchNum());
 			};
 			networkPane.drawBranch(branch, environment.getSizeX(), environment.getSizeY(), mouseClicked);
 			cbBranchNumber.getItems().add(branch.getBranchNum());
@@ -267,7 +267,7 @@ public class SimuladorRedeViewController {
 		}
 		selectedLoad = loadStackPane.getLoadNum();
 		Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getLoadShape();
-		shape.setStroke(Color.TOMATO);
+		shape.setStroke(Color.DARKORANGE);
 		shape.setStrokeWidth(2);
 		
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
@@ -291,7 +291,7 @@ public class SimuladorRedeViewController {
 		}
 		selectedFeeder = loadStackPane.getLoadNum();
 		Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getLoadShape();
-		shape.setStroke(Color.TOMATO);
+		shape.setStroke(Color.DARKORANGE);
 		shape.setStrokeWidth(2);
 		
 		Load load = environment.getLoad(loadStackPane.getLoadNum());
@@ -314,7 +314,7 @@ public class SimuladorRedeViewController {
 		}
 		selectedBranch = branchStackPane.getBranchNum();
 		Line l = networkPane.getBranchPaneMap().get(selectedBranch).getBranchLine();
-		l.setStroke(Color.TOMATO);
+		l.setStroke(Color.DARKORANGE);
 		l.setStrokeWidth(2);
 
 		Branch branch = environment.getBranch(branchStackPane.getBranchNum());

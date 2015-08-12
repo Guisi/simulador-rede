@@ -16,6 +16,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 import br.com.guisi.simulador.rede.Constants;
@@ -28,10 +29,9 @@ public class NetworkPane extends Pane {
 	private Map<Integer, LoadStackPane> loadPaneMap = new HashMap<Integer, LoadStackPane>();
 	private Map<Integer, BranchStackPane> branchPaneMap = new HashMap<Integer, BranchStackPane>();
 
-	public LoadStackPane drawNode(Load load, Environment environment) {
+	public LoadStackPane drawLoad(Load load, Environment environment) {
 		Text text = new Text(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
 		text.setBoundsType(TextBoundsType.VISUAL);
-		text.setFont(Font.font(11));
 		LoadStackPane stack = new LoadStackPane(load.getLoadNum());
 		
 		if (load.isLoad()) {
@@ -64,18 +64,27 @@ public class NetworkPane extends Pane {
 	public void setLoadColor(Load load, Environment environment) {
 		LoadStackPane loadPane = loadPaneMap.get(load.getLoadNum());
 
-		Color c;
+		Color loadColor;
 		if (load.isLoad()) {
 			if (load.isOn()) {
 				Load feeder = load.getFeeder();
-				c = (feeder != null) ? Color.web(feeder.getLoadColor()) : Color.WHITE;
+				loadColor = (feeder != null) ? Color.web(feeder.getLoadColor()) : Color.WHITE;
 			} else {
-				c = Color.BLACK;
+				loadColor = Color.BLACK;
+			}
+			
+			Text txt = loadPane.getLoadText();
+			if (load.getFeeder() == null) {
+				txt.setFont(Font.font("Verdana", FontWeight.BOLD, 11));
+				txt.setFill(Color.RED);
+			} else {
+				txt.setFont(Font.font("Verdana", FontWeight.NORMAL, 11));
+				txt.setFill(Color.BLACK);
 			}
 		} else {
-			c = Color.web(load.getFeederColor());
+			loadColor = Color.web(load.getFeederColor());
 		}
-		loadPane.getLoadShape().setFill(c);
+		loadPane.getLoadShape().setFill(loadColor);
 	}
 
 	public void drawBranch(Branch branch, int sizeX, int sizeY, EventHandler<MouseEvent> mouseClicked) {
