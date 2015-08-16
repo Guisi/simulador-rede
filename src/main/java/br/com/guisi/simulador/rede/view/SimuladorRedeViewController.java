@@ -30,10 +30,11 @@ import org.apache.commons.lang3.StringUtils;
 import br.com.guisi.simulador.rede.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.view.layout.BranchStackPane;
-import br.com.guisi.simulador.rede.view.layout.LoadStackPane;
+import br.com.guisi.simulador.rede.view.layout.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkPane;
 import br.com.guisi.simulador.rede.view.layout.ZoomingPane;
 
@@ -59,9 +60,13 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblLoadPower;
 	@FXML
+	private Label lblLoadReceivedPower;
+	@FXML
 	private Label lblLoadPriority;
 	@FXML
 	private Label lblLoadStatus;
+	@FXML
+	private Label lblLoadMessages;
 	@FXML
 	private Button btnPreviousLoad;
 	@FXML
@@ -77,6 +82,8 @@ public class SimuladorRedeViewController {
 	private Label lblFeederMinPower;
 	@FXML
 	private Label lblFeederMaxPower;
+	@FXML
+	private Label lblFeederMessages;
 	@FXML
 	private Button btnPreviousFeeder;
 	@FXML
@@ -97,6 +104,8 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblBranchStatus;
 	@FXML
+	private Label lblBranchMessages;
+	@FXML
 	private Button btnPreviousBranch;
 	@FXML
 	private Button btnNextBranch;
@@ -111,6 +120,9 @@ public class SimuladorRedeViewController {
 	
 	public void initialize() {
 		this.resetScreen();
+		
+		File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
+		this.loadEnvironmentFromFile(f);
 	}
 	
 	/**
@@ -135,14 +147,17 @@ public class SimuladorRedeViewController {
 		cbLoadNumber.setValue(null);
 		lblLoadFeeder.setText("");
 		lblLoadPower.setText("");
+		lblLoadReceivedPower.setText("");
 		lblLoadPriority.setText("");
 		lblLoadStatus.setText("");
+		lblLoadMessages.setText("");
 		
 		boxFeederInfo.setVisible(false);
 		cbFeederNumber.setValue(null);
 		lblFeederPower.setText("");
 		lblFeederMinPower.setText("");
 		lblFeederMaxPower.setText("");
+		lblFeederMessages.setText("");
 		
 		boxBranchInfo.setVisible(false);
 		cbBranchNumber.setValue(null);
@@ -151,6 +166,7 @@ public class SimuladorRedeViewController {
 		lblBranchPower.setText("");
 		lblBranchDistance.setText("");
 		lblBranchStatus.setText("");
+		lblBranchMessages.setText("");
 		
 		selectedLoad = null;
 		selectedFeeder = null;
@@ -170,27 +186,30 @@ public class SimuladorRedeViewController {
 		
 		if (csvFile != null) {
 			this.resetScreen();
-
-			try {
-				environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
-			} catch (Exception e) {
+			this.loadEnvironmentFromFile(csvFile);
+		}
+	}
+	
+	private void loadEnvironmentFromFile(File csvFile) {
+		try {
+			environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
+		} catch (Exception e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setContentText(e.getMessage());
+			e.printStackTrace();
+			alert.showAndWait();
+		}
+		
+		if (environment != null) {
+			String msgs = EnvironmentUtils.validateEnvironment(environment);
+			
+			if (StringUtils.isNotEmpty(msgs)) {
 				Alert alert = new Alert(AlertType.ERROR);
-				alert.setContentText(e.getMessage());
-				e.printStackTrace();
-				alert.showAndWait();
+				alert.setContentText(msgs);
+				alert.show();
 			}
 			
-			if (environment != null) {
-				String msgs = EnvironmentUtils.validateEnvironment(environment);
-				
-				if (StringUtils.isNotEmpty(msgs)) {
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setContentText(msgs);
-					alert.show();
-				}
-				
-				this.drawNetworkFromEnvironment();
-			}
+			this.drawNetworkFromEnvironment();
 		}
 	}
 	
@@ -221,21 +240,21 @@ public class SimuladorRedeViewController {
 		cbLoadNumber.setItems(FXCollections.observableArrayList());
 		cbFeederNumber.setItems(FXCollections.observableArrayList());
 		cbBranchNumber.setItems(FXCollections.observableArrayList());
-		for (Load node : environment.getLoadMap().values()) {
-			LoadStackPane loadStack = networkPane.drawLoad(node, environment);
+		environment.getNetworkNodeMap().values().forEach((node) -> {
+			NetworkNodeStackPane loadStack = networkPane.drawLoad(node, environment);
 			loadStack.setOnMouseClicked((event) -> {
 				if (node.isLoad()) { 
-					cbLoadNumber.setValue(((LoadStackPane)event.getSource()).getLoadNum());
+					cbLoadNumber.setValue(((NetworkNodeStackPane)event.getSource()).getNetworkNodeNumber());
 				} else {
-					cbFeederNumber.setValue(((LoadStackPane)event.getSource()).getLoadNum());
+					cbFeederNumber.setValue(((NetworkNodeStackPane)event.getSource()).getNetworkNodeNumber());
 				}
 			});
 			if (node.isLoad()) {
-				cbLoadNumber.getItems().add(node.getLoadNum());
+				cbLoadNumber.getItems().add(node.getNodeNumber());
 			} else {
-				cbFeederNumber.getItems().add(node.getLoadNum());
+				cbFeederNumber.getItems().add(node.getNodeNumber());
 			}
-		}
+		});
 		
 		//Desenha Branches
 		for (Branch branch : environment.getBranchMap().values()) {
@@ -257,49 +276,56 @@ public class SimuladorRedeViewController {
 	
 	/**
 	 * Exibe na tela as informações do Load selecionado
-	 * @param loadStackPane
+	 * @param networkNodeStackPane
 	 */
-	private void updateLoadInformationBox(LoadStackPane loadStackPane) {
+	private void updateLoadInformationBox(NetworkNodeStackPane networkNodeStackPane) {
 		if (selectedLoad != null) {
-			Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getLoadShape();
+			Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getNetworkNodeShape();
 			shape.setStroke(Color.BLACK);
 			shape.setStrokeWidth(1);
 		}
-		selectedLoad = loadStackPane.getLoadNum();
-		Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getLoadShape();
+		selectedLoad = networkNodeStackPane.getNetworkNodeNumber();
+		Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getNetworkNodeShape();
 		shape.setStroke(Color.DARKORANGE);
 		shape.setStrokeWidth(2);
 		
-		Load load = environment.getLoad(loadStackPane.getLoadNum());
-		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().getLoadNum().toString() : "");
+		Load load = environment.getLoad(selectedLoad);
+		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : "");
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblLoadPower.setText(df.format(load.getLoadPower()));
-		lblLoadPriority.setText(String.valueOf(load.getLoadPriority()));
+		lblLoadPower.setText(df.format(load.getPower()));
+		lblLoadReceivedPower.setText(df.format(load.getReceivedPower()));
+		lblLoadPriority.setText(String.valueOf(load.getPriority()));
 		lblLoadStatus.setText(load.isOn() ? "On" : "Off");
-		cbLoadNumber.setValue(load.getLoadNum());
+		cbLoadNumber.setValue(load.getNodeNumber());
+		
+		String msgs = null;
+		if (load.isOn() && !load.isSupplied()) {
+			msgs = load.getSupplyStatus().getDescription();
+		}
+		lblLoadMessages.setText(msgs);
 	}
 	
 	/**
 	 * Exibe na tela as informações do Feeder selecionado
-	 * @param loadStackPane
+	 * @param networkNodeStackPane
 	 */
-	private void updateFeederInformationBox(LoadStackPane loadStackPane) {
+	private void updateFeederInformationBox(NetworkNodeStackPane networkNodeStackPane) {
 		if (selectedFeeder != null) {
-			Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getLoadShape();
+			Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getNetworkNodeShape();
 			shape.setStroke(Color.BLACK);
 			shape.setStrokeWidth(1);
 		}
-		selectedFeeder = loadStackPane.getLoadNum();
-		Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getLoadShape();
+		selectedFeeder = networkNodeStackPane.getNetworkNodeNumber();
+		Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getNetworkNodeShape();
 		shape.setStroke(Color.DARKORANGE);
 		shape.setStrokeWidth(2);
 		
-		Load load = environment.getLoad(loadStackPane.getLoadNum());
+		Feeder feeder = environment.getFeeder(selectedFeeder);
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblFeederPower.setText(df.format(load.getLoadPower()));
-		lblFeederMinPower.setText(df.format(load.getLoadMinPower()));
-		lblFeederMaxPower.setText(df.format(load.getLoadMaxPower()));
-		cbFeederNumber.setValue(load.getLoadNum());
+		lblFeederPower.setText(df.format(feeder.getPower()));
+		lblFeederMinPower.setText(df.format(feeder.getMinPower()));
+		lblFeederMaxPower.setText(df.format(feeder.getMaxPower()));
+		cbFeederNumber.setValue(feeder.getNodeNumber());
 	}
 	
 	/**
@@ -318,8 +344,8 @@ public class SimuladorRedeViewController {
 		l.setStrokeWidth(2);
 
 		Branch branch = environment.getBranch(branchStackPane.getBranchNum());
-		lblBranchDe.setText(branch.getLoad1().getLoadNum().toString());
-		lblBranchPara.setText(branch.getLoad2().getLoadNum().toString());
+		lblBranchDe.setText(branch.getLoad1().getNodeNumber().toString());
+		lblBranchPara.setText(branch.getLoad2().getNodeNumber().toString());
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblBranchPower.setText(df.format(branch.getBranchPower()));
 		lblBranchDistance.setText(DecimalFormat.getNumberInstance().format(branch.getDistance()));
@@ -341,7 +367,7 @@ public class SimuladorRedeViewController {
 				int previousIndex = loadKeySet.indexOf(selected) - 1;
 				selected = (previousIndex < 0) ? loadKeySet.get(loadKeySet.size()-1) : loadKeySet.get(previousIndex);
 			}
-		} while (environment.getLoad(selected).isFeeder());
+		} while (environment.getNetworkNode(selected).isFeeder());
 
 		cbLoadNumber.setValue(selected);
 		this.updateLoadInformationBox(networkPane.getLoadPaneMap().get(selected));
@@ -360,7 +386,7 @@ public class SimuladorRedeViewController {
 				int nextIndex = loadKeySet.indexOf(selected) + 1;
 				selected = (nextIndex == loadKeySet.size()) ? loadKeySet.get(0) : loadKeySet.get(nextIndex);
 			}
-		} while (environment.getLoad(selected).isFeeder());
+		} while (environment.getNetworkNode(selected).isFeeder());
 
 		cbLoadNumber.setValue(selected);
 		this.updateLoadInformationBox(networkPane.getLoadPaneMap().get(selected));
@@ -389,7 +415,7 @@ public class SimuladorRedeViewController {
 				int previousIndex = loadKeySet.indexOf(selected) - 1;
 				selected = (previousIndex < 0) ? loadKeySet.get(loadKeySet.size()-1) : loadKeySet.get(previousIndex);
 			}
-		} while (environment.getLoad(selected).isLoad());
+		} while (environment.getNetworkNode(selected).isLoad());
 
 		cbFeederNumber.setValue(selected);
 		this.updateFeederInformationBox(networkPane.getLoadPaneMap().get(selected));
@@ -408,7 +434,7 @@ public class SimuladorRedeViewController {
 				int nextIndex = loadKeySet.indexOf(selected) + 1;
 				selected = (nextIndex == loadKeySet.size()) ? loadKeySet.get(0) : loadKeySet.get(nextIndex);
 			}
-		} while (environment.getLoad(selected).isLoad());
+		} while (environment.getNetworkNode(selected).isLoad());
 
 		cbFeederNumber.setValue(selected);
 		this.updateFeederInformationBox(networkPane.getLoadPaneMap().get(selected));

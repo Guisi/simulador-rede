@@ -24,7 +24,7 @@ public class SimuladorRede extends Application {
 			Scene scene = new Scene(node);
 			stage.setScene(scene);
 			scene.getStylesheets().add("/css/estilo.css");
-			stage.setMaximized(true);
+			//stage.setMaximized(true);
 			stage.show();
 			
 			SimuladorRedeViewController controller = (SimuladorRedeViewController) loader.getController();

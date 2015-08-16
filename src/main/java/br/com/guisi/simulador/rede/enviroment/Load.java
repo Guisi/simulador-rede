@@ -1,152 +1,60 @@
 package br.com.guisi.simulador.rede.enviroment;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import br.com.guisi.simulador.rede.constants.NodeType;
 import br.com.guisi.simulador.rede.constants.Status;
+import br.com.guisi.simulador.rede.constants.SupplyStatus;
 
-public class Load {
+public class Load extends NetworkNode {
 
-	private final NodeType nodeType;
-	private final Integer loadNum;
-	private Load feeder; 
-	private final Integer x;
-	private final Integer y;
-	private final double loadPower;
-	private final double loadMinPower;
-	private final double loadMaxPower;
-	private final int loadPriority;
-	private final String feederColor;
-	private final String loadColor;
-	private Status loadStatus;
-	private Set<Branch> branches = new HashSet<>();
-
-	public Load(NodeType nodeType, Integer loadNum, Integer x, Integer y, double loadPower, double loadMinPower, double loadMaxPower,
-			int loadPriority, String feederColor, String loadColor, Status loadStatus) {
-		this.nodeType = nodeType;
-		this.loadNum = loadNum;
-		this.x = x;
-		this.y = y;
-		this.loadPower = loadPower;
-		this.loadMinPower = loadMinPower;
-		this.loadMaxPower = loadMaxPower;
-		this.loadPriority = loadPriority;
-		this.feederColor = feederColor;
-		this.loadColor = loadColor;
-		this.loadStatus = loadStatus;
-	}
+	private Feeder feeder;
+	private int priority;
+	private SupplyStatus supplyStatus;
+	private double receivedPower;
 	
-	public void addBranch(Branch branch) {
-		branches.add(branch);
-	}
-	
-	public boolean isFeeder() {
-		return NodeType.FEEDER.equals(nodeType);
-	}
-	
-	public boolean isLoad() {
-		return NodeType.LOAD.equals(nodeType);
-	}
-	
-	public Set<Load> getConnectedLoads() {
-		Set<Load> loads = new HashSet<>();
-		branches.forEach((branch) -> {
-			if (branch.isOn()) {
-				loads.add(branch.getConnectedLoad(this));
-			}
-		});
-		return loads;
-	}
-	
-	public boolean isOn() {
-		return Status.ON.equals(loadStatus);
+	public Load(Integer nodeNumber, Integer x, Integer y, double power, Status status, int priority) {
+		super(nodeNumber, x, y, power, status);
+		this.priority = priority;
 	}
 
-	public Load getFeeder() {
+	public Feeder getFeeder() {
 		return feeder;
 	}
 
-	public void setFeeder(Load feeder) {
+	public void setFeeder(Feeder feeder) {
 		this.feeder = feeder;
 	}
 
-	public NodeType getNodeType() {
-		return nodeType;
-	}
-
-	public Integer getLoadNum() {
-		return loadNum;
-	}
-
-	public Integer getX() {
-		return x;
-	}
-
-	public Integer getY() {
-		return y;
-	}
-
-	public int getLoadPriority() {
-		return loadPriority;
-	}
-
-	public double getLoadPower() {
-		return loadPower;
-	}
-
-	public double getLoadMinPower() {
-		return loadMinPower;
-	}
-
-	public double getLoadMaxPower() {
-		return loadMaxPower;
-	}
-
-	public Set<Branch> getBranches() {
-		return branches;
+	public int getPriority() {
+		return priority;
 	}
 	
-	public String getFeederColor() {
-		return feederColor;
+	public String getColor() {
+		return feeder != null ? feeder.getLoadColor() : "#FFFFFF";
 	}
 
-	public String getLoadColor() {
-		return loadColor;
+	public SupplyStatus getSupplyStatus() {
+		return supplyStatus;
 	}
 
-	public Status getLoadStatus() {
-		return loadStatus;
+	public void setSupplyStatus(SupplyStatus supplyStatus) {
+		this.supplyStatus = supplyStatus;
+	}
+	
+	public boolean isSupplied() {
+		return SupplyStatus.SUPPLIED.equals(supplyStatus);
 	}
 
-	public void setLoadStatus(Status loadStatus) {
-		this.loadStatus = loadStatus;
+	public double getReceivedPower() {
+		return receivedPower;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + loadNum;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Load other = (Load) obj;
-		if (loadNum != other.loadNum)
-			return false;
-		return true;
+	public void setReceivedPower(double receivedPower) {
+		this.receivedPower = receivedPower;
 	}
 
 	@Override
 	public String toString() {
-		return "(loadNum: " + loadNum + ", x: " + getX() + ", y: " + getY() + ", loadPower: " + loadPower + ")";
+		return "Load [nodeNumber=" + nodeNumber + ", x=" + x + ", y=" + y + ", power=" + power + ", status=" + status + ", feeder="
+				+ (feeder != null ? feeder.getNodeNumber() : null) + ", priority=" + priority + ", supplyStatus=" + supplyStatus + ", receivedPower=" + receivedPower + "]";
 	}
+	
 }

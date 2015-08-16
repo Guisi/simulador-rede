@@ -22,19 +22,21 @@ import javafx.scene.text.TextBoundsType;
 import br.com.guisi.simulador.rede.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
+import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 
 public class NetworkPane extends Pane {
 
-	private Map<Integer, LoadStackPane> loadPaneMap = new HashMap<Integer, LoadStackPane>();
+	private Map<Integer, NetworkNodeStackPane> networkNodePaneMap = new HashMap<Integer, NetworkNodeStackPane>();
 	private Map<Integer, BranchStackPane> branchPaneMap = new HashMap<Integer, BranchStackPane>();
 
-	public LoadStackPane drawLoad(Load load, Environment environment) {
-		Text text = new Text(DecimalFormat.getNumberInstance().format(load.getLoadPower()));
+	public NetworkNodeStackPane drawLoad(NetworkNode networkNode, Environment environment) {
+		Text text = new Text(DecimalFormat.getNumberInstance().format(networkNode.getPower()));
 		text.setBoundsType(TextBoundsType.VISUAL);
-		LoadStackPane stack = new LoadStackPane(load.getLoadNum());
+		NetworkNodeStackPane stack = new NetworkNodeStackPane(networkNode.getNodeNumber());
 		
-		if (load.isLoad()) {
+		if (networkNode.isLoad()) {
 			Circle c = new Circle();
 			c.setStroke(Color.BLACK);
 			c.setRadius(Constants.LOAD_RADIUS_PX);
@@ -49,42 +51,39 @@ public class NetworkPane extends Pane {
 			stack.getChildren().addAll(r, text);
 		}
 
-		int centerX = (load.getX() - 1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
-		int centerY = (environment.getSizeY() - load.getY()) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
+		int centerX = (networkNode.getX() - 1) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
+		int centerY = (environment.getSizeY() - networkNode.getY()) * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING;
 		stack.setLayoutX(centerX);
 		stack.setLayoutY(centerY);
 		getChildren().add(stack);
 
-		loadPaneMap.put(load.getLoadNum(), stack);
-		this.setLoadColor(load, environment);
+		networkNodePaneMap.put(networkNode.getNodeNumber(), stack);
+		this.setNetworkNodeColor(networkNode);
 
 		return stack;
 	}
 
-	public void setLoadColor(Load load, Environment environment) {
-		LoadStackPane loadPane = loadPaneMap.get(load.getLoadNum());
+	public void setNetworkNodeColor(NetworkNode networkNode) {
+		NetworkNodeStackPane networkNodePane = networkNodePaneMap.get(networkNode.getNodeNumber());
 
-		Color loadColor;
-		if (load.isLoad()) {
-			if (load.isOn()) {
-				Load feeder = load.getFeeder();
-				loadColor = (feeder != null) ? Color.web(feeder.getLoadColor()) : Color.WHITE;
-			} else {
-				loadColor = Color.BLACK;
-			}
+		Color networkNodeColor;
+		if (networkNode.isLoad()) {
+			Load load = (Load) networkNode;
+			networkNodeColor = load.isOn() ? Color.web(load.getColor()) : Color.BLACK;
 			
-			Text txt = loadPane.getLoadText();
-			if (load.getFeeder() == null) {
-				txt.setFont(Font.font("Verdana", FontWeight.BOLD, 11));
-				txt.setFill(Color.RED);
-			} else {
+			Text txt = networkNodePane.getNetworkNodeText();
+			if (load.isSupplied()) {
 				txt.setFont(Font.font("Verdana", FontWeight.NORMAL, 11));
 				txt.setFill(Color.BLACK);
+			} else {
+				txt.setFont(Font.font("Verdana", FontWeight.BOLD, 11));
+				txt.setFill(Color.RED);
 			}
 		} else {
-			loadColor = Color.web(load.getFeederColor());
+			Feeder feeder = (Feeder) networkNode;
+			networkNodeColor = Color.web(feeder.getFeederColor());
 		}
-		loadPane.getLoadShape().setFill(loadColor);
+		networkNodePane.getNetworkNodeShape().setFill(networkNodeColor);
 	}
 
 	public void drawBranch(Branch branch, int sizeX, int sizeY, EventHandler<MouseEvent> mouseClicked) {
@@ -230,8 +229,8 @@ public class NetworkPane extends Pane {
 		}
 	}
 
-	public Map<Integer, LoadStackPane> getLoadPaneMap() {
-		return loadPaneMap;
+	public Map<Integer, NetworkNodeStackPane> getLoadPaneMap() {
+		return networkNodePaneMap;
 	}
 
 	public Map<Integer, BranchStackPane> getBranchPaneMap() {

@@ -5,14 +5,14 @@ import br.com.guisi.simulador.rede.constants.Status;
 public class Branch {
 
 	private Integer branchNum;
-	private Load load1;
-	private Load load2;
+	private NetworkNode load1;
+	private NetworkNode load2;
 	private double branchPower;
 	private double distance;
 	private Status status;
 	private boolean switchBranch;
 	
-	public Branch(Integer branchNum, Load load1, Load load2, double branchPower, double distance, Status status, boolean switchBranch) {
+	public Branch(Integer branchNum, NetworkNode load1, NetworkNode load2, double branchPower, double distance, Status status, boolean switchBranch) {
 		this.branchNum = branchNum;
 		this.load1 = load1;
 		this.load2 = load2;
@@ -29,11 +29,11 @@ public class Branch {
 	/**
 	 * Retorna o load conectado por esta branch
 	 * ao load passado como parametro
-	 * @param load
+	 * @param networkNode
 	 * @return
 	 */
-	public Load getConnectedLoad(Load load) {
-		return load1.equals(load) ? load2 : load1;
+	public NetworkNode getConnectedLoad(NetworkNode networkNode) {
+		return load1.equals(networkNode) ? load2 : load1;
 	}
 
 	public double getBranchPower() {
@@ -48,16 +48,16 @@ public class Branch {
 	public void setBranchNum(Integer branchNum) {
 		this.branchNum = branchNum;
 	}
-	public Load getLoad1() {
+	public NetworkNode getLoad1() {
 		return load1;
 	}
-	public void setLoad1(Load load1) {
+	public void setLoad1(NetworkNode load1) {
 		this.load1 = load1;
 	}
-	public Load getLoad2() {
+	public NetworkNode getLoad2() {
 		return load2;
 	}
-	public void setLoad2(Load load2) {
+	public void setLoad2(NetworkNode load2) {
 		this.load2 = load2;
 	}
 	public Status getStatus() {
@@ -102,6 +102,12 @@ public class Branch {
 		} else if (!branchNum.equals(other.branchNum))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Branch [branchNum=" + branchNum + ", load1=" + load1.getNodeNumber() + ", load2=" + load2.getNodeNumber() + ", branchPower=" + branchPower + ", distance=" + distance
+				+ ", status=" + status + ", switchBranch=" + switchBranch + "]";
 	}
 	
 }
