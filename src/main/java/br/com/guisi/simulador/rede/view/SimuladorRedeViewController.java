@@ -16,6 +16,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -85,6 +86,20 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblFeederMaxPower;
 	@FXML
+	private Label lblFeederEnergizedLoads;
+	@FXML
+	private Label lblFeederPartiallyEnergizedLoadsLabel;
+	@FXML
+	private Label lblFeederPartiallyEnergizedLoads;
+	@FXML
+	private Label lblFeederNotEnergizedLoadsLabel;
+	@FXML
+	private Label lblFeederNotEnergizedLoads;
+	@FXML
+	private Label lblFeederUsedPower;
+	@FXML
+	private Label lblFeederAvailablePower;
+	@FXML
 	private Label lblFeederMessages;
 	@FXML
 	private Button btnPreviousFeeder;
@@ -125,9 +140,9 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblPowerNotSupplied;
 	@FXML
-	private Label lblFeederUsedPower;
+	private Label lblFeedersUsedPower;
 	@FXML
-	private Label lblFeederAvailablePower;
+	private Label lblFeedersAvailablePower;
 	
 	
 	private Environment environment;
@@ -173,6 +188,13 @@ public class SimuladorRedeViewController {
 		lblFeederPower.setText("");
 		lblFeederMinPower.setText("");
 		lblFeederMaxPower.setText("");
+		lblFeederEnergizedLoads.setText("");
+		lblFeederPartiallyEnergizedLoads.setText("");
+		lblFeederPartiallyEnergizedLoadsLabel.setTooltip(new Tooltip("Partially energized loads"));
+		lblFeederNotEnergizedLoads.setText("");
+		lblFeederNotEnergizedLoadsLabel.setTooltip(new Tooltip("Not energized loads"));
+		lblFeederUsedPower.setText("");
+		lblFeederAvailablePower.setText("");
 		lblFeederMessages.setText("");
 		
 		cbBranchNumber.setValue(null);
@@ -188,8 +210,8 @@ public class SimuladorRedeViewController {
 		lblLoadsNotSupplied.setText("");
 		lblPowerSupplied.setText("");
 		lblPowerNotSupplied.setText("");
-		lblFeederUsedPower.setText("");
-		lblFeederAvailablePower.setText("");
+		lblFeedersUsedPower.setText("");
+		lblFeedersAvailablePower.setText("");
 		
 		selectedLoad = null;
 		selectedFeeder = null;
@@ -244,11 +266,11 @@ public class SimuladorRedeViewController {
 		lblLoadsNotSupplied.setText(String.valueOf(environment.getLoadsNotSupplied()));
 
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblPowerSupplied.setText(df.format(environment.getLoadPowerSupplied()));
-		lblPowerNotSupplied.setText(df.format(environment.getLoadPowerNotSupplied()));
+		lblPowerSupplied.setText(df.format(environment.getLoadsPowerSupplied()));
+		lblPowerNotSupplied.setText(df.format(environment.getLoadsPowerNotSupplied()));
 		
-		lblFeederUsedPower.setText(df.format(environment.getFeederUsedPower()));
-		lblFeederAvailablePower.setText(df.format(environment.getFeederAvailablePower()));
+		lblFeedersUsedPower.setText(df.format(environment.getFeedersUsedPower()));
+		lblFeedersAvailablePower.setText(df.format(environment.getFeedersAvailablePower()));
 	}
 	
 	/**
@@ -357,6 +379,11 @@ public class SimuladorRedeViewController {
 		lblFeederPower.setText(df.format(feeder.getPower()));
 		lblFeederMinPower.setText(df.format(feeder.getMinPower()));
 		lblFeederMaxPower.setText(df.format(feeder.getMaxPower()));
+		lblFeederEnergizedLoads.setText(String.valueOf(feeder.getEnergizedLoads()));
+		lblFeederPartiallyEnergizedLoads.setText(String.valueOf(feeder.getPartiallyEnergizedLoads()));
+		lblFeederNotEnergizedLoads.setText(String.valueOf(feeder.getNotEnergizedLoads()));
+		lblFeederUsedPower.setText(df.format(feeder.getUsedPower()));
+		lblFeederAvailablePower.setText(df.format(feeder.getAvailablePower()));
 		cbFeederNumber.setValue(feeder.getNodeNumber());
 	}
 	

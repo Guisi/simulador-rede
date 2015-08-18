@@ -82,19 +82,19 @@ public class Environment {
 		return loads.stream().filter((load) -> load.isNotSupplied()).count();
 	}
 	
-	public double getLoadPowerSupplied() {
+	public double getLoadsPowerSupplied() {
 		return loads.stream().mapToDouble((load) -> load.getPowerSupplied()).sum();
 	}
 	
-	public double getLoadPowerNotSupplied() {
+	public double getLoadsPowerNotSupplied() {
 		return loads.stream().mapToDouble((load) -> load.getPowerNotSupplied()).sum();
 	}
 	
-	public double getFeederUsedPower() {
+	public double getFeedersUsedPower() {
 		return feeders.stream().mapToDouble((feeder) -> feeder.getUsedPower()).sum();
 	}
 	
-	public double getFeederAvailablePower() {
+	public double getFeedersAvailablePower() {
 		return feeders.stream().mapToDouble((feeder) -> feeder.getAvailablePower()).sum();
 	}
 }

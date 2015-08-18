@@ -354,10 +354,18 @@ public class EnvironmentUtils {
 	 * @param environment
 	 */
 	public static void validatePowerSupply(Environment environment) {
+		//zera potência usada do branch
+		environment.getBranchMap().values().forEach((branch) -> branch.setUsedPower(0));
+		
 		List<Feeder> feeders = environment.getFeeders();
 		
 		//para cada feeder
 		feeders.forEach((feeder) -> {
+			//zera valores calculados do feeder
+			feeder.setEnergizedLoads(0);
+			feeder.setPartiallyEnergizedLoads(0);
+			feeder.setNotEnergizedLoads(0);
+			feeder.setUsedPower(0);
 			
 			//monta lista de loads de acordo com a ordem de atendimento
 			List<NetworkNode> allConnectedNodes = new ArrayList<>();
@@ -387,6 +395,8 @@ public class EnvironmentUtils {
 			//distribui potência do feeder nos loads
 			for (NetworkNode node : allConnectedNodes) {
 				Load load = (Load) node;
+				load.setPowerSupplied(0);
+				load.setSupplyStatus(null);
 				
 				//só calcula para loads on
 				if (load.isOn()) {
@@ -431,6 +441,14 @@ public class EnvironmentUtils {
 					} else {
 						load.setSupplyStatus(SupplyStatus.NOT_SUPPLIED_FEEDER_EXCEEDED);
 					}
+				}
+				
+				if (load.isSupplied()) {
+					feeder.incrementEnergizedLoad();
+				} else if (load.isPartiallySupplied()) {
+					feeder.incrementPartiallyEnergizedLoad();
+				} else {
+					feeder.incrementNotEnergizedLoad();
 				}
 			}
 		});

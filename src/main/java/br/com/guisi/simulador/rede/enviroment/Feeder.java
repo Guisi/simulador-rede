@@ -10,6 +10,9 @@ public class Feeder extends NetworkNode {
 	private double minPower;
 	private double maxPower;
 	private double usedPower;
+	private int energizedLoads;
+	private int partiallyEnergizedLoads;
+	private int notEnergizedLoads;
 	
 	public Feeder(Integer nodeNumber, Integer x, Integer y, double power, double minPower, double maxPower, String feederColor, String loadColor, Status status) {
 		super(nodeNumber, x, y, power, status);
@@ -25,6 +28,18 @@ public class Feeder extends NetworkNode {
 	
 	public void addUsedPower(double usedPower) {
 		this.usedPower += usedPower;
+	}
+	
+	public void incrementEnergizedLoad() {
+		this.energizedLoads++;
+	}
+	
+	public void incrementPartiallyEnergizedLoad() {
+		this.partiallyEnergizedLoads++;
+	}
+	
+	public void incrementNotEnergizedLoad() {
+		this.notEnergizedLoads++;
 	}
 
 	public double getMinPower() {
@@ -49,6 +64,30 @@ public class Feeder extends NetworkNode {
 
 	public void setUsedPower(double usedPower) {
 		this.usedPower = usedPower;
+	}
+
+	public int getEnergizedLoads() {
+		return energizedLoads;
+	}
+
+	public int getPartiallyEnergizedLoads() {
+		return partiallyEnergizedLoads;
+	}
+
+	public int getNotEnergizedLoads() {
+		return notEnergizedLoads;
+	}
+
+	public void setEnergizedLoads(int energizedLoads) {
+		this.energizedLoads = energizedLoads;
+	}
+
+	public void setPartiallyEnergizedLoads(int partiallyEnergizedLoads) {
+		this.partiallyEnergizedLoads = partiallyEnergizedLoads;
+	}
+
+	public void setNotEnergizedLoads(int notEnergizedLoads) {
+		this.notEnergizedLoads = notEnergizedLoads;
 	}
 
 	@Override
