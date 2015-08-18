@@ -20,12 +20,12 @@ public class Load extends NetworkNode {
 	}
 	
 	public boolean isPartiallySupplied() {
-		return isOn() && SupplyStatus.PARTIALLY_SUPPLIED_BRANCH_EXCEEDED.equals(supplyStatus)
-				|| SupplyStatus.PARTIALLY_SUPPLIED_FEEDER_EXCEEDED.equals(supplyStatus);
+		return isOn() && (SupplyStatus.PARTIALLY_SUPPLIED_BRANCH_EXCEEDED.equals(supplyStatus)
+				|| SupplyStatus.PARTIALLY_SUPPLIED_FEEDER_EXCEEDED.equals(supplyStatus));
 	}
 	
 	public boolean isNotSupplied() {
-		return isOn() && SupplyStatus.NOT_SUPPLIED_BRANCH_EXCEEDED.equals(supplyStatus)
+		return !isOn() || SupplyStatus.NOT_SUPPLIED_BRANCH_EXCEEDED.equals(supplyStatus)
 				|| SupplyStatus.NOT_SUPPLIED_FEEDER_EXCEEDED.equals(supplyStatus)
 				|| SupplyStatus.NOT_SUPPLIED_NO_FEEDER_CONNECTED.equals(supplyStatus);
 	}
