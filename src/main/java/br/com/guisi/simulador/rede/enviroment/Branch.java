@@ -4,19 +4,20 @@ import br.com.guisi.simulador.rede.constants.Status;
 
 public class Branch {
 
-	private Integer branchNum;
+	private Integer number;
 	private NetworkNode load1;
 	private NetworkNode load2;
-	private double branchPower;
+	private double power;
 	private double distance;
 	private Status status;
 	private boolean switchBranch;
+	private double usedPower;
 	
-	public Branch(Integer branchNum, NetworkNode load1, NetworkNode load2, double branchPower, double distance, Status status, boolean switchBranch) {
-		this.branchNum = branchNum;
+	public Branch(Integer number, NetworkNode load1, NetworkNode load2, double power, double distance, Status status, boolean switchBranch) {
+		this.number = number;
 		this.load1 = load1;
 		this.load2 = load2;
-		this.branchPower = branchPower;
+		this.power = power;
 		this.distance = distance;
 		this.status = status;
 		this.switchBranch = switchBranch;
@@ -35,18 +36,20 @@ public class Branch {
 	public NetworkNode getConnectedLoad(NetworkNode networkNode) {
 		return load1.equals(networkNode) ? load2 : load1;
 	}
+	
+	public double getAvailablePower() {
+		return power - usedPower;
+	}
+	
+	public void addUsedPower(double usedPower) {
+		this.usedPower += usedPower;
+	}
 
-	public double getBranchPower() {
-		return branchPower;
+	public double getPower() {
+		return power;
 	}
-	public void setBranchPower(double branchPower) {
-		this.branchPower = branchPower;
-	}
-	public Integer getBranchNum() {
-		return branchNum;
-	}
-	public void setBranchNum(Integer branchNum) {
-		this.branchNum = branchNum;
+	public Integer getNumber() {
+		return number;
 	}
 	public NetworkNode getLoad1() {
 		return load1;
@@ -79,11 +82,19 @@ public class Branch {
 		this.switchBranch = switchBranch;
 	}
 
+	public double getUsedPower() {
+		return usedPower;
+	}
+
+	public void setUsedPower(double usedPower) {
+		this.usedPower = usedPower;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((branchNum == null) ? 0 : branchNum.hashCode());
+		result = prime * result + ((number == null) ? 0 : number.hashCode());
 		return result;
 	}
 
@@ -96,17 +107,17 @@ public class Branch {
 		if (getClass() != obj.getClass())
 			return false;
 		Branch other = (Branch) obj;
-		if (branchNum == null) {
-			if (other.branchNum != null)
+		if (number == null) {
+			if (other.number != null)
 				return false;
-		} else if (!branchNum.equals(other.branchNum))
+		} else if (!number.equals(other.number))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Branch [branchNum=" + branchNum + ", load1=" + load1.getNodeNumber() + ", load2=" + load2.getNodeNumber() + ", branchPower=" + branchPower + ", distance=" + distance
+		return "Branch [branchNum=" + number + ", load1=" + load1.getNodeNumber() + ", load2=" + load2.getNodeNumber() + ", branchPower=" + power + ", distance=" + distance
 				+ ", status=" + status + ", switchBranch=" + switchBranch + "]";
 	}
 	

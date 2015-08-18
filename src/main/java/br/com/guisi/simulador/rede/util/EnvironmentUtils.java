@@ -288,7 +288,7 @@ public class EnvironmentUtils {
 	}
 	
 	/**
-	 * Retorna uma lista onde o primeiro item é o load para o qual está sendo retornado a rota
+	 * Retorna uma lista de loads onde o primeiro item é o load para o qual está sendo retornado a rota
 	 * e o último item é o feeder
 	 * @param networkNode
 	 * @return
@@ -296,37 +296,6 @@ public class EnvironmentUtils {
 	 */
 	public static List<NetworkNode> getRouteToFeeder(NetworkNode networkNode) {
 		return searchRouteToFeederRecursive(networkNode, networkNode, null);
-	}
-	
-	/**
-	 * Com base na rota entre o load e o feeder, calcula a potência que pode ser atendida
-	 * levando em conta a capacidade máxima dos branches e a potência dos loads existentes
-	 * no meio desta rota
-	 * @param networkNode
-	 * @return
-	 */
-	public static double getSupportedPower(NetworkNode networkNode) {
-		List<NetworkNode> route = getRouteToFeeder(networkNode);
-
-		double loadsPower = 0;
-		double discountedPower = 0;
-		for (int i = 0; i < route.size(); i++) {
-			NetworkNode node = route.get(i);
-			
-			if (node.isLoad()) {
-				loadsPower += node.getPower();
-			}
-		
-			if (i < route.size() - 1) {
-				NetworkNode nextNode = route.get(i+1);
-				Branch branch = node.getBranch(nextNode);
-				double branchPower = branch.getBranchPower();
-				if (branchPower < loadsPower) {
-					discountedPower = Math.max(discountedPower, loadsPower - branchPower);
-				}
-			}
-		}
-		return Math.max(0, networkNode.getPower() - discountedPower);
 	}
 	
 	/**
@@ -359,6 +328,26 @@ public class EnvironmentUtils {
 
 		return null;
 	}
+	
+	/**
+	 * Retorna a lista de branches existentes entre no caminho entre o load e o seu feeder
+	 * @param networkNode
+	 * @return
+	 */
+	public static List<Branch> getBranchesToFeeder(NetworkNode networkNode) {
+		List<Branch> branches = new ArrayList<>();
+		List<NetworkNode> route = getRouteToFeeder(networkNode);
+		for (int i = 0; i < route.size(); i++) {
+			NetworkNode node = route.get(i);
+			
+			if (i < route.size() - 1) {
+				NetworkNode nextNode = route.get(i+1);
+				branches.add(node.getBranch(nextNode));
+			}
+		}
+		return branches;
+	}
+	
 	
 	/**
 	 * Para cada feeder, navega pelas árvores de loads atualizando o status de atendimento
@@ -396,36 +385,49 @@ public class EnvironmentUtils {
 			allConnectedNodes.remove(feeder);
 			
 			//distribui potência do feeder nos loads
-			double feederPower = feeder.getPower();
 			for (NetworkNode node : allConnectedNodes) {
 				Load load = (Load) node;
 				
 				//só calcula para loads on
 				if (load.isOn()) {
 					//se ainda existe capacidade disponível no feeder
-					if (feederPower > 0) {
+					if (feeder.getAvailablePower() > 0) {
 						double receivedPower;
 						double loadPower = load.getPower();
 						
 						//se o feeder ainda tem potência para atender o load totalmente
-						if (loadPower <= feederPower) {
+						if (loadPower <= feeder.getAvailablePower()) {
 							load.setSupplyStatus(SupplyStatus.SUPPLIED);
 							receivedPower = loadPower;
 						} else {
 							//senão atribui o que resta de potência no feeder para atendimento parcial do load
 							load.setSupplyStatus(SupplyStatus.PARTIALLY_SUPPLIED_FEEDER_EXCEEDED);
-							receivedPower = feederPower;
+							receivedPower = feeder.getAvailablePower();
 						}
 						
 						//mesmo que o feeder consiga atender o load, é preciso validar se os branches suportam atender
-						double supportedPower = getSupportedPower(load);
+						//recupera branches entre load e feeder
+						List<Branch> branches = getBranchesToFeeder(load);
+						
+						//verifica a menor capacidade disponivel entre os branches
+						double supportedPower = branches.stream().min(Comparator.comparing(value -> value.getAvailablePower())).get().getAvailablePower();
+						
+						//se a capacidade suportada por algum branch é menor do que 
+						//a disponibilizada pelo feeder para este load, o status será diferente
 						if (supportedPower < receivedPower) {
 							load.setSupplyStatus(supportedPower > 0 ? SupplyStatus.PARTIALLY_SUPPLIED_BRANCH_EXCEEDED : SupplyStatus.NOT_SUPPLIED_BRANCH_EXCEEDED);
 						}
-						supportedPower = Math.min(receivedPower, supportedPower);
-						load.setReceivedPower(supportedPower);
 						
-						feederPower -= supportedPower;
+						//load receberá o menor valor entre o disponibilizado pelo feeder e o que os branches conseguem suportar
+						supportedPower = Math.min(receivedPower, supportedPower);
+						load.setPowerSupplied(supportedPower);
+						
+						//adiciona o valor do load nos seus branches
+						final double usedPower = supportedPower;
+						branches.forEach((branch) -> branch.addUsedPower(usedPower));
+						
+						//adiciona o valor do load no feeder
+						feeder.addUsedPower(supportedPower);
 					} else {
 						load.setSupplyStatus(SupplyStatus.NOT_SUPPLIED_FEEDER_EXCEEDED);
 					}

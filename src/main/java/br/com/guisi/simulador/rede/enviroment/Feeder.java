@@ -9,6 +9,7 @@ public class Feeder extends NetworkNode {
 	private String loadColor;
 	private double minPower;
 	private double maxPower;
+	private double usedPower;
 	
 	public Feeder(Integer nodeNumber, Integer x, Integer y, double power, double minPower, double maxPower, String feederColor, String loadColor, Status status) {
 		super(nodeNumber, x, y, power, status);
@@ -16,6 +17,14 @@ public class Feeder extends NetworkNode {
 		this.loadColor = loadColor;
 		this.minPower = minPower;
 		this.maxPower = maxPower;
+	}
+	
+	public double getAvailablePower() {
+		return power - usedPower;
+	}
+	
+	public void addUsedPower(double usedPower) {
+		this.usedPower += usedPower;
 	}
 
 	public double getMinPower() {
@@ -32,6 +41,14 @@ public class Feeder extends NetworkNode {
 
 	public String getLoadColor() {
 		return loadColor;
+	}
+	
+	public double getUsedPower() {
+		return usedPower;
+	}
+
+	public void setUsedPower(double usedPower) {
+		this.usedPower = usedPower;
 	}
 
 	@Override

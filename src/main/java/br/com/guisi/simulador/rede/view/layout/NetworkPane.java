@@ -87,8 +87,8 @@ public class NetworkPane extends Pane {
 	}
 
 	public void drawBranch(Branch branch, int sizeX, int sizeY, EventHandler<MouseEvent> mouseClicked) {
-		BranchStackPane sp = new BranchStackPane(branch.getBranchNum());
-		branchPaneMap.put(branch.getBranchNum(), sp);
+		BranchStackPane sp = new BranchStackPane(branch.getNumber());
+		branchPaneMap.put(branch.getNumber(), sp);
 		getChildren().add(sp);
 		sp.toBack();
 
@@ -131,7 +131,7 @@ public class NetworkPane extends Pane {
 
 		/** Label branch */
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		String power = " (" + df.format(branch.getBranchPower()) + ")";
+		String power = " (" + df.format(branch.getPower()) + ")";
 		Text text = new Text(power);
 		text.setFont(Font.font(10));
 		text.setBoundsType(TextBoundsType.VISUAL);

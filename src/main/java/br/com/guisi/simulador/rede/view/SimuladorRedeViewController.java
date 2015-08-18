@@ -17,7 +17,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -47,10 +47,11 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Button btnImportNetwork;
 	@FXML
-	private Pane labelPanel;
-	@FXML
 	private Slider zoomSlider;
+	@FXML
+	private HBox networkBox;
 
+	/** Loads */
 	@FXML
 	private VBox boxLoadInfo;
 	@FXML
@@ -72,6 +73,7 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Button btnNextLoad;
 	
+	/** Feeders */
 	@FXML
 	private VBox boxFeederInfo;
 	@FXML
@@ -89,6 +91,7 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Button btnNextFeeder;
 	
+	/** Branches */
 	@FXML
 	private VBox boxBranchInfo;
 	@FXML
@@ -110,6 +113,23 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Button btnNextBranch;
 	
+	/** Power flow */
+	@FXML
+	private Label lblLoadsSupplied;
+	@FXML
+	private Label lblLoadsPartiallySupplied;
+	@FXML
+	private Label lblLoadsNotSupplied;
+	@FXML
+	private Label lblPowerSupplied;
+	@FXML
+	private Label lblPowerNotSupplied;
+	@FXML
+	private Label lblFeederUsedPower;
+	@FXML
+	private Label lblFeederAvailablePower;
+	
+	
 	private Environment environment;
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
@@ -121,8 +141,8 @@ public class SimuladorRedeViewController {
 	public void initialize() {
 		this.resetScreen();
 		
-		File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
-		this.loadEnvironmentFromFile(f);
+		/*File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
+		this.loadEnvironmentFromFile(f);*/
 	}
 	
 	/**
@@ -138,12 +158,9 @@ public class SimuladorRedeViewController {
 		networkScrollPane.setContent(zoomingPane);
 		networkScrollPane.getStyleClass().add("networkPane");
 
-		networkScrollPane.setVisible(false);
-		zoomingPane.setVisible(false);
-		labelPanel.setVisible(false);
+		networkBox.setVisible(false);
 		zoomSlider.setVisible(false);
-		
-		boxLoadInfo.setVisible(false);
+
 		cbLoadNumber.setValue(null);
 		lblLoadFeeder.setText("");
 		lblLoadPower.setText("");
@@ -152,14 +169,12 @@ public class SimuladorRedeViewController {
 		lblLoadStatus.setText("");
 		lblLoadMessages.setText("");
 		
-		boxFeederInfo.setVisible(false);
 		cbFeederNumber.setValue(null);
 		lblFeederPower.setText("");
 		lblFeederMinPower.setText("");
 		lblFeederMaxPower.setText("");
 		lblFeederMessages.setText("");
 		
-		boxBranchInfo.setVisible(false);
 		cbBranchNumber.setValue(null);
 		lblBranchDe.setText("");
 		lblBranchPara.setText("");
@@ -167,6 +182,14 @@ public class SimuladorRedeViewController {
 		lblBranchDistance.setText("");
 		lblBranchStatus.setText("");
 		lblBranchMessages.setText("");
+		
+		lblLoadsSupplied.setText("");
+		lblLoadsPartiallySupplied.setText("");
+		lblLoadsNotSupplied.setText("");
+		lblPowerSupplied.setText("");
+		lblPowerNotSupplied.setText("");
+		lblFeederUsedPower.setText("");
+		lblFeederAvailablePower.setText("");
 		
 		selectedLoad = null;
 		selectedFeeder = null;
@@ -210,7 +233,22 @@ public class SimuladorRedeViewController {
 			}
 			
 			this.drawNetworkFromEnvironment();
+			
+			this.calculatePowerFlowResult();
 		}
+	}
+	
+	private void calculatePowerFlowResult() {
+		lblLoadsSupplied.setText(String.valueOf(environment.getLoadsSupplied()));
+		lblLoadsPartiallySupplied.setText(String.valueOf(environment.getLoadsPartiallySupplied()));
+		lblLoadsNotSupplied.setText(String.valueOf(environment.getLoadsNotSupplied()));
+
+		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
+		lblPowerSupplied.setText(df.format(environment.getLoadPowerSupplied()));
+		lblPowerNotSupplied.setText(df.format(environment.getLoadPowerNotSupplied()));
+		
+		lblFeederUsedPower.setText(df.format(environment.getFeederUsedPower()));
+		lblFeederAvailablePower.setText(df.format(environment.getFeederAvailablePower()));
 	}
 	
 	/**
@@ -219,20 +257,14 @@ public class SimuladorRedeViewController {
 	private void drawNetworkFromEnvironment() {
 		
 		//Seta visibilidade e tamanho dos panes da tela
-		networkScrollPane.setVisible(true);
-		zoomingPane.setVisible(true);
 		zoomingPane.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
 		zoomingPane.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
 		zoomingPane.setContentWidth(zoomingPane.getPrefWidth());
 		zoomingPane.setContentHeight(zoomingPane.getPrefHeight());
 		
-		labelPanel.setVisible(true);
+		networkBox.setVisible(true);
 		zoomSlider.setVisible(true);
 		
-		boxLoadInfo.setVisible(true);
-		boxFeederInfo.setVisible(true);
-		boxBranchInfo.setVisible(true);
-
 		//limpa o desenho anterior
 		networkPane.getChildren().clear();
 		
@@ -266,7 +298,7 @@ public class SimuladorRedeViewController {
 				cbBranchNumber.setValue(((BranchStackPane) node).getBranchNum());
 			};
 			networkPane.drawBranch(branch, environment.getSizeX(), environment.getSizeY(), mouseClicked);
-			cbBranchNumber.getItems().add(branch.getBranchNum());
+			cbBranchNumber.getItems().add(branch.getNumber());
 		}
 		
 		//Desenha grid
@@ -293,7 +325,7 @@ public class SimuladorRedeViewController {
 		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : "");
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblLoadPower.setText(df.format(load.getPower()));
-		lblLoadReceivedPower.setText(df.format(load.getReceivedPower()));
+		lblLoadReceivedPower.setText(df.format(load.getPowerSupplied()));
 		lblLoadPriority.setText(String.valueOf(load.getPriority()));
 		lblLoadStatus.setText(load.isOn() ? "On" : "Off");
 		cbLoadNumber.setValue(load.getNodeNumber());
@@ -347,10 +379,10 @@ public class SimuladorRedeViewController {
 		lblBranchDe.setText(branch.getLoad1().getNodeNumber().toString());
 		lblBranchPara.setText(branch.getLoad2().getNodeNumber().toString());
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblBranchPower.setText(df.format(branch.getBranchPower()));
+		lblBranchPower.setText(df.format(branch.getPower()));
 		lblBranchDistance.setText(DecimalFormat.getNumberInstance().format(branch.getDistance()));
 		lblBranchStatus.setText(branch.isOn() ? "On" : "Off");
-		cbBranchNumber.setValue(branch.getBranchNum());
+		cbBranchNumber.setValue(branch.getNumber());
 	}
 	
 	/**

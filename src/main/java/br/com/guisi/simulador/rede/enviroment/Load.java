@@ -8,13 +8,32 @@ public class Load extends NetworkNode {
 	private Feeder feeder;
 	private int priority;
 	private SupplyStatus supplyStatus;
-	private double receivedPower;
+	private double powerSupplied;
 	
 	public Load(Integer nodeNumber, Integer x, Integer y, double power, Status status, int priority) {
 		super(nodeNumber, x, y, power, status);
 		this.priority = priority;
 	}
 
+	public boolean isSupplied() {
+		return isOn() && SupplyStatus.SUPPLIED.equals(supplyStatus);
+	}
+	
+	public boolean isPartiallySupplied() {
+		return isOn() && SupplyStatus.PARTIALLY_SUPPLIED_BRANCH_EXCEEDED.equals(supplyStatus)
+				|| SupplyStatus.PARTIALLY_SUPPLIED_FEEDER_EXCEEDED.equals(supplyStatus);
+	}
+	
+	public boolean isNotSupplied() {
+		return isOn() && SupplyStatus.NOT_SUPPLIED_BRANCH_EXCEEDED.equals(supplyStatus)
+				|| SupplyStatus.NOT_SUPPLIED_FEEDER_EXCEEDED.equals(supplyStatus)
+				|| SupplyStatus.NOT_SUPPLIED_NO_FEEDER_CONNECTED.equals(supplyStatus);
+	}
+	
+	public double getPowerNotSupplied() {
+		return power - powerSupplied;
+	}
+	
 	public Feeder getFeeder() {
 		return feeder;
 	}
@@ -39,22 +58,18 @@ public class Load extends NetworkNode {
 		this.supplyStatus = supplyStatus;
 	}
 	
-	public boolean isSupplied() {
-		return SupplyStatus.SUPPLIED.equals(supplyStatus);
+	public double getPowerSupplied() {
+		return powerSupplied;
 	}
 
-	public double getReceivedPower() {
-		return receivedPower;
-	}
-
-	public void setReceivedPower(double receivedPower) {
-		this.receivedPower = receivedPower;
+	public void setPowerSupplied(double powerSupplied) {
+		this.powerSupplied = powerSupplied;
 	}
 
 	@Override
 	public String toString() {
 		return "Load [nodeNumber=" + nodeNumber + ", x=" + x + ", y=" + y + ", power=" + power + ", status=" + status + ", feeder="
-				+ (feeder != null ? feeder.getNodeNumber() : null) + ", priority=" + priority + ", supplyStatus=" + supplyStatus + ", receivedPower=" + receivedPower + "]";
+				+ (feeder != null ? feeder.getNodeNumber() : null) + ", priority=" + priority + ", supplyStatus=" + supplyStatus + ", receivedPower=" + powerSupplied + "]";
 	}
 	
 }
