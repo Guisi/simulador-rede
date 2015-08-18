@@ -23,6 +23,7 @@ public class SimuladorRede extends Application {
         	Pane node = loader.load(getClass().getResourceAsStream("/fxml/SimuladorRede.fxml"));
 			Scene scene = new Scene(node);
 			stage.setScene(scene);
+			stage.setTitle("O bêbado é uma desgraça!");
 			scene.getStylesheets().add("/css/estilo.css");
 			stage.setMaximized(true);
 			stage.show();

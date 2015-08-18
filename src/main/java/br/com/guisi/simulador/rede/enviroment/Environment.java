@@ -82,12 +82,16 @@ public class Environment {
 		return loads.stream().filter((load) -> load.isNotSupplied()).count();
 	}
 	
+	public long getLoadsOutOfService() {
+		return loads.stream().filter((load) -> !load.isOn()).count();
+	}
+	
 	public double getLoadsPowerSupplied() {
 		return loads.stream().mapToDouble((load) -> load.getPowerSupplied()).sum();
 	}
 	
 	public double getLoadsPowerNotSupplied() {
-		return loads.stream().mapToDouble((load) -> load.getPowerNotSupplied()).sum();
+		return loads.stream().filter((load) -> load.isOn()).mapToDouble((load) -> load.getPowerNotSupplied()).sum();
 	}
 	
 	public double getFeedersUsedPower() {

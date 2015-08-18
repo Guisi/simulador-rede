@@ -4,6 +4,8 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
@@ -45,8 +47,6 @@ public class SimuladorRedeViewController {
 
 	@FXML
 	private ScrollPane networkScrollPane;
-	@FXML
-	private Button btnImportNetwork;
 	@FXML
 	private Slider zoomSlider;
 	@FXML
@@ -136,6 +136,8 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblLoadsNotSupplied;
 	@FXML
+	private Label lblLoadsOutOfService;
+	@FXML
 	private Label lblPowerSupplied;
 	@FXML
 	private Label lblPowerNotSupplied;
@@ -158,6 +160,27 @@ public class SimuladorRedeViewController {
 		
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
 		this.loadEnvironmentFromFile(f);*/
+		
+		//this.savePreferences();
+		this.loadPreferences();
+	}
+	
+	private void loadPreferences() {
+		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+		System.out.println(prefs.get("teste", null));
+	}
+	
+	private void savePreferences() {
+		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+	    prefs.put("teste", "guiso");
+	    try {
+			prefs.flush();
+		} catch (BackingStoreException e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setContentText(e.getMessage());
+			e.printStackTrace();
+			alert.showAndWait();
+		}
 	}
 	
 	/**
@@ -208,6 +231,7 @@ public class SimuladorRedeViewController {
 		lblLoadsSupplied.setText("");
 		lblLoadsPartiallySupplied.setText("");
 		lblLoadsNotSupplied.setText("");
+		lblLoadsOutOfService.setText("");
 		lblPowerSupplied.setText("");
 		lblPowerNotSupplied.setText("");
 		lblFeedersUsedPower.setText("");
@@ -264,6 +288,7 @@ public class SimuladorRedeViewController {
 		lblLoadsSupplied.setText(String.valueOf(environment.getLoadsSupplied()));
 		lblLoadsPartiallySupplied.setText(String.valueOf(environment.getLoadsPartiallySupplied()));
 		lblLoadsNotSupplied.setText(String.valueOf(environment.getLoadsNotSupplied()));
+		lblLoadsOutOfService.setText(String.valueOf(environment.getLoadsOutOfService()));
 
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblPowerSupplied.setText(df.format(environment.getLoadsPowerSupplied()));

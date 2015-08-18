@@ -447,7 +447,7 @@ public class EnvironmentUtils {
 					feeder.incrementEnergizedLoad();
 				} else if (load.isPartiallySupplied()) {
 					feeder.incrementPartiallyEnergizedLoad();
-				} else {
+				} else if (load.isNotSupplied()) {
 					feeder.incrementNotEnergizedLoad();
 				}
 			}

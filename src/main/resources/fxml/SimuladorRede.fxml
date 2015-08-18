@@ -10,18 +10,23 @@
 <?import br.com.guisi.simulador.rede.view.*?>
 
 <VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="714.0" prefWidth="1200.0" spacing="5.0" style="-fx-background-color: #FFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.SimuladorRedeViewController">
-   <padding>
-      <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-   </padding>
    <children>
+      <MenuBar>
+        <menus>
+          <Menu mnemonicParsing="false" text="Environment">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#openNetworkFile" text="Import from CSV File" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
       <VBox fillWidth="false" spacing="5.0">
          <children>
             <HBox alignment="CENTER_LEFT" spacing="15.0">
                <children>
-                  <Button fx:id="btnImportNetwork" mnemonicParsing="false" onAction="#openNetworkFile" prefHeight="25.0" prefWidth="166.0" text="Import CSV File" />
                   <Slider fx:id="zoomSlider" blockIncrement="0.1" max="2.0" min="0.1" value="1.0">
                      <HBox.margin>
-                        <Insets left="400.0" />
+                        <Insets left="610.0" />
                      </HBox.margin></Slider>
                </children>
             </HBox>
@@ -277,17 +282,17 @@
                         </VBox>
                      </children>
                   </Pane>
-                  <Pane minHeight="-Infinity" prefHeight="170.0" style="-fx-background-color: transparent; -fx-border-color: #CECECE;">
+                  <Pane minHeight="-Infinity" prefHeight="200.0" style="-fx-background-color: transparent; -fx-border-color: #CECECE;">
                      <children>
                         <TabPane maxWidth="-Infinity" minWidth="-Infinity" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
                           <tabs>
                             <Tab text="Power Flow">
                               <content>
-                                <AnchorPane minHeight="-Infinity" minWidth="-Infinity">
+                                <AnchorPane minWidth="-Infinity">
                                        <children>
                                           <VBox spacing="5.0">
                                              <children>
-                                                <GridPane hgap="10.0" prefHeight="130.0">
+                                                <GridPane hgap="10.0" minHeight="-Infinity" prefHeight="150.0">
                                                   <columnConstraints>
                                                     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="157.0" minWidth="10.0" prefWidth="157.0" />
                                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="121.0" minWidth="10.0" prefWidth="48.0" />
@@ -300,22 +305,25 @@
                                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                   </rowConstraints>
                                                    <children>
                                                       <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Loads supplied:" />
                                                       <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Loads partially supplied:" GridPane.rowIndex="1" />
-                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Loads power supplied:" GridPane.rowIndex="3" />
+                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Loads power supplied:" GridPane.rowIndex="4" />
                                                       <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Loads not supplied:" GridPane.rowIndex="2" />
-                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Loads power not supplied:" GridPane.rowIndex="4" />
+                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Loads power not supplied:" GridPane.rowIndex="5" />
                                                       <Label fx:id="lblLoadsSupplied" GridPane.columnIndex="1" />
                                                       <Label fx:id="lblLoadsPartiallySupplied" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                      <Label fx:id="lblPowerSupplied" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                      <Label fx:id="lblPowerSupplied" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                                       <Label fx:id="lblLoadsNotSupplied" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                                      <Label fx:id="lblPowerNotSupplied" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                                      <Label fx:id="lblPowerNotSupplied" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                                       <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Feeders used power:" GridPane.columnIndex="2" />
                                                       <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Feeders available power:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                                       <Label fx:id="lblFeedersUsedPower" GridPane.columnIndex="3" />
                                                       <Label fx:id="lblFeedersAvailablePower" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Loads out-of-service:" GridPane.rowIndex="3" />
+                                                      <Label fx:id="lblLoadsOutOfService" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                                    </children>
                                                 </GridPane>
                                              </children>
@@ -344,6 +352,9 @@
                </children>
             </VBox>
          </children>
+         <VBox.margin>
+            <Insets left="5.0" right="5.0" />
+         </VBox.margin>
       </HBox>
    </children>
 </VBox>
