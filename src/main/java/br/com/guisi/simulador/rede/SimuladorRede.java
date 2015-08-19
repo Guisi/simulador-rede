@@ -21,15 +21,20 @@ public class SimuladorRede extends Application {
 		FXMLLoader loader = new FXMLLoader();
         try {
         	Pane node = loader.load(getClass().getResourceAsStream("/fxml/SimuladorRede.fxml"));
+        	
+        	SimuladorRedeViewController controller = (SimuladorRedeViewController) loader.getController();
+			controller.setMainStage(stage);
+        	
 			Scene scene = new Scene(node);
 			stage.setScene(scene);
 			stage.setTitle("Simulador");
 			scene.getStylesheets().add("/css/estilo.css");
 			stage.setMaximized(true);
+			stage.setOnCloseRequest((event) -> {
+				controller.savePreferences();
+	        });
 			stage.show();
 			
-			SimuladorRedeViewController controller = (SimuladorRedeViewController) loader.getController();
-			controller.setMainStage(stage);
         } catch (IOException e) {
         	throw new RuntimeException("Unable to load FXML file", e);
         }

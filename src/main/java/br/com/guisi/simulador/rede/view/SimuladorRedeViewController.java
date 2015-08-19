@@ -4,9 +4,10 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -18,6 +19,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -31,11 +33,13 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 
 import br.com.guisi.simulador.rede.Constants;
+import br.com.guisi.simulador.rede.constants.PreferenceKey;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
+import br.com.guisi.simulador.rede.util.PreferencesUtils;
 import br.com.guisi.simulador.rede.view.layout.BranchStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkPane;
@@ -146,6 +150,15 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblFeedersAvailablePower;
 	
+	/** Priority */
+	@FXML
+	private TextField tfPriority1;
+	@FXML
+	private TextField tfPriority2;
+	@FXML
+	private TextField tfPriority3;
+	@FXML
+	private TextField tfPriority4;
 	
 	private Environment environment;
 	private ZoomingPane zoomingPane;
@@ -155,26 +168,39 @@ public class SimuladorRedeViewController {
 	private Integer selectedFeeder;
 	private Integer selectedBranch;
 	
+	private Map<PreferenceKey, StringProperty> preferences;
+	
 	public void initialize() {
 		this.resetScreen();
 		
+		preferences = PreferencesUtils.loadPreferences();
+		
+		StringProperty priority1 = preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_1);
+		tfPriority1.setText(priority1.get());
+		priority1.bind(tfPriority1.textProperty());
+		
+		StringProperty priority2 = preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_2);
+		tfPriority2.setText(priority2.get());
+		priority2.bind(tfPriority2.textProperty());
+		
+		StringProperty priority3 = preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_3);
+		tfPriority3.setText(priority3.get());
+		priority3.bind(tfPriority3.textProperty());
+		
+		StringProperty priority4 = preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_4);
+		tfPriority4.setText(priority4.get());
+		priority4.bind(tfPriority4.textProperty());
+
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
 		this.loadEnvironmentFromFile(f);*/
-		
-		//this.savePreferences();
-		this.loadPreferences();
 	}
 	
-	public void loadPreferences() {
-		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
-		System.out.println(prefs.get("teste", null));
-	}
-	
+	/**
+	 * Salva propriedades de preferences
+	 */
 	public void savePreferences() {
-		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
-	    prefs.put("teste", "guiso");
-	    try {
-			prefs.flush();
+		try {
+			PreferencesUtils.savePreferences(preferences);
 		} catch (BackingStoreException e) {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setContentText(e.getMessage());
