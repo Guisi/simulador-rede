@@ -165,12 +165,12 @@ public class SimuladorRedeViewController {
 		this.loadPreferences();
 	}
 	
-	private void loadPreferences() {
+	public void loadPreferences() {
 		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
 		System.out.println(prefs.get("teste", null));
 	}
 	
-	private void savePreferences() {
+	public void savePreferences() {
 		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
 	    prefs.put("teste", "guiso");
 	    try {
