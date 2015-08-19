@@ -1,16 +1,15 @@
 package br.com.guisi.simulador.rede.view;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.prefs.BackingStoreException;
 
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -19,7 +18,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -28,27 +26,25 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import org.apache.commons.lang3.StringUtils;
 
-import br.com.guisi.simulador.rede.Constants;
-import br.com.guisi.simulador.rede.constants.PreferenceKey;
+import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
-import br.com.guisi.simulador.rede.util.PreferencesUtils;
 import br.com.guisi.simulador.rede.view.layout.BranchStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkPane;
 import br.com.guisi.simulador.rede.view.layout.ZoomingPane;
 
-public class SimuladorRedeViewController {
+public class SimuladorRedeController extends Controller {
 
-	private Stage mainStage;
-
+	@FXML
+	private VBox root;
 	@FXML
 	private ScrollPane networkScrollPane;
 	@FXML
@@ -104,8 +100,6 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblFeederAvailablePower;
 	@FXML
-	private Label lblFeederMessages;
-	@FXML
 	private Button btnPreviousFeeder;
 	@FXML
 	private Button btnNextFeeder;
@@ -125,8 +119,6 @@ public class SimuladorRedeViewController {
 	private Label lblBranchDistance;
 	@FXML
 	private Label lblBranchStatus;
-	@FXML
-	private Label lblBranchMessages;
 	@FXML
 	private Button btnPreviousBranch;
 	@FXML
@@ -150,15 +142,17 @@ public class SimuladorRedeViewController {
 	@FXML
 	private Label lblFeedersAvailablePower;
 	
-	/** Priority */
+	/** Distribution System */
 	@FXML
-	private TextField tfPriority1;
+	private Label lblTotalNumberFeeders;
 	@FXML
-	private TextField tfPriority2;
+	private Label lblTotalNumberLoads;
 	@FXML
-	private TextField tfPriority3;
+	private Label lblTotalNumberBranches;
 	@FXML
-	private TextField tfPriority4;
+	private Label lblTotalNumberSwitches;
+	@FXML
+	private Label lblTotalDemand;
 	
 	private Environment environment;
 	private ZoomingPane zoomingPane;
@@ -168,45 +162,11 @@ public class SimuladorRedeViewController {
 	private Integer selectedFeeder;
 	private Integer selectedBranch;
 	
-	private Map<PreferenceKey, StringProperty> preferences;
-	
 	public void initialize() {
 		this.resetScreen();
 		
-		preferences = PreferencesUtils.loadPreferences();
-		
-		StringProperty priority1 = preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_1);
-		tfPriority1.setText(priority1.get());
-		priority1.bind(tfPriority1.textProperty());
-		
-		StringProperty priority2 = preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_2);
-		tfPriority2.setText(priority2.get());
-		priority2.bind(tfPriority2.textProperty());
-		
-		StringProperty priority3 = preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_3);
-		tfPriority3.setText(priority3.get());
-		priority3.bind(tfPriority3.textProperty());
-		
-		StringProperty priority4 = preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_4);
-		tfPriority4.setText(priority4.get());
-		priority4.bind(tfPriority4.textProperty());
-
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
 		this.loadEnvironmentFromFile(f);*/
-	}
-	
-	/**
-	 * Salva propriedades de preferences
-	 */
-	public void savePreferences() {
-		try {
-			PreferencesUtils.savePreferences(preferences);
-		} catch (BackingStoreException e) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setContentText(e.getMessage());
-			e.printStackTrace();
-			alert.showAndWait();
-		}
 	}
 	
 	/**
@@ -244,7 +204,6 @@ public class SimuladorRedeViewController {
 		lblFeederNotEnergizedLoadsLabel.setTooltip(new Tooltip("Not energized loads"));
 		lblFeederUsedPower.setText("");
 		lblFeederAvailablePower.setText("");
-		lblFeederMessages.setText("");
 		
 		cbBranchNumber.setValue(null);
 		lblBranchDe.setText("");
@@ -252,7 +211,6 @@ public class SimuladorRedeViewController {
 		lblBranchPower.setText("");
 		lblBranchDistance.setText("");
 		lblBranchStatus.setText("");
-		lblBranchMessages.setText("");
 		
 		lblLoadsSupplied.setText("");
 		lblLoadsPartiallySupplied.setText("");
@@ -262,6 +220,12 @@ public class SimuladorRedeViewController {
 		lblPowerNotSupplied.setText("");
 		lblFeedersUsedPower.setText("");
 		lblFeedersAvailablePower.setText("");
+		
+		lblTotalNumberFeeders.setText("");
+		lblTotalNumberLoads.setText("");
+		lblTotalNumberBranches.setText("");
+		lblTotalNumberSwitches.setText("");
+		lblTotalDemand.setText("");
 		
 		selectedLoad = null;
 		selectedFeeder = null;
@@ -306,11 +270,20 @@ public class SimuladorRedeViewController {
 			
 			this.drawNetworkFromEnvironment();
 			
-			this.calculatePowerFlowResult();
+			this.updateDistributionSystemInfo();
+			this.updatePowerFlowInfo();
 		}
 	}
 	
-	private void calculatePowerFlowResult() {
+	private void updateDistributionSystemInfo() {
+		lblTotalNumberFeeders.setText(String.valueOf(environment.getFeeders().size()));
+		lblTotalNumberLoads.setText(String.valueOf(environment.getLoads().size()));
+		lblTotalNumberBranches.setText(String.valueOf(environment.getBranches().size()));
+		lblTotalNumberSwitches.setText(String.valueOf(environment.getSwitches().size()));
+		lblTotalDemand.setText("");
+	}
+	
+	private void updatePowerFlowInfo() {
 		lblLoadsSupplied.setText(String.valueOf(environment.getLoadsSupplied()));
 		lblLoadsPartiallySupplied.setText(String.valueOf(environment.getLoadsPartiallySupplied()));
 		lblLoadsNotSupplied.setText(String.valueOf(environment.getLoadsNotSupplied()));
@@ -362,7 +335,7 @@ public class SimuladorRedeViewController {
 		});
 		
 		//Desenha Branches
-		for (Branch branch : environment.getBranchMap().values()) {
+		for (Branch branch : environment.getBranches()) {
 			EventHandler<MouseEvent> mouseClicked = (event) -> {
 				Node node = (Node) event.getSource();
 				while (!(node instanceof BranchStackPane)) {
@@ -604,11 +577,20 @@ public class SimuladorRedeViewController {
 		}
 	}
 	
-	public Stage getMainStage() {
-		return mainStage;
-	}
+	public void showPriorityModal() {
+		FXMLLoader loader = new FXMLLoader();
+		try {
+			loader.load(getClass().getResourceAsStream("/fxml/PriorityConfig.fxml"));
+			PriorityConfigController controller = (PriorityConfigController) loader.getController();
+			SimuladorRede.showModalScene(controller);
 
-	public void setMainStage(Stage mainStage) {
-		this.mainStage = mainStage;
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to load FXML file", e);
+		}
+	}
+	
+	@Override
+	public Node getView() {
+		return root;
 	}
 }

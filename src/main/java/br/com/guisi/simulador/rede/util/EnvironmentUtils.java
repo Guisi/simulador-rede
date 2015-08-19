@@ -355,7 +355,7 @@ public class EnvironmentUtils {
 	 */
 	public static void validatePowerSupply(Environment environment) {
 		//zera potência usada do branch
-		environment.getBranchMap().values().forEach((branch) -> branch.setUsedPower(0));
+		environment.getBranches().forEach((branch) -> branch.setUsedPower(0));
 		
 		List<Feeder> feeders = environment.getFeeders();
 		

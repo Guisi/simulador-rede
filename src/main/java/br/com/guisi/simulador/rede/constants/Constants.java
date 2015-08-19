@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede;
+package br.com.guisi.simulador.rede.constants;
 
 public interface Constants {
 

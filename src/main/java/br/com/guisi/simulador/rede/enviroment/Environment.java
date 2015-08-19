@@ -12,6 +12,8 @@ public class Environment {
 	private final Map<Integer, Branch> branchMap;
 	private final List<Load> loads;
 	private final List<Feeder> feeders;
+	private final List<Branch> branches;
+	private final List<Branch> switches;
 	
 	public Environment(int sizeX, int sizeY, Map<Integer, NetworkNode> networkNodeMap, Map<Integer, Branch> branchMap) {
 		this.sizeX = sizeX;
@@ -26,6 +28,15 @@ public class Environment {
 				loads.add((Load) networkNode);
 			} else {
 				feeders.add((Feeder) networkNode);
+			}
+		});
+		
+		branches = new ArrayList<Branch>();
+		switches = new ArrayList<Branch>();
+		branchMap.values().forEach((branch) -> {
+			branches.add(branch);
+			if (branch.isSwitchBranch()) {
+				switches.add(branch);
 			}
 		});
 	}
@@ -68,6 +79,14 @@ public class Environment {
 	
 	public List<Load> getLoads() {
 		return loads;
+	}
+
+	public List<Branch> getBranches() {
+		return branches;
+	}
+
+	public List<Branch> getSwitches() {
+		return switches;
 	}
 
 	public long getLoadsSupplied() {

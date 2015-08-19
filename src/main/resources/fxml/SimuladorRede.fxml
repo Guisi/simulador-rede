@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.*?>
 <?import br.com.guisi.simulador.rede.view.*?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="714.0" prefWidth="1200.0" spacing="5.0" style="-fx-background-color: #FFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.SimuladorRedeViewController">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="714.0" prefWidth="1200.0" spacing="5.0" style="-fx-background-color: #FFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.SimuladorRedeController">
    <children>
       <MenuBar>
         <menus>
@@ -18,6 +18,11 @@
               <MenuItem mnemonicParsing="false" onAction="#openNetworkFile" text="Import from CSV File" />
             </items>
           </Menu>
+            <Menu mnemonicParsing="false" text="Parameters">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#showPriorityModal" text="Priority" />
+              </items>
+            </Menu>
         </menus>
       </MenuBar>
       <VBox fillWidth="false" spacing="5.0">
@@ -38,7 +43,7 @@
                <children>
                   <HBox>
                      <children>
-                        <VBox fx:id="boxLoadInfo" alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="200.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
+                        <VBox fx:id="boxLoadInfo" alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="280.0" prefWidth="200.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
                            <children>
                               <HBox alignment="CENTER" spacing="10.0">
                                  <children>
@@ -95,7 +100,7 @@
                                     <Button fx:id="btnNextLoad" mnemonicParsing="false" onAction="#nextLoad" prefHeight="25.0" prefWidth="25.0" styleClass="btnNext" />
                                  </children>
                                  <VBox.margin>
-                                    <Insets top="30.0" />
+                                    <Insets />
                                  </VBox.margin>
                               </HBox>
                            </children>
@@ -103,7 +108,7 @@
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
                         </VBox>
-                        <VBox fx:id="boxFeederInfo" alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="200.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
+                        <VBox fx:id="boxFeederInfo" alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="280.0" prefWidth="200.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
                            <children>
                               <HBox alignment="CENTER" spacing="10.0">
                                  <children>
@@ -158,7 +163,6 @@
                                     <Insets top="8.0" />
                                  </VBox.margin>
                               </GridPane>
-                              <Label fx:id="lblFeederMessages" prefHeight="50.0" textAlignment="CENTER" textFill="RED" wrapText="true" />
                               <HBox alignment="CENTER" spacing="20.0">
                                  <children>
                                     <Button fx:id="btnPreviousFeeder" mnemonicParsing="false" onAction="#previousFeeder" prefHeight="25.0" prefWidth="25.0" styleClass="btnPrevious" />
@@ -173,7 +177,7 @@
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
                         </VBox>
-                        <VBox fx:id="boxBranchInfo" alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="200.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
+                        <VBox fx:id="boxBranchInfo" alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="280.0" prefWidth="200.0" style="-fx-border-width: 1; -fx-border-color: #CECECE;">
                            <children>
                               <HBox alignment="CENTER" spacing="10.0">
                                  <children>
@@ -219,14 +223,13 @@
                                     <Insets top="10.0" />
                                  </VBox.margin>
                               </GridPane>
-                              <Label fx:id="lblBranchMessages" prefHeight="50.0" textAlignment="CENTER" textFill="RED" wrapText="true" />
                               <HBox alignment="CENTER" spacing="20.0">
                                  <children>
                                     <Button fx:id="btnPreviousBranch" mnemonicParsing="false" onAction="#previousBranch" prefHeight="25.0" prefWidth="25.0" styleClass="btnPrevious" />
                                     <Button fx:id="btnNextBranch" mnemonicParsing="false" onAction="#nextBranch" prefHeight="25.0" prefWidth="25.0" styleClass="btnNext" />
                                  </children>
                                  <VBox.margin>
-                                    <Insets top="50.0" />
+                                    <Insets top="70.0" />
                                  </VBox.margin>
                               </HBox>
                            </children>
@@ -236,45 +239,58 @@
                         </VBox>
                      </children>
                   </HBox>
-                  <Pane maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="160.0" prefWidth="600.0" style="-fx-border-width: 1; -fx-border-color: #CECECE; -fx-background-color: transparent;">
+                  <Pane maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="130.0" prefWidth="600.0" style="-fx-border-width: 1; -fx-border-color: #CECECE; -fx-background-color: transparent;">
                      <children>
-                        <VBox spacing="7.0">
+                        <VBox prefWidth="300.0" spacing="7.0">
                            <children>
                               <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" style="-fx-font-weight: bold; -fx-font-size: 13px;" text="Label" textAlignment="CENTER">
                                  <font>
                                     <Font size="16.0" />
                                  </font>
                               </Label>
-                              <HBox alignment="CENTER_LEFT" spacing="15.0">
+                              <GridPane>
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="156.0" minWidth="10.0" prefWidth="133.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="67.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
                                  <children>
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" height="10.0" stroke="BLACK" strokeType="INSIDE" width="20.0" />
-                                    <Label text="Closed Switches" />
+                                    <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                       <children>
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" height="10.0" stroke="BLACK" strokeType="INSIDE" width="20.0" />
+                                          <Label text="Closed Switches" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="15.0" GridPane.rowIndex="1">
+                                       <children>
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="10.0" stroke="BLACK" strokeType="INSIDE" width="20.0" />
+                                          <Label text="Open Switches" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="15.0" GridPane.rowIndex="2">
+                                       <children>
+                                          <Circle fill="WHITE" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
+                                          <Label text="Loads" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="15.0" GridPane.columnIndex="1">
+                                       <children>
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="20.0" />
+                                          <Label text="Feeders" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="15.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <children>
+                                          <Line endX="18.0" smooth="false" strokeWidth="1.3" />
+                                          <Label text="Branches" />
+                                       </children>
+                                    </HBox>
                                  </children>
-                              </HBox>
-                              <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                 <children>
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="10.0" stroke="BLACK" strokeType="INSIDE" width="20.0" />
-                                    <Label text="Open Switches" />
-                                 </children>
-                              </HBox>
-                              <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                 <children>
-                                    <Circle fill="WHITE" radius="10.0" stroke="BLACK" strokeType="INSIDE" />
-                                    <Label text="Loads" />
-                                 </children>
-                              </HBox>
-                              <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                 <children>
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="20.0" stroke="BLACK" strokeType="INSIDE" width="20.0" />
-                                    <Label text="Feeders" />
-                                 </children>
-                              </HBox>
-                              <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                 <children>
-                                    <Line endX="18.0" smooth="false" strokeWidth="1.3" />
-                                    <Label text="Branches" />
-                                 </children>
-                              </HBox>
+                              </GridPane>
                            </children>
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -286,11 +302,51 @@
                      <children>
                         <TabPane maxWidth="-Infinity" minWidth="-Infinity" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
                           <tabs>
+                              <Tab text="Distribution System">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <VBox>
+                                             <children>
+                                                <GridPane hgap="10.0">
+                                                  <columnConstraints>
+                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="159.0" minWidth="10.0" prefWidth="159.0" />
+                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="41.0" />
+                                                  </columnConstraints>
+                                                  <rowConstraints>
+                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                  </rowConstraints>
+                                                   <children>
+                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Total number of feeders:" />
+                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Total number of loads:" GridPane.rowIndex="1" />
+                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Total number of branches:" GridPane.rowIndex="2" />
+                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Total number of switches:" GridPane.rowIndex="3" />
+                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Total demand:" GridPane.rowIndex="4" />
+                                                      <Label fx:id="lblTotalNumberFeeders" GridPane.columnIndex="1" />
+                                                      <Label fx:id="lblTotalNumberLoads" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                      <Label fx:id="lblTotalNumberBranches" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                      <Label fx:id="lblTotalNumberSwitches" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                      <Label fx:id="lblTotalDemand" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                                   </children>
+                                                </GridPane>
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </padding>
+                                          </VBox>
+                                       </children>
+                                    </AnchorPane>
+                                </content>
+                              </Tab>
                             <Tab text="Power Flow">
                               <content>
                                 <AnchorPane minWidth="-Infinity">
                                        <children>
-                                          <VBox spacing="5.0">
+                                          <VBox>
                                              <children>
                                                 <GridPane hgap="10.0" minHeight="-Infinity" prefHeight="150.0">
                                                   <columnConstraints>
@@ -335,42 +391,6 @@
                                     </AnchorPane>
                               </content>
                             </Tab>
-                              <Tab text="Priority Values">
-                                <content>
-                                  <AnchorPane>
-                                       <children>
-                                          <VBox>
-                                             <children>
-                                                <GridPane hgap="10.0">
-                                                  <columnConstraints>
-                                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                  </columnConstraints>
-                                                  <rowConstraints>
-                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                  </rowConstraints>
-                                                   <children>
-                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Priority 1:" />
-                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Priority 2:" GridPane.rowIndex="1" />
-                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Priority 3:" GridPane.rowIndex="2" />
-                                                      <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Priority 4:" GridPane.rowIndex="3" />
-                                                      <TextField fx:id="tfPriority1" GridPane.columnIndex="1" />
-													  <TextField fx:id="tfPriority2" GridPane.columnIndex="1" GridPane.rowIndex="1" />													  
-                                                      <TextField fx:id="tfPriority3" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                                      <TextField fx:id="tfPriority4" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                                   </children>
-                                                </GridPane>
-                                             </children>
-                                             <padding>
-                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                             </padding>
-                                          </VBox>
-                                       </children></AnchorPane>
-                                </content>
-                              </Tab>
                           </tabs>
                         </TabPane>
                      </children>
