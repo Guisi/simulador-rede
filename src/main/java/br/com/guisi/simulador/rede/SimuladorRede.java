@@ -40,7 +40,7 @@ public class SimuladorRede extends Application {
 			Scene scene = new Scene(node);
 			primaryStage.setScene(scene);
 			primaryStage.setTitle("Simulador");
-			primaryStage.getIcons().add(new Image("/img/favico.png"));
+			primaryStage.getIcons().add(new Image("/img/bolt.png"));
 			scene.getStylesheets().add("/css/estilo.css");
 			primaryStage.setMaximized(true);
 			primaryStage.show();

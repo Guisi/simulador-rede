@@ -280,7 +280,9 @@ public class SimuladorRedeController extends Controller {
 		lblTotalNumberLoads.setText(String.valueOf(environment.getLoads().size()));
 		lblTotalNumberBranches.setText(String.valueOf(environment.getBranches().size()));
 		lblTotalNumberSwitches.setText(String.valueOf(environment.getSwitches().size()));
-		lblTotalDemand.setText("");
+		
+		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
+		lblTotalDemand.setText(df.format(environment.getLoadsDemand()));
 	}
 	
 	private void updatePowerFlowInfo() {
