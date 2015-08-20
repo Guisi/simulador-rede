@@ -370,27 +370,19 @@ public class EnvironmentUtils {
 			//monta lista de loads de acordo com a ordem de atendimento
 			List<NetworkNode> allConnectedNodes = new ArrayList<>();
 			List<NetworkNode> observedNodes = new ArrayList<>();
-			observedNodes.add(feeder);
+			observedNodes.addAll(feeder.getConnectedNodes());
 			do {
 				allConnectedNodes.addAll(observedNodes);
-	
+				
 				List<NetworkNode> connectedNodes = new ArrayList<>();
 				observedNodes.forEach((observedNode) -> {
-					List<NetworkNode> nodes = observedNode.getConnectedNodes();
-					nodes.removeAll(allConnectedNodes);
-					allConnectedNodes.addAll(nodes);
-					connectedNodes.addAll(nodes);
+					connectedNodes.addAll(observedNode.getConnectedNodes());
+					connectedNodes.removeAll(allConnectedNodes);
+					connectedNodes.remove(feeder);
 				});
 				
-				observedNodes = new ArrayList<>();
-				for (NetworkNode connectedNode : connectedNodes) {
-					observedNodes.addAll(connectedNode.getConnectedNodes());
-				}
-				observedNodes.removeAll(allConnectedNodes);
+				observedNodes = connectedNodes;
 			} while (!observedNodes.isEmpty());
-			
-			//remove o feeder da lista
-			allConnectedNodes.remove(feeder);
 			
 			//distribui potência do feeder nos loads
 			for (NetworkNode node : allConnectedNodes) {

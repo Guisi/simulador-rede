@@ -12,6 +12,7 @@ public class Branch {
 	private Status status;
 	private boolean switchBranch;
 	private double usedPower;
+	private int switchOperations;
 	
 	public Branch(Integer number, NetworkNode load1, NetworkNode load2, double power, double distance, Status status, boolean switchBranch) {
 		this.number = number;
@@ -43,6 +44,10 @@ public class Branch {
 	
 	public void addUsedPower(double usedPower) {
 		this.usedPower += usedPower;
+	}
+	
+	public void incrementSwitchOperation() {
+		this.switchOperations++;
 	}
 
 	public double getPower() {
@@ -88,6 +93,10 @@ public class Branch {
 
 	public void setUsedPower(double usedPower) {
 		this.usedPower = usedPower;
+	}
+
+	public int getSwitchOperations() {
+		return switchOperations;
 	}
 
 	@Override

@@ -154,6 +154,16 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private Label lblTotalDemand;
 	
+	/** Objective Functions */
+	@FXML
+	private Label lblLoadsRestoredVsPriority;
+	@FXML
+	private Label lblSwitchingOperations;
+	@FXML
+	private Label lblLossesDuringRestoration;
+	@FXML
+	private Label lblFeedersBalancing;
+	
 	private Environment environment;
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
@@ -227,6 +237,11 @@ public class SimuladorRedeController extends Controller {
 		lblTotalNumberSwitches.setText("");
 		lblTotalDemand.setText("");
 		
+		lblLoadsRestoredVsPriority.setText("");
+		lblSwitchingOperations.setText("");
+		lblLossesDuringRestoration.setText("");
+		lblFeedersBalancing.setText("");
+		
 		selectedLoad = null;
 		selectedFeeder = null;
 		selectedBranch = null;
@@ -272,6 +287,7 @@ public class SimuladorRedeController extends Controller {
 			
 			this.updateDistributionSystemInfo();
 			this.updatePowerFlowInfo();
+			this.updateObjectiveFunctions();
 		}
 	}
 	
@@ -297,6 +313,14 @@ public class SimuladorRedeController extends Controller {
 		
 		lblFeedersUsedPower.setText(df.format(environment.getFeedersUsedPower()));
 		lblFeedersAvailablePower.setText(df.format(environment.getFeedersAvailablePower()));
+	}
+	
+	private void updateObjectiveFunctions() {
+		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
+		lblLoadsRestoredVsPriority.setText(df.format(environment.getLoadsRestoredVsPriority()));
+		lblSwitchingOperations.setText(String.valueOf(environment.getSwitchingOperations()));
+		lblLossesDuringRestoration.setText("");
+		lblFeedersBalancing.setText("");
 	}
 	
 	/**

@@ -124,4 +124,12 @@ public class Environment {
 	public double getFeedersAvailablePower() {
 		return feeders.stream().mapToDouble((feeder) -> feeder.getAvailablePower()).sum();
 	}
+	
+	public double getLoadsRestoredVsPriority() {
+		return 0;
+	}
+	
+	public int getSwitchingOperations() {
+		return branches.stream().mapToInt((branch) -> branch.getSwitchOperations()).sum();
+	}
 }
