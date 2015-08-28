@@ -1,7 +1,6 @@
 package br.com.guisi.simulador.rede.view;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +8,13 @@ import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tooltip;
@@ -51,6 +50,8 @@ public class SimuladorRedeController extends Controller {
 	private Slider zoomSlider;
 	@FXML
 	private HBox networkBox;
+	@FXML
+	private MenuItem miExpresionEvaluator;
 
 	/** Loads */
 	@FXML
@@ -164,7 +165,6 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private Label lblFeedersBalancing;
 	
-	private Environment environment;
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
 	
@@ -183,6 +183,7 @@ public class SimuladorRedeController extends Controller {
 	 * Volta a tela ao estado original
 	 */
 	public void resetScreen() {
+		miExpresionEvaluator.setDisable(true);
 		zoomSlider.setValue(1);
 		
 		networkPane = new NetworkPane();
@@ -266,7 +267,8 @@ public class SimuladorRedeController extends Controller {
 	
 	private void loadEnvironmentFromFile(File csvFile) {
 		try {
-			environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
+			Environment environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
+			SimuladorRede.setEnvironment(environment);
 		} catch (Exception e) {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setContentText(e.getMessage());
@@ -274,8 +276,8 @@ public class SimuladorRedeController extends Controller {
 			alert.showAndWait();
 		}
 		
-		if (environment != null) {
-			String msgs = EnvironmentUtils.validateEnvironment(environment);
+		if (SimuladorRede.getEnvironment() != null) {
+			String msgs = EnvironmentUtils.validateEnvironment(getEnvironment());
 			
 			if (StringUtils.isNotEmpty(msgs)) {
 				Alert alert = new Alert(AlertType.ERROR);
@@ -292,33 +294,33 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	private void updateDistributionSystemInfo() {
-		lblTotalNumberFeeders.setText(String.valueOf(environment.getFeeders().size()));
-		lblTotalNumberLoads.setText(String.valueOf(environment.getLoads().size()));
-		lblTotalNumberBranches.setText(String.valueOf(environment.getBranches().size()));
-		lblTotalNumberSwitches.setText(String.valueOf(environment.getSwitches().size()));
+		lblTotalNumberFeeders.setText(String.valueOf(getEnvironment().getFeeders().size()));
+		lblTotalNumberLoads.setText(String.valueOf(getEnvironment().getLoads().size()));
+		lblTotalNumberBranches.setText(String.valueOf(getEnvironment().getBranches().size()));
+		lblTotalNumberSwitches.setText(String.valueOf(getEnvironment().getSwitches().size()));
 		
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblTotalDemand.setText(df.format(environment.getLoadsDemand()));
+		lblTotalDemand.setText(df.format(getEnvironment().getLoadsDemand()));
 	}
 	
 	private void updatePowerFlowInfo() {
-		lblLoadsSupplied.setText(String.valueOf(environment.getLoadsSupplied()));
-		lblLoadsPartiallySupplied.setText(String.valueOf(environment.getLoadsPartiallySupplied()));
-		lblLoadsNotSupplied.setText(String.valueOf(environment.getLoadsNotSupplied()));
-		lblLoadsOutOfService.setText(String.valueOf(environment.getLoadsOutOfService()));
+		lblLoadsSupplied.setText(String.valueOf(getEnvironment().getLoadsSupplied()));
+		lblLoadsPartiallySupplied.setText(String.valueOf(getEnvironment().getLoadsPartiallySupplied()));
+		lblLoadsNotSupplied.setText(String.valueOf(getEnvironment().getLoadsNotSupplied()));
+		lblLoadsOutOfService.setText(String.valueOf(getEnvironment().getLoadsOutOfService()));
 
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblPowerSupplied.setText(df.format(environment.getLoadsPowerSupplied()));
-		lblPowerNotSupplied.setText(df.format(environment.getLoadsPowerNotSupplied()));
+		lblPowerSupplied.setText(df.format(getEnvironment().getLoadsPowerSupplied()));
+		lblPowerNotSupplied.setText(df.format(getEnvironment().getLoadsPowerNotSupplied()));
 		
-		lblFeedersUsedPower.setText(df.format(environment.getFeedersUsedPower()));
-		lblFeedersAvailablePower.setText(df.format(environment.getFeedersAvailablePower()));
+		lblFeedersUsedPower.setText(df.format(getEnvironment().getFeedersUsedPower()));
+		lblFeedersAvailablePower.setText(df.format(getEnvironment().getFeedersAvailablePower()));
 	}
 	
 	private void updateObjectiveFunctions() {
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblLoadsRestoredVsPriority.setText(df.format(environment.getLoadsRestoredVsPriority()));
-		lblSwitchingOperations.setText(String.valueOf(environment.getSwitchingOperations()));
+		lblLoadsRestoredVsPriority.setText(df.format(getEnvironment().getLoadsRestoredVsPriority()));
+		lblSwitchingOperations.setText(String.valueOf(getEnvironment().getSwitchingOperations()));
 		lblLossesDuringRestoration.setText("");
 		lblFeedersBalancing.setText("");
 	}
@@ -329,13 +331,14 @@ public class SimuladorRedeController extends Controller {
 	private void drawNetworkFromEnvironment() {
 		
 		//Seta visibilidade e tamanho dos panes da tela
-		zoomingPane.setPrefWidth(environment.getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
-		zoomingPane.setPrefHeight(environment.getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
+		zoomingPane.setPrefWidth(getEnvironment().getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
+		zoomingPane.setPrefHeight(getEnvironment().getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
 		zoomingPane.setContentWidth(zoomingPane.getPrefWidth());
 		zoomingPane.setContentHeight(zoomingPane.getPrefHeight());
 		
 		networkBox.setVisible(true);
 		zoomSlider.setVisible(true);
+		miExpresionEvaluator.setDisable(false);
 		
 		//limpa o desenho anterior
 		networkPane.getChildren().clear();
@@ -344,8 +347,8 @@ public class SimuladorRedeController extends Controller {
 		cbLoadNumber.setItems(FXCollections.observableArrayList());
 		cbFeederNumber.setItems(FXCollections.observableArrayList());
 		cbBranchNumber.setItems(FXCollections.observableArrayList());
-		environment.getNetworkNodeMap().values().forEach((node) -> {
-			NetworkNodeStackPane loadStack = networkPane.drawLoad(node, environment);
+		getEnvironment().getNetworkNodeMap().values().forEach((node) -> {
+			NetworkNodeStackPane loadStack = networkPane.drawLoad(node, getEnvironment());
 			loadStack.setOnMouseClicked((event) -> {
 				if (node.isLoad()) { 
 					cbLoadNumber.setValue(((NetworkNodeStackPane)event.getSource()).getNetworkNodeNumber());
@@ -361,7 +364,7 @@ public class SimuladorRedeController extends Controller {
 		});
 		
 		//Desenha Branches
-		for (Branch branch : environment.getBranches()) {
+		for (Branch branch : getEnvironment().getBranches()) {
 			EventHandler<MouseEvent> mouseClicked = (event) -> {
 				Node node = (Node) event.getSource();
 				while (!(node instanceof BranchStackPane)) {
@@ -369,12 +372,12 @@ public class SimuladorRedeController extends Controller {
 				}
 				cbBranchNumber.setValue(((BranchStackPane) node).getBranchNum());
 			};
-			networkPane.drawBranch(branch, environment.getSizeX(), environment.getSizeY(), mouseClicked);
+			networkPane.drawBranch(branch, getEnvironment().getSizeX(), getEnvironment().getSizeY(), mouseClicked);
 			cbBranchNumber.getItems().add(branch.getNumber());
 		}
 		
 		//Desenha grid
-		networkPane.drawGrid(environment.getSizeX(), environment.getSizeY());
+		networkPane.drawGrid(getEnvironment().getSizeX(), getEnvironment().getSizeY());
 		networkPane.setSnapToPixel(false);
 	}
 	
@@ -393,7 +396,7 @@ public class SimuladorRedeController extends Controller {
 		shape.setStroke(Color.DARKORANGE);
 		shape.setStrokeWidth(2);
 		
-		Load load = environment.getLoad(selectedLoad);
+		Load load = getEnvironment().getLoad(selectedLoad);
 		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : "");
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblLoadPower.setText(df.format(load.getPower()));
@@ -424,7 +427,7 @@ public class SimuladorRedeController extends Controller {
 		shape.setStroke(Color.DARKORANGE);
 		shape.setStrokeWidth(2);
 		
-		Feeder feeder = environment.getFeeder(selectedFeeder);
+		Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
 		lblFeederPower.setText(df.format(feeder.getPower()));
 		lblFeederMinPower.setText(df.format(feeder.getMinPower()));
@@ -452,7 +455,7 @@ public class SimuladorRedeController extends Controller {
 		l.setStroke(Color.DARKORANGE);
 		l.setStrokeWidth(2);
 
-		Branch branch = environment.getBranch(branchStackPane.getBranchNum());
+		Branch branch = getEnvironment().getBranch(branchStackPane.getBranchNum());
 		lblBranchDe.setText(branch.getLoad1().getNodeNumber().toString());
 		lblBranchPara.setText(branch.getLoad2().getNodeNumber().toString());
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
@@ -476,7 +479,7 @@ public class SimuladorRedeController extends Controller {
 				int previousIndex = loadKeySet.indexOf(selected) - 1;
 				selected = (previousIndex < 0) ? loadKeySet.get(loadKeySet.size()-1) : loadKeySet.get(previousIndex);
 			}
-		} while (environment.getNetworkNode(selected).isFeeder());
+		} while (getEnvironment().getNetworkNode(selected).isFeeder());
 
 		cbLoadNumber.setValue(selected);
 		this.updateLoadInformationBox(networkPane.getLoadPaneMap().get(selected));
@@ -495,7 +498,7 @@ public class SimuladorRedeController extends Controller {
 				int nextIndex = loadKeySet.indexOf(selected) + 1;
 				selected = (nextIndex == loadKeySet.size()) ? loadKeySet.get(0) : loadKeySet.get(nextIndex);
 			}
-		} while (environment.getNetworkNode(selected).isFeeder());
+		} while (getEnvironment().getNetworkNode(selected).isFeeder());
 
 		cbLoadNumber.setValue(selected);
 		this.updateLoadInformationBox(networkPane.getLoadPaneMap().get(selected));
@@ -524,7 +527,7 @@ public class SimuladorRedeController extends Controller {
 				int previousIndex = loadKeySet.indexOf(selected) - 1;
 				selected = (previousIndex < 0) ? loadKeySet.get(loadKeySet.size()-1) : loadKeySet.get(previousIndex);
 			}
-		} while (environment.getNetworkNode(selected).isLoad());
+		} while (getEnvironment().getNetworkNode(selected).isLoad());
 
 		cbFeederNumber.setValue(selected);
 		this.updateFeederInformationBox(networkPane.getLoadPaneMap().get(selected));
@@ -543,7 +546,7 @@ public class SimuladorRedeController extends Controller {
 				int nextIndex = loadKeySet.indexOf(selected) + 1;
 				selected = (nextIndex == loadKeySet.size()) ? loadKeySet.get(0) : loadKeySet.get(nextIndex);
 			}
-		} while (environment.getNetworkNode(selected).isLoad());
+		} while (getEnvironment().getNetworkNode(selected).isLoad());
 
 		cbFeederNumber.setValue(selected);
 		this.updateFeederInformationBox(networkPane.getLoadPaneMap().get(selected));
@@ -604,15 +607,11 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	public void showPriorityModal() {
-		FXMLLoader loader = new FXMLLoader();
-		try {
-			loader.load(getClass().getResourceAsStream("/fxml/PriorityConfig.fxml"));
-			PriorityConfigController controller = (PriorityConfigController) loader.getController();
-			SimuladorRede.showModalScene(controller);
-
-		} catch (IOException e) {
-			throw new RuntimeException("Unable to load FXML file", e);
-		}
+		SimuladorRede.showModalScene("Priority Values", "/fxml/PriorityConfig.fxml");
+	}
+	
+	public void showExpressionEvaluator() {
+		SimuladorRede.showUtilityScene("Expression Evaluator", "/fxml/ExpressionEvaluator.fxml");
 	}
 	
 	@Override

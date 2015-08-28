@@ -71,11 +71,11 @@ public class PriorityConfigController extends Controller {
 			alert.showAndWait();
 		}
 		
-		SimuladorRede.closeModalScene();
+		SimuladorRede.closeScene(getStage());
 	}
 	
 	public void cancel() {
-		SimuladorRede.closeModalScene();
+		SimuladorRede.closeScene(getStage());
 	}
 	
 	@Override

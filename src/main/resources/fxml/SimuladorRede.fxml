@@ -18,9 +18,10 @@
               <MenuItem mnemonicParsing="false" onAction="#openNetworkFile" text="Import from CSV File" />
             </items>
           </Menu>
-            <Menu mnemonicParsing="false" text="Parameters">
+            <Menu mnemonicParsing="false" text="Options">
               <items>
-                <MenuItem mnemonicParsing="false" onAction="#showPriorityModal" text="Priority" />
+                <MenuItem mnemonicParsing="false" onAction="#showPriorityModal" text="Priority Values" />
+                  <MenuItem fx:id="miExpresionEvaluator" disable="true" mnemonicParsing="false" onAction="#showExpressionEvaluator" text="Expression Evaluator" />
               </items>
             </Menu>
         </menus>

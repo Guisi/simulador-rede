@@ -1,6 +1,9 @@
 package br.com.guisi.simulador.rede.view;
 
 import javafx.scene.Node;
+import javafx.stage.Stage;
+import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.enviroment.Environment;
 
 /**
  * Classe abstrata dos controllers
@@ -14,5 +17,19 @@ public abstract class Controller {
 	 * @return
 	 */
 	public abstract Node getView();
+	
+	private Stage stage;
+
+	public Stage getStage() {
+		return stage;
+	}
+
+	public void setStage(Stage stage) {
+		this.stage = stage;
+	}
+	
+	public Environment getEnvironment() {
+		return SimuladorRede.getEnvironment();
+	}
 	
 }
