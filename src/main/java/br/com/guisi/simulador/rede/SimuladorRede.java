@@ -83,6 +83,7 @@ public class SimuladorRede extends Application {
     	    	if(stage.getScene() == null) {
     	    		Scene scene = new Scene(myPane, Color.TRANSPARENT);
     	    		scene.getStylesheets().add("/css/estilo.css");
+    	    		scene.getStylesheets().add("/css/java-keywords.css");
     		    	
     	    		stage.setScene(scene);
     	    	} else {

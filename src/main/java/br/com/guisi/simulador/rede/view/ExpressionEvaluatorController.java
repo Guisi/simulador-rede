@@ -7,37 +7,51 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+
 import br.com.guisi.simulador.rede.util.EvaluationObject;
+import br.com.guisi.simulador.rede.util.richtext.JavaKeywords;
 
 public class ExpressionEvaluatorController extends Controller {
 
 	private final String EVALUATE_FUNCTION_NAME = "evaluateFunction";
-	private final String EVALUATE_FUNCTION = "var " + EVALUATE_FUNCTION_NAME + " = function(evalObj) '{' return evalObj.{0}; '}';";
+	private final String EVALUATE_FUNCTION = "var " + EVALUATE_FUNCTION_NAME + " = function(eval) '{' {0}; '}';";
 	
 	@FXML
 	private VBox root;
 	@FXML
-	private TextArea taExpression;
+	private VBox vBoxInternal;
 	@FXML
 	private Label lblResult;
+	
+	private CodeArea codeArea;
 	
 	private EvaluationObject evaluationObject;
 	
 	public void initialize() {
 		evaluationObject = new EvaluationObject();
 		evaluationObject.setEnvironment(getEnvironment());
+		
+		codeArea = new CodeArea();
+        codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+        codeArea.setPrefHeight(1000);
+
+        codeArea.textProperty().addListener((obs, oldText, newText) -> {
+            codeArea.setStyleSpans(0, JavaKeywords.computeHighlighting(newText));
+        });
+        vBoxInternal.getChildren().add(0, codeArea);
+        //codeArea.replaceText(0, 0, sampleCode);
 	}
 	
 	public void evaluateExpression() {
-		long ini = System.currentTimeMillis();
-		String expression = MessageFormat.format(EVALUATE_FUNCTION, taExpression.getText());
+		String expression = MessageFormat.format(EVALUATE_FUNCTION, codeArea.getText());
 		
 		try {
 			ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
@@ -51,8 +65,6 @@ public class ExpressionEvaluatorController extends Controller {
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 			alert.showAndWait();
 		}
-		
-		System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
 	}
 	
 	@Override

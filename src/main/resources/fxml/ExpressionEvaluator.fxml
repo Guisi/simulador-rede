@@ -5,11 +5,10 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="root" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="600.0" style="-fx-border-color: #CECECE;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.ExpressionEvaluatorController">
+<VBox fx:id="root" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" style="-fx-border-color: #CECECE;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.ExpressionEvaluatorController">
    <children>
-      <VBox alignment="TOP_CENTER" spacing="10.0">
+      <VBox fx:id="vBoxInternal" alignment="TOP_CENTER" spacing="10.0">
          <children>
-            <TextArea fx:id="taExpression" prefHeight="500.0" promptText="Type the expression here" wrapText="true" />
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                <children>
                   <Button mnemonicParsing="false" onAction="#evaluateExpression" text="Evaluate" />
