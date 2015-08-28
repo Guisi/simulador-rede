@@ -51,6 +51,7 @@ public class ExpressionEvaluatorController extends Controller {
 	}
 	
 	public void evaluateExpression() {
+		lblResult.setText("");
 		String expression = MessageFormat.format(EVALUATE_FUNCTION, codeArea.getText());
 		
 		try {
