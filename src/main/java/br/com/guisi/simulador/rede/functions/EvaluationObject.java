@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.util;
+package br.com.guisi.simulador.rede.functions;
 
 import br.com.guisi.simulador.rede.enviroment.Environment;
 

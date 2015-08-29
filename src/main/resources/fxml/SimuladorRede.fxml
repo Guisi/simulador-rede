@@ -21,7 +21,8 @@
             <Menu mnemonicParsing="false" text="Options">
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#showPriorityModal" text="Priority Values" />
-                  <MenuItem fx:id="miExpresionEvaluator" disable="true" mnemonicParsing="false" onAction="#showExpressionEvaluator" text="Expression Evaluator" />
+                  <MenuItem mnemonicParsing="false" onAction="#showFunctionsWindow" text="Functions" />
+                  <MenuItem fx:id="miExpresionEvaluator" disable="true" mnemonicParsing="false" onAction="#showExpressionEvaluatorWindow" text="Expression Evaluator" />
               </items>
             </Menu>
         </menus>

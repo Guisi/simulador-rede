@@ -610,8 +610,12 @@ public class SimuladorRedeController extends Controller {
 		SimuladorRede.showModalScene("Priority Values", "/fxml/PriorityConfig.fxml");
 	}
 	
-	public void showExpressionEvaluator() {
+	public void showExpressionEvaluatorWindow() {
 		SimuladorRede.showUtilityScene("Expression Evaluator", "/fxml/ExpressionEvaluator.fxml");
+	}
+	
+	public void showFunctionsWindow() {
+		SimuladorRede.showModalScene("Functions", "/fxml/Functions.fxml");
 	}
 	
 	@Override

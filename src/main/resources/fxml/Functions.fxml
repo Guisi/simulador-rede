@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-border-color: #CECECE;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.FunctionsController">
+   <children>
+      <VBox fx:id="vBoxInternal" alignment="TOP_CENTER" spacing="10.0" />
+      <TableView fx:id="tvFunctions">
+        <columns>
+          <TableColumn fx:id="tcFunctionName" minWidth="300.0" prefWidth="350.0" text="Function Name" />
+          <TableColumn fx:id="tcFunctionExpression" minWidth="300.0" prefWidth="400.0" text="Function Expression" />
+        </columns>
+      </TableView>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

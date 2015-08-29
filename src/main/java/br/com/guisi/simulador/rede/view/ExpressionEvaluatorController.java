@@ -16,7 +16,7 @@ import javax.script.ScriptEngineManager;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 
-import br.com.guisi.simulador.rede.util.EvaluationObject;
+import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.util.richtext.JavaKeywords;
 
 public class ExpressionEvaluatorController extends Controller {
