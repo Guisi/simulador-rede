@@ -40,6 +40,7 @@ public class SimuladorRede extends Application {
         	preferences = PreferencesUtils.loadPreferences();
         	
         	Pane node = loader.load(getClass().getResourceAsStream("/fxml/SimuladorRede.fxml"));
+			Controller controller = (Controller) loader.getController();
         	
 			Scene scene = new Scene(node);
 			primaryStage.setScene(scene);
@@ -47,6 +48,7 @@ public class SimuladorRede extends Application {
 			primaryStage.getIcons().add(new Image("/img/bolt.png"));
 			scene.getStylesheets().add("/css/estilo.css");
 			primaryStage.setMaximized(true);
+			controller.initializeController();
 			primaryStage.show();
 			
         } catch (IOException e) {
@@ -54,22 +56,23 @@ public class SimuladorRede extends Application {
         }
 	}
 	
-	public static void showModalScene(String title, String fxmlFile) {
+	public static void showModalScene(String title, String fxmlFile, Object... data) {
     	showScene(title, fxmlFile, true);
     }
 	
-	public static void showUtilityScene(String title, String fxmlFile) {
+	public static void showUtilityScene(String title, String fxmlFile, Object... data) {
     	showScene(title, fxmlFile, false);
     }
 	
-	public static void showScene(String title, String fxmlFile, boolean modal) {
+	public static void showScene(String title, String fxmlFile, boolean modal, Object... data) {
 		Stage stage = openStages.get(fxmlFile);
 		
+		Controller controller = null;
 		if (stage == null) {
 			FXMLLoader loader = new FXMLLoader();
 			try {
 				loader.load(SimuladorRede.class.getResourceAsStream(fxmlFile));
-				Controller controller = (Controller) loader.getController();
+				controller = (Controller) loader.getController();
 				
 				stage = new Stage(StageStyle.UTILITY);
 		    	stage.initModality(modal ? Modality.APPLICATION_MODAL : Modality.NONE);
@@ -96,6 +99,7 @@ public class SimuladorRede extends Application {
 			}
 		}
 		
+		controller.initializeController(data);
 		stage.centerOnScreen();
 
 		if (!stage.isShowing()) {

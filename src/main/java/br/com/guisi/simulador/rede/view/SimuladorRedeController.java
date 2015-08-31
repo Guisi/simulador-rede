@@ -172,7 +172,8 @@ public class SimuladorRedeController extends Controller {
 	private Integer selectedFeeder;
 	private Integer selectedBranch;
 	
-	public void initialize() {
+	@Override
+	public void initializeController(Object... data) {
 		this.resetScreen();
 		
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo.csv");

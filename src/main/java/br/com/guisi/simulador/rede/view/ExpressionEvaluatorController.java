@@ -35,13 +35,14 @@ public class ExpressionEvaluatorController extends Controller {
 	
 	private EvaluationObject evaluationObject;
 	
-	public void initialize() {
+	@Override
+	public void initializeController(Object... data) {
 		evaluationObject = new EvaluationObject();
 		evaluationObject.setEnvironment(getEnvironment());
 		
 		codeArea = new CodeArea();
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-        codeArea.setPrefHeight(1000);
+        codeArea.setPrefHeight(10000);
 
         codeArea.textProperty().addListener((obs, oldText, newText) -> {
             codeArea.setStyleSpans(0, JavaKeywords.computeHighlighting(newText));

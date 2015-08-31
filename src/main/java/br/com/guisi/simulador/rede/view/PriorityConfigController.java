@@ -31,7 +31,8 @@ public class PriorityConfigController extends Controller {
 	@FXML
 	private TextField tfPriority4;
 	
-	public void initialize() {
+	@Override
+	public void initializeController(Object... data) {
 		Map<PreferenceKey, String> preferences = SimuladorRede.getPreferences();
 		
 		tfPriority1.setText(preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_1));

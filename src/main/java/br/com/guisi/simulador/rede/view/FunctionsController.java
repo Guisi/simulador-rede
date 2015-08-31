@@ -11,6 +11,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
 
 public class FunctionsController extends Controller {
@@ -27,13 +28,13 @@ public class FunctionsController extends Controller {
 	@FXML
 	private TableColumn<FunctionItem, String> tcFunctionExpression;
 	
-	public void initialize() {
+	@Override
+	public void initializeController(Object... data) {
 		tvFunctions.setRowFactory( tv -> {
 		    TableRow<FunctionItem> row = new TableRow<>();
 		    row.setOnMouseClicked(event -> {
 		        if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
-		        	FunctionItem rowData = row.getItem();
-		            System.out.println(rowData);
+		        	 editFunctionItem(row.getItem());
 		        }
 		    });
 		    return row ;
@@ -49,6 +50,10 @@ public class FunctionsController extends Controller {
 		
 		tvFunctions.setItems(FXCollections.observableArrayList());
 		tvFunctions.getItems().addAll(functions);
+	}
+	
+	private void editFunctionItem(FunctionItem functionItem) {
+		SimuladorRede.showModalScene("Edit Function", "/fxml/FunctionEdit.fxml");
 	}
 	
 	@Override

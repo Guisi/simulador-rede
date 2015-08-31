@@ -16,7 +16,7 @@ public class JavaKeywords {
             "continue", "default", "do", "double", "else",
             "enum", "extends", "final", "finally", "float",
             "for", "for each", "goto", "in", "if", "implements", 
-            "import",
+            "import", "function",
             "instanceof", "int", "interface", "long", "native",
             "new", "package", "private", "protected", "public",
             "return", "short", "static", "strictfp", "super",

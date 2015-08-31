@@ -18,6 +18,8 @@ public abstract class Controller {
 	 */
 	public abstract Node getView();
 	
+	public abstract void initializeController(Object... data);
+	
 	private Stage stage;
 
 	public Stage getStage() {
