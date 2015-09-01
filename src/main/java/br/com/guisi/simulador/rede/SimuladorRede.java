@@ -18,6 +18,7 @@ import br.com.guisi.simulador.rede.constants.PreferenceKey;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.util.PreferencesUtils;
 import br.com.guisi.simulador.rede.view.Controller;
+import br.com.guisi.simulador.rede.view.SimuladorRedeController;
 
 public class SimuladorRede extends Application {
 
@@ -39,7 +40,7 @@ public class SimuladorRede extends Application {
         try {
         	preferences = PreferencesUtils.loadPreferences();
         	
-        	Pane node = loader.load(getClass().getResourceAsStream("/fxml/SimuladorRede.fxml"));
+        	Pane node = loader.load(getClass().getResourceAsStream(SimuladorRedeController.FXML_FILE));
 			Controller controller = (Controller) loader.getController();
         	
 			Scene scene = new Scene(node);
@@ -57,46 +58,44 @@ public class SimuladorRede extends Application {
 	}
 	
 	public static void showModalScene(String title, String fxmlFile, Object... data) {
-    	showScene(title, fxmlFile, true);
+    	showScene(title, fxmlFile, true, data);
     }
 	
 	public static void showUtilityScene(String title, String fxmlFile, Object... data) {
-    	showScene(title, fxmlFile, false);
+    	showScene(title, fxmlFile, false, data);
     }
 	
 	public static void showScene(String title, String fxmlFile, boolean modal, Object... data) {
 		Stage stage = openStages.get(fxmlFile);
 		
-		Controller controller = null;
+		FXMLLoader loader = new FXMLLoader();
+		try {
+			loader.load(SimuladorRede.class.getResourceAsStream(fxmlFile));
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to load FXML file", e);
+		}
+		Controller controller = (Controller) loader.getController();
+		
 		if (stage == null) {
-			FXMLLoader loader = new FXMLLoader();
-			try {
-				loader.load(SimuladorRede.class.getResourceAsStream(fxmlFile));
-				controller = (Controller) loader.getController();
-				
-				stage = new Stage(StageStyle.UTILITY);
-		    	stage.initModality(modal ? Modality.APPLICATION_MODAL : Modality.NONE);
-		    	stage.initOwner(primaryStage);
-		    	stage.setTitle(title);
-		    	final Stage finalStage = stage;
-		    	stage.setOnCloseRequest((event) -> SimuladorRede.closeScene(finalStage));
-		    	controller.setStage(stage);
+			stage = new Stage(StageStyle.UTILITY);
+	    	stage.initModality(modal ? Modality.APPLICATION_MODAL : Modality.NONE);
+	    	stage.initOwner(primaryStage);
+	    	stage.setTitle(title);
+	    	stage.setOnCloseRequest((event) -> SimuladorRede.closeScene(controller));
+	    	controller.setStage(stage);
+	    	
+	    	Pane myPane = (Pane) controller.getView();
+	    	if(stage.getScene() == null) {
+	    		Scene scene = new Scene(myPane, Color.TRANSPARENT);
+	    		scene.getStylesheets().add("/css/estilo.css");
+	    		scene.getStylesheets().add("/css/java-keywords.css");
 		    	
-		    	Pane myPane = (Pane) controller.getView();
-    	    	if(stage.getScene() == null) {
-    	    		Scene scene = new Scene(myPane, Color.TRANSPARENT);
-    	    		scene.getStylesheets().add("/css/estilo.css");
-    	    		scene.getStylesheets().add("/css/java-keywords.css");
-    		    	
-    	    		stage.setScene(scene);
-    	    	} else {
-    	    		stage.getScene().setRoot(myPane);
-    	    	}
-    	    	
-    	    	openStages.put(fxmlFile, stage);
-			} catch (IOException e) {
-				throw new RuntimeException("Unable to load FXML file", e);
-			}
+	    		stage.setScene(scene);
+	    	} else {
+	    		stage.getScene().setRoot(myPane);
+	    	}
+	    	
+	    	openStages.put(fxmlFile, stage);
 		}
 		
 		controller.initializeController(data);
@@ -115,13 +114,16 @@ public class SimuladorRede extends Application {
 	/**
      * Fecha cena
      */
-    public static void closeScene(Stage stage){
+    public static void closeScene(Controller controller) {
+    	Stage stage = controller.getStage();
+    	String fxmlFile = controller.getFxmlFile();
     	if (stage.getModality().equals(Modality.APPLICATION_MODAL)) {
     		primaryStage.getScene().getRoot().setEffect(null);
     	}
 		if (stage != null && stage.isShowing()) {
 			stage.close();
 		}
+		openStages.remove(fxmlFile);
     }
 
 	public static Stage getPrimaryStage() {

@@ -42,6 +42,8 @@ import br.com.guisi.simulador.rede.view.layout.ZoomingPane;
 
 public class SimuladorRedeController extends Controller {
 
+	public static final String FXML_FILE = "/fxml/SimuladorRede.fxml";
+	
 	@FXML
 	private VBox root;
 	@FXML
@@ -608,19 +610,24 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	public void showPriorityModal() {
-		SimuladorRede.showModalScene("Priority Values", "/fxml/PriorityConfig.fxml");
+		SimuladorRede.showModalScene("Priority Values", PriorityConfigController.FXML_FILE);
 	}
 	
 	public void showExpressionEvaluatorWindow() {
-		SimuladorRede.showUtilityScene("Expression Evaluator", "/fxml/ExpressionEvaluator.fxml");
+		SimuladorRede.showUtilityScene("Expression Evaluator", ExpressionEvaluatorController.FXML_FILE);
 	}
 	
 	public void showFunctionsWindow() {
-		SimuladorRede.showModalScene("Functions", "/fxml/Functions.fxml");
+		SimuladorRede.showModalScene("Functions", FunctionsController.FXML_FILE);
 	}
 	
 	@Override
 	public Node getView() {
 		return root;
+	}
+	
+	@Override
+	public String getFxmlFile() {
+		return FXML_FILE;
 	}
 }

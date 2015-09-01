@@ -5,12 +5,18 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="400.0" style="-fx-border-color: #CECECE;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.FunctionEditController">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-border-color: #CECECE;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.FunctionEditController">
    <children>
       <VBox fx:id="vBoxInternal">
          <children>
             <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Function Name" />
             <TextField fx:id="txFunctionName" />
+            <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Function Type">
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Label>
+            <ComboBox fx:id="cbFunctionType" promptText="-- Select --" />
             <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Function Expression">
                <VBox.margin>
                   <Insets top="10.0" />

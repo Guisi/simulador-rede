@@ -24,3 +24,11 @@
 	-fx-background-repeat: no-repeat;
 	-fx-background-position: center;
 }
+
+.btnPlus {
+	-fx-background-image: url("../img/plus.png");
+	-fx-background-repeat: no-repeat;
+	-fx-background-position: center;
+	-fx-pref-height: 24px;
+	-fx-pref-width: 24px;
+}

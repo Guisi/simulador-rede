@@ -18,6 +18,8 @@ import br.com.guisi.simulador.rede.util.DoubleTextFieldListener;
 import br.com.guisi.simulador.rede.util.PreferencesUtils;
 
 public class PriorityConfigController extends Controller {
+	
+	public static final String FXML_FILE = "/fxml/PriorityConfig.fxml";
 
 	@FXML
 	private VBox root;
@@ -72,15 +74,20 @@ public class PriorityConfigController extends Controller {
 			alert.showAndWait();
 		}
 		
-		SimuladorRede.closeScene(getStage());
+		SimuladorRede.closeScene(this);
 	}
 	
 	public void cancel() {
-		SimuladorRede.closeScene(getStage());
+		SimuladorRede.closeScene(this);
 	}
 	
 	@Override
 	public Node getView() {
 		return root;
+	}
+	
+	@Override
+	public String getFxmlFile() {
+		return FXML_FILE;
 	}
 }

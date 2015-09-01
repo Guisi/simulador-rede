@@ -21,6 +21,8 @@ import br.com.guisi.simulador.rede.util.richtext.JavaKeywords;
 
 public class ExpressionEvaluatorController extends Controller {
 
+	public static final String FXML_FILE = "/fxml/ExpressionEvaluator.fxml";
+	
 	private final String EVALUATE_FUNCTION_NAME = "evaluateFunction";
 	private final String EVALUATE_FUNCTION = "var " + EVALUATE_FUNCTION_NAME + " = function(eval) '{' {0}; '}';";
 	
@@ -72,5 +74,10 @@ public class ExpressionEvaluatorController extends Controller {
 	@Override
 	public Node getView() {
 		return root;
+	}
+	
+	@Override
+	public String getFxmlFile() {
+		return FXML_FILE;
 	}
 }
