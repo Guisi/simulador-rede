@@ -88,44 +88,4 @@ public class Environment {
 	public List<Branch> getSwitches() {
 		return switches;
 	}
-
-	public long getLoadsSupplied() {
-		return loads.stream().filter((load) -> load.isSupplied()).count();
-	}
-	
-	public long getLoadsPartiallySupplied() {
-		return loads.stream().filter((load) -> load.isPartiallySupplied()).count();
-	}
-	
-	public long getLoadsNotSupplied() {
-		return loads.stream().filter((load) -> load.isNotSupplied()).count();
-	}
-	
-	public long getLoadsOutOfService() {
-		return loads.stream().filter((load) -> !load.isOn()).count();
-	}
-	
-	public double getLoadsPowerSupplied() {
-		return loads.stream().mapToDouble((load) -> load.getPowerSupplied()).sum();
-	}
-	
-	public double getLoadsPowerNotSupplied() {
-		return loads.stream().filter((load) -> load.isOn()).mapToDouble((load) -> load.getPowerNotSupplied()).sum();
-	}
-	
-	public double getFeedersUsedPower() {
-		return feeders.stream().mapToDouble((feeder) -> feeder.getUsedPower()).sum();
-	}
-	
-	public double getFeedersAvailablePower() {
-		return feeders.stream().mapToDouble((feeder) -> feeder.getAvailablePower()).sum();
-	}
-	
-	public double getLoadsRestoredVsPriority() {
-		return 0;
-	}
-	
-	public int getSwitchingOperations() {
-		return branches.stream().mapToInt((branch) -> branch.getSwitchOperations()).sum();
-	}
 }
