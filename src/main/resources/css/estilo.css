@@ -32,3 +32,11 @@
 	-fx-pref-height: 24px;
 	-fx-pref-width: 24px;
 }
+
+.btnRemove {
+	-fx-background-image: url("../img/remove.png");
+	-fx-background-repeat: no-repeat;
+	-fx-background-position: center;
+	-fx-pref-height: 24px;
+	-fx-pref-width: 24px;
+}

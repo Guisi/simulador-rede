@@ -113,10 +113,6 @@ public class Environment {
 		return loads.stream().filter((load) -> load.isOn()).mapToDouble((load) -> load.getPowerNotSupplied()).sum();
 	}
 	
-	public double getLoadsDemand() {
-		return loads.stream().filter((load) -> load.isOn()).mapToDouble((load) -> load.getPower()).sum();
-	}
-	
 	public double getFeedersUsedPower() {
 		return feeders.stream().mapToDouble((feeder) -> feeder.getUsedPower()).sum();
 	}

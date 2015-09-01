@@ -1,35 +1,26 @@
 package br.com.guisi.simulador.rede.view;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
+import java.util.Optional;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
-
-import org.apache.commons.lang3.StringUtils;
-
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
+import br.com.guisi.simulador.rede.util.FunctionsUtils;
 
 public class FunctionsController extends Controller {
 
 	public static final String FXML_FILE = "/fxml/Functions.fxml";
-	private static final String FUNCTIONS_PROPERTIES = "functions.properties";
 	
 	@FXML
 	private VBox root;
@@ -58,7 +49,7 @@ public class FunctionsController extends Controller {
 		});
 		
 		try {
-			this.functions = this.loadProperties();
+			this.functions = FunctionsUtils.loadProperties();
 		} catch (IOException e) {
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 			alert.showAndWait();
@@ -71,6 +62,12 @@ public class FunctionsController extends Controller {
 		
 		tvFunctions.setItems(FXCollections.observableArrayList());
 		tvFunctions.getItems().addAll(functions);
+		
+		SimuladorRedeController controller = (SimuladorRedeController) data[0];
+		this.getStage().setOnCloseRequest((event) -> {
+			controller.updateFunctionsTables();
+			SimuladorRede.closeScene(this);
+		});
 	}
 	
 	private void editFunctionItem(FunctionItem functionItem) {
@@ -81,51 +78,48 @@ public class FunctionsController extends Controller {
 		SimuladorRede.showModalScene("Edit Function", FunctionEditController.FXML_FILE, new FunctionItem(), this);
 	}
 	
+	public void removeFunction() {
+		FunctionItem fi = tvFunctions.getSelectionModel().getSelectedItem();
+		if (fi == null) {
+			Alert alert = new Alert(AlertType.ERROR, "Selecione um item para remover!");
+			alert.showAndWait();
+		} else {
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			alert.setTitle("Confirmação");
+			alert.setContentText("Are you sure??");
+
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.get() == ButtonType.OK){
+			    this.removeFunctionItem(fi);
+				alert.close();
+			} else {
+				alert.close();
+			}
+			
+		}
+	}
+	
+	private void removeFunctionItem(FunctionItem functionItem) {
+		this.functions.remove(functionItem);
+		this.saveList();
+	}
+	
 	public void updateList(FunctionItem functionItem) {
 		if (this.functions.contains(functionItem)) {
 			this.functions.set(functions.indexOf(functionItem), functionItem);
 		} else {
-			functionItem.setFunctionKey(functions.size());
+			functionItem.setFunctionIndex(functions.size());
 			this.functions.add(functionItem);
 		}
-		
+		this.saveList();
+	}
+	
+	private void saveList() {
 		tvFunctions.getItems().clear();
 		tvFunctions.getItems().addAll(functions);
 		
-		this.saveProperties();
-	}
-	
-	private List<FunctionItem> loadProperties() throws IOException {
-		List<FunctionItem> functions = new ArrayList<>();
-		if (Files.exists(Paths.get(FUNCTIONS_PROPERTIES))) {
-			Properties prop = new Properties();
-			prop.load(new FileInputStream(FUNCTIONS_PROPERTIES));
-			
-			for (Entry<Object, Object> entry : prop.entrySet()) {
-				String key = (String) entry.getKey();
-				String value = (String) entry.getValue();
-				if (StringUtils.isNotBlank(value)) {
-					String[] arr = value.split("@");
-					if (arr.length == 3) {
-						FunctionItem fi = new FunctionItem(key, arr[0], arr[1], arr[2]);
-						functions.add(fi);
-					}
-				}
-			}
-		}
-		Collections.sort(functions);
-		return functions;
-	}
-	
-	private void saveProperties() {
-		Properties prop = new Properties();
-		for (FunctionItem function : this.functions) {
-			String value = function.getFunctionName().get() + "@" + function.getFunctionType().get() + "@" + function.getFunctionExpression();
-			prop.put(function.getFunctionKey(), value);
-		}
-		
 		try {
-			prop.store(new FileOutputStream(FUNCTIONS_PROPERTIES), null);
+			FunctionsUtils.saveProperties(this.functions);
 		} catch (IOException e) {
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 			alert.showAndWait();

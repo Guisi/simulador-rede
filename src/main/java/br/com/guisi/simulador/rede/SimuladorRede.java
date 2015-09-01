@@ -82,7 +82,6 @@ public class SimuladorRede extends Application {
 	    	stage.initOwner(primaryStage);
 	    	stage.setTitle(title);
 	    	stage.setOnCloseRequest((event) -> SimuladorRede.closeScene(controller));
-	    	controller.setStage(stage);
 	    	
 	    	Pane myPane = (Pane) controller.getView();
 	    	if(stage.getScene() == null) {
@@ -98,6 +97,7 @@ public class SimuladorRede extends Application {
 	    	openStages.put(fxmlFile, stage);
 		}
 		
+		controller.setStage(stage);
 		controller.initializeController(data);
 		stage.centerOnScreen();
 

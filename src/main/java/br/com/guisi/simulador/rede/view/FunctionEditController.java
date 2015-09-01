@@ -77,8 +77,6 @@ public class FunctionEditController extends Controller {
 			return;
 		}
 
-		functionName = functionName.replace("@", "");
-		functionExpression = functionExpression.replace("@", "");
 		this.functionItem.getFunctionName().set(functionName);
 		this.functionItem.getFunctionType().set(functionType);
         this.functionItem.setFunctionExpression(codeArea.getText());

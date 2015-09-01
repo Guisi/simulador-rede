@@ -12,7 +12,6 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		
 		File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
 		Environment environment = null;
 		

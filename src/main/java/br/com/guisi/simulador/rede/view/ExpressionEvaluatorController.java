@@ -1,7 +1,5 @@
 package br.com.guisi.simulador.rede.view;
 
-import java.text.MessageFormat;
-
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -9,22 +7,16 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
+import br.com.guisi.simulador.rede.util.EvaluatorUtils;
 import br.com.guisi.simulador.rede.util.richtext.JavaKeywords;
 
 public class ExpressionEvaluatorController extends Controller {
 
 	public static final String FXML_FILE = "/fxml/ExpressionEvaluator.fxml";
-	
-	private final String EVALUATE_FUNCTION_NAME = "evaluateFunction";
-	private final String EVALUATE_FUNCTION = "var " + EVALUATE_FUNCTION_NAME + " = function(eval) '{' {0}; '}';";
 	
 	@FXML
 	private VBox root;
@@ -50,20 +42,12 @@ public class ExpressionEvaluatorController extends Controller {
             codeArea.setStyleSpans(0, JavaKeywords.computeHighlighting(newText));
         });
         vBoxInternal.getChildren().add(0, codeArea);
-        //codeArea.replaceText(0, 0, sampleCode);
 	}
 	
 	public void evaluateExpression() {
 		lblResult.setText("");
-		String expression = MessageFormat.format(EVALUATE_FUNCTION, codeArea.getText());
-		
 		try {
-			ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-			engine.eval(expression);
-			
-			Invocable invocable = (Invocable) engine;
-			Object result = invocable.invokeFunction(EVALUATE_FUNCTION_NAME, evaluationObject);
-			
+			Object result = EvaluatorUtils.evaluateExpression(evaluationObject, codeArea.getText());
 			lblResult.setText(String.valueOf(result));
 		} catch (Exception e) {
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage());

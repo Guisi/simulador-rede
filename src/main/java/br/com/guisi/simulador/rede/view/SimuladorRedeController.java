@@ -1,6 +1,7 @@
 package br.com.guisi.simulador.rede.view;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +18,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -30,11 +36,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.Constants;
+import br.com.guisi.simulador.rede.constants.FunctionType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
+import br.com.guisi.simulador.rede.functions.EvaluationObject;
+import br.com.guisi.simulador.rede.functions.FunctionItem;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
+import br.com.guisi.simulador.rede.util.EvaluatorUtils;
+import br.com.guisi.simulador.rede.util.FunctionsUtils;
 import br.com.guisi.simulador.rede.view.layout.BranchStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkPane;
@@ -53,7 +64,7 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private HBox networkBox;
 	@FXML
-	private MenuItem miExpresionEvaluator;
+	private MenuItem miExpressionEvaluator;
 
 	/** Loads */
 	@FXML
@@ -127,45 +138,8 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private Button btnNextBranch;
 	
-	/** Power flow */
 	@FXML
-	private Label lblLoadsSupplied;
-	@FXML
-	private Label lblLoadsPartiallySupplied;
-	@FXML
-	private Label lblLoadsNotSupplied;
-	@FXML
-	private Label lblLoadsOutOfService;
-	@FXML
-	private Label lblPowerSupplied;
-	@FXML
-	private Label lblPowerNotSupplied;
-	@FXML
-	private Label lblFeedersUsedPower;
-	@FXML
-	private Label lblFeedersAvailablePower;
-	
-	/** Distribution System */
-	@FXML
-	private Label lblTotalNumberFeeders;
-	@FXML
-	private Label lblTotalNumberLoads;
-	@FXML
-	private Label lblTotalNumberBranches;
-	@FXML
-	private Label lblTotalNumberSwitches;
-	@FXML
-	private Label lblTotalDemand;
-	
-	/** Objective Functions */
-	@FXML
-	private Label lblLoadsRestoredVsPriority;
-	@FXML
-	private Label lblSwitchingOperations;
-	@FXML
-	private Label lblLossesDuringRestoration;
-	@FXML
-	private Label lblFeedersBalancing;
+	private TabPane tabPaneFunctions;
 	
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
@@ -176,6 +150,7 @@ public class SimuladorRedeController extends Controller {
 	
 	@Override
 	public void initializeController(Object... data) {
+		this.createFunctionTables();
 		this.resetScreen();
 		
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
@@ -186,7 +161,7 @@ public class SimuladorRedeController extends Controller {
 	 * Volta a tela ao estado original
 	 */
 	public void resetScreen() {
-		miExpresionEvaluator.setDisable(true);
+		miExpressionEvaluator.setDisable(true);
 		zoomSlider.setValue(1);
 		
 		networkPane = new NetworkPane();
@@ -226,29 +201,51 @@ public class SimuladorRedeController extends Controller {
 		lblBranchDistance.setText("");
 		lblBranchStatus.setText("");
 		
-		lblLoadsSupplied.setText("");
-		lblLoadsPartiallySupplied.setText("");
-		lblLoadsNotSupplied.setText("");
-		lblLoadsOutOfService.setText("");
-		lblPowerSupplied.setText("");
-		lblPowerNotSupplied.setText("");
-		lblFeedersUsedPower.setText("");
-		lblFeedersAvailablePower.setText("");
-		
-		lblTotalNumberFeeders.setText("");
-		lblTotalNumberLoads.setText("");
-		lblTotalNumberBranches.setText("");
-		lblTotalNumberSwitches.setText("");
-		lblTotalDemand.setText("");
-		
-		lblLoadsRestoredVsPriority.setText("");
-		lblSwitchingOperations.setText("");
-		lblLossesDuringRestoration.setText("");
-		lblFeedersBalancing.setText("");
-		
 		selectedLoad = null;
 		selectedFeeder = null;
 		selectedBranch = null;
+		
+		for (Tab tab: tabPaneFunctions.getTabs()) {
+			@SuppressWarnings("unchecked")
+			TableView<FunctionItem> tv = (TableView<FunctionItem>) tab.getContent();
+			tv.getItems().clear();
+		}
+	}
+	
+	/**
+	 * Cria os tabs e tabelas para cada tipo de função
+	 */
+	private void createFunctionTables() {
+		tabPaneFunctions.getTabs().clear();
+		for (FunctionType type : FunctionType.values()) {
+			TableView<FunctionItem> tv = new TableView<FunctionItem>();
+			tv.widthProperty().addListener((source, oldWidth, newWidth) -> {
+                Pane header = (Pane) tv.lookup("TableHeaderRow");
+                if (header.isVisible()){
+                    header.setMaxHeight(0);
+                    header.setMinHeight(0);
+                    header.setPrefHeight(0);
+                    header.setVisible(false);
+                }
+			});
+			tv.setPrefHeight(170);
+			tv.setItems(FXCollections.observableArrayList());
+			
+			TableColumn<FunctionItem, String> tcFunctionName = new TableColumn<FunctionItem, String>();
+			tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getFunctionName());
+			tcFunctionName.setStyle("-fx-font-weight: bold; -fx-alignment: center-right;");
+			tcFunctionName.setPrefWidth(300);
+			tv.getColumns().add(tcFunctionName);
+			
+			TableColumn<FunctionItem, String> tcFunctionResult = new TableColumn<FunctionItem, String>();
+			tcFunctionResult.setPrefWidth(300);
+			tcFunctionResult.setCellValueFactory(cellData -> cellData.getValue().getFunctionResult());
+			tv.getColumns().add(tcFunctionResult);
+			
+			Tab tab = new Tab(type.getDescription());
+			tab.setContent(tv);
+			tabPaneFunctions.getTabs().add(tab);
+		}
 	}
 	
 	/**
@@ -268,6 +265,10 @@ public class SimuladorRedeController extends Controller {
 		}
 	}
 	
+	/**
+	 * Carrega o ambiente a partir do arquivo
+	 * @param csvFile
+	 */
 	private void loadEnvironmentFromFile(File csvFile) {
 		try {
 			Environment environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
@@ -290,42 +291,51 @@ public class SimuladorRedeController extends Controller {
 			
 			this.drawNetworkFromEnvironment();
 			
-			this.updateDistributionSystemInfo();
-			this.updatePowerFlowInfo();
-			this.updateObjectiveFunctions();
+			this.updateFunctionsTables();
 		}
 	}
 	
-	private void updateDistributionSystemInfo() {
-		lblTotalNumberFeeders.setText(String.valueOf(getEnvironment().getFeeders().size()));
-		lblTotalNumberLoads.setText(String.valueOf(getEnvironment().getLoads().size()));
-		lblTotalNumberBranches.setText(String.valueOf(getEnvironment().getBranches().size()));
-		lblTotalNumberSwitches.setText(String.valueOf(getEnvironment().getSwitches().size()));
-		
-		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblTotalDemand.setText(df.format(getEnvironment().getLoadsDemand()));
-	}
-	
-	private void updatePowerFlowInfo() {
-		lblLoadsSupplied.setText(String.valueOf(getEnvironment().getLoadsSupplied()));
-		lblLoadsPartiallySupplied.setText(String.valueOf(getEnvironment().getLoadsPartiallySupplied()));
-		lblLoadsNotSupplied.setText(String.valueOf(getEnvironment().getLoadsNotSupplied()));
-		lblLoadsOutOfService.setText(String.valueOf(getEnvironment().getLoadsOutOfService()));
-
-		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblPowerSupplied.setText(df.format(getEnvironment().getLoadsPowerSupplied()));
-		lblPowerNotSupplied.setText(df.format(getEnvironment().getLoadsPowerNotSupplied()));
-		
-		lblFeedersUsedPower.setText(df.format(getEnvironment().getFeedersUsedPower()));
-		lblFeedersAvailablePower.setText(df.format(getEnvironment().getFeedersAvailablePower()));
-	}
-	
-	private void updateObjectiveFunctions() {
-		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblLoadsRestoredVsPriority.setText(df.format(getEnvironment().getLoadsRestoredVsPriority()));
-		lblSwitchingOperations.setText(String.valueOf(getEnvironment().getSwitchingOperations()));
-		lblLossesDuringRestoration.setText("");
-		lblFeedersBalancing.setText("");
+	/**
+	 * Com base nas funções cadastradas, executa as respectivas expressôes
+	 * e inclui nas tabelas
+	 */
+	public void updateFunctionsTables() {
+		if (getEnvironment() != null) {
+			try {
+				for (Tab tab: tabPaneFunctions.getTabs()) {
+					@SuppressWarnings("unchecked")
+					TableView<FunctionItem> tv = (TableView<FunctionItem>) tab.getContent();
+					tv.getItems().clear();
+				}
+				
+				EvaluationObject evaluationObject = new EvaluationObject();
+				evaluationObject.setEnvironment(getEnvironment());
+				
+				List<FunctionItem> functions = FunctionsUtils.loadProperties();
+				for (FunctionItem functionItem : functions) {
+					FunctionType ft = FunctionType.getByDescription(functionItem.getFunctionType().get());
+					functionItem.getFunctionName().set(functionItem.getFunctionName().get() + ":");
+					String expression = functionItem.getFunctionExpression();
+					
+					String functionResult;
+					try {
+						Object result = EvaluatorUtils.evaluateExpression(evaluationObject, expression);
+						functionResult = String.valueOf(result);
+					} catch (Exception e) {
+						functionResult = "Error in expression evaluation!";
+					}
+					functionItem.getFunctionResult().set(functionResult);
+					
+					@SuppressWarnings("unchecked")
+					TableView<FunctionItem> tv = (TableView<FunctionItem>) tabPaneFunctions
+						.getTabs().get(ft.ordinal()).getContent();
+					tv.getItems().add(functionItem);
+				}
+			} catch (IOException e) {
+				Alert alert = new Alert(AlertType.ERROR, e.getMessage());
+				alert.showAndWait();
+			}
+		}
 	}
 	
 	/**
@@ -341,7 +351,7 @@ public class SimuladorRedeController extends Controller {
 		
 		networkBox.setVisible(true);
 		zoomSlider.setVisible(true);
-		miExpresionEvaluator.setDisable(false);
+		miExpressionEvaluator.setDisable(false);
 		
 		//limpa o desenho anterior
 		networkPane.getChildren().clear();
@@ -618,7 +628,7 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	public void showFunctionsWindow() {
-		SimuladorRede.showModalScene("Functions", FunctionsController.FXML_FILE);
+		SimuladorRede.showModalScene("Functions", FunctionsController.FXML_FILE, this);
 	}
 	
 	@Override
