@@ -7,7 +7,6 @@ import java.util.Map;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.effect.BoxBlur;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -102,9 +101,6 @@ public class SimuladorRede extends Application {
 		stage.centerOnScreen();
 
 		if (!stage.isShowing()) {
-	    	if (modal) {
-	    		primaryStage.getScene().getRoot().setEffect(new BoxBlur());
-	    	}
 	    	stage.show();
     	} else {
     		stage.requestFocus();
@@ -117,9 +113,6 @@ public class SimuladorRede extends Application {
     public static void closeScene(Controller controller) {
     	Stage stage = controller.getStage();
     	String fxmlFile = controller.getFxmlFile();
-    	if (stage.getModality().equals(Modality.APPLICATION_MODAL)) {
-    		primaryStage.getScene().getRoot().setEffect(null);
-    	}
 		if (stage != null && stage.isShowing()) {
 			stage.close();
 		}

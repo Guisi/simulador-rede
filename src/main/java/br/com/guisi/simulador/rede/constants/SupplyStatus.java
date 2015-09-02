@@ -1,5 +1,12 @@
 package br.com.guisi.simulador.rede.constants;
 
+import br.com.guisi.simulador.rede.enviroment.Load;
+
+/**
+ * Enumeration representando os possíveis status de atendimento de um {@link Load}
+ * 
+ * @author douglas.guisi
+ */
 public enum SupplyStatus {
 
 	SUPPLIED("Atendido"),

@@ -2,6 +2,11 @@ package br.com.guisi.simulador.rede.enviroment;
 
 import br.com.guisi.simulador.rede.constants.Status;
 
+/**
+ * Classe representando uma branch
+ * 
+ * @author douglas.guisi
+ */
 public class Branch {
 
 	private Integer number;
@@ -24,6 +29,10 @@ public class Branch {
 		this.switchBranch = switchBranch;
 	}
 	
+	/**
+	 * Retorna se a branch está ligada
+	 * @return boolean
+	 */
 	public boolean isOn() {
 		return Status.ON.equals(status);
 	}
@@ -32,54 +41,100 @@ public class Branch {
 	 * Retorna o load conectado por esta branch
 	 * ao load passado como parametro
 	 * @param networkNode
-	 * @return
+	 * @return {@link NetworkNode}
 	 */
 	public NetworkNode getConnectedLoad(NetworkNode networkNode) {
 		return load1.equals(networkNode) ? load2 : load1;
 	}
 	
+	/**
+	 * Retorna a quantidade de potência disponível com relação à capacidade máxima
+	 * @return double
+	 */
 	public double getAvailablePower() {
 		return power - usedPower;
 	}
 	
+	/**
+	 * Adiciona o valor de potência usado com relação à capacidade máxima
+	 * @param usedPower
+	 */
 	public void addUsedPower(double usedPower) {
 		this.usedPower += usedPower;
 	}
 	
+	/**
+	 * Incrementa o número de operações desta branch em 1
+	 */
 	public void incrementSwitchOperation() {
 		this.switchOperations++;
 	}
 
+	/**
+	 * Retorna a capacidade máxima desta branch
+	 * @return double
+	 */
 	public double getPower() {
 		return power;
 	}
+	
+	/**
+	 * Retorna o número desta branch
+	 * @return {@link Integer}
+	 */
 	public Integer getNumber() {
 		return number;
 	}
+	
+	/**
+	 * Retorna o {@link Load} de uma das pontas da branch
+	 * @return {@link Load}
+	 */
 	public NetworkNode getLoad1() {
 		return load1;
 	}
+	
 	public void setLoad1(NetworkNode load1) {
 		this.load1 = load1;
 	}
+
+	/**
+	 * Retorna o {@link Load} de uma das pontas da branch
+	 * @return {@link Load}
+	 */
 	public NetworkNode getLoad2() {
 		return load2;
 	}
 	public void setLoad2(NetworkNode load2) {
 		this.load2 = load2;
 	}
+	
+	/**
+	 * Retorna o {@link Status} desta branch, on ou off
+	 * @return {@link Status}
+	 */
 	public Status getStatus() {
 		return status;
 	}
 	public void setStatus(Status status) {
 		this.status = status;
 	}
+
+	/**
+	 * Retorna a distância entre uma ponta e outra desta branch
+	 * @return double
+	 */
 	public double getDistance() {
 		return distance;
 	}
 	public void setDistance(double distance) {
 		this.distance = distance;
 	}
+	
+	/**
+	 * Retorna se esta branch é um switch
+	 * @return boolean
+	 */
 	public boolean isSwitchBranch() {
 		return switchBranch;
 	}
@@ -87,6 +142,10 @@ public class Branch {
 		this.switchBranch = switchBranch;
 	}
 
+	/**
+	 * Retorna a potência em uso nesta branch
+	 * @return double
+	 */
 	public double getUsedPower() {
 		return usedPower;
 	}
@@ -95,6 +154,10 @@ public class Branch {
 		this.usedPower = usedPower;
 	}
 
+	/**
+	 * Retorna o número de operações de switch desta branch
+	 * @return int
+	 */
 	public int getSwitchOperations() {
 		return switchOperations;
 	}

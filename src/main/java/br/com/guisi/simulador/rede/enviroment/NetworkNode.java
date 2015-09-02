@@ -7,6 +7,11 @@ import java.util.Set;
 
 import br.com.guisi.simulador.rede.constants.Status;
 
+/**
+ * Classe representando um nó da rede (Load ou Feeder)
+ * 
+ * @author douglas.guisi
+ */
 public abstract class NetworkNode {
 
 	protected Integer nodeNumber;
@@ -29,17 +34,25 @@ public abstract class NetworkNode {
 		branches.add(branch);
 	}
 	
+	/**
+	 * Retorna se este nó é um {@link Feeder}
+	 * @return boolean
+	 */
 	public boolean isFeeder() {
 		return this instanceof Feeder;
 	}
 	
+	/**
+	 * Retorna se este nó é um {@link Load}
+	 * @return boolean
+	 */
 	public boolean isLoad() {
 		return this instanceof Load;
 	}
 	
 	/**
-	 * Retorna os nodes conectados a este node
-	 * @return
+	 * Retorna a lista de nós conectados a este
+	 * @return {@link List<NetworkNode>}
 	 */
 	public List<NetworkNode> getConnectedNodes() {
 		List<NetworkNode> networkNodes = new ArrayList<>();
@@ -53,7 +66,7 @@ public abstract class NetworkNode {
 	
 	/**
 	 * Retorna a branch que conecta este node ao node passado como parâmetro
-	 * @return
+	 * @return {@link Branch}
 	 */
 	public Branch getBranch(NetworkNode node) {
 		for (Branch branch : branches) {
@@ -64,30 +77,58 @@ public abstract class NetworkNode {
 		return null;
 	}
 	
+	/**
+	 * Retorna se este nó está ligado
+	 * @return boolean
+	 */
 	public boolean isOn() {
 		return Status.ON.equals(status);
 	}
 
+	/**
+	 * Retorna a posição X deste nó no ambiente
+	 * @return {@link Integer}
+	 */
 	public Integer getX() {
 		return x;
 	}
 
+	/**
+	 * Retorna a posição Y deste nó no ambiente
+	 * @return {@link Integer}
+	 */
 	public Integer getY() {
 		return y;
 	}
 
+	/**
+	 * Retorna um {@link Set<Branch>} com os branches ligados neste nó
+	 * @return {@link Set<Branch>}
+	 */
 	public Set<Branch> getBranches() {
 		return branches;
 	}
 	
+	/**
+	 * Retorna o número deste nó
+	 * @return {@link Integer}
+	 */
 	public Integer getNodeNumber() {
 		return nodeNumber;
 	}
 
+	/**
+	 * Retorna a potência deste nó
+	 * @return double
+	 */
 	public double getPower() {
 		return power;
 	}
 
+	/**
+	 * Retorna o {@link Status} deste nó, on ou off
+	 * @return {@link Status}
+	 */
 	public Status getStatus() {
 		return status;
 	}

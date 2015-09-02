@@ -1,8 +1,9 @@
 package br.com.guisi.simulador.rede.constants;
 
 /**
- * @author Guisi
- *
+ * Enumeration representando os tipos de funções que podem ser cadastrados no simulador
+ * 
+ * @author douglas.guisi
  */
 public enum FunctionType {
 
