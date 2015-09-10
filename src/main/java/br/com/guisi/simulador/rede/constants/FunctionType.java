@@ -7,7 +7,7 @@ package br.com.guisi.simulador.rede.constants;
  */
 public enum FunctionType {
 
-	DISTRIBUITION_SYSTEM("Distribuition System"),
+	SYSTEM_SUMMARY("System Summary"),
 	POWER_FLOW("Power Flow"),
 	OBJETIVE_FUNCTIONS("Objective Functions");
 	
