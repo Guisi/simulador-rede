@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.collections.FXCollections;
+import javafx.concurrent.Worker;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -23,6 +24,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -43,6 +46,7 @@ import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
+import br.com.guisi.simulador.rede.task.AgentTask;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
 import br.com.guisi.simulador.rede.util.FunctionsUtils;
@@ -65,6 +69,12 @@ public class SimuladorRedeController extends Controller {
 	private HBox networkBox;
 	@FXML
 	private MenuItem miExpressionEvaluator;
+	@FXML
+	private Button btnRunAgent;
+	@FXML
+	private Button btnStopAgent;
+	@FXML
+	private Label lblCount;
 
 	/** Loads */
 	@FXML
@@ -148,6 +158,9 @@ public class SimuladorRedeController extends Controller {
 	private Integer selectedFeeder;
 	private Integer selectedBranch;
 	
+	private AgentTask agentTask;
+	private Integer count = 0;
+	
 	@Override
 	public void initializeController(Object... data) {
 		this.createFunctionTables();
@@ -173,6 +186,14 @@ public class SimuladorRedeController extends Controller {
 
 		networkBox.setVisible(false);
 		zoomSlider.setVisible(false);
+		btnRunAgent.setVisible(false);
+		btnStopAgent.setVisible(false);
+		
+		Image imageCheck = new Image(getClass().getResourceAsStream("/img/check.png"));
+		btnRunAgent.setGraphic(new ImageView(imageCheck));
+		
+		Image imageDelete = new Image(getClass().getResourceAsStream("/img/delete.png"));
+		btnStopAgent.setGraphic(new ImageView(imageDelete));
 
 		cbLoadNumber.setValue(null);
 		lblLoadFeeder.setText("");
@@ -351,6 +372,8 @@ public class SimuladorRedeController extends Controller {
 		
 		networkBox.setVisible(true);
 		zoomSlider.setVisible(true);
+		btnRunAgent.setVisible(true);
+		btnStopAgent.setVisible(true);
 		miExpressionEvaluator.setDisable(false);
 		
 		//limpa o desenho anterior
@@ -629,6 +652,36 @@ public class SimuladorRedeController extends Controller {
 	
 	public void showFunctionsWindow() {
 		SimuladorRede.showModalScene("Functions", FunctionsController.FXML_FILE, this);
+	}
+	
+	public void runAgent() {
+		btnRunAgent.setDisable(true);
+		btnStopAgent.setDisable(false);
+		agentTask = new AgentTask(count);
+		
+		agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
+			updateAgentStatus(newState);
+		});
+		
+		agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+            	stopAgent();
+            }
+        });
+		
+		new Thread(agentTask).start();
+	}
+	
+	public void stopAgent() {
+		agentTask.cancel();
+		btnRunAgent.setDisable(false);
+    	btnStopAgent.setDisable(true);
+    	count = agentTask.getValue();
+    	updateAgentStatus(count);
+	}
+	
+	private void updateAgentStatus(Integer newState) {
+		lblCount.setText(String.valueOf(newState));
 	}
 	
 	@Override

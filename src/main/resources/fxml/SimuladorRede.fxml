@@ -31,13 +31,19 @@
          <children>
             <HBox alignment="CENTER_LEFT" spacing="15.0">
                <children>
+                  <Button fx:id="btnRunAgent" mnemonicParsing="false" onAction="#runAgent" prefWidth="80.0" text="Iniciar" />
+                  <Button fx:id="btnStopAgent" disable="true" mnemonicParsing="false" onAction="#stopAgent" prefWidth="80.0" text="Parar" />
+                  <Label fx:id="lblCount" />
                   <Slider fx:id="zoomSlider" blockIncrement="0.1" max="2.0" min="0.1" value="1.0">
                      <HBox.margin>
-                        <Insets left="610.0" />
+                        <Insets left="410.0" />
                      </HBox.margin></Slider>
                </children>
             </HBox>
          </children>
+         <VBox.margin>
+            <Insets left="5.0" right="5.0" />
+         </VBox.margin>
       </VBox>
       <HBox fx:id="networkBox" style="-fx-background-color: #FFF;">
          <children>
