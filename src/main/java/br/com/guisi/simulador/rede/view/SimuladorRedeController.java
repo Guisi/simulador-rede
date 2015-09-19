@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javafx.collections.FXCollections;
@@ -16,6 +17,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
@@ -40,6 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.FunctionType;
+import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
@@ -62,6 +65,8 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private VBox root;
 	@FXML
+	private MenuBar menuBar;
+	@FXML
 	private ScrollPane networkScrollPane;
 	@FXML
 	private Slider zoomSlider;
@@ -70,11 +75,15 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private MenuItem miExpressionEvaluator;
 	@FXML
+	private VBox controlsVBox;
+	@FXML
 	private Button btnRunAgent;
 	@FXML
 	private Button btnStopAgent;
 	@FXML
 	private Label lblCount;
+	@FXML
+	private ComboBox<TaskExecutionType> cbTaskExecutionType;
 
 	/** Loads */
 	@FXML
@@ -166,6 +175,15 @@ public class SimuladorRedeController extends Controller {
 		this.createFunctionTables();
 		this.resetScreen();
 		
+		Image imageCheck = new Image(getClass().getResourceAsStream("/img/check.png"));
+		btnRunAgent.setGraphic(new ImageView(imageCheck));
+		
+		Image imageDelete = new Image(getClass().getResourceAsStream("/img/delete.png"));
+		btnStopAgent.setGraphic(new ImageView(imageDelete));
+		
+		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
+		cbTaskExecutionType.setValue(TaskExecutionType.CONTINUOUS_UPDATE_EVERY_STEP);
+		
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
 		this.loadEnvironmentFromFile(f);*/
 	}
@@ -185,16 +203,8 @@ public class SimuladorRedeController extends Controller {
 		networkScrollPane.getStyleClass().add("networkPane");
 
 		networkBox.setVisible(false);
-		zoomSlider.setVisible(false);
-		btnRunAgent.setVisible(false);
-		btnStopAgent.setVisible(false);
+		controlsVBox.setVisible(false);
 		
-		Image imageCheck = new Image(getClass().getResourceAsStream("/img/check.png"));
-		btnRunAgent.setGraphic(new ImageView(imageCheck));
-		
-		Image imageDelete = new Image(getClass().getResourceAsStream("/img/delete.png"));
-		btnStopAgent.setGraphic(new ImageView(imageDelete));
-
 		cbLoadNumber.setValue(null);
 		lblLoadFeeder.setText("");
 		lblLoadPower.setText("");
@@ -363,7 +373,6 @@ public class SimuladorRedeController extends Controller {
 	 * Desenha o ambiente na tela
 	 */
 	private void drawNetworkFromEnvironment() {
-		
 		//Seta visibilidade e tamanho dos panes da tela
 		zoomingPane.setPrefWidth(getEnvironment().getSizeX() * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING);
 		zoomingPane.setPrefHeight(getEnvironment().getSizeY() * Constants.NETWORK_GRID_SIZE_PX - 10 + Constants.NETWORK_PANE_PADDING);
@@ -371,9 +380,7 @@ public class SimuladorRedeController extends Controller {
 		zoomingPane.setContentHeight(zoomingPane.getPrefHeight());
 		
 		networkBox.setVisible(true);
-		zoomSlider.setVisible(true);
-		btnRunAgent.setVisible(true);
-		btnStopAgent.setVisible(true);
+		controlsVBox.setVisible(true);
 		miExpressionEvaluator.setDisable(false);
 		
 		//limpa o desenho anterior
@@ -383,6 +390,7 @@ public class SimuladorRedeController extends Controller {
 		cbLoadNumber.setItems(FXCollections.observableArrayList());
 		cbFeederNumber.setItems(FXCollections.observableArrayList());
 		cbBranchNumber.setItems(FXCollections.observableArrayList());
+
 		getEnvironment().getNetworkNodeMap().values().forEach((node) -> {
 			NetworkNodeStackPane loadStack = networkPane.drawLoad(node, getEnvironment());
 			loadStack.setOnMouseClicked((event) -> {
@@ -655,9 +663,8 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	public void runAgent() {
-		btnRunAgent.setDisable(true);
-		btnStopAgent.setDisable(false);
-		agentTask = new AgentTask(count);
+		this.enableDisableScreen(true);
+		agentTask = new AgentTask(count, cbTaskExecutionType.getValue());
 		
 		agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
 			updateAgentStatus(newState);
@@ -673,15 +680,21 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	public void stopAgent() {
+		this.enableDisableScreen(false);
 		agentTask.cancel();
-		btnRunAgent.setDisable(false);
-    	btnStopAgent.setDisable(true);
     	count = agentTask.getValue();
     	updateAgentStatus(count);
 	}
 	
 	private void updateAgentStatus(Integer newState) {
 		lblCount.setText(String.valueOf(newState));
+	}
+	
+	private void enableDisableScreen(boolean disable) {
+		btnRunAgent.setDisable(disable);
+		btnStopAgent.setDisable(!disable);
+		cbTaskExecutionType.setDisable(disable);
+		menuBar.setDisable(disable);
 	}
 	
 	@Override

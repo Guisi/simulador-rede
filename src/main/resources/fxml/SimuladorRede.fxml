@@ -11,7 +11,7 @@
 
 <VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="714.0" prefWidth="1200.0" spacing="5.0" style="-fx-background-color: #FFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.view.SimuladorRedeController">
    <children>
-      <MenuBar>
+      <MenuBar fx:id="menuBar">
         <menus>
           <Menu mnemonicParsing="false" text="Environment">
             <items>
@@ -27,16 +27,18 @@
             </Menu>
         </menus>
       </MenuBar>
-      <VBox fillWidth="false" spacing="5.0">
+      <VBox fx:id="controlsVBox" fillWidth="false" spacing="5.0">
          <children>
             <HBox alignment="CENTER_LEFT" spacing="15.0">
                <children>
-                  <Button fx:id="btnRunAgent" mnemonicParsing="false" onAction="#runAgent" prefWidth="80.0" text="Iniciar" />
-                  <Button fx:id="btnStopAgent" disable="true" mnemonicParsing="false" onAction="#stopAgent" prefWidth="80.0" text="Parar" />
+                  <Button fx:id="btnRunAgent" mnemonicParsing="false" onAction="#runAgent" />
+                  <Button fx:id="btnStopAgent" disable="true" mnemonicParsing="false" onAction="#stopAgent" />
                   <Label fx:id="lblCount" />
+                  <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Execution Type:" />
+                  <ComboBox fx:id="cbTaskExecutionType" />
                   <Slider fx:id="zoomSlider" blockIncrement="0.1" max="2.0" min="0.1" value="1.0">
                      <HBox.margin>
-                        <Insets left="410.0" />
+                        <Insets left="40.0" />
                      </HBox.margin></Slider>
                </children>
             </HBox>
