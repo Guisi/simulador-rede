@@ -49,6 +49,12 @@
 			<version>0.6.6</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.n52.matlab</groupId>
+			<artifactId>matlab-control</artifactId>
+			<version>5.0.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<!-- Build do modulo -->

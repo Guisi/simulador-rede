@@ -12,6 +12,14 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
+		double[] bus = new double[5];
+
+		for (int i = 0; i < bus.length; i++) {
+			System.out.println(bus[i]);
+		}
+	}
+	
+	public static void teste() throws Exception {
 		File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
 		Environment environment = null;
 		
