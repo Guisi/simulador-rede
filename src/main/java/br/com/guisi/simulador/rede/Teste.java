@@ -1,6 +1,8 @@
 package br.com.guisi.simulador.rede;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -12,11 +14,8 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		double[] bus = new double[5];
-
-		for (int i = 0; i < bus.length; i++) {
-			System.out.println(bus[i]);
-		}
+		double d = 1.097d / 121d;
+		System.out.println(d);
 	}
 	
 	public static void teste() throws Exception {
