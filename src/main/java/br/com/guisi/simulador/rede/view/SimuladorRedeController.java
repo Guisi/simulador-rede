@@ -476,9 +476,9 @@ public class SimuladorRedeController extends Controller {
 		lblFeederPower.setText(df.format(feeder.getPower()));
 		lblFeederMinPower.setText(df.format(feeder.getMinPower()));
 		lblFeederMaxPower.setText(df.format(feeder.getMaxPower()));
-		lblFeederEnergizedLoads.setText(String.valueOf(feeder.getEnergizedLoads()));
+		/*lblFeederEnergizedLoads.setText(String.valueOf(feeder.getEnergizedLoads()));
 		lblFeederPartiallyEnergizedLoads.setText(String.valueOf(feeder.getPartiallyEnergizedLoads()));
-		lblFeederNotEnergizedLoads.setText(String.valueOf(feeder.getNotEnergizedLoads()));
+		lblFeederNotEnergizedLoads.setText(String.valueOf(feeder.getNotEnergizedLoads()));*/
 		lblFeederUsedPower.setText(df.format(feeder.getUsedPower()));
 		lblFeederAvailablePower.setText(df.format(feeder.getAvailablePower()));
 		cbFeederNumber.setValue(feeder.getNodeNumber());

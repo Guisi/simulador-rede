@@ -63,9 +63,16 @@ public class MatPowerTest {
 		
 		proxy.setVariable("potenciaBase", POTENCIA_BASE);
 
-		long ini = System.currentTimeMillis();
-		proxy.eval("ret = case_simulador_fluxo(mpcBus, mpcGen, mpcBranch, potenciaBase);");
-		System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
+		long total = 0;
+		for (int i = 0; i < 1000; i++) {
+			long ini = System.currentTimeMillis();
+			//proxy.eval("ret = case_simulador_fluxo(mpcBus, mpcGen, mpcBranch, potenciaBase);");
+			proxy.eval("ret = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
+			total += System.currentTimeMillis() - ini;
+			
+			//System.out.println("Tempo: " + total);
+		}
+		System.out.println(total / 1000);
 	    
 		System.out.println("Result: " + proxy.getVariable("ret"));
 		

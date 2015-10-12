@@ -89,6 +89,10 @@ public class Environment {
 	public Map<Integer, NetworkNode> getNetworkNodeMap() {
 		return networkNodeMap;
 	}
+	
+	public List<NetworkNode> getNetworkNodes() {
+		return new ArrayList<>(networkNodeMap.values());
+	}
 
 	/**
 	 * Retorna o tamanho X do ambiente

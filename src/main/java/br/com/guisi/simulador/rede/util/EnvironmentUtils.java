@@ -174,13 +174,13 @@ public class EnvironmentUtils {
 				load.setFeeder(feeder);
 				if (feeder == null) {
 					load.setSupplyStatus(SupplyStatus.NOT_SUPPLIED_NO_FEEDER_CONNECTED);
-					//msgs.append("O load " + load.getLoadNum() + " não está ligado a nenhum feeder.").append("\n");
 				}
 			}
 		});
 		
 		if (msgs.length() == 0) {
-			validatePowerSupply(environment);
+			//TODO execute power flow
+			environment.getLoads().forEach((load) -> load.setSupplyStatus(SupplyStatus.NOT_SUPPLIED_NO_FEEDER_CONNECTED));
 		}
 		
 		return msgs.toString();
@@ -346,104 +346,6 @@ public class EnvironmentUtils {
 			}
 		}
 		return branches;
-	}
-	
-	
-	/**
-	 * Para cada feeder, navega pelas árvores de loads atualizando o status de atendimento
-	 * @param environment
-	 */
-	public static void validatePowerSupply(Environment environment) {
-		//zera potência usada do branch
-		environment.getBranches().forEach((branch) -> branch.setUsedPower(0));
-		
-		List<Feeder> feeders = environment.getFeeders();
-		
-		//para cada feeder
-		feeders.forEach((feeder) -> {
-			//zera valores calculados do feeder
-			feeder.setEnergizedLoads(0);
-			feeder.setPartiallyEnergizedLoads(0);
-			feeder.setNotEnergizedLoads(0);
-			feeder.setUsedPower(0);
-			
-			//monta lista de loads de acordo com a ordem de atendimento
-			List<NetworkNode> allConnectedNodes = new ArrayList<>();
-			List<NetworkNode> observedNodes = new ArrayList<>();
-			observedNodes.addAll(feeder.getConnectedNodes());
-			do {
-				allConnectedNodes.addAll(observedNodes);
-				
-				List<NetworkNode> connectedNodes = new ArrayList<>();
-				observedNodes.forEach((observedNode) -> {
-					connectedNodes.addAll(observedNode.getConnectedNodes());
-					connectedNodes.removeAll(allConnectedNodes);
-					connectedNodes.remove(feeder);
-				});
-				
-				observedNodes = connectedNodes;
-			} while (!observedNodes.isEmpty());
-			
-			//distribui potência do feeder nos loads
-			for (NetworkNode node : allConnectedNodes) {
-				Load load = (Load) node;
-				load.setPowerSupplied(0);
-				load.setSupplyStatus(null);
-				
-				//só calcula para loads on
-				if (load.isOn()) {
-					//se ainda existe capacidade disponível no feeder
-					if (feeder.getAvailablePower() > 0) {
-						double receivedPower;
-						double loadPower = load.getPower();
-						
-						//se o feeder ainda tem potência para atender o load totalmente
-						if (loadPower <= feeder.getAvailablePower()) {
-							load.setSupplyStatus(SupplyStatus.SUPPLIED);
-							receivedPower = loadPower;
-						} else {
-							//senão atribui o que resta de potência no feeder para atendimento parcial do load
-							load.setSupplyStatus(SupplyStatus.PARTIALLY_SUPPLIED_FEEDER_EXCEEDED);
-							receivedPower = feeder.getAvailablePower();
-						}
-						
-						//mesmo que o feeder consiga atender o load, é preciso validar se os branches suportam atender
-						//recupera branches entre load e feeder
-						List<Branch> branches = getBranchesToFeeder(load);
-						
-						//verifica a menor capacidade disponivel entre os branches
-						double supportedPower = branches.stream().min(Comparator.comparing(value -> value.getAvailablePower())).get().getAvailablePower();
-						
-						//se a capacidade suportada por algum branch é menor do que 
-						//a disponibilizada pelo feeder para este load, o status será diferente
-						if (supportedPower < receivedPower) {
-							load.setSupplyStatus(supportedPower > 0 ? SupplyStatus.PARTIALLY_SUPPLIED_BRANCH_EXCEEDED : SupplyStatus.NOT_SUPPLIED_BRANCH_EXCEEDED);
-						}
-						
-						//load receberá o menor valor entre o disponibilizado pelo feeder e o que os branches conseguem suportar
-						supportedPower = Math.min(receivedPower, supportedPower);
-						load.setPowerSupplied(supportedPower);
-						
-						//adiciona o valor do load nos seus branches
-						final double usedPower = supportedPower;
-						branches.forEach((branch) -> branch.addUsedPower(usedPower));
-						
-						//adiciona o valor do load no feeder
-						feeder.addUsedPower(supportedPower);
-					} else {
-						load.setSupplyStatus(SupplyStatus.NOT_SUPPLIED_FEEDER_EXCEEDED);
-					}
-				}
-				
-				if (load.isSupplied()) {
-					feeder.incrementEnergizedLoad();
-				} else if (load.isPartiallySupplied()) {
-					feeder.incrementPartiallyEnergizedLoad();
-				} else if (load.isNotSupplied()) {
-					feeder.incrementNotEnergizedLoad();
-				}
-			}
-		});
 	}
 	
 	public static void main(String[] args) {

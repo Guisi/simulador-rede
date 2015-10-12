@@ -14,9 +14,6 @@ public class Feeder extends NetworkNode {
 	private double minPower;
 	private double maxPower;
 	private double usedPower;
-	private int energizedLoads;
-	private int partiallyEnergizedLoads;
-	private int notEnergizedLoads;
 	
 	public Feeder(Integer nodeNumber, Integer x, Integer y, double power, double minPower, double maxPower, String feederColor, String loadColor, Status status) {
 		super(nodeNumber, x, y, power, status);
@@ -42,27 +39,6 @@ public class Feeder extends NetworkNode {
 		this.usedPower += usedPower;
 	}
 	
-	/**
-	 * Incrementa o total de loads totalmente energizados por este feeder em 1
-	 */
-	public void incrementEnergizedLoad() {
-		this.energizedLoads++;
-	}
-	
-	/**
-	 * Incrementa o total de loads parcialmente energizados por este feeder em 1
-	 */
-	public void incrementPartiallyEnergizedLoad() {
-		this.partiallyEnergizedLoads++;
-	}
-	
-	/**
-	 * Incrementa o total de loads não energizados por este feeder em 1
-	 */
-	public void incrementNotEnergizedLoad() {
-		this.notEnergizedLoads++;
-	}
-
 	/**
 	 * Retorna o valor de potência mínimo deste feeder
 	 * @return double
@@ -97,42 +73,6 @@ public class Feeder extends NetworkNode {
 
 	public void setUsedPower(double usedPower) {
 		this.usedPower = usedPower;
-	}
-
-	/**
-	 * Retorna o número de loads totalmente energizados por este feeder
-	 * @return int
-	 */
-	public int getEnergizedLoads() {
-		return energizedLoads;
-	}
-
-	/**
-	 * Retorna o número de loads parcialmente energizados por este feeder
-	 * @return int
-	 */
-	public int getPartiallyEnergizedLoads() {
-		return partiallyEnergizedLoads;
-	}
-
-	/**
-	 * Retorna o número de loads que este feeder não conseguiu energizar
-	 * @return int
-	 */
-	public int getNotEnergizedLoads() {
-		return notEnergizedLoads;
-	}
-
-	public void setEnergizedLoads(int energizedLoads) {
-		this.energizedLoads = energizedLoads;
-	}
-
-	public void setPartiallyEnergizedLoads(int partiallyEnergizedLoads) {
-		this.partiallyEnergizedLoads = partiallyEnergizedLoads;
-	}
-
-	public void setNotEnergizedLoads(int notEnergizedLoads) {
-		this.notEnergizedLoads = notEnergizedLoads;
 	}
 
 	@Override
