@@ -82,15 +82,15 @@
                                     <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Nº:" />
                                     <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Feeder:" GridPane.rowIndex="1" />
                                     <Label fx:id="lblLoadFeeder" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Power:" GridPane.rowIndex="2" />
-                                    <Label fx:id="lblLoadPower" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Active Power:" GridPane.rowIndex="2" />
+                                    <Label fx:id="lblLoadActivePower" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                     <Label alignment="CENTER" prefHeight="17.0" style="-fx-font-weight: bold;" text="Priority:" GridPane.rowIndex="4" />
                                     <Label fx:id="lblLoadPriority" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                     <ComboBox fx:id="cbLoadNumber" onAction="#changeCbLoadNumber" GridPane.columnIndex="1" />
                                     <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Status:" GridPane.rowIndex="5" />
                                     <Label fx:id="lblLoadStatus" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Power supplied:" GridPane.rowIndex="3" />
-                                    <Label fx:id="lblLoadReceivedPower" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Reactive Power:" GridPane.rowIndex="3" />
+                                    <Label fx:id="lblLoadReactivePower" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                  </children>
                                  <opaqueInsets>
                                     <Insets />
@@ -133,23 +133,21 @@
                               <GridPane hgap="10.0" minHeight="-Infinity" prefHeight="190.0">
                                  <children>
                                     <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Nº:" />
-                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Power:" GridPane.rowIndex="1" />
-                                    <Label fx:id="lblFeederPower" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Active Power:" GridPane.rowIndex="1" />
+                                    <Label fx:id="lblFeederActivePower" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                     <ComboBox fx:id="cbFeederNumber" onAction="#changeCbFeederNumber" GridPane.columnIndex="1" />
-                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Min power:" GridPane.rowIndex="2" />
-                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Energized loads:" GridPane.rowIndex="4" />
-                                    <Label fx:id="lblFeederMinPower" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                    <Label fx:id="lblFeederEnergizedLoads" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                                    <Label fx:id="lblFeederPartiallyEnergizedLoadsLabel" alignment="CENTER" style="-fx-font-weight: bold;" text="Partial. energiz.:" GridPane.rowIndex="5" />
-                                    <Label fx:id="lblFeederPartiallyEnergizedLoads" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Max power:" GridPane.rowIndex="3" />
-                                    <Label fx:id="lblFeederMaxPower" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                    <Label fx:id="lblFeederNotEnergizedLoadsLabel" alignment="CENTER" style="-fx-font-weight: bold;" text="Not energ. loads:" GridPane.rowIndex="6" />
-                                    <Label fx:id="lblFeederNotEnergizedLoads" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                                    <Label fx:id="lblFeederNotEnergizedLoadsLabel1" alignment="CENTER" style="-fx-font-weight: bold;" text="Used power:" GridPane.rowIndex="7" />
-                                    <Label fx:id="lblFeederNotEnergizedLoadsLabel11" alignment="CENTER" style="-fx-font-weight: bold;" text="Available power:" GridPane.rowIndex="8" />
-                                    <Label fx:id="lblFeederUsedPower" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                                    <Label fx:id="lblFeederAvailablePower" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Reactive power:" GridPane.rowIndex="2" />
+                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Energized loads:" GridPane.rowIndex="3" />
+                                    <Label fx:id="lblFeederReactivePower" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <Label fx:id="lblFeederEnergizedLoads" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Label fx:id="lblFeederPartiallyEnergizedLoadsLabel" alignment="CENTER" style="-fx-font-weight: bold;" text="Partial. energiz.:" GridPane.rowIndex="4" />
+                                    <Label fx:id="lblFeederPartiallyEnergizedLoads" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <Label fx:id="lblFeederNotEnergizedLoadsLabel" alignment="CENTER" style="-fx-font-weight: bold;" text="Not energ. loads:" GridPane.rowIndex="5" />
+                                    <Label fx:id="lblFeederNotEnergizedLoads" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                    <Label fx:id="lblFeederNotEnergizedLoadsLabel1" alignment="CENTER" style="-fx-font-weight: bold;" text="Used power:" GridPane.rowIndex="6" />
+                                    <Label fx:id="lblFeederNotEnergizedLoadsLabel11" alignment="CENTER" style="-fx-font-weight: bold;" text="Available power:" GridPane.rowIndex="7" />
+                                    <Label fx:id="lblFeederUsedPower" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                    <Label fx:id="lblFeederAvailablePower" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                                  </children>
                                  <columnConstraints>
                                     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="123.0" minWidth="10.0" prefWidth="97.0" />
@@ -159,7 +157,6 @@
                                     <Insets />
                                  </opaqueInsets>
                                  <rowConstraints>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -199,7 +196,7 @@
                                     </Label>
                                  </children>
                               </HBox>
-                              <GridPane hgap="10.0" minHeight="-Infinity" prefHeight="140.0">
+                              <GridPane hgap="10.0" minHeight="-Infinity" prefHeight="170.0">
                                  <children>
                                     <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Nº:" />
                                     <Label alignment="CENTER" style="-fx-font-weight: bold;" text="From:" GridPane.rowIndex="1" />
@@ -208,11 +205,13 @@
                                     <Label fx:id="lblBranchPara" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                     <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Max power:" GridPane.rowIndex="3" />
                                     <Label fx:id="lblBranchPower" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Distance:" GridPane.rowIndex="4" />
-                                    <Label fx:id="lblBranchDistance" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Status:" GridPane.rowIndex="5" />
-                                    <Label fx:id="lblBranchStatus" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Resistance:" GridPane.rowIndex="4" />
+                                    <Label fx:id="lblBranchResistance" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Status:" GridPane.rowIndex="6" />
+                                    <Label fx:id="lblBranchStatus" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                                     <ComboBox fx:id="cbBranchNumber" onAction="#changeCbBranchNumber" GridPane.columnIndex="1" />
+                                    <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Reactance:" GridPane.rowIndex="5" />
+                                    <Label fx:id="lblBranchReactance" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                  </children>
                                  <columnConstraints>
                                     <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="88.0" />
@@ -222,6 +221,7 @@
                                     <Insets />
                                  </opaqueInsets>
                                  <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -239,7 +239,7 @@
                                     <Button fx:id="btnNextBranch" mnemonicParsing="false" onAction="#nextBranch" prefHeight="25.0" prefWidth="25.0" styleClass="btnNext" />
                                  </children>
                                  <VBox.margin>
-                                    <Insets top="70.0" />
+                                    <Insets top="40.0" />
                                  </VBox.margin>
                               </HBox>
                            </children>

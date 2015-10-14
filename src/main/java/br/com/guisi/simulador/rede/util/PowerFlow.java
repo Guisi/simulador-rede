@@ -67,12 +67,12 @@ public class PowerFlow {
 			if (node.isLoad() && node.isOn()) {
 				//potencia ativa dos loads em megawatts (Pd) (se a carga estiver desligada, 0) 
 				//TODO carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
-				loadActivePowerMW[i] = node.getPower() / 1000;
+				loadActivePowerMW[i] = node.getActivePower() / 1000;
 				
 				//potencia reativa dos loads em Mega Volt Ampère (Qd) (se a carga estiver desligada, 0) 
 				//TODO carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
 				//TODO incluir informação de potência reativa na planilha
-				loadReactivePowerMVar[i] = node.getPower() / 1000;
+				loadReactivePowerMVar[i] = node.getActivePower() / 1000;
 			}
 			
 			//area sempre 1
@@ -145,11 +145,11 @@ public class PowerFlow {
 			
 			//Potência Injetada em MW (Pg) (segundo o Fausto, nao faz diferenca o valor passado aqui)
 			//TODO carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
-			potenciaGeradaMW[i] = feeder.getPower() / 1000;
+			potenciaGeradaMW[i] = feeder.getActivePower() / 1000;
 			
 			//Potência Injetada em MVar (Qg)
 			//TODO carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
-			potenciaGeradaMVar[i] = feeder.getPower() / 1000;
+			potenciaGeradaMVar[i] = feeder.getActivePower() / 1000;
 			
 			 //nao precisamos de valores maximos e minimos de capacidade do feeder
 			//Potência máxima de cada geração em MVar

@@ -35,6 +35,7 @@ public class EnvironmentUtils {
 		Map<Integer, NetworkNode> nodeMap = new HashMap<>();
 		List<String> loadLines = getLoadLines(lines);
 		for (String line : loadLines) {
+			line = line.replace(".", "").replace(",", ".");
 			String[] colunas = line.split(";");
 			
 			//tipo, feeder ou load
@@ -49,30 +50,29 @@ public class EnvironmentUtils {
 			//posicao Y
 			Integer y = Integer.valueOf(colunas[3]);
 			
-			//potencia
-			double power = Double.parseDouble(colunas[4]);
+			//potencia ativa
+			double activePower = Double.parseDouble(colunas[4]);
 			
-			double minPower = StringUtils.isNotBlank(colunas[5]) ? Double.parseDouble(colunas[5]) : 0;
-			
-			double maxPower = StringUtils.isNotBlank(colunas[6]) ? Double.parseDouble(colunas[6]) : 0;
+			//potencia reativa
+			double reactivePower = Double.parseDouble(colunas[5]);
 			
 			//prioridade
 			int priority = 0;
 			if (isLoad) {
-				 priority = Integer.valueOf(colunas[7]);
+				 priority = Integer.valueOf(colunas[6]);
 			}
 			
-			String feederColor = StringUtils.isNotBlank(colunas[8]) ? colunas[8] : "#FFFFFF";
-			String loadColor = StringUtils.isNotBlank(colunas[9]) ? colunas[9] : "#FFFFFF";
+			String feederColor = StringUtils.isNotBlank(colunas[7]) ? colunas[7] : "#FFFFFF";
+			String loadColor = StringUtils.isNotBlank(colunas[8]) ? colunas[8] : "#FFFFFF";
 			
-			boolean statusValue = Integer.parseInt(colunas[10]) == 1;
+			boolean statusValue = Integer.parseInt(colunas[9]) == 1;
 			Status status = statusValue ? Status.ON : Status.OFF;
 			
 			NetworkNode node;
 			if (isLoad) {
-				node = new Load(nodeNum, x, y, power, status, priority);
+				node = new Load(nodeNum, x, y, activePower, reactivePower, status, priority);
 			} else {
-				node = new Feeder(nodeNum, x, y, power, minPower, maxPower, feederColor, loadColor, status);
+				node = new Feeder(nodeNum, x, y, activePower, reactivePower, feederColor, loadColor, status);
 			}
 			nodeMap.put(nodeNum, node);
 		}
@@ -81,6 +81,7 @@ public class EnvironmentUtils {
 		Map<Integer, Branch> branchMap = new HashMap<>();
 		List<String> branchLines = getBranchLines(lines);
 		for (String line : branchLines) {
+			line = line.replace(".", "").replace(",", ".");
 			String[] colunas = line.split(";");
 			
 			//numero do branch
@@ -94,19 +95,22 @@ public class EnvironmentUtils {
 			Integer loadTo = Integer.parseInt(colunas[2]);
 			NetworkNode node2 = nodeMap.get(loadTo);
 			
-			//potencia maxima
-			double branchPower = Double.parseDouble(colunas[3]);
+			//corrent maxima
+			double maxCurrent = Double.parseDouble(colunas[3]);
 			
-			//distancia
-			double distance = Double.parseDouble(colunas[4]);
+			//resistencia
+			double resistance = Double.parseDouble(colunas[4]);
+			
+			//reatancia
+			double reactance = Double.parseDouble(colunas[5]);
 			
 			//status do branch
-			int branchStatus = Integer.parseInt(colunas[5]);
+			int branchStatus = Integer.parseInt(colunas[6]);
 			Status status = branchStatus == 0 ? Status.OFF : Status.ON;
 			
-			boolean switchBranch = Integer.parseInt(colunas[6]) == 1;
+			boolean switchBranch = Integer.parseInt(colunas[7]) == 1;
 			
-			Branch branch = new Branch(branchNum, node1, node2, branchPower, distance, status, switchBranch);
+			Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, status, switchBranch);
 			branchMap.put(branchNum, branch);
 			
 			//adiciona a branch nos dois loads os quais ela conecta

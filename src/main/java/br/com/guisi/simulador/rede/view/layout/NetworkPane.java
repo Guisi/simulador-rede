@@ -32,7 +32,7 @@ public class NetworkPane extends Pane {
 	private Map<Integer, BranchStackPane> branchPaneMap = new HashMap<Integer, BranchStackPane>();
 
 	public NetworkNodeStackPane drawLoad(NetworkNode networkNode, Environment environment) {
-		Text text = new Text(DecimalFormat.getNumberInstance().format(networkNode.getPower()));
+		Text text = new Text(DecimalFormat.getNumberInstance().format(networkNode.getNodeNumber()));
 		text.setBoundsType(TextBoundsType.VISUAL);
 		NetworkNodeStackPane stack = new NetworkNodeStackPane(networkNode.getNodeNumber());
 		

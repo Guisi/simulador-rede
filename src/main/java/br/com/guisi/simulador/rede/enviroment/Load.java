@@ -13,10 +13,9 @@ public class Load extends NetworkNode {
 	private Feeder feeder;
 	private int priority;
 	private SupplyStatus supplyStatus;
-	private double powerSupplied;
 	
-	public Load(Integer nodeNumber, Integer x, Integer y, double power, Status status, int priority) {
-		super(nodeNumber, x, y, power, status);
+	public Load(Integer nodeNumber, Integer x, Integer y, double activePower, double reactivePower, Status status, int priority) {
+		super(nodeNumber, x, y, activePower, reactivePower, status);
 		this.priority = priority;
 	}
 
@@ -45,14 +44,6 @@ public class Load extends NetworkNode {
 		return isOn() && (SupplyStatus.NOT_SUPPLIED_BRANCH_EXCEEDED.equals(supplyStatus)
 				|| SupplyStatus.NOT_SUPPLIED_FEEDER_EXCEEDED.equals(supplyStatus)
 				|| SupplyStatus.NOT_SUPPLIED_NO_FEEDER_CONNECTED.equals(supplyStatus));
-	}
-	
-	/**
-	 * Retorna o total de potência não atendida neste load
-	 * @return double
-	 */
-	public double getPowerNotSupplied() {
-		return power - powerSupplied;
 	}
 	
 	/**
@@ -91,22 +82,10 @@ public class Load extends NetworkNode {
 		this.supplyStatus = supplyStatus;
 	}
 	
-	/**
-	 * Retorna o total de potência atendida neste {@link Load}
-	 * @return double
-	 */
-	public double getPowerSupplied() {
-		return powerSupplied;
-	}
-
-	public void setPowerSupplied(double powerSupplied) {
-		this.powerSupplied = powerSupplied;
-	}
-
 	@Override
 	public String toString() {
-		return "Load [nodeNumber=" + nodeNumber + ", x=" + x + ", y=" + y + ", power=" + power + ", status=" + status + ", feeder="
-				+ (feeder != null ? feeder.getNodeNumber() : null) + ", priority=" + priority + ", supplyStatus=" + supplyStatus + ", receivedPower=" + powerSupplied + "]";
+		return "Load [nodeNumber=" + nodeNumber + ", x=" + x + ", y=" + y + ", activePower=" + activePower + ", reactivePower=" + reactivePower + ", status=" + status + ", feeder="
+				+ (feeder != null ? feeder.getNodeNumber() : null) + ", priority=" + priority + ", supplyStatus=" + supplyStatus + "]";
 	}
 	
 }

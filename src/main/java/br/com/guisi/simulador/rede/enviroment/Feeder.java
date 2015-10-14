@@ -11,16 +11,12 @@ public class Feeder extends NetworkNode {
 
 	private String feederColor;
 	private String loadColor;
-	private double minPower;
-	private double maxPower;
 	private double usedPower;
 	
-	public Feeder(Integer nodeNumber, Integer x, Integer y, double power, double minPower, double maxPower, String feederColor, String loadColor, Status status) {
-		super(nodeNumber, x, y, power, status);
+	public Feeder(Integer nodeNumber, Integer x, Integer y, double activePower, double reactivePower, String feederColor, String loadColor, Status status) {
+		super(nodeNumber, x, y, activePower, reactivePower, status);
 		this.feederColor = feederColor;
 		this.loadColor = loadColor;
-		this.minPower = minPower;
-		this.maxPower = maxPower;
 	}
 	
 	/**
@@ -28,7 +24,7 @@ public class Feeder extends NetworkNode {
 	 * @return double
 	 */
 	public double getAvailablePower() {
-		return power - usedPower;
+		return activePower - usedPower;
 	}
 	
 	/**
@@ -39,22 +35,6 @@ public class Feeder extends NetworkNode {
 		this.usedPower += usedPower;
 	}
 	
-	/**
-	 * Retorna o valor de potência mínimo deste feeder
-	 * @return double
-	 */
-	public double getMinPower() {
-		return minPower;
-	}
-
-	/**
-	 * Retorna o valor de potência máximo deste feeder
-	 * @return double
-	 */
-	public double getMaxPower() {
-		return maxPower;
-	}
-
 	public String getFeederColor() {
 		return feederColor;
 	}
@@ -77,7 +57,7 @@ public class Feeder extends NetworkNode {
 
 	@Override
 	public String toString() {
-		return "Feeder [nodeNumber=" + nodeNumber + ", x=" + x + ", y=" + y + ", power=" + power + ", status=" + status 
-				+ ", feederColor=" + feederColor + ", loadColor=" + loadColor + ", minPower=" + minPower + ", maxPower=" + maxPower + "]";
+		return "Feeder [nodeNumber=" + nodeNumber + ", x=" + x + ", y=" + y + ", activePower=" + activePower + ", reactivePower=" + reactivePower + ", status=" + status 
+				+ ", feederColor=" + feederColor + ", loadColor=" + loadColor + "]";
 	}
 }

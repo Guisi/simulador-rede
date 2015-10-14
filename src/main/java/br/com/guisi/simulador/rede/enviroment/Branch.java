@@ -13,18 +13,20 @@ public class Branch {
 	private NetworkNode load1;
 	private NetworkNode load2;
 	private double maxCurrent;
-	private double distance;
+	private double resistance;
+	private double reactance;
 	private Status status;
 	private boolean switchBranch;
 	private double usedPower;
 	private int switchOperations;
 	
-	public Branch(Integer number, NetworkNode load1, NetworkNode load2, double maxCurrent, double distance, Status status, boolean switchBranch) {
+	public Branch(Integer number, NetworkNode load1, NetworkNode load2, double maxCurrent, double resistance, double reactance, Status status, boolean switchBranch) {
 		this.number = number;
 		this.load1 = load1;
 		this.load2 = load2;
 		this.maxCurrent = maxCurrent;
-		this.distance = distance;
+		this.resistance = resistance;
+		this.reactance = reactance;
 		this.status = status;
 		this.switchBranch = switchBranch;
 	}
@@ -121,16 +123,29 @@ public class Branch {
 	}
 
 	/**
-	 * Retorna a distância entre uma ponta e outra desta branch
-	 * @return double
+	 * Retorna a resistencia do branch
+	 * @return
 	 */
-	public double getDistance() {
-		return distance;
+	public double getResistance() {
+		return resistance;
 	}
-	public void setDistance(double distance) {
-		this.distance = distance;
+
+	public void setResistence(double resistence) {
+		this.resistance = resistence;
 	}
-	
+
+	/**
+	 * Retorna a reatancia do branch
+	 * @return
+	 */
+	public double getReactance() {
+		return reactance;
+	}
+
+	public void setReactance(double reactance) {
+		this.reactance = reactance;
+	}
+
 	/**
 	 * Retorna se esta branch é um switch
 	 * @return boolean
@@ -189,8 +204,8 @@ public class Branch {
 
 	@Override
 	public String toString() {
-		return "Branch [branchNum=" + number + ", load1=" + load1.getNodeNumber() + ", load2=" + load2.getNodeNumber() + ", branchPower=" + maxCurrent + ", distance=" + distance
-				+ ", status=" + status + ", switchBranch=" + switchBranch + "]";
+		return "Branch [branchNum=" + number + ", load1=" + load1.getNodeNumber() + ", load2=" + load2.getNodeNumber() + ", branchPower=" + maxCurrent + ", resistance=" + resistance
+				+ ", reactance=" + reactance + ", status=" + status + ", switchBranch=" + switchBranch + "]";
 	}
 	
 }

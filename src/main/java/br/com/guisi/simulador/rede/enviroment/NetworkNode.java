@@ -17,16 +17,18 @@ public abstract class NetworkNode {
 	protected Integer nodeNumber;
 	protected Integer x;
 	protected Integer y;
-	protected double power;
+	protected double activePower;
+	protected double reactivePower;
 	protected Status status;
 	protected Set<Branch> branches = new HashSet<>();
 	
-	public NetworkNode(Integer nodeNumber, Integer x, Integer y, double power, Status status) {
+	public NetworkNode(Integer nodeNumber, Integer x, Integer y, double activePower, double reactivePower, Status status) {
 		super();
 		this.nodeNumber = nodeNumber;
 		this.x = x;
 		this.y = y;
-		this.power = power;
+		this.activePower = activePower;
+		this.reactivePower = reactivePower;
 		this.status = status;
 	}
 
@@ -118,11 +120,19 @@ public abstract class NetworkNode {
 	}
 
 	/**
-	 * Retorna a potência deste nó
+	 * Retorna a potência ativa deste nó
 	 * @return double
 	 */
-	public double getPower() {
-		return power;
+	public double getActivePower() {
+		return activePower;
+	}
+	
+	/**
+	 * Retorna a potência reativa deste nó
+	 * @return double
+	 */
+	public double getReactivePower() {
+		return reactivePower;
 	}
 
 	/**
