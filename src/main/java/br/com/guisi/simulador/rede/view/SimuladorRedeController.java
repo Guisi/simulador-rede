@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.collections.FXCollections;
-import javafx.concurrent.Worker;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -53,6 +52,7 @@ import br.com.guisi.simulador.rede.task.AgentTask;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
 import br.com.guisi.simulador.rede.util.FunctionsUtils;
+import br.com.guisi.simulador.rede.util.PowerFlow;
 import br.com.guisi.simulador.rede.view.layout.BranchStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkPane;
@@ -663,7 +663,16 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	public void runAgent() {
-		this.enableDisableScreen(true);
+		try {
+			PowerFlow.executePowerFlow(getEnvironment());
+		} catch (Exception e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setContentText(e.getMessage());
+			e.printStackTrace();
+			alert.showAndWait();
+		}
+		
+		/*this.enableDisableScreen(true);
 		agentTask = new AgentTask(count, cbTaskExecutionType.getValue());
 		
 		agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
@@ -676,7 +685,7 @@ public class SimuladorRedeController extends Controller {
             }
         });
 		
-		new Thread(agentTask).start();
+		new Thread(agentTask).start();*/
 	}
 	
 	public void stopAgent() {

@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import br.com.guisi.simulador.rede.constants.PreferenceKey;
 import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.util.Matlab;
 import br.com.guisi.simulador.rede.util.PreferencesUtils;
 import br.com.guisi.simulador.rede.view.Controller;
 import br.com.guisi.simulador.rede.view.SimuladorRedeController;
@@ -48,6 +49,15 @@ public class SimuladorRede extends Application {
 			primaryStage.getIcons().add(new Image("/img/bolt.png"));
 			scene.getStylesheets().add("/css/estilo.css");
 			primaryStage.setMaximized(true);
+			
+			primaryStage.setOnCloseRequest((event) -> {
+				try {
+					Matlab.disconnectMatlabProxy();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+			
 			controller.initializeController();
 			primaryStage.show();
 			

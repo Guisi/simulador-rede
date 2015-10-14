@@ -3,6 +3,12 @@ package br.com.guisi.simulador.rede.util;
 import java.io.File;
 import java.util.List;
 
+import org.n52.matlab.control.MatlabConnectionException;
+import org.n52.matlab.control.MatlabInvocationException;
+import org.n52.matlab.control.MatlabProxy;
+import org.n52.matlab.control.extensions.MatlabNumericArray;
+import org.n52.matlab.control.extensions.MatlabTypeConverter;
+
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
@@ -25,19 +31,40 @@ public class PowerFlow {
 	//Restrição mínima de tensão em pu (Vmin_pu)
 	private static final double TENSAO_MIN_PU = 0.9;
 
-	public static void executePowerFlow(Environment environment) {
+	public static void executePowerFlow(Environment environment) throws Exception {
 		double[][] mpcBus = mountMpcBus(environment);
 		
 		double[][] mpcGen = mountMpcGen(environment);
 		
 		double[][] mpcBranch = mountMpcBranch(environment);
 		
-		for (double[] ds : mpcBranch) {
+		try {
+			MatlabProxy proxy = Matlab.getMatlabProxy();
+			
+			MatlabTypeConverter processor = new MatlabTypeConverter(proxy);
+			
+			processor.setNumericArray("mpcBus", new MatlabNumericArray(mpcBus, null));
+			processor.setNumericArray("mpcGen", new MatlabNumericArray(mpcGen, null));
+			processor.setNumericArray("mpcBranch", new MatlabNumericArray(mpcBranch, null));
+			
+			proxy.setVariable("potenciaBase", POTENCIA_BASE);
+			
+			long ini = System.currentTimeMillis();
+			proxy.eval("ret = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
+			System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
+			
+			Object ret = proxy.getVariable("ret");
+			System.out.println("Result: " + ret);
+		} catch (MatlabConnectionException | MatlabInvocationException e) {
+			throw new Exception(e);
+		}
+		
+		/*for (double[] ds : mpcBranch) {
 			for (double d : ds) {
 				System.out.print(d + "	");
 			}
 			System.out.println();
-		}
+		}*/
 	}
 	
 	private static double[][] mountMpcBus(Environment environment) {
@@ -66,13 +93,12 @@ public class PowerFlow {
 			//TODO multiplicar pelo percentual de uso do período do dia
 			if (node.isLoad() && node.isOn()) {
 				//potencia ativa dos loads em megawatts (Pd) (se a carga estiver desligada, 0) 
-				//TODO carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
+				//carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
 				loadActivePowerMW[i] = node.getActivePower() / 1000;
 				
 				//potencia reativa dos loads em Mega Volt Ampère (Qd) (se a carga estiver desligada, 0) 
-				//TODO carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
-				//TODO incluir informação de potência reativa na planilha
-				loadReactivePowerMVar[i] = node.getActivePower() / 1000;
+				//carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
+				loadReactivePowerMVar[i] = node.getReactivePower() / 1000;
 			}
 			
 			//area sempre 1
@@ -144,12 +170,12 @@ public class PowerFlow {
 			busG[i] = feeder.getNodeNumber();
 			
 			//Potência Injetada em MW (Pg) (segundo o Fausto, nao faz diferenca o valor passado aqui)
-			//TODO carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
+			//carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
 			potenciaGeradaMW[i] = feeder.getActivePower() / 1000;
 			
 			//Potência Injetada em MVar (Qg)
-			//TODO carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
-			potenciaGeradaMVar[i] = feeder.getActivePower() / 1000;
+			//carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
+			potenciaGeradaMVar[i] = feeder.getReactivePower() / 1000;
 			
 			 //nao precisamos de valores maximos e minimos de capacidade do feeder
 			//Potência máxima de cada geração em MVar
@@ -214,10 +240,10 @@ public class PowerFlow {
 			branchTo[i] = branch.getLoad2().getNodeNumber();
 
 			//resistência em pu (ohms / impedancia)
-			resistenciaPu[i] = 0 / zb; //TODO incluir na planilha (em Ohms)
+			resistenciaPu[i] = branch.getResistance() / zb;
 			
 			//reatância em pu (ohms / impedancia)
-			reatanciaPu[i] = 0 / zb; //TODO incluir na planilha (em Ohms)
+			reatanciaPu[i] = branch.getReactance() / zb;
 			
 			//Capacidade máxima em potência [MVA] (Smax)
 			correnteMaxBranchMVA[i] = branch.getMaxCurrent() * TENSAO_BASE / POTENCIA_BASE;
