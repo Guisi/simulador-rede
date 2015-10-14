@@ -12,18 +12,18 @@ public class Branch {
 	private Integer number;
 	private NetworkNode load1;
 	private NetworkNode load2;
-	private double power;
+	private double maxCurrent;
 	private double distance;
 	private Status status;
 	private boolean switchBranch;
 	private double usedPower;
 	private int switchOperations;
 	
-	public Branch(Integer number, NetworkNode load1, NetworkNode load2, double power, double distance, Status status, boolean switchBranch) {
+	public Branch(Integer number, NetworkNode load1, NetworkNode load2, double maxCurrent, double distance, Status status, boolean switchBranch) {
 		this.number = number;
 		this.load1 = load1;
 		this.load2 = load2;
-		this.power = power;
+		this.maxCurrent = maxCurrent;
 		this.distance = distance;
 		this.status = status;
 		this.switchBranch = switchBranch;
@@ -52,7 +52,7 @@ public class Branch {
 	 * @return double
 	 */
 	public double getAvailablePower() {
-		return power - usedPower;
+		return maxCurrent - usedPower;
 	}
 	
 	/**
@@ -71,13 +71,13 @@ public class Branch {
 	}
 
 	/**
-	 * Retorna a capacidade máxima desta branch
+	 * Retorna a capacidade máxima desta branch (em ampères)
 	 * @return double
 	 */
-	public double getPower() {
-		return power;
+	public double getMaxCurrent() {
+		return maxCurrent;
 	}
-	
+
 	/**
 	 * Retorna o número desta branch
 	 * @return {@link Integer}
@@ -189,7 +189,7 @@ public class Branch {
 
 	@Override
 	public String toString() {
-		return "Branch [branchNum=" + number + ", load1=" + load1.getNodeNumber() + ", load2=" + load2.getNodeNumber() + ", branchPower=" + power + ", distance=" + distance
+		return "Branch [branchNum=" + number + ", load1=" + load1.getNodeNumber() + ", load2=" + load2.getNodeNumber() + ", branchPower=" + maxCurrent + ", distance=" + distance
 				+ ", status=" + status + ", switchBranch=" + switchBranch + "]";
 	}
 	

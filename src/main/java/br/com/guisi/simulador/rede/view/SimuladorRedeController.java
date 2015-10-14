@@ -503,7 +503,7 @@ public class SimuladorRedeController extends Controller {
 		lblBranchDe.setText(branch.getLoad1().getNodeNumber().toString());
 		lblBranchPara.setText(branch.getLoad2().getNodeNumber().toString());
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblBranchPower.setText(df.format(branch.getPower()));
+		lblBranchPower.setText(df.format(branch.getMaxCurrent()));
 		lblBranchDistance.setText(DecimalFormat.getNumberInstance().format(branch.getDistance()));
 		lblBranchStatus.setText(branch.isOn() ? "On" : "Off");
 		cbBranchNumber.setValue(branch.getNumber());

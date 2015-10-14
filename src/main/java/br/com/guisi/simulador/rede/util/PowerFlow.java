@@ -3,6 +3,7 @@ package br.com.guisi.simulador.rede.util;
 import java.io.File;
 import java.util.List;
 
+import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
@@ -29,7 +30,9 @@ public class PowerFlow {
 		
 		double[][] mpcGen = mountMpcGen(environment);
 		
-		for (double[] ds : mpcGen) {
+		double[][] mpcBranch = mountMpcBranch(environment);
+		
+		for (double[] ds : mpcBranch) {
 			for (double d : ds) {
 				System.out.print(d + "	");
 			}
@@ -184,6 +187,78 @@ public class PowerFlow {
 			mpcGen[i][9] = pMin[i];
 		}
 		return mpcGen;
+	}
+	
+	private static double[][] mountMpcBranch(Environment environment) {
+		List<Branch> branches = environment.getBranches();
+		
+		double[] branchFrom = new double[branches.size()];
+		double[] branchTo = new double[branches.size()];
+		double[] resistenciaPu = new double[branches.size()];
+		double[] reatanciaPu = new double[branches.size()];
+		double[] correnteMaxBranchMVA = new double[branches.size()];
+		double[] statusBranch = new double[branches.size()];
+		double[] anguloMin = new double[branchFrom.length];
+		double[] anguloMax = new double[branchFrom.length];
+		
+		//Impedância de base
+		double zb = Math.pow(TENSAO_BASE, 2)/POTENCIA_BASE;
+		
+		for (int i = 0; i < branches.size(); i++) {
+			Branch branch = branches.get(i);
+			
+			//branch De
+			branchFrom[i] = branch.getLoad1().getNodeNumber();
+			
+			//branch Para
+			branchTo[i] = branch.getLoad2().getNodeNumber();
+
+			//resistência em pu (ohms / impedancia)
+			resistenciaPu[i] = 0 / zb; //TODO incluir na planilha (em Ohms)
+			
+			//reatância em pu (ohms / impedancia)
+			reatanciaPu[i] = 0 / zb; //TODO incluir na planilha (em Ohms)
+			
+			//Capacidade máxima em potência [MVA] (Smax)
+			correnteMaxBranchMVA[i] = branch.getMaxCurrent() * TENSAO_BASE / POTENCIA_BASE;
+			
+			//Status Branch
+			statusBranch[i] = branch.isOn() ? 1 : 0;
+			
+			//angulo minimo
+			anguloMin[i] = -360;
+			
+			//angulo maximo
+			anguloMax[i] = 360;
+		}
+		
+		//Vetor bshant
+		double[] bsh = new double[branchFrom.length];
+		
+		//Ratio
+		double[] ratio = new double[branchFrom.length];
+		
+		//Angle
+		double[] angle = new double[branchFrom.length];
+		
+		//variavel mpc.branch do matpower
+		double[][] mpcBranch = new double[branchFrom.length][13];
+		for (int i = 0; i < branchFrom.length; i++) {
+			mpcBranch[i][0] = branchFrom[i];
+			mpcBranch[i][1] = branchTo[i];
+			mpcBranch[i][2] = resistenciaPu[i];
+			mpcBranch[i][3] = reatanciaPu[i];
+			mpcBranch[i][4] = bsh[i];
+			mpcBranch[i][5] = correnteMaxBranchMVA[i];
+			mpcBranch[i][6] = correnteMaxBranchMVA[i];
+			mpcBranch[i][7] = correnteMaxBranchMVA[i];
+			mpcBranch[i][8] = ratio[i];
+			mpcBranch[i][9] = angle[i];
+			mpcBranch[i][10] = statusBranch[i];
+			mpcBranch[i][11] = anguloMin[i];
+			mpcBranch[i][12] = anguloMax[i];
+		}
+		return mpcBranch;
 	}
 	
 	public static void main(String[] args) {

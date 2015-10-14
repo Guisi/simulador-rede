@@ -284,7 +284,7 @@ public class MatPowerTest {
 		Arrays.fill(anguloMax, 360);
 		
 		//variavel mpc.branch do matpower
-		double[][] mpcBranch = new double[branchFrom.length][21];
+		double[][] mpcBranch = new double[branchFrom.length][13];
 		for (int i = 0; i < branchFrom.length; i++) {
 			mpcBranch[i][0] = branchFrom[i];
 			mpcBranch[i][1] = branchTo[i];

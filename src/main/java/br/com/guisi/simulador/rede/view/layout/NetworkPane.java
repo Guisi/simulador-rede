@@ -131,7 +131,7 @@ public class NetworkPane extends Pane {
 
 		/** Label branch */
 		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		String power = " (" + df.format(branch.getPower()) + ")";
+		String power = " (" + df.format(branch.getMaxCurrent()) + ")";
 		Text text = new Text(power);
 		text.setFont(Font.font(10));
 		text.setBoundsType(TextBoundsType.VISUAL);
