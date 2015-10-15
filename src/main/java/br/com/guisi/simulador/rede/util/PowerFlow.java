@@ -17,7 +17,7 @@ import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 public class PowerFlow {
 	
 	//Tensão de referencia em pu (VRef) (Fausto usou 1.02, vamos usar 1.0)
-	private static final double TENSAO_REFERENCIA_PU = 1.0;
+	private static final double TENSAO_REFERENCIA_PU = 1.02;
 	
 	//Potência de base (Sbase)
 	private static final double POTENCIA_BASE = 1000000;
@@ -53,18 +53,40 @@ public class PowerFlow {
 			proxy.eval("ret = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
 			System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
 			
-			Object ret = proxy.getVariable("ret");
-			System.out.println("Result: " + ret);
+			Object[] ret = (Object[]) proxy.getVariable("ret");
+
+			//recupera informacoes das cargas
+			double[] mpcBusResult = getMpcObject(ret, "bus"); 
+			
+			int nodeQuantity = environment.getNetworkNodes().size();
+			for (int i = 0; i < nodeQuantity; i++) {
+				NetworkNode node = environment.getNetworkNode((int) mpcBusResult[i]);
+				
+				node.setActualVoltagePU(mpcBusResult[nodeQuantity * 7 + i]); //tensão está na sétima parte do array
+				
+				System.out.println((node.isFeeder() ? "Feeder" : "Load") + " " + node.getNodeNumber() + " - Tensão: " + node.getActualVoltagePU());
+			}
 		} catch (MatlabConnectionException | MatlabInvocationException e) {
 			throw new Exception(e);
 		}
-		
-		/*for (double[] ds : mpcBranch) {
-			for (double d : ds) {
-				System.out.print(d + "	");
+	}
+	
+	private static double[] getMpcObject(Object[] ret, String name) {
+		int idx = -1;
+		Object[] arrayEntries = (Object[]) ret[0];
+		for (int i = 0; i < arrayEntries.length; i++) {
+			if (name.equals(arrayEntries[i])) {
+				idx = i;
+				break;
 			}
-			System.out.println();
-		}*/
+		}
+		
+		Object[] arrayValues = (Object[]) ret[1];
+		
+		Object[] array = (Object[]) arrayValues[0];
+		double[] arrayRet = (double[]) array[idx];
+		
+		return arrayRet;
 	}
 	
 	private static double[][] mountMpcBus(Environment environment) {
@@ -94,11 +116,11 @@ public class PowerFlow {
 			if (node.isLoad() && node.isOn()) {
 				//potencia ativa dos loads em megawatts (Pd) (se a carga estiver desligada, 0) 
 				//carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
-				loadActivePowerMW[i] = node.getActivePower() / 1000;
+				loadActivePowerMW[i] = node.getActivePower() / 1000 * 0.9;
 				
 				//potencia reativa dos loads em Mega Volt Ampère (Qd) (se a carga estiver desligada, 0) 
 				//carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
-				loadReactivePowerMVar[i] = node.getReactivePower() / 1000;
+				loadReactivePowerMVar[i] = node.getReactivePower() / 1000 * 0.75;
 			}
 			
 			//area sempre 1
