@@ -1,7 +1,10 @@
 package br.com.guisi.simulador.rede;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import org.apache.commons.math3.complex.Complex;
 import org.n52.matlab.control.MatlabConnectionException;
 import org.n52.matlab.control.MatlabInvocationException;
 import org.n52.matlab.control.MatlabProxy;
@@ -63,18 +66,38 @@ public class MatPowerTest {
 		
 		proxy.setVariable("potenciaBase", POTENCIA_BASE);
 
-		long total = 0;
-		for (int i = 0; i < 1000; i++) {
-			long ini = System.currentTimeMillis();
-			//proxy.eval("ret = case_simulador_fluxo(mpcBus, mpcGen, mpcBranch, potenciaBase);");
-			proxy.eval("ret = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
-			total += System.currentTimeMillis() - ini;
-			
-			//System.out.println("Tempo: " + total);
+		//proxy.eval("ret = case_simulador_fluxo(mpcBus, mpcGen, mpcBranch, potenciaBase);");
+		proxy.eval("ret = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
+		
+		//recupera informacoes das cargas
+		Map<Integer, Double> actualVoltageMap = new LinkedHashMap<>();
+		double[][] mpsBus = processor.getNumericArray("ret.bus").getRealArray2D();
+		
+		for (int i = 0; i < mpsBus.length; i++) {
+			Integer nodeNumber = (int) mpcBus[i][0];
+			actualVoltageMap.put(nodeNumber, mpsBus[i][7]);
 		}
-		System.out.println(total / 1000);
-	    
-		System.out.println("Result: " + proxy.getVariable("ret"));
+		
+		MatlabNumericArray array = processor.getNumericArray("ret.branch");
+		double[][] d = array.getRealArray2D();
+		
+		double losses = 0;
+		for (double[] es : d) {
+			double sAtual = new Complex(es[13], es[14]).abs();
+			
+			Integer loadTo = (int) es[1];
+			
+			Double voltagePu = actualVoltageMap.get(loadTo);
+			if (voltagePu != null) {
+				System.out.println( (sAtual / (voltagePu * TENSAO_BASE)) * POTENCIA_BASE);
+			}
+			
+			double loss = Math.abs(es[13] + es[15]);
+			System.out.println(loss);
+			losses += loss;
+		}
+		
+		System.out.println("Losses: " + losses);
 		
 		proxy.eval("rmpath('matpower5.1')");
 

@@ -19,7 +19,7 @@ public abstract class NetworkNode {
 	protected Integer y;
 	protected double activePower;
 	protected double reactivePower;
-	protected double actualVoltagePU;
+	protected double currentVoltagePU;
 	protected Status status;
 	protected Set<Branch> branches = new HashSet<>();
 	
@@ -148,12 +148,12 @@ public abstract class NetworkNode {
 	 * Voltagem atual em PU
 	 * @return
 	 */
-	public double getActualVoltagePU() {
-		return actualVoltagePU;
+	public double getCurrentVoltagePU() {
+		return currentVoltagePU;
 	}
 
-	public void setActualVoltagePU(double actualVoltagePU) {
-		this.actualVoltagePU = actualVoltagePU;
+	public void setCurrentVoltagePU(double currentVoltagePU) {
+		this.currentVoltagePU = currentVoltagePU;
 	}
 
 	@Override

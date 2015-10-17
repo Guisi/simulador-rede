@@ -101,6 +101,8 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private Label lblLoadStatus;
 	@FXML
+	private Label lblLoadCurrentVoltage;
+	@FXML
 	private Label lblLoadMessages;
 	@FXML
 	private Button btnPreviousLoad;
@@ -145,7 +147,11 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private Label lblBranchPara;
 	@FXML
-	private Label lblBranchPower;
+	private Label lblBranchMaxCurrent;
+	@FXML
+	private Label lblBranchInstantCurrent;
+	@FXML
+	private Label lblBranchLossesMW;
 	@FXML
 	private Label lblBranchResistance;
 	@FXML
@@ -211,6 +217,7 @@ public class SimuladorRedeController extends Controller {
 		lblLoadReactivePower.setText("");
 		lblLoadPriority.setText("");
 		lblLoadStatus.setText("");
+		lblLoadCurrentVoltage.setText("");
 		lblLoadMessages.setText("");
 		
 		cbFeederNumber.setValue(null);
@@ -227,7 +234,9 @@ public class SimuladorRedeController extends Controller {
 		cbBranchNumber.setValue(null);
 		lblBranchDe.setText("");
 		lblBranchPara.setText("");
-		lblBranchPower.setText("");
+		lblBranchMaxCurrent.setText("");
+		lblBranchInstantCurrent.setText("");
+		lblBranchLossesMW.setText("");
 		lblBranchResistance.setText("");
 		lblBranchReactance.setText("");
 		lblBranchStatus.setText("");
@@ -442,11 +451,11 @@ public class SimuladorRedeController extends Controller {
 		
 		Load load = getEnvironment().getLoad(selectedLoad);
 		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : "");
-		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblLoadActivePower.setText(df.format(load.getActivePower()));
-		lblLoadReactivePower.setText(df.format(load.getReactivePower()));
+		lblLoadActivePower.setText(DecimalFormat.getNumberInstance().format(load.getActivePower()));
+		lblLoadReactivePower.setText(DecimalFormat.getNumberInstance().format(load.getReactivePower()));
 		lblLoadPriority.setText(String.valueOf(load.getPriority()));
 		lblLoadStatus.setText(load.isOn() ? "On" : "Off");
+		lblLoadCurrentVoltage.setText(DecimalFormat.getNumberInstance().format(load.getCurrentVoltagePU()));
 		cbLoadNumber.setValue(load.getNodeNumber());
 		
 		String msgs = null;
@@ -472,14 +481,13 @@ public class SimuladorRedeController extends Controller {
 		shape.setStrokeWidth(2);
 		
 		Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
-		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblFeederActivePower.setText(df.format(feeder.getActivePower()));
-		lblFeederReactivePower.setText(df.format(feeder.getReactivePower()));
+		lblFeederActivePower.setText(DecimalFormat.getNumberInstance().format(feeder.getActivePower()));
+		lblFeederReactivePower.setText(DecimalFormat.getNumberInstance().format(feeder.getReactivePower()));
 		/*lblFeederEnergizedLoads.setText(String.valueOf(feeder.getEnergizedLoads()));
 		lblFeederPartiallyEnergizedLoads.setText(String.valueOf(feeder.getPartiallyEnergizedLoads()));
 		lblFeederNotEnergizedLoads.setText(String.valueOf(feeder.getNotEnergizedLoads()));*/
-		lblFeederUsedPower.setText(df.format(feeder.getUsedPower()));
-		lblFeederAvailablePower.setText(df.format(feeder.getAvailablePower()));
+		lblFeederUsedPower.setText(DecimalFormat.getNumberInstance().format(feeder.getUsedPower()));
+		lblFeederAvailablePower.setText(DecimalFormat.getNumberInstance().format(feeder.getAvailablePower()));
 		cbFeederNumber.setValue(feeder.getNodeNumber());
 	}
 	
@@ -499,10 +507,11 @@ public class SimuladorRedeController extends Controller {
 		l.setStrokeWidth(2);
 
 		Branch branch = getEnvironment().getBranch(branchStackPane.getBranchNum());
-		lblBranchDe.setText(branch.getLoad1().getNodeNumber().toString());
-		lblBranchPara.setText(branch.getLoad2().getNodeNumber().toString());
-		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
-		lblBranchPower.setText(df.format(branch.getMaxCurrent()));
+		lblBranchDe.setText(branch.getNode1().getNodeNumber().toString());
+		lblBranchPara.setText(branch.getNode2().getNodeNumber().toString());
+		lblBranchMaxCurrent.setText(DecimalFormat.getNumberInstance().format(branch.getMaxCurrent()));
+		lblBranchInstantCurrent.setText(DecimalFormat.getNumberInstance().format(branch.getInstantCurrent()));
+		lblBranchLossesMW.setText(DecimalFormat.getNumberInstance().format(branch.getLossesMW()));
 		lblBranchResistance.setText(DecimalFormat.getNumberInstance().format(branch.getResistance()));
 		lblBranchReactance.setText(DecimalFormat.getNumberInstance().format(branch.getReactance()));
 		lblBranchStatus.setText(branch.isOn() ? "On" : "Off");

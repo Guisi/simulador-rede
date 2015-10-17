@@ -10,25 +10,29 @@ import br.com.guisi.simulador.rede.constants.Status;
 public class Branch {
 
 	private Integer number;
-	private NetworkNode load1;
-	private NetworkNode load2;
+	private BranchId branchId;
+	private NetworkNode node1;
+	private NetworkNode node2;
 	private double maxCurrent;
 	private double resistance;
 	private double reactance;
 	private Status status;
 	private boolean switchBranch;
-	private double usedPower;
 	private int switchOperations;
+
+	private double instantCurrent;
+	private double lossesMW;
 	
-	public Branch(Integer number, NetworkNode load1, NetworkNode load2, double maxCurrent, double resistance, double reactance, Status status, boolean switchBranch) {
+	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, double reactance, Status status, boolean switchBranch) {
 		this.number = number;
-		this.load1 = load1;
-		this.load2 = load2;
+		this.node1 = node1;
+		this.node2 = node2;
 		this.maxCurrent = maxCurrent;
 		this.resistance = resistance;
 		this.reactance = reactance;
 		this.status = status;
 		this.switchBranch = switchBranch;
+		this.branchId = new BranchId(node1.getNodeNumber(), node2.getNodeNumber());
 	}
 	
 	/**
@@ -46,7 +50,7 @@ public class Branch {
 	 * @return {@link NetworkNode}
 	 */
 	public NetworkNode getConnectedLoad(NetworkNode networkNode) {
-		return load1.equals(networkNode) ? load2 : load1;
+		return node1.equals(networkNode) ? node2 : node1;
 	}
 	
 	/**
@@ -54,15 +58,7 @@ public class Branch {
 	 * @return double
 	 */
 	public double getAvailablePower() {
-		return maxCurrent - usedPower;
-	}
-	
-	/**
-	 * Adiciona o valor de potência usado com relação à capacidade máxima
-	 * @param usedPower
-	 */
-	public void addUsedPower(double usedPower) {
-		this.usedPower += usedPower;
+		return maxCurrent - instantCurrent;
 	}
 	
 	/**
@@ -89,26 +85,26 @@ public class Branch {
 	}
 	
 	/**
-	 * Retorna o {@link Load} de uma das pontas da branch
-	 * @return {@link Load}
+	 * Retorna o {@link NetworkNode} de uma das pontas da branch
+	 * @return {@link NetworkNode}
 	 */
-	public NetworkNode getLoad1() {
-		return load1;
+	public NetworkNode getNode1() {
+		return node1;
 	}
 	
-	public void setLoad1(NetworkNode load1) {
-		this.load1 = load1;
+	public void setNode1(NetworkNode node1) {
+		this.node1 = node1;
 	}
 
 	/**
-	 * Retorna o {@link Load} de uma das pontas da branch
-	 * @return {@link Load}
+	 * Retorna o {@link NetworkNode} de uma das pontas da branch
+	 * @return {@link NetworkNode}
 	 */
-	public NetworkNode getLoad2() {
-		return load2;
+	public NetworkNode getNode2() {
+		return node2;
 	}
-	public void setLoad2(NetworkNode load2) {
-		this.load2 = load2;
+	public void setNode2(NetworkNode node2) {
+		this.node2 = node2;
 	}
 	
 	/**
@@ -158,15 +154,15 @@ public class Branch {
 	}
 
 	/**
-	 * Retorna a potência em uso nesta branch
-	 * @return double
+	 * Retorna a corrente atual passando por esta branch
+	 * @return
 	 */
-	public double getUsedPower() {
-		return usedPower;
+	public double getInstantCurrent() {
+		return instantCurrent;
 	}
 
-	public void setUsedPower(double usedPower) {
-		this.usedPower = usedPower;
+	public void setInstantCurrent(double instantCurrent) {
+		this.instantCurrent = instantCurrent;
 	}
 
 	/**
@@ -175,6 +171,22 @@ public class Branch {
 	 */
 	public int getSwitchOperations() {
 		return switchOperations;
+	}
+
+	public BranchId getBranchId() {
+		return branchId;
+	}
+
+	/**
+	 * Perda em megawatts
+	 * @return
+	 */
+	public double getLossesMW() {
+		return lossesMW;
+	}
+
+	public void setLossesMW(double lossesMW) {
+		this.lossesMW = lossesMW;
 	}
 
 	@Override
@@ -204,7 +216,7 @@ public class Branch {
 
 	@Override
 	public String toString() {
-		return "Branch [branchNum=" + number + ", load1=" + load1.getNodeNumber() + ", load2=" + load2.getNodeNumber() + ", branchPower=" + maxCurrent + ", resistance=" + resistance
+		return "Branch [branchNum=" + number + ", node1=" + node1.getNodeNumber() + ", node2=" + node2.getNodeNumber() + ", branchPower=" + maxCurrent + ", resistance=" + resistance
 				+ ", reactance=" + reactance + ", status=" + status + ", switchBranch=" + switchBranch + "]";
 	}
 	

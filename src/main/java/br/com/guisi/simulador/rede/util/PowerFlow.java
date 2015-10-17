@@ -3,6 +3,7 @@ package br.com.guisi.simulador.rede.util;
 import java.io.File;
 import java.util.List;
 
+import org.apache.commons.math3.complex.Complex;
 import org.n52.matlab.control.MatlabConnectionException;
 import org.n52.matlab.control.MatlabInvocationException;
 import org.n52.matlab.control.MatlabProxy;
@@ -50,43 +51,40 @@ public class PowerFlow {
 			proxy.setVariable("potenciaBase", POTENCIA_BASE);
 			
 			long ini = System.currentTimeMillis();
-			proxy.eval("ret = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
+			proxy.eval("mpc = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
 			System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
 			
-			Object[] ret = (Object[]) proxy.getVariable("ret");
-
 			//recupera informacoes das cargas
-			double[] mpcBusResult = getMpcObject(ret, "bus"); 
+			double[][] mpcBusRet = processor.getNumericArray("mpc.bus").getRealArray2D();
 			
-			int nodeQuantity = environment.getNetworkNodes().size();
-			for (int i = 0; i < nodeQuantity; i++) {
-				NetworkNode node = environment.getNetworkNode((int) mpcBusResult[i]);
+			for (double[] mpcBusRetLine : mpcBusRet) {
+				Integer nodeNumber = (int) mpcBusRetLine[0];
+				NetworkNode node = environment.getNetworkNode(nodeNumber);
 				
-				node.setActualVoltagePU(mpcBusResult[nodeQuantity * 7 + i]); //tensão está na sétima parte do array
-				
-				System.out.println((node.isFeeder() ? "Feeder" : "Load") + " " + node.getNodeNumber() + " - Tensão: " + node.getActualVoltagePU());
+				node.setCurrentVoltagePU(mpcBusRetLine[7]); //tensão
 			}
+			
+			double[][] mpcBranchRet = processor.getNumericArray("mpc.branch").getRealArray2D();
+			
+			for (double[] mpcBranchRetLine : mpcBranchRet) {
+				double sAtual = new Complex(mpcBranchRetLine[13], mpcBranchRetLine[14]).abs();
+				
+				Integer nodeFrom = (int) mpcBranchRetLine[0];
+				Integer nodeTo = (int) mpcBranchRetLine[1];
+				
+				Branch branch = environment.getBranch(nodeFrom, nodeTo);
+				if (branch != null) {
+					double actualCurrent = (sAtual / (branch.getNode2().getCurrentVoltagePU() * TENSAO_BASE)) * POTENCIA_BASE;
+					branch.setInstantCurrent(actualCurrent);
+					
+					double losses = Math.abs(mpcBranchRetLine[13] + mpcBranchRetLine[15]);
+					branch.setLossesMW(losses);
+				}
+			}
+			
 		} catch (MatlabConnectionException | MatlabInvocationException e) {
 			throw new Exception(e);
 		}
-	}
-	
-	private static double[] getMpcObject(Object[] ret, String name) {
-		int idx = -1;
-		Object[] arrayEntries = (Object[]) ret[0];
-		for (int i = 0; i < arrayEntries.length; i++) {
-			if (name.equals(arrayEntries[i])) {
-				idx = i;
-				break;
-			}
-		}
-		
-		Object[] arrayValues = (Object[]) ret[1];
-		
-		Object[] array = (Object[]) arrayValues[0];
-		double[] arrayRet = (double[]) array[idx];
-		
-		return arrayRet;
 	}
 	
 	private static double[][] mountMpcBus(Environment environment) {
@@ -256,10 +254,10 @@ public class PowerFlow {
 			Branch branch = branches.get(i);
 			
 			//branch De
-			branchFrom[i] = branch.getLoad1().getNodeNumber();
+			branchFrom[i] = branch.getNode1().getNodeNumber();
 			
 			//branch Para
-			branchTo[i] = branch.getLoad2().getNodeNumber();
+			branchTo[i] = branch.getNode2().getNodeNumber();
 
 			//resistência em pu (ohms / impedancia)
 			resistenciaPu[i] = branch.getResistance() / zb;
@@ -310,12 +308,14 @@ public class PowerFlow {
 	}
 	
 	public static void main(String[] args) {
-		File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
+		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.csv");
 		
 		try {
 			Environment environment = EnvironmentUtils.getEnvironmentFromFile(f);
 			
 			executePowerFlow(environment);
+			
+			Matlab.disconnectMatlabProxy();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

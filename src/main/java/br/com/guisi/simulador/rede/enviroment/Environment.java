@@ -1,6 +1,7 @@
 package br.com.guisi.simulador.rede.enviroment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ public class Environment {
 	private final int sizeY;
 	private final Map<Integer, NetworkNode> networkNodeMap;
 	private final Map<Integer, Branch> branchMap;
+	private final Map<BranchId, Branch> branchFromToMap;
 	private final List<Load> loads;
 	private final List<Feeder> feeders;
 	private final List<Branch> branches;
@@ -25,6 +27,7 @@ public class Environment {
 		this.sizeY = sizeY;
 		this.networkNodeMap = networkNodeMap;
 		this.branchMap = branchMap;
+		this.branchFromToMap = new HashMap<>();
 		
 		loads = new ArrayList<Load>();
 		feeders = new ArrayList<Feeder>();
@@ -39,6 +42,8 @@ public class Environment {
 		branches = new ArrayList<Branch>();
 		switches = new ArrayList<Branch>();
 		branchMap.values().forEach((branch) -> {
+			this.branchFromToMap.put(branch.getBranchId(), branch);
+			
 			branches.add(branch);
 			if (branch.isSwitchBranch()) {
 				switches.add(branch);
@@ -83,6 +88,16 @@ public class Environment {
 	}
 	
 	/**
+	 * Retorna o {@link Branch} pelos números dos nodes de e para
+	 * @param nodeFrom
+	 * @param nodeTo
+	 * @return
+	 */
+	public Branch getBranch(Integer nodeFrom, Integer nodeTo) {
+		return branchFromToMap.get(new BranchId(nodeFrom, nodeTo));
+	}
+	
+	/**
 	 * Returns a {@link Map<Integer, NetworkNode>} with all nodes
 	 * @return {@link Map<Integer, NetworkNode>}
 	 */
@@ -118,6 +133,10 @@ public class Environment {
 		return branchMap;
 	}
 	
+	public Map<BranchId, Branch> getBranchFromToMap() {
+		return branchFromToMap;
+	}
+
 	/**
 	 * Retorna um {@link List<Feeder>} com todos os feeders
 	 * @return {@link List<Feeder>}
