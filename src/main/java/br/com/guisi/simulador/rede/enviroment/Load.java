@@ -1,7 +1,7 @@
 package br.com.guisi.simulador.rede.enviroment;
 
 import br.com.guisi.simulador.rede.constants.Status;
-import br.com.guisi.simulador.rede.constants.SupplyStatus;
+import br.com.guisi.simulador.rede.constants.LoadSupplyStatus;
 
 /**
  * Classe representando um Load da rede
@@ -12,40 +12,13 @@ public class Load extends NetworkNode {
 
 	private Feeder feeder;
 	private int priority;
-	private SupplyStatus supplyStatus;
+	private LoadSupplyStatus loadSupplyStatus;
 	
 	public Load(Integer nodeNumber, Integer x, Integer y, double activePower, double reactivePower, Status status, int priority) {
 		super(nodeNumber, x, y, activePower, reactivePower, status);
 		this.priority = priority;
 	}
 
-	/**
-	 * Retorna se o load está ligado e sendo totalmente energizado
-	 * @return boolean
-	 */
-	public boolean isSupplied() {
-		return isOn() && SupplyStatus.SUPPLIED.equals(supplyStatus);
-	}
-	
-	/**
-	 * Retorna se o load está ligado e parcialmente energizado
-	 * @return boolean
-	 */
-	public boolean isPartiallySupplied() {
-		return isOn() && (SupplyStatus.PARTIALLY_SUPPLIED_BRANCH_EXCEEDED.equals(supplyStatus)
-				|| SupplyStatus.PARTIALLY_SUPPLIED_FEEDER_EXCEEDED.equals(supplyStatus));
-	}
-	
-	/**
-	 * Retorna se o load está ligado mas sem energia
-	 * @return boolean
-	 */
-	public boolean isNotSupplied() {
-		return isOn() && (SupplyStatus.NOT_SUPPLIED_BRANCH_EXCEEDED.equals(supplyStatus)
-				|| SupplyStatus.NOT_SUPPLIED_FEEDER_EXCEEDED.equals(supplyStatus)
-				|| SupplyStatus.NOT_SUPPLIED_NO_FEEDER_CONNECTED.equals(supplyStatus));
-	}
-	
 	/**
 	 * Retorna o {@link Feeder} ao qual este {@link Load} está ligado
 	 * @return {@link Feeder}
@@ -69,23 +42,31 @@ public class Load extends NetworkNode {
 	public String getColor() {
 		return feeder != null ? feeder.getLoadColor() : "#FFFFFF";
 	}
+	
+	/**
+	 * Retorna se o load está ligado e atendido normalmente
+	 * @return boolean
+	 */
+	public boolean isSupplied() {
+		return isOn() && LoadSupplyStatus.SUPPLIED.equals(loadSupplyStatus);
+	}
 
 	/**
 	 * Retorna o status de atendimento deste {@link Load}
-	 * @return {@link SupplyStatus}
+	 * @return {@link LoadSupplyStatus}
 	 */
-	public SupplyStatus getSupplyStatus() {
-		return supplyStatus;
+	public LoadSupplyStatus getSupplyStatus() {
+		return loadSupplyStatus;
 	}
 
-	public void setSupplyStatus(SupplyStatus supplyStatus) {
-		this.supplyStatus = supplyStatus;
+	public void setSupplyStatus(LoadSupplyStatus loadSupplyStatus) {
+		this.loadSupplyStatus = loadSupplyStatus;
 	}
 	
 	@Override
 	public String toString() {
 		return "Load [nodeNumber=" + nodeNumber + ", x=" + x + ", y=" + y + ", activePower=" + activePower + ", reactivePower=" + reactivePower + ", status=" + status + ", feeder="
-				+ (feeder != null ? feeder.getNodeNumber() : null) + ", priority=" + priority + ", supplyStatus=" + supplyStatus + "]";
+				+ (feeder != null ? feeder.getNodeNumber() : null) + ", priority=" + priority + ", supplyStatus=" + loadSupplyStatus + "]";
 	}
 	
 }

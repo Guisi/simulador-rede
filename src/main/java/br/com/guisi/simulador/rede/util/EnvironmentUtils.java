@@ -13,8 +13,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import br.com.guisi.simulador.rede.constants.Constants;
+import br.com.guisi.simulador.rede.constants.LoadSupplyStatus;
 import br.com.guisi.simulador.rede.constants.Status;
-import br.com.guisi.simulador.rede.constants.SupplyStatus;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
@@ -164,7 +165,7 @@ public class EnvironmentUtils {
 	 * Valida se a rede esta configurada corretamente
 	 * Por exemplo, se existe algum ciclo fechado ou isolamento
 	 */
-	public static String validateEnvironment(Environment environment) throws IllegalStateException {
+	public static String validateEnvironment(Environment environment) throws Exception {
 		StringBuilder msgs = new StringBuilder();
 		
 		//primeiro valida se rede está radial
@@ -177,14 +178,22 @@ public class EnvironmentUtils {
 				Feeder feeder = getFeeder(load);
 				load.setFeeder(feeder);
 				if (feeder == null) {
-					load.setSupplyStatus(SupplyStatus.NOT_SUPPLIED_NO_FEEDER_CONNECTED);
+					load.setSupplyStatus(LoadSupplyStatus.NO_FEEDER_CONNECTED);
 				}
 			}
 		});
 		
 		if (msgs.length() == 0) {
-			//TODO execute power flow
-			environment.getLoads().forEach((load) -> load.setSupplyStatus(SupplyStatus.NOT_SUPPLIED_NO_FEEDER_CONNECTED));
+			PowerFlow.executePowerFlow(environment);
+			environment.getLoads().forEach((load) -> {
+				if (load.getCurrentVoltagePU() < Constants.TENSAO_MIN_PU) {
+					load.setSupplyStatus(LoadSupplyStatus.CURRENT_VOLTAGE_BELOW_LIMIT);
+				} else if (load.getCurrentVoltagePU() > Constants.TENSAO_MAX_PU) {
+					load.setSupplyStatus(LoadSupplyStatus.CURRENT_VOLTAGE_ABOVE_LIMIT);
+				} else {
+					load.setSupplyStatus(LoadSupplyStatus.SUPPLIED);
+				}
+			});
 		}
 		
 		return msgs.toString();
@@ -358,12 +367,9 @@ public class EnvironmentUtils {
 		
 		try {
 			environment = EnvironmentUtils.getEnvironmentFromFile(f);
+			EnvironmentUtils.validateEnvironment(environment);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		
-		if (environment != null) {
-			EnvironmentUtils.validateEnvironment(environment);
 		}
 	}
 }

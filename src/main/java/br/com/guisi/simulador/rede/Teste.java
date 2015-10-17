@@ -6,17 +6,13 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-import org.apache.commons.math3.complex.Complex;
-
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		Complex complex = new Complex(0.946513766768218, 0.602616283545342);
-		
-		System.out.println(complex.abs());
+		System.out.println(String.format("%03d", 0));
 	}
 	
 	public static void teste() throws Exception {

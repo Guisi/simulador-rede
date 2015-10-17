@@ -31,7 +31,7 @@ public class FunctionsUtils {
 				Integer quantity = Integer.valueOf((String) qtdStr);
 				
 				for (int i = 0; i < quantity; i++) {
-					String prefix = FUNCTION_KEY_PREFIX + i + "_";
+					String prefix = FUNCTION_KEY_PREFIX + String.format("%03d", i) + "_";
 					String functionName = (String) prop.get(prefix + "NAME");
 					String functionType = (String) prop.get(prefix + "TYPE");
 					String functionExpression = (String) prop.get(prefix + "EXPRESSION");
@@ -47,8 +47,9 @@ public class FunctionsUtils {
 	public static void saveProperties(List<FunctionItem> functions) throws IOException {
 		Properties prop = new OrderedProperties();
 		prop.put(FUNCTIONS_QUANTITY_KEY, String.valueOf(functions.size()));
-		for (FunctionItem function : functions) {
-			String prefix = FUNCTION_KEY_PREFIX + function.getFunctionIndex() + "_";
+		for (int i = 0; i < functions.size(); i++) {
+			FunctionItem function = functions.get(i);
+			String prefix = FUNCTION_KEY_PREFIX + String.format("%03d", i) + "_";
 			prop.put(prefix + "NAME", function.getFunctionName().get());
 			prop.put(prefix + "TYPE", function.getFunctionType().get());
 			prop.put(prefix + "EXPRESSION", function.getFunctionExpression());

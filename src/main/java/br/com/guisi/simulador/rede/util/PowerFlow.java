@@ -10,6 +10,7 @@ import org.n52.matlab.control.MatlabProxy;
 import org.n52.matlab.control.extensions.MatlabNumericArray;
 import org.n52.matlab.control.extensions.MatlabTypeConverter;
 
+import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
@@ -17,21 +18,6 @@ import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 
 public class PowerFlow {
 	
-	//Tensão de referencia em pu (VRef) (Fausto usou 1.02, vamos usar 1.0)
-	private static final double TENSAO_REFERENCIA_PU = 1.02;
-	
-	//Potência de base (Sbase)
-	private static final double POTENCIA_BASE = 1000000;
-	
-	//Tensão de base (VBase) 
-	private static final double TENSAO_BASE = 11000;
-	
-	//Restrição máxima de tensão em pu (Vmax_pu)
-	private static final double TENSAO_MAX_PU = 1.05;
-	
-	//Restrição mínima de tensão em pu (Vmin_pu)
-	private static final double TENSAO_MIN_PU = 0.9;
-
 	public static void executePowerFlow(Environment environment) throws Exception {
 		double[][] mpcBus = mountMpcBus(environment);
 		
@@ -48,7 +34,7 @@ public class PowerFlow {
 			processor.setNumericArray("mpcGen", new MatlabNumericArray(mpcGen, null));
 			processor.setNumericArray("mpcBranch", new MatlabNumericArray(mpcBranch, null));
 			
-			proxy.setVariable("potenciaBase", POTENCIA_BASE);
+			proxy.setVariable("potenciaBase", Constants.POTENCIA_BASE);
 			
 			long ini = System.currentTimeMillis();
 			proxy.eval("mpc = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
@@ -74,7 +60,7 @@ public class PowerFlow {
 				
 				Branch branch = environment.getBranch(nodeFrom, nodeTo);
 				if (branch != null) {
-					double actualCurrent = (sAtual / (branch.getNode2().getCurrentVoltagePU() * TENSAO_BASE)) * POTENCIA_BASE;
+					double actualCurrent = (sAtual / (branch.getNode2().getCurrentVoltagePU() * Constants.TENSAO_BASE)) * Constants.POTENCIA_BASE;
 					branch.setInstantCurrent(actualCurrent);
 					
 					double losses = Math.abs(mpcBranchRetLine[13] + mpcBranchRetLine[15]);
@@ -125,20 +111,20 @@ public class PowerFlow {
 			area[i] = 1;
 			
 			//voltage magnitude (Vm) (p.u.)
-			voltageMagnitude[i] = TENSAO_REFERENCIA_PU;
+			voltageMagnitude[i] = Constants.TENSAO_REFERENCIA_PU;
 			
 			//Tensão de Barra em kV
-			double base = TENSAO_BASE / 1000;
+			double base = Constants.TENSAO_BASE / 1000;
 			baseKV[i] = base;
 			
 			//zone sempre 1
 			zone[i] = 1;
 			
 			//Restrição máxima (Vmax)
-			restricaoMax[i] = TENSAO_MAX_PU;
+			restricaoMax[i] = Constants.TENSAO_MAX_PU;
 			
 			//Restrição mínima (Vmax)
-			restricaoMin[i] = TENSAO_MIN_PU;
+			restricaoMin[i] = Constants.TENSAO_MIN_PU;
 		}
 		
 		//Gs e bs zerado
@@ -208,10 +194,10 @@ public class PowerFlow {
 			pMin[i] = potenciaGeradaMW[i];
 
 			//Voltage magnitude setpoint (vg) (p.u.) - para cada load/feeder
-			vmSetpoint[i] = TENSAO_REFERENCIA_PU;
+			vmSetpoint[i] = Constants.TENSAO_REFERENCIA_PU;
 			
 			//Potência de base em MVa
-			double base = POTENCIA_BASE / 1000000;
+			double base = Constants.POTENCIA_BASE / 1000000;
 			mBase[i] = base;
 			
 			//Status dos pontos de entrega de potência e de Geração distribuída (DG)
@@ -248,7 +234,7 @@ public class PowerFlow {
 		double[] anguloMax = new double[branchFrom.length];
 		
 		//Impedância de base
-		double zb = Math.pow(TENSAO_BASE, 2)/POTENCIA_BASE;
+		double zb = Math.pow(Constants.TENSAO_BASE, 2) / Constants.POTENCIA_BASE;
 		
 		for (int i = 0; i < branches.size(); i++) {
 			Branch branch = branches.get(i);
@@ -266,7 +252,7 @@ public class PowerFlow {
 			reatanciaPu[i] = branch.getReactance() / zb;
 			
 			//Capacidade máxima em potência [MVA] (Smax)
-			correnteMaxBranchMVA[i] = branch.getMaxCurrent() * TENSAO_BASE / POTENCIA_BASE;
+			correnteMaxBranchMVA[i] = branch.getMaxCurrent() * Constants.TENSAO_BASE / Constants.POTENCIA_BASE;
 			
 			//Status Branch
 			statusBranch[i] = branch.isOn() ? 1 : 0;

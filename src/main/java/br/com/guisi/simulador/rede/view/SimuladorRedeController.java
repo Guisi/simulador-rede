@@ -313,25 +313,25 @@ public class SimuladorRedeController extends Controller {
 		try {
 			Environment environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
 			SimuladorRede.setEnvironment(environment);
+			
+			if (SimuladorRede.getEnvironment() != null) {
+				String msgs = EnvironmentUtils.validateEnvironment(getEnvironment());
+				
+				if (StringUtils.isNotEmpty(msgs)) {
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setContentText(msgs);
+					alert.show();
+				}
+				
+				this.drawNetworkFromEnvironment();
+				
+				this.updateFunctionsTables();
+			}
 		} catch (Exception e) {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setContentText(e.getMessage());
 			e.printStackTrace();
 			alert.showAndWait();
-		}
-		
-		if (SimuladorRede.getEnvironment() != null) {
-			String msgs = EnvironmentUtils.validateEnvironment(getEnvironment());
-			
-			if (StringUtils.isNotEmpty(msgs)) {
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setContentText(msgs);
-				alert.show();
-			}
-			
-			this.drawNetworkFromEnvironment();
-			
-			this.updateFunctionsTables();
 		}
 	}
 	
