@@ -184,7 +184,10 @@ public class EnvironmentUtils {
 		});
 		
 		if (msgs.length() == 0) {
+			//executa o fluxo de potência
 			PowerFlow.executePowerFlow(environment);
+			
+			//atribui os status dos loads de acordo com o retorno do fluxo de potência
 			environment.getLoads().forEach((load) -> {
 				if (load.getCurrentVoltagePU() < Constants.TENSAO_MIN_PU) {
 					load.setSupplyStatus(LoadSupplyStatus.CURRENT_VOLTAGE_BELOW_LIMIT);
@@ -194,6 +197,10 @@ public class EnvironmentUtils {
 					load.setSupplyStatus(LoadSupplyStatus.SUPPLIED);
 				}
 			});
+			
+			//atribui os status e uso dos feeders de acordo com o retorno do fluxo de potência
+			
+			System.out.println(environment.getFeeders().get(0).getBranches());
 		}
 		
 		return msgs.toString();

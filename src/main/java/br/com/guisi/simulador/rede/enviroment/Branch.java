@@ -217,7 +217,7 @@ public class Branch {
 	@Override
 	public String toString() {
 		return "Branch [branchNum=" + number + ", node1=" + node1.getNodeNumber() + ", node2=" + node2.getNodeNumber() + ", branchPower=" + maxCurrent + ", resistance=" + resistance
-				+ ", reactance=" + reactance + ", status=" + status + ", switchBranch=" + switchBranch + "]";
+				+ ", reactance=" + reactance + ", status=" + status + ", switchBranch=" + switchBranch + ", instantCurrent=" + instantCurrent + ", lossesMW=" + lossesMW + "]";
 	}
 	
 }
