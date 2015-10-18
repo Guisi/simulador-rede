@@ -189,7 +189,11 @@ public class EnvironmentUtils {
 		
 		if (msgs.length() == 0) {
 			//executa o fluxo de potência
-			PowerFlow.executePowerFlow(environment);
+			boolean success = PowerFlow.executePowerFlow(environment);
+			
+			if (!success) {
+				msgs.append("Error: Newton's method power flow did not converge in 10 iterations.");
+			}
 			
 			//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
 			environment.getFeeders().forEach((feeder) -> {

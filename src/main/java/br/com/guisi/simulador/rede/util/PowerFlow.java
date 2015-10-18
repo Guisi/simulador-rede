@@ -18,7 +18,7 @@ import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 
 public class PowerFlow {
 	
-	public static void executePowerFlow(Environment environment) throws Exception {
+	public static boolean executePowerFlow(Environment environment) throws Exception {
 		double[][] mpcBus = mountMpcBus(environment);
 		
 		double[][] mpcGen = mountMpcGen(environment);
@@ -40,34 +40,39 @@ public class PowerFlow {
 			proxy.eval("mpc = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
 			//System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
 			
-			//recupera informacoes das cargas
-			double[][] mpcBusRet = processor.getNumericArray("mpc.bus").getRealArray2D();
+			double success = processor.getNumericArray("mpc.success").getRealValue(0);
 			
-			for (double[] mpcBusRetLine : mpcBusRet) {
-				Integer nodeNumber = (int) mpcBusRetLine[0];
-				NetworkNode node = environment.getNetworkNode(nodeNumber);
+			if (success == 1) {
+				//recupera informacoes das cargas
+				double[][] mpcBusRet = processor.getNumericArray("mpc.bus").getRealArray2D();
 				
-				node.setCurrentVoltagePU(mpcBusRetLine[7]); //tensão
-			}
-			
-			double[][] mpcBranchRet = processor.getNumericArray("mpc.branch").getRealArray2D();
-			
-			for (double[] mpcBranchRetLine : mpcBranchRet) {
-				double sAtual = new Complex(mpcBranchRetLine[13], mpcBranchRetLine[14]).abs();
-				
-				Integer nodeFrom = (int) mpcBranchRetLine[0];
-				Integer nodeTo = (int) mpcBranchRetLine[1];
-				
-				Branch branch = environment.getBranch(nodeFrom, nodeTo);
-				if (branch != null) {
-					double actualCurrent = (sAtual / (branch.getNode2().getCurrentVoltagePU() * Constants.TENSAO_BASE)) * Constants.POTENCIA_BASE;
-					branch.setInstantCurrent(actualCurrent);
+				for (double[] mpcBusRetLine : mpcBusRet) {
+					Integer nodeNumber = (int) mpcBusRetLine[0];
+					NetworkNode node = environment.getNetworkNode(nodeNumber);
 					
-					double losses = Math.abs(mpcBranchRetLine[13] + mpcBranchRetLine[15]);
-					branch.setLossesMW(losses);
+					node.setCurrentVoltagePU(mpcBusRetLine[7]); //tensão
 				}
+				
+				double[][] mpcBranchRet = processor.getNumericArray("mpc.branch").getRealArray2D();
+				
+				for (double[] mpcBranchRetLine : mpcBranchRet) {
+					double sAtual = new Complex(mpcBranchRetLine[13], mpcBranchRetLine[14]).abs();
+					
+					Integer nodeFrom = (int) mpcBranchRetLine[0];
+					Integer nodeTo = (int) mpcBranchRetLine[1];
+					
+					Branch branch = environment.getBranch(nodeFrom, nodeTo);
+					if (branch != null) {
+						double actualCurrent = (sAtual / (branch.getNode2().getCurrentVoltagePU() * Constants.TENSAO_BASE)) * Constants.POTENCIA_BASE;
+						branch.setInstantCurrent(actualCurrent);
+						
+						double losses = Math.abs(mpcBranchRetLine[13] + mpcBranchRetLine[15]);
+						branch.setLossesMW(losses);
+					}
+				}
+				return true;
 			}
-			
+			return false;
 		} catch (MatlabConnectionException | MatlabInvocationException e) {
 			throw new Exception(e);
 		}
