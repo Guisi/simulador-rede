@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.collections.FXCollections;
+import javafx.concurrent.Worker;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -51,7 +52,6 @@ import br.com.guisi.simulador.rede.task.AgentTask;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
 import br.com.guisi.simulador.rede.util.FunctionsUtils;
-import br.com.guisi.simulador.rede.util.PowerFlow;
 import br.com.guisi.simulador.rede.view.layout.BranchStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkPane;
@@ -196,7 +196,7 @@ public class SimuladorRedeController extends Controller {
 		
 		TableColumn<BrokenConstraint, String> tcFunctionName = new TableColumn<BrokenConstraint, String>();
 		tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getMessage());
-		tcFunctionName.setStyle("-fx-alignment: center-left;");
+		tcFunctionName.setStyle("-fx-alignment: center-left; -fx-text-fill: red;");
 		tcFunctionName.setPrefWidth(590);
 		tvBrokenConstraints.getColumns().add(tcFunctionName);
 		
@@ -319,7 +319,7 @@ public class SimuladorRedeController extends Controller {
 			Environment environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
 			SimuladorRede.setEnvironment(environment);
 			
-			if (SimuladorRede.getEnvironment() != null) {
+			if (getEnvironment() != null) {
 				String msgs = EnvironmentUtils.validateEnvironment(getEnvironment());
 				
 				if (StringUtils.isNotEmpty(msgs)) {
@@ -330,7 +330,7 @@ public class SimuladorRedeController extends Controller {
 				
 				this.drawNetworkFromEnvironment();
 				
-				this.updateBrokenConstraints();
+				this.updateWarningsBrokenConstraints();
 
 				this.updateFunctionsTables();
 			}
@@ -342,13 +342,48 @@ public class SimuladorRedeController extends Controller {
 		}
 	}
 	
-	public void updateBrokenConstraints() {
+	/**
+	 * Verifica as restrições quebradas e cria as mensagens
+	 */
+	public void updateWarningsBrokenConstraints() {
 		if (getEnvironment() != null) {
 			tvBrokenConstraints.getItems().clear();
 			
-			BrokenConstraint constraint = new BrokenConstraint();
-			constraint.getMessage().setValue("Teste mensagem!!!");
-			tvBrokenConstraints.getItems().add(constraint);
+			getEnvironment().getLoads().forEach((load) -> {
+				String msg = null;
+				if (load.isOn()) {
+					if (load.getFeeder() == null) {
+						msg = "Not connected to a feeder";
+					} else if (load.isCurrentVoltageAboveLimit()) {
+						msg = "Current voltage above limit (" + load.getCurrentVoltagePU() + ")";
+					} else if (load.isCurrentVoltageBelowLimit()) {
+						msg = "Current voltage below limit (" + load.getCurrentVoltagePU() + ")";
+					}
+				}
+				if (msg != null) {
+					BrokenConstraint constraint = new BrokenConstraint();
+					constraint.getMessage().setValue("Load " + load.getNodeNumber() + ": " + msg);
+					tvBrokenConstraints.getItems().add(constraint);
+				}
+			});
+			
+			getEnvironment().getFeeders().forEach((feeder) -> {
+				if (feeder.isOn() && feeder.isPowerOverflow()) {
+					BrokenConstraint constraint = new BrokenConstraint();
+					constraint.getMessage().setValue("Feeder " + feeder.getNodeNumber() 
+							+ ": Power overflow (max: " + feeder.getActivePower() + ", required: " + feeder.getUsedPower() + ")");
+					tvBrokenConstraints.getItems().add(constraint);
+				}
+			});
+			
+			getEnvironment().getBranches().forEach((branch) -> {
+				if (branch.isOn() && branch.isMaxCurrentOverflow()) {
+					BrokenConstraint constraint = new BrokenConstraint();
+					constraint.getMessage().setValue("Branch " + branch.getNumber() 
+							+ ": Max current overflow (max: " + branch.getMaxCurrent() + ", required: " + branch.getInstantCurrent() + ")");
+					tvBrokenConstraints.getItems().add(constraint);
+				}
+			});
 		}
 	}
 	
@@ -684,16 +719,7 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	public void runAgent() {
-		try {
-			PowerFlow.executePowerFlow(getEnvironment());
-		} catch (Exception e) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setContentText(e.getMessage());
-			e.printStackTrace();
-			alert.showAndWait();
-		}
-		
-		/*this.enableDisableScreen(true);
+		this.enableDisableScreen(true);
 		agentTask = new AgentTask(count, cbTaskExecutionType.getValue());
 		
 		agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
@@ -706,7 +732,7 @@ public class SimuladorRedeController extends Controller {
             }
         });
 		
-		new Thread(agentTask).start();*/
+		new Thread(agentTask).start();
 	}
 	
 	public void stopAgent() {

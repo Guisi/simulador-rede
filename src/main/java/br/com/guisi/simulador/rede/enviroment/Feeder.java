@@ -21,6 +21,14 @@ public class Feeder extends NetworkNode {
 	}
 	
 	/**
+	 * Retorna verdadeiro se excedeu capacidade de potência do feeder
+	 * @return
+	 */
+	public boolean isPowerOverflow() {
+		return activePower < usedPower;
+	}
+	
+	/**
 	 * Retorna a potência disponível deste feeder
 	 * @return double
 	 */

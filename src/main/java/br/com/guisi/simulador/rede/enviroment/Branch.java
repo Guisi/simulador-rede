@@ -44,6 +44,14 @@ public class Branch {
 	}
 	
 	/**
+	 * Retorna verdadeiro se corrente necessária é maior que capacidade máxima do branch
+	 * @return
+	 */
+	public boolean isMaxCurrentOverflow() {
+		return maxCurrent < instantCurrent;
+	}
+	
+	/**
 	 * Retorna o load conectado por esta branch
 	 * ao load passado como parametro
 	 * @param networkNode

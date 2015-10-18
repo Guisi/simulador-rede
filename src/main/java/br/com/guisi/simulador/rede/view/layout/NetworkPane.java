@@ -82,6 +82,10 @@ public class NetworkPane extends Pane {
 		} else {
 			Feeder feeder = (Feeder) networkNode;
 			networkNodeColor = Color.web(feeder.getFeederColor());
+			
+			Text txt = networkNodePane.getNetworkNodeText();
+			txt.setFill(feeder.isPowerOverflow() ? Color.RED : Color.BLACK);
+			txt.setFont(Font.font("Verdana", feeder.isPowerOverflow() ? FontWeight.BOLD : FontWeight.NORMAL, 11));
 		}
 		networkNodePane.getNetworkNodeShape().setFill(networkNodeColor);
 	}
@@ -136,6 +140,7 @@ public class NetworkPane extends Pane {
 		text.setFont(Font.font(10));
 		text.setBoundsType(TextBoundsType.VISUAL);
 		text.setOnMouseClicked(mouseClicked);
+		sp.setBranchText(text);
 
 		/** Tipo branch */
 		Rectangle r = new Rectangle();
@@ -175,6 +180,15 @@ public class NetworkPane extends Pane {
 		}
 		
 		box.toFront();
+		
+		this.setBranchTextColor(branch);
+	}
+	
+	public void setBranchTextColor(Branch branch) {
+		BranchStackPane branchPane = branchPaneMap.get(branch.getNumber());
+
+		Text txt = branchPane.getBranchText();
+		txt.setFill(branch.isMaxCurrentOverflow() ? Color.RED : Color.BLACK);
 	}
 
 	/**
