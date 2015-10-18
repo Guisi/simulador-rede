@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.Status;
 
 /**
@@ -155,7 +156,15 @@ public abstract class NetworkNode {
 	public void setCurrentVoltagePU(double currentVoltagePU) {
 		this.currentVoltagePU = currentVoltagePU;
 	}
-
+	
+	public boolean isCurrentVoltageBelowLimit() {
+		return currentVoltagePU < Constants.TENSAO_MIN_PU; 
+	}
+	
+	public boolean isCurrentVoltageAboveLimit() {
+		return currentVoltagePU > Constants.TENSAO_MAX_PU; 
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

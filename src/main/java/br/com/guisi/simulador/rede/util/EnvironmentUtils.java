@@ -13,8 +13,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import br.com.guisi.simulador.rede.constants.Constants;
-import br.com.guisi.simulador.rede.constants.LoadSupplyStatus;
 import br.com.guisi.simulador.rede.constants.Status;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
@@ -171,14 +169,20 @@ public class EnvironmentUtils {
 		//primeiro valida se rede está radial
 		msgs.append( validateRadialState(environment) );
 		
+		//zera valores consolidados do feeder
+		environment.getFeeders().forEach((feeder) -> {
+			feeder.setEnergizedLoads(0);
+			feeder.setUsedPower(0);
+		});
+		
 		//depois, verifica se todos os loads estão conectados a algum feeder
 		environment.getNetworkNodeMap().values().forEach((node) -> {
 			if (node.isLoad()) {
 				Load load = (Load) node;
 				Feeder feeder = getFeeder(load);
 				load.setFeeder(feeder);
-				if (feeder == null) {
-					load.setSupplyStatus(LoadSupplyStatus.NO_FEEDER_CONNECTED);
+				if (feeder != null) {
+					feeder.incrementEnergizedLoads();
 				}
 			}
 		});
@@ -187,20 +191,10 @@ public class EnvironmentUtils {
 			//executa o fluxo de potência
 			PowerFlow.executePowerFlow(environment);
 			
-			//atribui os status dos loads de acordo com o retorno do fluxo de potência
-			environment.getLoads().forEach((load) -> {
-				if (load.getCurrentVoltagePU() < Constants.TENSAO_MIN_PU) {
-					load.setSupplyStatus(LoadSupplyStatus.CURRENT_VOLTAGE_BELOW_LIMIT);
-				} else if (load.getCurrentVoltagePU() > Constants.TENSAO_MAX_PU) {
-					load.setSupplyStatus(LoadSupplyStatus.CURRENT_VOLTAGE_ABOVE_LIMIT);
-				} else {
-					load.setSupplyStatus(LoadSupplyStatus.SUPPLIED);
-				}
+			//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
+			environment.getFeeders().forEach((feeder) -> {
+				feeder.getBranches().forEach((branch) -> feeder.addUsedPower(branch.getInstantCurrent()));
 			});
-			
-			//atribui os status e uso dos feeders de acordo com o retorno do fluxo de potência
-			
-			System.out.println(environment.getFeeders().get(0).getBranches());
 		}
 		
 		return msgs.toString();

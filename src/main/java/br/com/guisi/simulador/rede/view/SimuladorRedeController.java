@@ -24,7 +24,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -57,6 +56,7 @@ import br.com.guisi.simulador.rede.view.layout.BranchStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkPane;
 import br.com.guisi.simulador.rede.view.layout.ZoomingPane;
+import br.com.guisi.simulador.rede.view.tableview.BrokenConstraint;
 
 public class SimuladorRedeController extends Controller {
 
@@ -103,8 +103,6 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private Label lblLoadCurrentVoltage;
 	@FXML
-	private Label lblLoadMessages;
-	@FXML
 	private Button btnPreviousLoad;
 	@FXML
 	private Button btnNextLoad;
@@ -120,14 +118,6 @@ public class SimuladorRedeController extends Controller {
 	private Label lblFeederReactivePower;
 	@FXML
 	private Label lblFeederEnergizedLoads;
-	@FXML
-	private Label lblFeederPartiallyEnergizedLoadsLabel;
-	@FXML
-	private Label lblFeederPartiallyEnergizedLoads;
-	@FXML
-	private Label lblFeederNotEnergizedLoadsLabel;
-	@FXML
-	private Label lblFeederNotEnergizedLoads;
 	@FXML
 	private Label lblFeederUsedPower;
 	@FXML
@@ -165,6 +155,8 @@ public class SimuladorRedeController extends Controller {
 	
 	@FXML
 	private TabPane tabPaneFunctions;
+	@FXML
+	private TableView<BrokenConstraint> tvBrokenConstraints;
 	
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
@@ -189,6 +181,24 @@ public class SimuladorRedeController extends Controller {
 		
 		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
 		cbTaskExecutionType.setValue(TaskExecutionType.CONTINUOUS_UPDATE_EVERY_STEP);
+		
+		tvBrokenConstraints.widthProperty().addListener((source, oldWidth, newWidth) -> {
+            Pane header = (Pane) tvBrokenConstraints.lookup("TableHeaderRow");
+            if (header.isVisible()){
+                header.setMaxHeight(0);
+                header.setMinHeight(0);
+                header.setPrefHeight(0);
+                header.setVisible(false);
+            }
+		});
+		tvBrokenConstraints.setItems(FXCollections.observableArrayList());
+		tvBrokenConstraints.setPlaceholder(new Label("No broken constraints found"));
+		
+		TableColumn<BrokenConstraint, String> tcFunctionName = new TableColumn<BrokenConstraint, String>();
+		tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getMessage());
+		tcFunctionName.setStyle("-fx-alignment: center-left;");
+		tcFunctionName.setPrefWidth(590);
+		tvBrokenConstraints.getColumns().add(tcFunctionName);
 		
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
 		this.loadEnvironmentFromFile(f);*/
@@ -218,16 +228,11 @@ public class SimuladorRedeController extends Controller {
 		lblLoadPriority.setText("");
 		lblLoadStatus.setText("");
 		lblLoadCurrentVoltage.setText("");
-		lblLoadMessages.setText("");
 		
 		cbFeederNumber.setValue(null);
 		lblFeederActivePower.setText("");
 		lblFeederReactivePower.setText("");
 		lblFeederEnergizedLoads.setText("");
-		lblFeederPartiallyEnergizedLoads.setText("");
-		lblFeederPartiallyEnergizedLoadsLabel.setTooltip(new Tooltip("Partially energized loads"));
-		lblFeederNotEnergizedLoads.setText("");
-		lblFeederNotEnergizedLoadsLabel.setTooltip(new Tooltip("Not energized loads"));
 		lblFeederUsedPower.setText("");
 		lblFeederAvailablePower.setText("");
 		
@@ -274,11 +279,11 @@ public class SimuladorRedeController extends Controller {
 			TableColumn<FunctionItem, String> tcFunctionName = new TableColumn<FunctionItem, String>();
 			tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getFunctionName());
 			tcFunctionName.setStyle("-fx-font-weight: bold; -fx-alignment: center-right;");
-			tcFunctionName.setPrefWidth(300);
+			tcFunctionName.setPrefWidth(292);
 			tv.getColumns().add(tcFunctionName);
 			
 			TableColumn<FunctionItem, String> tcFunctionResult = new TableColumn<FunctionItem, String>();
-			tcFunctionResult.setPrefWidth(300);
+			tcFunctionResult.setPrefWidth(292);
 			tcFunctionResult.setCellValueFactory(cellData -> cellData.getValue().getFunctionResult());
 			tv.getColumns().add(tcFunctionResult);
 			
@@ -325,6 +330,8 @@ public class SimuladorRedeController extends Controller {
 				
 				this.drawNetworkFromEnvironment();
 				
+				this.updateBrokenConstraints();
+
 				this.updateFunctionsTables();
 			}
 		} catch (Exception e) {
@@ -332,6 +339,16 @@ public class SimuladorRedeController extends Controller {
 			alert.setContentText(e.getMessage());
 			e.printStackTrace();
 			alert.showAndWait();
+		}
+	}
+	
+	public void updateBrokenConstraints() {
+		if (getEnvironment() != null) {
+			tvBrokenConstraints.getItems().clear();
+			
+			BrokenConstraint constraint = new BrokenConstraint();
+			constraint.getMessage().setValue("Teste mensagem!!!");
+			tvBrokenConstraints.getItems().add(constraint);
 		}
 	}
 	
@@ -449,20 +466,15 @@ public class SimuladorRedeController extends Controller {
 		shape.setStroke(Color.DARKORANGE);
 		shape.setStrokeWidth(2);
 		
+		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_3);
 		Load load = getEnvironment().getLoad(selectedLoad);
 		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : "");
-		lblLoadActivePower.setText(DecimalFormat.getNumberInstance().format(load.getActivePower()));
-		lblLoadReactivePower.setText(DecimalFormat.getNumberInstance().format(load.getReactivePower()));
+		lblLoadActivePower.setText(df.format(load.getActivePower()));
+		lblLoadReactivePower.setText(df.format(load.getReactivePower()));
 		lblLoadPriority.setText(String.valueOf(load.getPriority()));
 		lblLoadStatus.setText(load.isOn() ? "On" : "Off");
-		lblLoadCurrentVoltage.setText(DecimalFormat.getNumberInstance().format(load.getCurrentVoltagePU()));
+		lblLoadCurrentVoltage.setText(df.format(load.getCurrentVoltagePU()));
 		cbLoadNumber.setValue(load.getNodeNumber());
-		
-		String msgs = null;
-		if (load.isOn() && !load.isSupplied()) {
-			msgs = load.getSupplyStatus().getDescription();
-		}
-		lblLoadMessages.setText(msgs);
 	}
 	
 	/**
@@ -480,14 +492,13 @@ public class SimuladorRedeController extends Controller {
 		shape.setStroke(Color.DARKORANGE);
 		shape.setStrokeWidth(2);
 		
+		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_3);
 		Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
-		lblFeederActivePower.setText(DecimalFormat.getNumberInstance().format(feeder.getActivePower()));
-		lblFeederReactivePower.setText(DecimalFormat.getNumberInstance().format(feeder.getReactivePower()));
-		/*lblFeederEnergizedLoads.setText(String.valueOf(feeder.getEnergizedLoads()));
-		lblFeederPartiallyEnergizedLoads.setText(String.valueOf(feeder.getPartiallyEnergizedLoads()));
-		lblFeederNotEnergizedLoads.setText(String.valueOf(feeder.getNotEnergizedLoads()));*/
-		lblFeederUsedPower.setText(DecimalFormat.getNumberInstance().format(feeder.getUsedPower()));
-		lblFeederAvailablePower.setText(DecimalFormat.getNumberInstance().format(feeder.getAvailablePower()));
+		lblFeederActivePower.setText(df.format(feeder.getActivePower()));
+		lblFeederReactivePower.setText(df.format(feeder.getReactivePower()));
+		lblFeederUsedPower.setText(df.format(feeder.getUsedPower()));
+		lblFeederEnergizedLoads.setText(String.valueOf(feeder.getEnergizedLoads()));
+		lblFeederAvailablePower.setText(df.format(feeder.getAvailablePower()));
 		cbFeederNumber.setValue(feeder.getNodeNumber());
 	}
 	
@@ -506,14 +517,15 @@ public class SimuladorRedeController extends Controller {
 		l.setStroke(Color.DARKORANGE);
 		l.setStrokeWidth(2);
 
+		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_3);
 		Branch branch = getEnvironment().getBranch(branchStackPane.getBranchNum());
 		lblBranchDe.setText(branch.getNode1().getNodeNumber().toString());
 		lblBranchPara.setText(branch.getNode2().getNodeNumber().toString());
-		lblBranchMaxCurrent.setText(DecimalFormat.getNumberInstance().format(branch.getMaxCurrent()));
-		lblBranchInstantCurrent.setText(DecimalFormat.getNumberInstance().format(branch.getInstantCurrent()));
-		lblBranchLossesMW.setText(DecimalFormat.getNumberInstance().format(branch.getLossesMW()));
-		lblBranchResistance.setText(DecimalFormat.getNumberInstance().format(branch.getResistance()));
-		lblBranchReactance.setText(DecimalFormat.getNumberInstance().format(branch.getReactance()));
+		lblBranchMaxCurrent.setText(df.format(branch.getMaxCurrent()));
+		lblBranchInstantCurrent.setText(df.format(branch.getInstantCurrent()));
+		lblBranchLossesMW.setText(df.format(branch.getLossesMW()));
+		lblBranchResistance.setText(df.format(branch.getResistance()));
+		lblBranchReactance.setText(df.format(branch.getReactance()));
 		lblBranchStatus.setText(branch.isOn() ? "On" : "Off");
 		cbBranchNumber.setValue(branch.getNumber());
 	}

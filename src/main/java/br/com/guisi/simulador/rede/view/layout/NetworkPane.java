@@ -130,7 +130,7 @@ public class NetworkPane extends Pane {
 		sp.setLayoutY(Math.min(l.getEndY(), l.getStartY()));
 
 		/** Label branch */
-		DecimalFormat df = new DecimalFormat(Constants.POWER_DECIMAL_FORMAT);
+		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_2);
 		String power = " (" + df.format(branch.getMaxCurrent()) + ")";
 		Text text = new Text(power);
 		text.setFont(Font.font(10));

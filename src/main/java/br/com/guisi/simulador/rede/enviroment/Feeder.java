@@ -12,6 +12,7 @@ public class Feeder extends NetworkNode {
 	private String feederColor;
 	private String loadColor;
 	private double usedPower;
+	private int energizedLoads;
 	
 	public Feeder(Integer nodeNumber, Integer x, Integer y, double activePower, double reactivePower, String feederColor, String loadColor, Status status) {
 		super(nodeNumber, x, y, activePower, reactivePower, status);
@@ -35,6 +36,10 @@ public class Feeder extends NetworkNode {
 		this.usedPower += usedPower;
 	}
 	
+	public void incrementEnergizedLoads() {
+		this.energizedLoads++;
+	}
+	
 	public String getFeederColor() {
 		return feederColor;
 	}
@@ -53,6 +58,18 @@ public class Feeder extends NetworkNode {
 
 	public void setUsedPower(double usedPower) {
 		this.usedPower = usedPower;
+	}
+	
+	/**
+	 * Retorna o número de loads atendidos por este feeder
+	 * @return
+	 */
+	public int getEnergizedLoads() {
+		return energizedLoads;
+	}
+
+	public void setEnergizedLoads(int energizedLoads) {
+		this.energizedLoads = energizedLoads;
 	}
 
 	@Override

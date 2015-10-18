@@ -36,9 +36,9 @@ public class PowerFlow {
 			
 			proxy.setVariable("potenciaBase", Constants.POTENCIA_BASE);
 			
-			long ini = System.currentTimeMillis();
+			//long ini = System.currentTimeMillis();
 			proxy.eval("mpc = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
-			System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
+			//System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
 			
 			//recupera informacoes das cargas
 			double[][] mpcBusRet = processor.getNumericArray("mpc.bus").getRealArray2D();

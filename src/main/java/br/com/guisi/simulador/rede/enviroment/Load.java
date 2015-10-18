@@ -1,7 +1,6 @@
 package br.com.guisi.simulador.rede.enviroment;
 
 import br.com.guisi.simulador.rede.constants.Status;
-import br.com.guisi.simulador.rede.constants.LoadSupplyStatus;
 
 /**
  * Classe representando um Load da rede
@@ -12,7 +11,6 @@ public class Load extends NetworkNode {
 
 	private Feeder feeder;
 	private int priority;
-	private LoadSupplyStatus loadSupplyStatus;
 	
 	public Load(Integer nodeNumber, Integer x, Integer y, double activePower, double reactivePower, Status status, int priority) {
 		super(nodeNumber, x, y, activePower, reactivePower, status);
@@ -48,25 +46,13 @@ public class Load extends NetworkNode {
 	 * @return boolean
 	 */
 	public boolean isSupplied() {
-		return isOn() && LoadSupplyStatus.SUPPLIED.equals(loadSupplyStatus);
+		return isOn() && feeder != null && !isCurrentVoltageAboveLimit() && !isCurrentVoltageBelowLimit();
 	}
 
-	/**
-	 * Retorna o status de atendimento deste {@link Load}
-	 * @return {@link LoadSupplyStatus}
-	 */
-	public LoadSupplyStatus getSupplyStatus() {
-		return loadSupplyStatus;
-	}
-
-	public void setSupplyStatus(LoadSupplyStatus loadSupplyStatus) {
-		this.loadSupplyStatus = loadSupplyStatus;
-	}
-	
 	@Override
 	public String toString() {
 		return "Load [nodeNumber=" + nodeNumber + ", x=" + x + ", y=" + y + ", activePower=" + activePower + ", reactivePower=" + reactivePower + ", status=" + status + ", feeder="
-				+ (feeder != null ? feeder.getNodeNumber() : null) + ", priority=" + priority + ", supplyStatus=" + loadSupplyStatus + "]";
+				+ (feeder != null ? feeder.getNodeNumber() : null) + ", priority=" + priority + ", supplied=" + isSupplied() + "]";
 	}
 	
 }

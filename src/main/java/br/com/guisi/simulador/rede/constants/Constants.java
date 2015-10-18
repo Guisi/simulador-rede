@@ -7,7 +7,8 @@ public interface Constants {
 	int NETWORK_GRID_SIZE_PX = 70;
 	int LOAD_RADIUS_PX = 12;
 	int BRANCH_TYPE_PX = 10;
-	String POWER_DECIMAL_FORMAT = "##0.00";
+	String DECIMAL_FORMAT_2 = "##0.00";
+	String DECIMAL_FORMAT_3 = "##0.000";
 	
 	/** power flow */
 	//Tensão de referencia em pu (VRef) (Fausto usou 1.02, vamos usar 1.0)
