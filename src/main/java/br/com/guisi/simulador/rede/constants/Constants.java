@@ -12,7 +12,7 @@ public interface Constants {
 	
 	/** power flow */
 	//Tensão de referencia em pu (VRef) (Fausto usou 1.02, vamos usar 1.0)
-	double TENSAO_REFERENCIA_PU = 1.02;
+	double TENSAO_REFERENCIA_PU = 1.00;
 	
 	//Potência de base (Sbase)
 	double POTENCIA_BASE = 1000000;

@@ -3,7 +3,9 @@ package br.com.guisi.simulador.rede.qlearning;
 import br.com.guisi.simulador.rede.constants.SwitchState;
 
 /**
- * Classe representando o valor de recompensa para 
+ * Classe representando o valor de recompensa para um estado/ação do agente
+ * O estado é representado pelo número da branch switch
+ * A ação é representada pelo estado do switch, aberto ou fechado
  * 
  * @author Guisi
  *
