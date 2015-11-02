@@ -61,7 +61,7 @@ public abstract class NetworkNode {
 	public List<NetworkNode> getConnectedNodes() {
 		List<NetworkNode> networkNodes = new ArrayList<>();
 		branches.forEach((branch) -> {
-			if (branch.isOn()) {
+			if (branch.isClosed()) {
 				networkNodes.add(branch.getConnectedLoad(this));
 			}
 		});
@@ -74,7 +74,7 @@ public abstract class NetworkNode {
 	 */
 	public Branch getBranch(NetworkNode node) {
 		for (Branch branch : branches) {
-			if (branch.isOn() && branch.getConnectedLoad(this).equals(node)) {
+			if (branch.isClosed() && branch.getConnectedLoad(this).equals(node)) {
 				return branch;
 			}
 		}

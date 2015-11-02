@@ -260,7 +260,7 @@ public class PowerFlow {
 			correnteMaxBranchMVA[i] = branch.getMaxCurrent() * Constants.TENSAO_BASE / Constants.POTENCIA_BASE;
 			
 			//Status Branch
-			statusBranch[i] = branch.isOn() ? 1 : 0;
+			statusBranch[i] = branch.isClosed() ? 1 : 0;
 			
 			//angulo minimo
 			anguloMin[i] = -360;

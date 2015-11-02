@@ -2,6 +2,16 @@ package br.com.guisi.simulador.rede.constants;
 
 public interface Constants {
 
+	/** Q-Learning */
+	/* E-greedy de 90% */
+	double E_GREEDY = 0.9;
+
+	/* Constante de aprendizagem (alpha) */
+	double LEARNING_CONSTANT = 0.1;
+	
+	/* Fator de desconto (gamma) */
+	double DISCOUNT_FACTOR = 0.9;
+	
 	/** network interface */
 	int NETWORK_PANE_PADDING = 30;
 	int NETWORK_GRID_SIZE_PX = 70;

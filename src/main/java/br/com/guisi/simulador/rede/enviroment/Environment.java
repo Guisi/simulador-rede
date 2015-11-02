@@ -52,6 +52,19 @@ public class Environment {
 	}
 	
 	/**
+	 * 
+	 * @param switchNumber
+	 * @param switchState
+	 * @return
+	 */
+	public boolean changeSwitchState(Integer switchNumber, SwitchState switchState) {
+		Branch switchBranch = getBranch(switchNumber);
+		boolean changed = switchBranch.getSwitchState() == switchState;
+		switchBranch.setSwitchState(switchState);
+		return changed;
+	}
+	
+	/**
 	 * Retorna o {@link NetworkNode} pelo número
 	 * @param networkNodeNumber
 	 * @return {@link NetworkNode}

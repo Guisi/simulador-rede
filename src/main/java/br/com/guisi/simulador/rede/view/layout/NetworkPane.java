@@ -14,6 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -38,12 +39,10 @@ public class NetworkPane extends Pane {
 		
 		if (networkNode.isLoad()) {
 			Circle c = new Circle();
-			c.setStroke(Color.BLACK);
 			c.setRadius(Constants.LOAD_RADIUS_PX);
 			stack.getChildren().addAll(c, text);
 		} else {
 			Rectangle r = new Rectangle();
-			r.setStroke(Color.BLACK);
 			r.setWidth(Constants.LOAD_RADIUS_PX * 2);
 			r.setHeight(Constants.LOAD_RADIUS_PX * 2);
 			r.setArcHeight(5);
@@ -58,14 +57,18 @@ public class NetworkPane extends Pane {
 		getChildren().add(stack);
 
 		networkNodePaneMap.put(networkNode.getNodeNumber(), stack);
-		this.setNetworkNodeColor(networkNode);
+		this.updateNetworkNode(networkNode);
 
 		return stack;
 	}
 
-	public void setNetworkNodeColor(NetworkNode networkNode) {
+	public void updateNetworkNode(NetworkNode networkNode) {
 		NetworkNodeStackPane networkNodePane = networkNodePaneMap.get(networkNode.getNodeNumber());
 
+		Shape shape = networkNodePane.getNetworkNodeShape();
+		shape.setStroke(Color.BLACK);
+		shape.setStrokeWidth(1);
+		
 		Color networkNodeColor;
 		if (networkNode.isLoad()) {
 			Load load = (Load) networkNode;
@@ -87,7 +90,7 @@ public class NetworkPane extends Pane {
 			txt.setFill(feeder.isPowerOverflow() ? Color.RED : Color.BLACK);
 			txt.setFont(Font.font("Verdana", feeder.isPowerOverflow() ? FontWeight.BOLD : FontWeight.NORMAL, 11));
 		}
-		networkNodePane.getNetworkNodeShape().setFill(networkNodeColor);
+		shape.setFill(networkNodeColor);
 	}
 
 	public void drawBranch(Branch branch, int sizeX, int sizeY, EventHandler<MouseEvent> mouseClicked) {
@@ -123,10 +126,6 @@ public class NetworkPane extends Pane {
 		l.setStroke(Color.BLACK);
 		l.setStrokeType(StrokeType.CENTERED);
 		l.getStrokeDashArray().clear();
-		if (!branch.isOn()) {
-			l.getStrokeDashArray().addAll(2d, 5d);
-		}
-		l.setStrokeWidth(1.3);
 		l.setOnMouseClicked(mouseClicked);
 		sp.getChildren().add(l);
 		l.toBack();
@@ -147,13 +146,8 @@ public class NetworkPane extends Pane {
 		r.setWidth(Constants.BRANCH_TYPE_PX * 2);
 		r.setHeight(Constants.BRANCH_TYPE_PX);
 		r.setOnMouseClicked(mouseClicked);
-		r.setFill(branch.isOn() ? Color.BLACK : Color.WHITE);
-		if (!branch.isOn()) {
-			r.setStroke(Color.GRAY);
-			r.setStrokeWidth(1);
-		}
-		/* r.setVisible(branch.isSwitchBranch() && branch.isOn()); */
 		r.setVisible(branch.isSwitchBranch());
+		sp.setSwitchRectangle(r);
 
 		/** agrupa rectangle e text */
 		VBox box = new VBox();
@@ -181,14 +175,28 @@ public class NetworkPane extends Pane {
 		
 		box.toFront();
 		
-		this.setBranchTextColor(branch);
+		this.updateBranch(branch);
 	}
 	
-	public void setBranchTextColor(Branch branch) {
+	public void updateBranch(Branch branch) {
 		BranchStackPane branchPane = branchPaneMap.get(branch.getNumber());
 
 		Text txt = branchPane.getBranchText();
 		txt.setFill(branch.isMaxCurrentOverflow() ? Color.RED : Color.BLACK);
+		
+		Line line = branchPane.getBranchLine();
+		line.setStroke(Color.BLACK);
+		line.setStrokeWidth(1.3);
+		if (!branch.isClosed()) {
+			line.getStrokeDashArray().addAll(2d, 5d);
+		}
+		
+		Rectangle rect = branchPane.getSwitchRectangle();
+		rect.setFill(branch.isClosed() ? Color.BLACK : Color.WHITE);
+		if (!branch.isClosed()) {
+			rect.setStroke(Color.GRAY);
+			rect.setStrokeWidth(1);
+		}
 	}
 
 	/**

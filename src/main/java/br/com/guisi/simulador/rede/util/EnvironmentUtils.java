@@ -19,6 +19,7 @@ import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
+import br.com.guisi.simulador.rede.enviroment.SwitchState;
 
 
 
@@ -105,11 +106,11 @@ public class EnvironmentUtils {
 			
 			//status do branch
 			int branchStatus = Integer.parseInt(colunas[6]);
-			Status status = branchStatus == 0 ? Status.OFF : Status.ON;
+			SwitchState switchState = branchStatus == 0 ? SwitchState.OPEN : SwitchState.CLOSED;
 			
 			boolean switchBranch = Integer.parseInt(colunas[7]) == 1;
 			
-			Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, status, switchBranch);
+			Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, switchState, switchBranch);
 			branchMap.put(branchNum, branch);
 			
 			//adiciona a branch nos dois loads os quais ela conecta

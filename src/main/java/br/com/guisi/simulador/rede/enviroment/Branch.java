@@ -1,6 +1,5 @@
 package br.com.guisi.simulador.rede.enviroment;
 
-import br.com.guisi.simulador.rede.constants.Status;
 
 /**
  * Classe representando uma branch
@@ -16,21 +15,21 @@ public class Branch {
 	private double maxCurrent;
 	private double resistance;
 	private double reactance;
-	private Status status;
 	private boolean switchBranch;
+	private SwitchState switchState;
 	private int switchOperations;
 
 	private double instantCurrent;
 	private double lossesMW;
 	
-	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, double reactance, Status status, boolean switchBranch) {
+	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, double reactance, SwitchState switchState, boolean switchBranch) {
 		this.number = number;
 		this.node1 = node1;
 		this.node2 = node2;
 		this.maxCurrent = maxCurrent;
 		this.resistance = resistance;
 		this.reactance = reactance;
-		this.status = status;
+		this.switchState = switchState;
 		this.switchBranch = switchBranch;
 		this.branchId = new BranchId(node1.getNodeNumber(), node2.getNodeNumber());
 	}
@@ -39,8 +38,8 @@ public class Branch {
 	 * Retorna se a branch está ligada
 	 * @return boolean
 	 */
-	public boolean isOn() {
-		return Status.ON.equals(status);
+	public boolean isClosed() {
+		return SwitchState.CLOSED.equals(switchState);
 	}
 	
 	/**
@@ -115,15 +114,17 @@ public class Branch {
 		this.node2 = node2;
 	}
 	
+
 	/**
-	 * Retorna o {@link Status} desta branch, on ou off
-	 * @return {@link Status}
+	 * Retorna o {@link SwitchState} desta branch, aberto ou fechado
+	 * @return
 	 */
-	public Status getStatus() {
-		return status;
+	public SwitchState getSwitchState() {
+		return switchState;
 	}
-	public void setStatus(Status status) {
-		this.status = status;
+
+	public void setSwitchState(SwitchState switchState) {
+		this.switchState = switchState;
 	}
 
 	/**
@@ -225,7 +226,7 @@ public class Branch {
 	@Override
 	public String toString() {
 		return "Branch [branchNum=" + number + ", node1=" + node1.getNodeNumber() + ", node2=" + node2.getNodeNumber() + ", branchPower=" + maxCurrent + ", resistance=" + resistance
-				+ ", reactance=" + reactance + ", status=" + status + ", switchBranch=" + switchBranch + ", instantCurrent=" + instantCurrent + ", lossesMW=" + lossesMW + "]";
+				+ ", reactance=" + reactance + ", switchState=" + switchState + ", switchBranch=" + switchBranch + ", instantCurrent=" + instantCurrent + ", lossesMW=" + lossesMW + "]";
 	}
 	
 }

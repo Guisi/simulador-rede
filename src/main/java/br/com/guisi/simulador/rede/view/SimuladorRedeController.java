@@ -377,7 +377,7 @@ public class SimuladorRedeController extends Controller {
 			});
 			
 			getEnvironment().getBranches().forEach((branch) -> {
-				if (branch.isOn() && branch.isMaxCurrentOverflow()) {
+				if (branch.isClosed() && branch.isMaxCurrentOverflow()) {
 					BrokenConstraint constraint = new BrokenConstraint();
 					constraint.getMessage().setValue("Branch " + branch.getNumber() 
 							+ ": Max current overflow (max: " + branch.getMaxCurrent() + ", required: " + branch.getInstantCurrent() + ")");
@@ -492,9 +492,7 @@ public class SimuladorRedeController extends Controller {
 	 */
 	private void updateLoadInformationBox(NetworkNodeStackPane networkNodeStackPane) {
 		if (selectedLoad != null) {
-			Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getNetworkNodeShape();
-			shape.setStroke(Color.BLACK);
-			shape.setStrokeWidth(1);
+			networkPane.updateNetworkNode(getEnvironment().getLoad(selectedLoad));
 		}
 		selectedLoad = networkNodeStackPane.getNetworkNodeNumber();
 		Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getNetworkNodeShape();
@@ -518,9 +516,7 @@ public class SimuladorRedeController extends Controller {
 	 */
 	private void updateFeederInformationBox(NetworkNodeStackPane networkNodeStackPane) {
 		if (selectedFeeder != null) {
-			Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getNetworkNodeShape();
-			shape.setStroke(Color.BLACK);
-			shape.setStrokeWidth(1);
+			networkPane.updateNetworkNode(getEnvironment().getFeeder(selectedFeeder));
 		}
 		selectedFeeder = networkNodeStackPane.getNetworkNodeNumber();
 		Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getNetworkNodeShape();
@@ -543,9 +539,7 @@ public class SimuladorRedeController extends Controller {
 	 */
 	private void updateBranchInformationBox(BranchStackPane branchStackPane) {
 		if (selectedBranch != null) {
-			Line l = networkPane.getBranchPaneMap().get(selectedBranch).getBranchLine();
-			l.setStroke(Color.BLACK);
-			l.setStrokeWidth(1);
+			networkPane.updateBranch(getEnvironment().getBranch(selectedBranch));
 		}
 		selectedBranch = branchStackPane.getBranchNum();
 		Line l = networkPane.getBranchPaneMap().get(selectedBranch).getBranchLine();
@@ -561,7 +555,7 @@ public class SimuladorRedeController extends Controller {
 		lblBranchLossesMW.setText(df.format(branch.getLossesMW()));
 		lblBranchResistance.setText(df.format(branch.getResistance()));
 		lblBranchReactance.setText(df.format(branch.getReactance()));
-		lblBranchStatus.setText(branch.isOn() ? "On" : "Off");
+		lblBranchStatus.setText(branch.isClosed() ? "Closed" : "Open");
 		cbBranchNumber.setValue(branch.getNumber());
 	}
 	
