@@ -33,7 +33,6 @@
                <children>
                   <Button fx:id="btnRunAgent" mnemonicParsing="false" onAction="#runAgent" />
                   <Button fx:id="btnStopAgent" disable="true" mnemonicParsing="false" onAction="#stopAgent" />
-                  <Label fx:id="lblCount" />
                   <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Execution Type:" />
                   <ComboBox fx:id="cbTaskExecutionType" />
                   <Slider fx:id="zoomSlider" blockIncrement="0.1" max="2.0" min="0.1" value="1.0">

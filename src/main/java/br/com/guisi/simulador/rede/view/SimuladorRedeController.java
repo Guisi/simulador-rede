@@ -48,6 +48,8 @@ import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
+import br.com.guisi.simulador.rede.qlearning.QLearningAgent;
+import br.com.guisi.simulador.rede.qlearning.QLearningStatus;
 import br.com.guisi.simulador.rede.task.AgentTask;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
@@ -80,8 +82,6 @@ public class SimuladorRedeController extends Controller {
 	private Button btnRunAgent;
 	@FXML
 	private Button btnStopAgent;
-	@FXML
-	private Label lblCount;
 	@FXML
 	private ComboBox<TaskExecutionType> cbTaskExecutionType;
 
@@ -166,7 +166,7 @@ public class SimuladorRedeController extends Controller {
 	private Integer selectedBranch;
 	
 	private AgentTask agentTask;
-	private Integer count = 0;
+	private QLearningAgent qLearningAgent;
 	
 	@Override
 	public void initializeController(Object... data) {
@@ -180,7 +180,7 @@ public class SimuladorRedeController extends Controller {
 		btnStopAgent.setGraphic(new ImageView(imageDelete));
 		
 		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
-		cbTaskExecutionType.setValue(TaskExecutionType.CONTINUOUS_UPDATE_EVERY_STEP);
+		cbTaskExecutionType.setValue(TaskExecutionType.STEP_BY_STEP);
 		
 		tvBrokenConstraints.widthProperty().addListener((source, oldWidth, newWidth) -> {
             Pane header = (Pane) tvBrokenConstraints.lookup("TableHeaderRow");
@@ -200,7 +200,7 @@ public class SimuladorRedeController extends Controller {
 		tcFunctionName.setPrefWidth(590);
 		tvBrokenConstraints.getColumns().add(tcFunctionName);
 		
-		/*File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
+		/*File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.csv");
 		this.loadEnvironmentFromFile(f);*/
 	}
 	
@@ -714,10 +714,14 @@ public class SimuladorRedeController extends Controller {
 	
 	public void runAgent() {
 		this.enableDisableScreen(true);
-		agentTask = new AgentTask(count, cbTaskExecutionType.getValue());
+		if (qLearningAgent == null) {
+			qLearningAgent = new QLearningAgent(getEnvironment());
+		}
+		agentTask = new AgentTask(cbTaskExecutionType.getValue(), qLearningAgent);
 		
 		agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
-			updateAgentStatus(newState);
+			//updateAgentStatus(newState, cbTaskExecutionType.getValue().equals(TaskExecutionType.STEP_BY_STEP));
+			updateAgentStatus(newState, true);
 		});
 		
 		agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
@@ -732,12 +736,14 @@ public class SimuladorRedeController extends Controller {
 	public void stopAgent() {
 		this.enableDisableScreen(false);
 		agentTask.cancel();
-    	count = agentTask.getValue();
-    	updateAgentStatus(count);
+    	QLearningStatus qLearningStatus = agentTask.getValue();
+    	updateAgentStatus(qLearningStatus, true);
 	}
 	
-	private void updateAgentStatus(Integer newState) {
-		lblCount.setText(String.valueOf(newState));
+	private void updateAgentStatus(QLearningStatus qLearningStatus, boolean updateAgentPosition) {
+		if (updateAgentPosition) {
+			networkPane.setAgentCirclePosition(qLearningStatus.getCurrentState());
+		}
 	}
 	
 	private void enableDisableScreen(boolean disable) {

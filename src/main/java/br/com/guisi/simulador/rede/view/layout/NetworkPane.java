@@ -31,6 +31,7 @@ public class NetworkPane extends Pane {
 
 	private Map<Integer, NetworkNodeStackPane> networkNodePaneMap = new HashMap<Integer, NetworkNodeStackPane>();
 	private Map<Integer, BranchStackPane> branchPaneMap = new HashMap<Integer, BranchStackPane>();
+	private Integer agentPosition;
 
 	public NetworkNodeStackPane drawLoad(NetworkNode networkNode, Environment environment) {
 		Text text = new Text(DecimalFormat.getNumberInstance().format(networkNode.getNodeNumber()));
@@ -148,15 +149,26 @@ public class NetworkPane extends Pane {
 		r.setOnMouseClicked(mouseClicked);
 		r.setVisible(branch.isSwitchBranch());
 		sp.setSwitchRectangle(r);
-
+		
 		/** agrupa rectangle e text */
 		VBox box = new VBox();
-		box.setPadding(new Insets(0, 0, Constants.BRANCH_TYPE_PX, 0));
 		box.setAlignment(Pos.CENTER);
 		box.setSpacing(2);
 		box.getChildren().add(text);
 		box.getChildren().add(r);
 		sp.getChildren().add(box);
+
+		if (branch.isSwitchBranch()) {
+			Circle c = new Circle();
+			c.setRadius(4);
+			c.setFill(Color.GREEN);
+			c.setVisible(false);
+			box.getChildren().add(c);
+			box.setPadding(new Insets(0, 0, 0, 0));
+			sp.setAgentCircle(c);
+		} else {
+			box.setPadding(new Insets(0, 0, Constants.BRANCH_TYPE_PX, 0));
+		}
 
 		if (y1 != y2) {
 			double xDiff = x2 - x1;
@@ -196,6 +208,24 @@ public class NetworkPane extends Pane {
 		if (!branch.isClosed()) {
 			rect.setStroke(Color.GRAY);
 			rect.setStrokeWidth(1);
+		}
+	}
+	
+	public void setAgentCirclePosition(Integer branchNumber) {
+		setAgentCircleVisibility(agentPosition, false);
+		agentPosition = branchNumber;
+		setAgentCircleVisibility(agentPosition, true);
+	}
+	
+	private void setAgentCircleVisibility(Integer branchNumber, boolean visible) {
+		if (branchNumber != null) {
+			BranchStackPane branchPane = branchPaneMap.get(branchNumber);
+			if (branchPane != null) {
+				Circle c = branchPane.getAgentCircle();
+				if (c != null) {
+					c.setVisible(visible);
+				}
+			}
 		}
 	}
 

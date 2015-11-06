@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Classe representando um ambiente simulado de uma rede de energia elétrica
@@ -21,6 +22,8 @@ public class Environment {
 	private final List<Feeder> feeders;
 	private final List<Branch> branches;
 	private final List<Branch> switches;
+	
+	private final Random RANDOM = new Random(System.currentTimeMillis());
 	
 	public Environment(int sizeX, int sizeY, Map<Integer, NetworkNode> networkNodeMap, Map<Integer, Branch> branchMap) {
 		this.sizeX = sizeX;
@@ -49,6 +52,14 @@ public class Environment {
 				switches.add(branch);
 			}
 		});
+	}
+	
+	/**
+	 * Retorna um switch aleatório
+	 * @return
+	 */
+	public Branch getRandomSwitch() {
+		return switches.get(RANDOM.nextInt(switches.size()));
 	}
 	
 	/**

@@ -1,52 +1,62 @@
 package br.com.guisi.simulador.rede.qlearning;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.Observable;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
 
-public class QLearningAgent {
+public class QLearningAgent extends Observable {
 	
 	private Environment environment;
 	private final QTable qTable;
+	private QLearningStatus status;
 	
 	public QLearningAgent(Environment environment) {
 		this.environment = environment;
 		this.qTable = new QTable();
+		this.status = new QLearningStatus();
+		Integer initialState = environment.getRandomSwitch().getNumber();
+		this.status.setInitialState(initialState);
+		this.status.setLastState(initialState);
+		this.status.setCurrentState(initialState);
 	}
 	
 	/**
 	 * Inicia a interação do agente
 	 */
 	public void run() {
-		//State lastState = initialState;
-		Integer initialState = nextEpisode(null);
+		this.status.setLastState(this.status.getCurrentState());
+		Integer state = nextEpisode(this.status.getCurrentState());
+		this.status.setCurrentState(state);
+
+		try {
+			QLearningStatus status = (QLearningStatus) this.getStatus().clone();
+			setChanged();
+			notifyObservers(status);
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
 	 * Realiza uma interação no ambiente
 	 * @param state
-	 * @return {@link State} estado para o qual o agente se moveu
+	 * @return {@link Integer} estado para o qual o agente se moveu
 	 */
 	private Integer nextEpisode(Integer state) {
 		//Se randomico menor que E-greedy, escolhe melhor acao
 		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
 		SwitchState action = randomAction ? SwitchState.getRandomAction() : qTable.getBestAction(state);
 		
+		//altera o estado do switch
+		boolean changed = environment.changeSwitchState(state, action);
+		
 		//verifica no ambiente qual é o resultado de executar a ação
 		//ActionResult actionResult = environment.executeAction(state, action);
 		
 		//recupera estado para o qual se moveu (será o mesmo atual caso não pode realizar a ação)
-		Integer nextState = 0;//TODO actionResult.getNextState();
+		Integer nextState = environment.getRandomSwitch().getNumber();//TODO actionResult.getNextState();
 		
 		//recupera em sua QTable o valor de recompensa para o estado/ação que estava antes
 		QValue qValue = qTable.getQValue(state, action);
@@ -97,5 +107,13 @@ public class QLearningAgent {
 	
 	public double getLowerReward() {
 		return qTable.getLowerReward();
+	}
+
+	public QLearningStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(QLearningStatus status) {
+		this.status = status;
 	}
 }
