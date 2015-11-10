@@ -25,17 +25,19 @@ public class QLearningAgent extends Observable {
 	/**
 	 * Inicia a interação do agente
 	 */
-	public void run() {
+	public void run(boolean notifyObservers) {
 		this.status.setLastState(this.status.getCurrentState());
 		Integer state = nextEpisode(this.status.getCurrentState());
 		this.status.setCurrentState(state);
 
-		try {
-			QLearningStatus status = (QLearningStatus) this.getStatus().clone();
-			setChanged();
-			notifyObservers(status);
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
+		if (notifyObservers) {
+			try {
+				QLearningStatus status = (QLearningStatus) this.getStatus().clone();
+				setChanged();
+				notifyObservers(status);
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

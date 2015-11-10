@@ -63,14 +63,15 @@ public class Environment {
 	}
 	
 	/**
+	 * Indica a mudança do estado de um switch
 	 * 
 	 * @param switchNumber
 	 * @param switchState
-	 * @return
+	 * @return verdadeiro se mudou o estado, falso se manteve o mesmo
 	 */
 	public boolean changeSwitchState(Integer switchNumber, SwitchState switchState) {
 		Branch switchBranch = getBranch(switchNumber);
-		boolean changed = switchBranch.getSwitchState() == switchState;
+		boolean changed = switchBranch.getSwitchState().equals(switchState);
 		switchBranch.setSwitchState(switchState);
 		return changed;
 	}
@@ -119,6 +120,11 @@ public class Environment {
 	 */
 	public Branch getBranch(Integer nodeFrom, Integer nodeTo) {
 		return branchFromToMap.get(new BranchId(nodeFrom, nodeTo));
+	}
+	
+	public Branch getClosestSwitch() {
+		//(Math.abs(x - goal.x) + Math.abs(y - goal.y))
+		return null;
 	}
 	
 	/**

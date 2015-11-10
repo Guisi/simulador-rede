@@ -26,19 +26,20 @@ public class AgentTask extends Task<QLearningStatus> implements Observer {
 		switch (executionType) {
 			case CONTINUOUS_UPDATE_END_ONLY:
 				while (true) {
+					qLearningAgent.run(false);
 					if (stop) {
 						break;
 					}
 				}
 			case CONTINUOUS_UPDATE_EVERY_STEP:
 				while (true) {
-					qLearningAgent.run();
+					qLearningAgent.run(true);
 					if (stop) {
 						break;
 					}
 				}
 			case STEP_BY_STEP:
-				qLearningAgent.run();
+				qLearningAgent.run(true);
 				break;
 		}
 		return qLearningAgent.getStatus();
