@@ -170,6 +170,55 @@ public class EnvironmentUtils {
 		//primeiro valida se rede está radial
 		msgs.append( validateRadialState(environment) );
 		
+		//na sequencia atualiza informações das conexões dos feeders e loads
+		updateFeedersConnections(environment);
+		
+		if (msgs.length() == 0) {
+			//executa o fluxo de potência
+			boolean success = PowerFlow.executePowerFlow(environment);
+			
+			if (!success) {
+				msgs.append("Error: Newton's method power flow did not converge in 10 iterations.");
+			}
+			
+			//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
+			environment.getFeeders().forEach((feeder) -> {
+				feeder.getBranches().forEach((branch) -> feeder.addUsedPower(branch.getInstantCurrent()));
+			});
+		}
+		
+		return msgs.toString();
+	}
+	
+	/**
+	 * Valida se existe algum ciclo fechado na rede
+	 * @param environment
+	 * @throws IllegalStateException
+	 */
+	public static String validateRadialState(Environment environment) {
+		StringBuilder msgs = new StringBuilder();
+		
+		environment.getNetworkNodeMap().values().forEach((node) -> {
+			try {
+				validateRadialStateRecursive(node, node, null, new ArrayList<>());
+				
+				if (node.isFeeder()) {
+					Feeder feeder = (Feeder) node;
+					checkIfExistsConnectedFeeders(feeder, node, null);
+				}
+			} catch (IllegalStateException e) {
+				msgs.append(e.getMessage()).append("\n");
+			}
+		});
+		
+		return msgs.toString();
+	}
+	
+	/**
+	 * Atualiza informações das conexões dos feeders e loads
+	 * @param environment
+	 */
+	public static void updateFeedersConnections(Environment environment) {
 		//zera valores consolidados do feeder
 		environment.getFeeders().forEach((feeder) -> {
 			feeder.setEnergizedLoads(0);
@@ -187,46 +236,6 @@ public class EnvironmentUtils {
 				}
 			}
 		});
-		
-		if (msgs.length() == 0) {
-			//executa o fluxo de potência
-			/*boolean success = PowerFlow.executePowerFlow(environment);
-			
-			if (!success) {
-				msgs.append("Error: Newton's method power flow did not converge in 10 iterations.");
-			}*/
-			
-			//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
-			environment.getFeeders().forEach((feeder) -> {
-				feeder.getBranches().forEach((branch) -> feeder.addUsedPower(branch.getInstantCurrent()));
-			});
-		}
-		
-		return msgs.toString();
-	}
-	
-	/**
-	 * Valida se existe algum ciclo fechado na rede
-	 * @param environment
-	 * @throws IllegalStateException
-	 */
-	private static String validateRadialState(Environment environment) {
-		StringBuilder msgs = new StringBuilder();
-		
-		environment.getNetworkNodeMap().values().forEach((node) -> {
-			try {
-				validateRadialStateRecursive(node, node, null, new ArrayList<>());
-				
-				if (node.isFeeder()) {
-					Feeder feeder = (Feeder) node;
-					checkIfExistsConnectedFeeders(feeder, node, null);
-				}
-			} catch (IllegalStateException e) {
-				msgs.append(e.getMessage()).append("\n");
-			}
-		});
-		
-		return msgs.toString();
 	}
 
 	/**

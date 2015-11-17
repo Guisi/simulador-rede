@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 
 import org.fxmisc.richtext.CodeArea;
@@ -23,7 +23,7 @@ public class ExpressionEvaluatorController extends Controller {
 	@FXML
 	private VBox vBoxInternal;
 	@FXML
-	private Label lblResult;
+	private TextArea taEvalResult;
 	
 	private CodeArea codeArea;
 	
@@ -45,10 +45,10 @@ public class ExpressionEvaluatorController extends Controller {
 	}
 	
 	public void evaluateExpression() {
-		lblResult.setText("");
+		taEvalResult.setText("");
 		try {
 			Object result = EvaluatorUtils.evaluateExpression(evaluationObject, codeArea.getText());
-			lblResult.setText(String.valueOf(result));
+			taEvalResult.setText(String.valueOf(result));
 		} catch (Exception e) {
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 			alert.showAndWait();

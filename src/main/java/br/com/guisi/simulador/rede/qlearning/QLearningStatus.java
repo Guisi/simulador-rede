@@ -1,12 +1,29 @@
 package br.com.guisi.simulador.rede.qlearning;
 
+import java.util.ArrayList;
+import java.util.List;
 
-public class QLearningStatus implements Cloneable {
+
+public class QLearningStatus {
 
 	private Integer initialState;
 	private Integer lastState;
 	private Integer currentState;
-
+	private List<Integer> switchesChanged = new ArrayList<>();
+	private boolean handled;
+	
+	public QLearningStatus() {
+	}
+	
+	public QLearningStatus clone() {
+		QLearningStatus newStatus = new QLearningStatus();
+		newStatus.setInitialState(initialState);
+		newStatus.setLastState(lastState);
+		newStatus.setCurrentState(currentState);
+		newStatus.getSwitchesChanged().addAll(switchesChanged);
+		return newStatus;
+	}
+	
 	public Integer getInitialState() {
 		return initialState;
 	}
@@ -26,11 +43,21 @@ public class QLearningStatus implements Cloneable {
 		this.currentState = currentState;
 	}
 	
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		return super.clone();
+	public List<Integer> getSwitchesChanged() {
+		return switchesChanged;
 	}
-	
+	public void setSwitchesChanged(List<Integer> switchesChanged) {
+		this.switchesChanged = switchesChanged;
+	}
+
+	public boolean isHandled() {
+		return handled;
+	}
+
+	public void setHandled(boolean handled) {
+		this.handled = handled;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

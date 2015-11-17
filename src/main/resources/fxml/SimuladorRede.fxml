@@ -250,7 +250,7 @@
                         </HBox>
                      </content>
                   </TitledPane>
-                  <TitledPane expanded="false" text="Labels and Messages">
+                  <TitledPane text="Labels and Messages">
                      <content>
                         <TabPane prefHeight="170.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
                           <tabs>
@@ -314,6 +314,15 @@
                                     </AnchorPane>
                               </content>
                             </Tab>
+                              <Tab text="Switches Operations">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <TableView fx:id="tvSwitchesOperations" prefHeight="140.0" prefWidth="600.0" />
+                                       </children>
+                                    </AnchorPane>
+                                </content>
+                              </Tab>
                           </tabs>
                         </TabPane>
                      </content>

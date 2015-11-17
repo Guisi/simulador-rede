@@ -71,7 +71,7 @@ public class Environment {
 	 */
 	public boolean changeSwitchState(Integer switchNumber, SwitchState switchState) {
 		Branch switchBranch = getBranch(switchNumber);
-		boolean changed = switchBranch.getSwitchState().equals(switchState);
+		boolean changed = !switchBranch.getSwitchState().equals(switchState);
 		switchBranch.setSwitchState(switchState);
 		return changed;
 	}
@@ -197,5 +197,24 @@ public class Environment {
 	 */
 	public List<Branch> getSwitches() {
 		return switches;
+	}
+	
+	/**
+	 * Retorna verdadeiro se ambiente é válido para reconfiguração
+	 * Passo 1: valida se existem switches abertos
+	 * @return
+	 */
+	public boolean isValidForReconfiguration() {
+		//o primeiro passo é validar se existem switches abertos
+		//pois se todos os switches estiverem fechados, não há como reconfigurar
+		boolean hasOpenSwitch = false;
+		for (Branch switc : switches) {
+			if (!switc.isClosed()) {
+				hasOpenSwitch = true;
+				break;
+			}
+		}
+		
+		return hasOpenSwitch;
 	}
 }

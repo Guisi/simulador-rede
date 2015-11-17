@@ -27,17 +27,14 @@ public class QLearningAgent extends Observable {
 	 */
 	public void run(boolean notifyObservers) {
 		this.status.setLastState(this.status.getCurrentState());
-		Integer state = nextEpisode(this.status.getCurrentState());
+		Integer state = this.nextEpisode(this.status.getCurrentState());
 		this.status.setCurrentState(state);
 
 		if (notifyObservers) {
-			try {
-				QLearningStatus status = (QLearningStatus) this.getStatus().clone();
-				setChanged();
-				notifyObservers(status);
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
+			QLearningStatus status = this.status.clone();
+			this.status.getSwitchesChanged().clear();
+			setChanged();
+			notifyObservers(status);
 		}
 	}
 	
@@ -53,6 +50,9 @@ public class QLearningAgent extends Observable {
 		
 		//altera o estado do switch
 		boolean changed = environment.changeSwitchState(state, action);
+		if (changed) {
+			this.status.getSwitchesChanged().add(state);
+		}
 		
 		//verifica no ambiente qual é o resultado de executar a ação
 		//ActionResult actionResult = environment.executeAction(state, action);

@@ -59,6 +59,7 @@ import br.com.guisi.simulador.rede.view.layout.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.layout.NetworkPane;
 import br.com.guisi.simulador.rede.view.layout.ZoomingPane;
 import br.com.guisi.simulador.rede.view.tableview.BrokenConstraint;
+import br.com.guisi.simulador.rede.view.tableview.SwitchOperation;
 
 public class SimuladorRedeController extends Controller {
 
@@ -157,6 +158,8 @@ public class SimuladorRedeController extends Controller {
 	private TabPane tabPaneFunctions;
 	@FXML
 	private TableView<BrokenConstraint> tvBrokenConstraints;
+	@FXML
+	private TableView<SwitchOperation> tvSwitchesOperations;
 	
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
@@ -182,6 +185,7 @@ public class SimuladorRedeController extends Controller {
 		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
 		cbTaskExecutionType.setValue(TaskExecutionType.STEP_BY_STEP);
 		
+		//tabela de broken constraints
 		tvBrokenConstraints.widthProperty().addListener((source, oldWidth, newWidth) -> {
             Pane header = (Pane) tvBrokenConstraints.lookup("TableHeaderRow");
             if (header.isVisible()){
@@ -194,11 +198,29 @@ public class SimuladorRedeController extends Controller {
 		tvBrokenConstraints.setItems(FXCollections.observableArrayList());
 		tvBrokenConstraints.setPlaceholder(new Label("No broken constraints found"));
 		
-		TableColumn<BrokenConstraint, String> tcFunctionName = new TableColumn<BrokenConstraint, String>();
-		tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getMessage());
-		tcFunctionName.setStyle("-fx-alignment: center-left; -fx-text-fill: red;");
-		tcFunctionName.setPrefWidth(590);
-		tvBrokenConstraints.getColumns().add(tcFunctionName);
+		TableColumn<BrokenConstraint, String> tcBrokenConstraint = new TableColumn<BrokenConstraint, String>();
+		tcBrokenConstraint.setCellValueFactory(cellData -> cellData.getValue().getMessage());
+		tcBrokenConstraint.setStyle("-fx-alignment: center-left; -fx-text-fill: red;");
+		tcBrokenConstraint.setPrefWidth(590);
+		tvBrokenConstraints.getColumns().add(tcBrokenConstraint);
+		
+		//tabela de switch operations
+		tvSwitchesOperations.widthProperty().addListener((source, oldWidth, newWidth) -> {
+            Pane header = (Pane) tvSwitchesOperations.lookup("TableHeaderRow");
+            if (header.isVisible()){
+                header.setMaxHeight(0);
+                header.setMinHeight(0);
+                header.setPrefHeight(0);
+                header.setVisible(false);
+            }
+		});
+		tvSwitchesOperations.setItems(FXCollections.observableArrayList());
+		tvSwitchesOperations.setPlaceholder(new Label("No switches operations yet"));
+		TableColumn<SwitchOperation, String> tcSwitchOperation = new TableColumn<SwitchOperation, String>();
+		tcSwitchOperation.setCellValueFactory(cellData -> cellData.getValue().getMessage());
+		tcSwitchOperation.setStyle("-fx-alignment: center-left; -fx-text-fill: red;");
+		tcSwitchOperation.setPrefWidth(590);
+		tvSwitchesOperations.getColumns().add(tcSwitchOperation);
 		
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.csv");
 		this.loadEnvironmentFromFile(f);*/
@@ -712,37 +734,68 @@ public class SimuladorRedeController extends Controller {
 		SimuladorRede.showModalScene("Functions", FunctionsController.FXML_FILE, this);
 	}
 	
+	/*********************************
+	 *********************************
+	 * Controle da interação do agente
+	 *********************************
+	 *********************************/
 	public void runAgent() {
-		this.enableDisableScreen(true);
-		if (qLearningAgent == null) {
-			qLearningAgent = new QLearningAgent(getEnvironment());
+		if (getEnvironment().isValidForReconfiguration()) {
+			this.enableDisableScreen(true);
+			if (qLearningAgent == null) {
+				qLearningAgent = new QLearningAgent(getEnvironment());
+			}
+			agentTask = new AgentTask(cbTaskExecutionType.getValue(), qLearningAgent);
+			
+			agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
+				if (!newState.isHandled()) {
+					updateAgentStatus(newState);
+				}
+			});
+			
+			agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
+	            if (newState == Worker.State.SUCCEEDED) {
+	            	stopAgent();
+	            }
+	        });
+			
+			new Thread(agentTask).start();
+		} else {
+			Alert alert = new Alert(AlertType.ERROR, "O ambiente é inválido para reconfiguração.");
+			alert.showAndWait();
 		}
-		agentTask = new AgentTask(cbTaskExecutionType.getValue(), qLearningAgent);
-		
-		agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
-			//updateAgentStatus(newState, cbTaskExecutionType.getValue().equals(TaskExecutionType.STEP_BY_STEP));
-			updateAgentStatus(newState, true);
-		});
-		
-		agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
-            if (newState == Worker.State.SUCCEEDED) {
-            	stopAgent();
-            }
-        });
-		
-		new Thread(agentTask).start();
 	}
 	
 	public void stopAgent() {
 		this.enableDisableScreen(false);
 		agentTask.cancel();
-    	QLearningStatus qLearningStatus = agentTask.getValue();
-    	updateAgentStatus(qLearningStatus, true);
+    	/*QLearningStatus qLearningStatus = agentTask.getValue();
+    	updateAgentStatus(qLearningStatus);*/
 	}
 	
-	private void updateAgentStatus(QLearningStatus qLearningStatus, boolean updateAgentPosition) {
-		if (updateAgentPosition) {
-			networkPane.setAgentCirclePosition(qLearningStatus.getCurrentState());
+	private void updateAgentStatus(QLearningStatus qLearningStatus) {
+		qLearningStatus.setHandled(true);
+		networkPane.setAgentCirclePosition(qLearningStatus.getCurrentState());
+		
+		List<Integer> switchesChanged = qLearningStatus.getSwitchesChanged();
+		if (!switchesChanged.isEmpty()) {
+			Environment environment = getEnvironment();
+			
+			//atualiza informações das conexões dos feeders e loads
+			EnvironmentUtils.updateFeedersConnections(environment);
+			
+			//atualiza status dos switches na tela
+			switchesChanged.forEach((swNum) -> {
+				Branch sw = environment.getBranch(swNum);
+				networkPane.updateBranch(sw);
+				
+				SwitchOperation switchOperation = new SwitchOperation();
+				switchOperation.getMessage().setValue("Switch " + swNum + (sw.isClosed() ? " closed" : " opened") );
+				tvSwitchesOperations.getItems().add(switchOperation);
+			});
+			
+			//atualiza status dos nós na tela
+			environment.getNetworkNodes().forEach((node) -> networkPane.updateNetworkNode(node));
 		}
 	}
 	
