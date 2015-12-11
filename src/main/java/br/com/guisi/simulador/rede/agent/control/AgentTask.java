@@ -1,12 +1,12 @@
-package br.com.guisi.simulador.rede.task;
+package br.com.guisi.simulador.rede.agent.control;
 
 import java.util.Observable;
 import java.util.Observer;
 
 import javafx.concurrent.Task;
+import br.com.guisi.simulador.rede.agent.qlearning.QLearningAgent;
+import br.com.guisi.simulador.rede.agent.qlearning.QLearningStatus;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
-import br.com.guisi.simulador.rede.qlearning.QLearningAgent;
-import br.com.guisi.simulador.rede.qlearning.QLearningStatus;
 
 public class AgentTask extends Task<QLearningStatus> implements Observer {
 

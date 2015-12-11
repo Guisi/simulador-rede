@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.qlearning;
+package br.com.guisi.simulador.rede.agent.qlearning;
 
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
 

@@ -71,11 +71,11 @@ public class FunctionsController extends Controller {
 	}
 	
 	private void editFunctionItem(FunctionItem functionItem) {
-		SimuladorRede.showModalScene("Edit Function", FunctionEditController.FXML_FILE, functionItem, this);
+		SimuladorRede.showModalScene("Edit Function", FunctionEditController.class, functionItem, this);
 	}
 	
 	public void newFunction() {
-		SimuladorRede.showModalScene("Edit Function", FunctionEditController.FXML_FILE, new FunctionItem(), this);
+		SimuladorRede.showModalScene("Edit Function", FunctionEditController.class, new FunctionItem(), this);
 	}
 	
 	public void removeFunction() {
@@ -129,10 +129,5 @@ public class FunctionsController extends Controller {
 	@Override
 	public Node getView() {
 		return root;
-	}
-	
-	@Override
-	public String getFxmlFile() {
-		return FXML_FILE;
 	}
 }

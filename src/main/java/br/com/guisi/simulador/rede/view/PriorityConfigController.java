@@ -85,9 +85,4 @@ public class PriorityConfigController extends Controller {
 	public Node getView() {
 		return root;
 	}
-	
-	@Override
-	public String getFxmlFile() {
-		return FXML_FILE;
-	}
 }

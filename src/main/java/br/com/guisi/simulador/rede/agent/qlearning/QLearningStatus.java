@@ -1,7 +1,10 @@
-package br.com.guisi.simulador.rede.qlearning;
+package br.com.guisi.simulador.rede.agent.qlearning;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.beanutils.BeanUtils;
 
 
 public class QLearningStatus {
@@ -16,12 +19,11 @@ public class QLearningStatus {
 	}
 	
 	public QLearningStatus clone() {
-		QLearningStatus newStatus = new QLearningStatus();
-		newStatus.setInitialState(initialState);
-		newStatus.setLastState(lastState);
-		newStatus.setCurrentState(currentState);
-		newStatus.getSwitchesChanged().addAll(switchesChanged);
-		return newStatus;
+		try {
+			return (QLearningStatus) BeanUtils.cloneBean(this);
+		} catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
+			return null;
+		}
 	}
 	
 	public Integer getInitialState() {

@@ -1,11 +1,9 @@
 package br.com.guisi.simulador.rede;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
@@ -13,6 +11,10 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
+
 import br.com.guisi.simulador.rede.constants.PreferenceKey;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.util.Matlab;
@@ -21,10 +23,14 @@ import br.com.guisi.simulador.rede.view.Controller;
 import br.com.guisi.simulador.rede.view.SimuladorRedeController;
 
 public class SimuladorRede extends Application {
-
+	
+	/*
+	 * Contexto do Spring
+	 */
+	public static AbstractApplicationContext ctx;
+	
 	private static Stage primaryStage;
 	private static Map<PreferenceKey, String> preferences;
-	private static Map<String, Stage> openStages = new HashMap<String, Stage>();
 	
 	private static Environment environment;
 	
@@ -32,59 +38,55 @@ public class SimuladorRede extends Application {
 		launch(args);
 	}
 
-	@Override
-	public void start(Stage stage) {
-		SimuladorRede.primaryStage = stage;
-		
-		FXMLLoader loader = new FXMLLoader();
-        try {
-        	preferences = PreferencesUtils.loadPreferences();
-        	
-        	Pane node = loader.load(getClass().getResourceAsStream(SimuladorRedeController.FXML_FILE));
-			Controller controller = (Controller) loader.getController();
-        	
-			Scene scene = new Scene(node);
-			primaryStage.setScene(scene);
-			primaryStage.setTitle("Simulador");
-			primaryStage.getIcons().add(new Image("/img/bolt.png"));
-			scene.getStylesheets().add("/css/estilo.css");
-			primaryStage.setMaximized(true);
-			
-			primaryStage.setOnCloseRequest((event) -> {
-				try {
-					Matlab.disconnectMatlabProxy();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			});
-			
-			controller.initializeController();
-			primaryStage.show();
-			
-        } catch (IOException e) {
-        	throw new RuntimeException("Unable to load FXML file", e);
-        }
+	/**
+	 * Inicializa contexto do Spring
+	 */
+	private static void initializeSpring(){
+		ctx = new AnnotationConfigApplicationContext("br.com.guisi.simulador.rede");
+		ctx.registerShutdownHook();
 	}
 	
-	public static void showModalScene(String title, String fxmlFile, Object... data) {
-    	showScene(title, fxmlFile, true, data);
+	@Override
+	public void start(Stage stage) {
+		initializeSpring();
+		
+		SimuladorRede.primaryStage = stage;
+		
+    	preferences = PreferencesUtils.loadPreferences();
+    	
+		Controller controller = ctx.getBean(SimuladorRedeController.class);
+    	
+		Scene scene = new Scene((Parent) controller.getView());
+		primaryStage.setScene(scene);
+		primaryStage.setTitle("Simulador");
+		primaryStage.getIcons().add(new Image("/img/bolt.png"));
+		scene.getStylesheets().add("/css/estilo.css");
+		primaryStage.setMaximized(true);
+		
+		primaryStage.setOnCloseRequest((event) -> {
+			try {
+				Matlab.disconnectMatlabProxy();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+		
+		controller.initializeController();
+		primaryStage.show();
+	}
+	
+	public static void showModalScene(String title, Class<?> controllerClass, Object... data) {
+    	showScene(title, controllerClass, true, data);
     }
 	
-	public static void showUtilityScene(String title, String fxmlFile, Object... data) {
-    	showScene(title, fxmlFile, false, data);
+	public static void showUtilityScene(String title, Class<?> controllerClass, Object... data) {
+    	showScene(title, controllerClass, false, data);
     }
 	
-	public static void showScene(String title, String fxmlFile, boolean modal, Object... data) {
-		Stage stage = openStages.get(fxmlFile);
-		
-		FXMLLoader loader = new FXMLLoader();
-		try {
-			loader.load(SimuladorRede.class.getResourceAsStream(fxmlFile));
-		} catch (IOException e) {
-			throw new RuntimeException("Unable to load FXML file", e);
-		}
-		Controller controller = (Controller) loader.getController();
-		
+	public static void showScene(String title, Class<?> controllerClass, boolean modal, Object... data) {
+		Controller controller = (Controller) ctx.getBean(controllerClass);
+		Stage stage = controller.getStage();
+
 		if (stage == null) {
 			stage = new Stage(StageStyle.UTILITY);
 	    	stage.initModality(modal ? Modality.APPLICATION_MODAL : Modality.NONE);
@@ -102,12 +104,9 @@ public class SimuladorRede extends Application {
 	    	} else {
 	    		stage.getScene().setRoot(myPane);
 	    	}
-	    	
-	    	openStages.put(fxmlFile, stage);
+	    	controller.setStage(stage);
+	    	controller.initializeController(data);
 		}
-		
-		controller.setStage(stage);
-		controller.initializeController(data);
 		stage.centerOnScreen();
 
 		if (!stage.isShowing()) {
@@ -122,11 +121,9 @@ public class SimuladorRede extends Application {
      */
     public static void closeScene(Controller controller) {
     	Stage stage = controller.getStage();
-    	String fxmlFile = controller.getFxmlFile();
 		if (stage != null && stage.isShowing()) {
 			stage.close();
 		}
-		openStages.remove(fxmlFile);
     }
 
 	public static Stage getPrimaryStage() {

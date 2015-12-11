@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.collections.FXCollections;
-import javafx.concurrent.Worker;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -36,9 +35,13 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.agent.control.AgentControl;
+import br.com.guisi.simulador.rede.agent.qlearning.QLearningStatus;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.FunctionType;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
@@ -46,11 +49,9 @@ import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
+import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
-import br.com.guisi.simulador.rede.qlearning.QLearningAgent;
-import br.com.guisi.simulador.rede.qlearning.QLearningStatus;
-import br.com.guisi.simulador.rede.task.AgentTask;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
 import br.com.guisi.simulador.rede.util.FunctionsUtils;
@@ -64,6 +65,9 @@ import br.com.guisi.simulador.rede.view.tableview.SwitchOperation;
 public class SimuladorRedeController extends Controller {
 
 	public static final String FXML_FILE = "/fxml/SimuladorRede.fxml";
+
+	@Inject
+	private AgentControl agentControl;
 	
 	@FXML
 	private VBox root;
@@ -168,11 +172,11 @@ public class SimuladorRedeController extends Controller {
 	private Integer selectedFeeder;
 	private Integer selectedBranch;
 	
-	private AgentTask agentTask;
-	private QLearningAgent qLearningAgent;
-	
 	@Override
 	public void initializeController(Object... data) {
+		this.listenToEvent(EventType.AGENT_RUNNING);
+		this.listenToEvent(EventType.AGENT_STOPPED);
+		
 		this.createFunctionTables();
 		this.resetScreen();
 		
@@ -723,15 +727,15 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	public void showPriorityModal() {
-		SimuladorRede.showModalScene("Priority Values", PriorityConfigController.FXML_FILE);
+		SimuladorRede.showModalScene("Priority Values", PriorityConfigController.class);
 	}
 	
 	public void showExpressionEvaluatorWindow() {
-		SimuladorRede.showUtilityScene("Expression Evaluator", ExpressionEvaluatorController.FXML_FILE);
+		SimuladorRede.showUtilityScene("Expression Evaluator", ExpressionEvaluatorController.class);
 	}
 	
 	public void showFunctionsWindow() {
-		SimuladorRede.showModalScene("Functions", FunctionsController.FXML_FILE, this);
+		SimuladorRede.showModalScene("Functions", FunctionsController.class, this);
 	}
 	
 	/*********************************
@@ -740,37 +744,20 @@ public class SimuladorRedeController extends Controller {
 	 *********************************
 	 *********************************/
 	public void runAgent() {
-		if (getEnvironment().isValidForReconfiguration()) {
-			this.enableDisableScreen(true);
-			if (qLearningAgent == null) {
-				qLearningAgent = new QLearningAgent(getEnvironment());
-			}
-			agentTask = new AgentTask(cbTaskExecutionType.getValue(), qLearningAgent);
-			
-			agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
-				if (!newState.isHandled()) {
-					updateAgentStatus(newState);
-				}
-			});
-			
-			agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
-	            if (newState == Worker.State.SUCCEEDED) {
-	            	stopAgent();
-	            }
-	        });
-			
-			new Thread(agentTask).start();
-		} else {
-			Alert alert = new Alert(AlertType.ERROR, "O ambiente é inválido para reconfiguração.");
-			alert.showAndWait();
-		}
+		agentControl.run();
 	}
 	
 	public void stopAgent() {
-		this.enableDisableScreen(false);
-		agentTask.cancel();
-    	/*QLearningStatus qLearningStatus = agentTask.getValue();
-    	updateAgentStatus(qLearningStatus);*/
+		agentControl.stop();
+	}
+	
+	@Override
+	public void onEvent(EventType eventType, Object data) {
+		switch (eventType) {
+			case AGENT_RUNNING: enableDisableScreen(true); break;
+			case AGENT_STOPPED: enableDisableScreen(false); break;
+			default: break;
+		}
 	}
 	
 	private void updateAgentStatus(QLearningStatus qLearningStatus) {
@@ -809,10 +796,5 @@ public class SimuladorRedeController extends Controller {
 	@Override
 	public Node getView() {
 		return root;
-	}
-	
-	@Override
-	public String getFxmlFile() {
-		return FXML_FILE;
 	}
 }
