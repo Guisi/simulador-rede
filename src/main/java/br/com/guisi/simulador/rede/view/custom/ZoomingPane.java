@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view.layout;
+package br.com.guisi.simulador.rede.view.custom;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;

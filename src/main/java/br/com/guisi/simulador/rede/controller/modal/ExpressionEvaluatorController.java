@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view;
+package br.com.guisi.simulador.rede.controller.modal;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -10,13 +10,14 @@ import javafx.scene.layout.VBox;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 
+import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
 import br.com.guisi.simulador.rede.util.richtext.JavaKeywords;
 
 public class ExpressionEvaluatorController extends Controller {
 
-	public static final String FXML_FILE = "/fxml/ExpressionEvaluator.fxml";
+	public static final String FXML_FILE = "/fxml/modal/ExpressionEvaluator.fxml";
 	
 	@FXML
 	private VBox root;

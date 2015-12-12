@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view.layout;
+package br.com.guisi.simulador.rede.view.custom;
 
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;

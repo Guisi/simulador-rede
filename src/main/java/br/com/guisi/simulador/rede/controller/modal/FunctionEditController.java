@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view;
+package br.com.guisi.simulador.rede.controller.modal;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -15,12 +15,13 @@ import org.fxmisc.richtext.LineNumberFactory;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.FunctionType;
+import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
 import br.com.guisi.simulador.rede.util.richtext.JavaKeywords;
 
 public class FunctionEditController extends Controller {
 	
-	public static final String FXML_FILE = "/fxml/FunctionEdit.fxml";
+	public static final String FXML_FILE = "/fxml/modal/FunctionEdit.fxml";
 	
 	@FXML
 	private VBox root;

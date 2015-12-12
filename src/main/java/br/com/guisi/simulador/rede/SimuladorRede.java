@@ -16,18 +16,18 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.AbstractApplicationContext;
 
 import br.com.guisi.simulador.rede.constants.PreferenceKey;
+import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.util.Matlab;
 import br.com.guisi.simulador.rede.util.PreferencesUtils;
-import br.com.guisi.simulador.rede.view.Controller;
-import br.com.guisi.simulador.rede.view.SimuladorRedeController;
 
 public class SimuladorRede extends Application {
 	
 	/*
 	 * Contexto do Spring
 	 */
-	public static AbstractApplicationContext ctx;
+	private static AbstractApplicationContext ctx;
 	
 	private static Stage primaryStage;
 	private static Map<PreferenceKey, String> preferences;
@@ -140,6 +140,10 @@ public class SimuladorRede extends Application {
 
 	public static void setEnvironment(Environment environment) {
 		SimuladorRede.environment = environment;
+	}
+
+	public static AbstractApplicationContext getCtx() {
+		return ctx;
 	}
 	
 }

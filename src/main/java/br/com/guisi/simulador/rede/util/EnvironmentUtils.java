@@ -161,37 +161,6 @@ public class EnvironmentUtils {
 	}
 	
 	/**
-	 * Valida se a rede esta configurada corretamente
-	 * Por exemplo, se existe algum ciclo fechado ou isolamento
-	 */
-	public static String validateEnvironment(Environment environment) throws Exception {
-		StringBuilder msgs = new StringBuilder();
-		
-		//primeiro valida se rede está radial
-		msgs.append( validateRadialState(environment) );
-		
-		//na sequencia atualiza informações das conexões dos feeders e loads
-		updateFeedersConnections(environment);
-		
-		if (msgs.length() == 0) {
-			//executa o fluxo de potência
-			/* TODO remover
-			 * boolean success = PowerFlow.executePowerFlow(environment);
-			
-			if (!success) {
-				msgs.append("Error: Newton's method power flow did not converge in 10 iterations.");
-			}*/
-			
-			//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
-			environment.getFeeders().forEach((feeder) -> {
-				feeder.getBranches().forEach((branch) -> feeder.addUsedPower(branch.getInstantCurrent()));
-			});
-		}
-		
-		return msgs.toString();
-	}
-	
-	/**
 	 * Valida se existe algum ciclo fechado na rede
 	 * @param environment
 	 * @throws IllegalStateException
@@ -223,7 +192,6 @@ public class EnvironmentUtils {
 		//zera valores consolidados do feeder
 		environment.getFeeders().forEach((feeder) -> {
 			feeder.setEnergizedLoads(0);
-			feeder.setUsedPower(0);
 		});
 		
 		//depois, verifica se todos os loads estão conectados a algum feeder
@@ -377,15 +345,15 @@ public class EnvironmentUtils {
 		return branches;
 	}
 	
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
 		Environment environment = null;
 		
 		try {
 			environment = EnvironmentUtils.getEnvironmentFromFile(f);
-			EnvironmentUtils.validateEnvironment(environment);
+			//EnvironmentUtils.validateEnvironment(environment);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 }

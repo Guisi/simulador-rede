@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view;
+package br.com.guisi.simulador.rede.controller.modal;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,12 +15,14 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
 import br.com.guisi.simulador.rede.util.FunctionsUtils;
 
 public class FunctionsController extends Controller {
 
-	public static final String FXML_FILE = "/fxml/Functions.fxml";
+	public static final String FXML_FILE = "/fxml/modal/Functions.fxml";
 	
 	@FXML
 	private VBox root;
@@ -38,6 +40,10 @@ public class FunctionsController extends Controller {
 	
 	@Override
 	public void initializeController(Object... data) {
+		this.initializeTable();
+	}
+	
+	private void initializeTable() {
 		tvFunctions.setRowFactory( tv -> {
 		    TableRow<FunctionItem> row = new TableRow<>();
 		    row.setOnMouseClicked(event -> {
@@ -63,9 +69,8 @@ public class FunctionsController extends Controller {
 		tvFunctions.setItems(FXCollections.observableArrayList());
 		tvFunctions.getItems().addAll(functions);
 		
-		SimuladorRedeController controller = (SimuladorRedeController) data[0];
 		this.getStage().setOnCloseRequest((event) -> {
-			controller.updateFunctionsTables();
+			this.fireEvent(EventType.FUNCTIONS_UPDATED, null);
 			SimuladorRede.closeScene(this);
 		});
 	}

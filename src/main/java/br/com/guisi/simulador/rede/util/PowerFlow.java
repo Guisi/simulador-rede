@@ -18,7 +18,27 @@ import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 
 public class PowerFlow {
 	
-	public static boolean executePowerFlow(Environment environment) throws Exception {
+	public static boolean execute(Environment environment) throws Exception {
+		//atualiza informações das conexões dos feeders e loads
+		EnvironmentUtils.updateFeedersConnections(environment);
+
+		//executa power flow
+		boolean success = true;//TODO remove executePowerFlow(environment);
+
+		//zera o valor de potencia usado dos feeders
+		environment.getFeeders().forEach((feeder) -> {
+			feeder.setUsedPower(0);
+		});
+		
+		//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
+		environment.getFeeders().forEach((feeder) -> {
+			feeder.getBranches().forEach((branch) -> feeder.addUsedPower(branch.getInstantCurrent()));
+		});
+		
+		return success;
+	}
+	
+	private static boolean executePowerFlow(Environment environment) throws Exception {
 		double[][] mpcBus = mountMpcBus(environment);
 		
 		double[][] mpcGen = mountMpcGen(environment);

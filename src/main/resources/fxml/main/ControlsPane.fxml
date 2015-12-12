@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.main.ControlsPaneController">
+   <children>
+      <HBox alignment="CENTER_LEFT" spacing="15.0">
+         <children>
+            <Button fx:id="btnRunAgent" mnemonicParsing="false" onAction="#runAgent" />
+            <Button fx:id="btnStopAgent" disable="true" mnemonicParsing="false" onAction="#stopAgent" />
+            <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Execution Type:" />
+            <ComboBox fx:id="cbTaskExecutionType" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="5.0" top="5.0" />
+   </padding>
+</VBox>

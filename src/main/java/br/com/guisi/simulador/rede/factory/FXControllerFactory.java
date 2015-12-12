@@ -8,11 +8,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import br.com.guisi.simulador.rede.view.ExpressionEvaluatorController;
-import br.com.guisi.simulador.rede.view.FunctionEditController;
-import br.com.guisi.simulador.rede.view.FunctionsController;
-import br.com.guisi.simulador.rede.view.PriorityConfigController;
-import br.com.guisi.simulador.rede.view.SimuladorRedeController;
+import br.com.guisi.simulador.rede.controller.main.ControlsPaneController;
+import br.com.guisi.simulador.rede.controller.main.ElementsDetailsPaneController;
+import br.com.guisi.simulador.rede.controller.main.FunctionsPaneController;
+import br.com.guisi.simulador.rede.controller.main.LabelAndMessagesPaneController;
+import br.com.guisi.simulador.rede.controller.main.MenuPaneController;
+import br.com.guisi.simulador.rede.controller.main.NetworkPaneController;
+import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
+import br.com.guisi.simulador.rede.controller.modal.ExpressionEvaluatorController;
+import br.com.guisi.simulador.rede.controller.modal.FunctionEditController;
+import br.com.guisi.simulador.rede.controller.modal.FunctionsController;
+import br.com.guisi.simulador.rede.controller.modal.PriorityConfigController;
 
 /**
  * Factory responsavel por registrar os controllers no contexto do Spring
@@ -50,6 +56,42 @@ public class FXControllerFactory{
 	@Lazy
 	public PriorityConfigController priorityConfigController(){
 		return (PriorityConfigController) loadController(PriorityConfigController.FXML_FILE);
+	}
+	
+	@Bean
+	@Lazy
+	public LabelAndMessagesPaneController labelAndMessagesPaneController(){
+		return (LabelAndMessagesPaneController) loadController(LabelAndMessagesPaneController.FXML_FILE);
+	}
+	
+	@Bean
+	@Lazy
+	public FunctionsPaneController functionsPaneController(){
+		return (FunctionsPaneController) loadController(FunctionsPaneController.FXML_FILE);
+	}
+	
+	@Bean
+	@Lazy
+	public ElementsDetailsPaneController elementsDetailsPaneController(){
+		return (ElementsDetailsPaneController) loadController(ElementsDetailsPaneController.FXML_FILE);
+	}
+	
+	@Bean
+	@Lazy
+	public MenuPaneController menuPaneController(){
+		return (MenuPaneController) loadController(MenuPaneController.FXML_FILE);
+	}
+	
+	@Bean
+	@Lazy
+	public ControlsPaneController controlsPaneController(){
+		return (ControlsPaneController) loadController(ControlsPaneController.FXML_FILE);
+	}
+	
+	@Bean
+	@Lazy
+	public NetworkPaneController networkPaneController(){
+		return (NetworkPaneController) loadController(NetworkPaneController.FXML_FILE);
 	}
 	
 	/**

@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view;
+package br.com.guisi.simulador.rede.controller.modal;
 
 import java.util.Map;
 import java.util.prefs.BackingStoreException;
@@ -14,12 +14,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.PreferenceKey;
+import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.util.DoubleTextFieldListener;
 import br.com.guisi.simulador.rede.util.PreferencesUtils;
 
 public class PriorityConfigController extends Controller {
 	
-	public static final String FXML_FILE = "/fxml/PriorityConfig.fxml";
+	public static final String FXML_FILE = "/fxml/modal/PriorityConfig.fxml";
 
 	@FXML
 	private VBox root;

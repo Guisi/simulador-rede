@@ -7,7 +7,18 @@ package br.com.guisi.simulador.rede.events;
  */
 public enum EventType {
 
-	AGENT_RUNNING,
-	AGENT_STOPPED
+	RESET_SCREEN,
 	
+	ENVIRONMENT_LOADED,
+	
+	FUNCTIONS_UPDATED,
+	
+	AGENT_RUNNING,
+	AGENT_STOPPED,
+	
+	POWER_FLOW_COMPLETED,
+	
+	LOAD_SELECTED,
+	FEEDER_SELECTED,
+	BRANCH_SELECTED
 }

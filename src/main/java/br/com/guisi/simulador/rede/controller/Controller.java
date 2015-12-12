@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view;
+package br.com.guisi.simulador.rede.controller;
 
 import javafx.scene.Node;
 import javafx.stage.Stage;
@@ -43,12 +43,35 @@ public abstract class Controller implements EventListener {
 	public void onEvent(EventType eventType, Object data) {
 	}
 	
+	public <T extends Controller> T getController(Class<T> controllerClass, Object...data) {
+		T controller = SimuladorRede.getCtx().getBean(controllerClass);
+		controller.initializeController(data);
+		return controller;
+	}
+	
 	public Environment getEnvironment() {
 		return SimuladorRede.getEnvironment();
 	}
 	
+	/**
+	 * Registra este controller para escutar um determinada evento
+	 * @param eventType
+	 */
 	public void listenToEvent(EventType eventType){
 		eventBus.register(eventType, this);
+	}
+	
+	/**
+	 * Lanca um novo evento no barramento
+	 * @param eventType
+	 * @param data
+	 */
+	public void fireEvent(EventType eventType, Object data){
+		eventBus.fire(eventType, data);
+	}
+	
+	public void fireEvent(EventType eventType){
+		eventBus.fire(eventType, null);
 	}
 	
 }

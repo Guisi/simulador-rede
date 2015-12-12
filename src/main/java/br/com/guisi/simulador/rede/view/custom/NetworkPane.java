@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view.layout;
+package br.com.guisi.simulador.rede.view.custom;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;

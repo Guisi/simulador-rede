@@ -26,7 +26,7 @@ public class Teste {
 		}
 		
 		if (environment != null) {
-			EnvironmentUtils.validateEnvironment(environment);
+			//EnvironmentUtils.validateEnvironment(environment);
 		
 			StringBuilder sb = new StringBuilder();
 			sb.append("var funcao = function(environment) { ");
