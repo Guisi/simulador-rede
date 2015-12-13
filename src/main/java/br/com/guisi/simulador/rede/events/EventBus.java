@@ -20,6 +20,9 @@ public class EventBus {
 
 	private EventBus() {
 		registers = new HashMap<EventType, Set<EventListener>>();
+		for (EventType eventType : EventType.values()) {
+			registers.put(eventType, new HashSet<>());
+		}
 	}
 
 	/**
@@ -29,12 +32,7 @@ public class EventBus {
 	 * @param listener
 	 */
 	public void register(EventType eventType, EventListener listener) {
-		Set<EventListener> listeners = registers.get(eventType);
-		if (listeners == null) {
-			listeners = new HashSet<>();
-			registers.put(eventType, listeners);
-		}
-		listeners.add(listener);
+		registers.get(eventType).add(listener);
 	}
 
 	/**
@@ -44,11 +42,10 @@ public class EventBus {
 	 * @param data
 	 */
 	public void fire(EventType eventType, Object data) {
-		Set<EventListener> listeners = registers.get(eventType);
-		if (listeners != null) {
-			for (EventListener listener : listeners) {
-				listener.onEvent(eventType, data);
-			}
-		}
+		registers.get(eventType).forEach(listener -> listener.onEvent(eventType, data));
+	}
+	
+	public void fire(EventType eventType) {
+		registers.get(eventType).forEach(listener -> listener.onEvent(eventType, null));
 	}
 }

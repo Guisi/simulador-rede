@@ -1,41 +1,23 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
-import java.util.Observable;
-
+import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.agent.Agent;
+import br.com.guisi.simulador.rede.annotations.QLearning;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
 
-public class QLearningAgent extends Observable {
+@QLearning
+public class QLearningAgent extends Agent {
 	
-	private Environment environment;
-	private final QTable qTable;
-	private QLearningStatus status;
+	private QTable qTable;
+	private Integer initialState;
 	
-	public QLearningAgent(Environment environment) {
-		this.environment = environment;
+	@Override
+	public void init() {
+		super.init();
+		
 		this.qTable = new QTable();
-		this.status = new QLearningStatus();
-		Integer initialState = environment.getRandomSwitch().getNumber();
-		this.status.setInitialState(initialState);
-		this.status.setLastState(initialState);
-		this.status.setCurrentState(initialState);
-	}
-	
-	/**
-	 * Inicia a interação do agente
-	 */
-	public void run(boolean notifyObservers) {
-		this.status.setLastState(this.status.getCurrentState());
-		Integer state = this.nextEpisode(this.status.getCurrentState());
-		this.status.setCurrentState(state);
-
-		if (notifyObservers) {
-			QLearningStatus status = this.status.clone();
-			this.status.getSwitchesChanged().clear();
-			setChanged();
-			notifyObservers(status);
-		}
 	}
 	
 	/**
@@ -43,7 +25,10 @@ public class QLearningAgent extends Observable {
 	 * @param state
 	 * @return {@link Integer} estado para o qual o agente se moveu
 	 */
-	private Integer nextEpisode(Integer state) {
+	@Override
+	protected void runNextEpisode() {
+		Environment environment = SimuladorRede.getEnvironment();
+		
 		//Se randomico menor que E-greedy, escolhe melhor acao
 		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
 		SwitchState action = randomAction ? SwitchState.getRandomAction() : qTable.getBestAction(state);
@@ -96,7 +81,11 @@ public class QLearningAgent extends Observable {
         	nextState = environment.getRandomInitialStateForAgent();
         }
         */
-        return nextState;
+	}
+	
+	@Override
+	protected void setNotifications() {
+		
 	}
 	
 	public QValue getBestQValue(Integer state) {
@@ -109,13 +98,5 @@ public class QLearningAgent extends Observable {
 	
 	public double getLowerReward() {
 		return qTable.getLowerReward();
-	}
-
-	public QLearningStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(QLearningStatus status) {
-		this.status = status;
 	}
 }

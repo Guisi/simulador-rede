@@ -138,6 +138,9 @@ public class FunctionsPaneController extends Controller {
 		}
 	}
 	
+	/**
+	 * Executa as expressões das funções
+	 */
 	private void evaluateFunctionsExpressions() {
 		EvaluationObject evaluationObject = new EvaluationObject();
 		evaluationObject.setEnvironment(getEnvironment());

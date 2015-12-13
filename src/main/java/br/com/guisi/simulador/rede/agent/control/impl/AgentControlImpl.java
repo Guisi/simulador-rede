@@ -1,10 +1,16 @@
 package br.com.guisi.simulador.rede.agent.control.impl;
 
+import javafx.concurrent.Worker;
+
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
+import br.com.guisi.simulador.rede.annotations.QLearning;
+import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.events.EventBus;
 import br.com.guisi.simulador.rede.events.EventType;
 
@@ -14,44 +20,41 @@ public class AgentControlImpl implements AgentControl {
 	@Inject
 	private EventBus eventBus;
 	
-	@Override
-	public void run() {
-		eventBus.fire(EventType.AGENT_RUNNING, null);
-	}
-
-	@Override
-	public void stop() {
-		eventBus.fire(EventType.AGENT_STOPPED, null);
-	}
-
+	@Inject
+	@QLearning
+	private Agent agent;
 	
-	/*if (getEnvironment().isValidForReconfiguration()) {
-		this.enableDisableScreen(true);
-		if (qLearningAgent == null) {
-			qLearningAgent = new QLearningAgent(getEnvironment());
-		}
-		agentTask = new AgentTask(cbTaskExecutionType.getValue(), qLearningAgent);
+	@PostConstruct
+	private void init() {
+		agent.init();
+	}
+	
+	@Override
+	public void run(TaskExecutionType taskExecutionType) {
+		AgentTask agentTask = new AgentTask(agent, taskExecutionType);
 		
 		agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
-			if (!newState.isHandled()) {
-				updateAgentStatus(newState);
-			}
+			eventBus.fire(EventType.AGENT_NOTIFICATION, newState);
 		});
 		
 		agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
-            	stopAgent();
+            	eventBus.fire(EventType.AGENT_STOPPED);
             }
         });
 		
+		eventBus.fire(EventType.AGENT_RUNNING);
+
 		new Thread(agentTask).start();
-	} else {
-		Alert alert = new Alert(AlertType.ERROR, "O ambiente é inválido para reconfiguração.");
-		alert.showAndWait();
-	}*/
+	}
+
+	@Override
+	public void stop() {
+		agent.stop();
+	}
 	
-	/*this.enableDisableScreen(false);
-	agentTask.cancel();*/
-	/*QLearningStatus qLearningStatus = agentTask.getValue();
-	updateAgentStatus(qLearningStatus);*/
+	@Override
+	public void reset() {
+		agent.init();
+	}
 }
