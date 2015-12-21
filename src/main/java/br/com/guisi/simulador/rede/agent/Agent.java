@@ -10,10 +10,6 @@ public abstract class Agent extends Observable {
 	private boolean stopRequest;
 	private int stepCount = 1;
 	
-	public void init() {
-		this.stopRequest = false;
-	}
-	
 	public final void run(TaskExecutionType taskExecutionType) {
 		this.stopRequest = false;
 

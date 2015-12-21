@@ -71,7 +71,7 @@ public class Branch {
 	/**
 	 * Incrementa o número de operações desta branch em 1
 	 */
-	public void incrementSwitchOperation() {
+	private void incrementSwitchOperation() {
 		this.switchOperations++;
 	}
 
@@ -123,8 +123,13 @@ public class Branch {
 		return switchState;
 	}
 
-	public void setSwitchState(SwitchState switchState) {
-		this.switchState = switchState;
+	/**
+	 * Inverte o estado do switch (aberto -> fechado / fechado -> aberto)
+	 * e incrementa o switchOperation
+	 */
+	public void reverse() {
+		switchState = switchState == SwitchState.OPEN ? SwitchState.CLOSED : SwitchState.OPEN;
+		incrementSwitchOperation();
 	}
 
 	/**

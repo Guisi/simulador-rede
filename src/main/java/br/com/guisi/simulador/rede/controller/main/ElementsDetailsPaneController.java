@@ -186,6 +186,7 @@ public class ElementsDetailsPaneController extends Controller {
 		lblFeederUsedPower.setText(df.format(feeder.getUsedPower()));
 		lblFeederEnergizedLoads.setText(String.valueOf(feeder.getEnergizedLoads()));
 		lblFeederAvailablePower.setText(df.format(feeder.getAvailablePower()));
+		cbFeederNumber.valueProperty().set(selectedFeeder);
 	}
 	
 	/**
@@ -203,6 +204,7 @@ public class ElementsDetailsPaneController extends Controller {
 		lblBranchResistance.setText(df.format(branch.getResistance()));
 		lblBranchReactance.setText(df.format(branch.getReactance()));
 		lblBranchStatus.setText(branch.isClosed() ? "Closed" : "Open");
+		cbBranchNumber.valueProperty().set(selectedBranch);
 	}
 	
 	/**

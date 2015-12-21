@@ -14,6 +14,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import br.com.guisi.simulador.rede.agent.AgentNotification;
+import br.com.guisi.simulador.rede.constants.AgentNotificationType;
 import br.com.guisi.simulador.rede.constants.FunctionType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -40,6 +42,8 @@ public class FunctionsPaneController extends Controller {
 		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
 		this.listenToEvent(EventType.FUNCTIONS_UPDATED);
 		this.listenToEvent(EventType.POWER_FLOW_COMPLETED);
+		this.listenToEvent(EventType.AGENT_NOTIFICATION);
+		this.listenToEvent(EventType.AGENT_STOPPED);
 		
 		for (Tab tab: tabPaneFunctions.getTabs()) {
 			@SuppressWarnings("unchecked")
@@ -56,7 +60,9 @@ public class FunctionsPaneController extends Controller {
 			case RESET_SCREEN: this.resetScreen(); break;
 			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
 			case FUNCTIONS_UPDATED: this.updateFunctionsTables(); break;
-			case POWER_FLOW_COMPLETED: this.evaluateFunctionsExpressions(); break;
+			case POWER_FLOW_COMPLETED: this.evaluateFunctionsExpressions(null); break;
+			case AGENT_NOTIFICATION : this.processAgentNotification((AgentNotification) data); break;
+			case AGENT_STOPPED: this.processAgentStop(); break;
 			default: break;
 		}
 	}
@@ -130,7 +136,7 @@ public class FunctionsPaneController extends Controller {
 					tv.getItems().add(functionItem);
 				}
 				
-				this.evaluateFunctionsExpressions();
+				this.evaluateFunctionsExpressions(null);
 			} catch (IOException e) {
 				Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 				alert.showAndWait();
@@ -141,11 +147,17 @@ public class FunctionsPaneController extends Controller {
 	/**
 	 * Executa as expressões das funções
 	 */
-	private void evaluateFunctionsExpressions() {
+	private void evaluateFunctionsExpressions(String functionName) {
 		EvaluationObject evaluationObject = new EvaluationObject();
 		evaluationObject.setEnvironment(getEnvironment());
 		
 		for (FunctionItem functionItem : functions) {
+			
+			//se passou nome de função, executa apenas ela
+			if (functionName != null && !functionName.equals(functionItem.getFunctionName().getValue())) {
+				continue;
+			}
+			
 			String expression = functionItem.getFunctionExpression();
 			
 			String functionResult;
@@ -157,6 +169,18 @@ public class FunctionsPaneController extends Controller {
 			}
 			functionItem.getFunctionResult().set(functionResult);
 		}
+	}
+	
+	private void processAgentNotification(AgentNotification agentNotification) {
+		Integer switchChanged = agentNotification.getIntegerNotification(AgentNotificationType.SWITCH_STATE_CHANGED);
+		
+		if (switchChanged != null) {
+			this.evaluateFunctionsExpressions("Switching Operations:");
+		}
+	}
+	
+	private void processAgentStop() {
+		this.evaluateFunctionsExpressions("Switching Operations:");
 	}
 
 	@Override

@@ -63,17 +63,13 @@ public class Environment {
 	}
 	
 	/**
-	 * Indica a mudança do estado de um switch
+	 * Inverte estado do switch
 	 * 
 	 * @param switchNumber
-	 * @param switchState
-	 * @return verdadeiro se mudou o estado, falso se manteve o mesmo
 	 */
-	public boolean changeSwitchState(Integer switchNumber, SwitchState switchState) {
+	public void reverseSwitch(Integer switchNumber) {
 		Branch switchBranch = getBranch(switchNumber);
-		boolean changed = !switchBranch.getSwitchState().equals(switchState);
-		switchBranch.setSwitchState(switchState);
-		return changed;
+		switchBranch.reverse();
 	}
 	
 	/**
@@ -205,9 +201,11 @@ public class Environment {
 	 * @return
 	 */
 	public boolean isValidForReconfiguration() {
+		return true;
+		
 		//o primeiro passo é validar se existem switches abertos
 		//pois se todos os switches estiverem fechados, não há como reconfigurar
-		boolean hasOpenSwitch = false;
+		/*boolean hasOpenSwitch = false;
 		for (Branch switc : switches) {
 			if (!switc.isClosed()) {
 				hasOpenSwitch = true;
@@ -215,6 +213,6 @@ public class Environment {
 			}
 		}
 		
-		return hasOpenSwitch;
+		return hasOpenSwitch;*/
 	}
 }

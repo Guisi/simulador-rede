@@ -1,22 +1,23 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Named;
+
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
-import br.com.guisi.simulador.rede.annotations.QLearning;
+import br.com.guisi.simulador.rede.constants.AgentNotificationType;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
 
-@QLearning
+@Named
 public class QLearningAgent extends Agent {
 	
 	private QTable qTable;
-	private Integer initialState;
-	
-	@Override
+	private Integer currentState;
+
+	@PostConstruct
 	public void init() {
-		super.init();
-		
 		this.qTable = new QTable();
 	}
 	
@@ -28,16 +29,21 @@ public class QLearningAgent extends Agent {
 	@Override
 	protected void runNextEpisode() {
 		Environment environment = SimuladorRede.getEnvironment();
+
+		currentState = environment.getRandomSwitch().getNumber();
 		
 		//Se randomico menor que E-greedy, escolhe melhor acao
 		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
-		SwitchState action = randomAction ? SwitchState.getRandomAction() : qTable.getBestAction(state);
+		
+		//TODO remover
+		randomAction = true;
+		
+		SwitchState action = randomAction 
+				? SwitchState.getRandomAction() 
+						: qTable.getBestAction(currentState);
 		
 		//altera o estado do switch
-		boolean changed = environment.changeSwitchState(state, action);
-		if (changed) {
-			this.status.getSwitchesChanged().add(state);
-		}
+		environment.reverseSwitch(currentState);
 		
 		//verifica no ambiente qual é o resultado de executar a ação
 		//ActionResult actionResult = environment.executeAction(state, action);
@@ -46,7 +52,7 @@ public class QLearningAgent extends Agent {
 		Integer nextState = environment.getRandomSwitch().getNumber();//TODO actionResult.getNextState();
 		
 		//recupera em sua QTable o valor de recompensa para o estado/ação que estava antes
-		QValue qValue = qTable.getQValue(state, action);
+		QValue qValue = qTable.getQValue(currentState, action);
         double q = qValue.getReward();
         
         //recupera em sua QTable o melhor valor para o estado para o qual se moveu
@@ -85,7 +91,7 @@ public class QLearningAgent extends Agent {
 	
 	@Override
 	protected void setNotifications() {
-		
+		agentNotification.putNotification(AgentNotificationType.SWITCH_STATE_CHANGED, currentState);
 	}
 	
 	public QValue getBestQValue(Integer state) {

@@ -5,8 +5,6 @@ import java.util.Arrays;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
@@ -88,12 +86,7 @@ public class ControlsPaneController extends Controller {
 	 *********************************
 	 *********************************/
 	public void runAgent() {
-		if (getEnvironment().isValidForReconfiguration()) {
-			agentControl.run(cbTaskExecutionType.getValue());
-		} else {
-			Alert alert = new Alert(AlertType.ERROR, "O ambiente é inválido para reconfiguração.");
-			alert.showAndWait();
-		}
+		agentControl.run(cbTaskExecutionType.getValue());
 	}
 	
 	public void stopAgent() {

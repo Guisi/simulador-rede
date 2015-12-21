@@ -10,10 +10,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
+import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.agent.AgentNotification;
+import br.com.guisi.simulador.rede.constants.AgentNotificationType;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
+import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.view.custom.BranchStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkPane;
@@ -45,6 +50,8 @@ public class NetworkPaneController extends Controller {
 		this.listenToEvent(EventType.LOAD_SELECTED);
 		this.listenToEvent(EventType.FEEDER_SELECTED);
 		this.listenToEvent(EventType.BRANCH_SELECTED);
+		this.listenToEvent(EventType.AGENT_NOTIFICATION);
+		this.listenToEvent(EventType.AGENT_STOPPED);
 		
 		networkPane = new NetworkPane();
 		zoomingPane = new ZoomingPane(networkPane);
@@ -62,6 +69,8 @@ public class NetworkPaneController extends Controller {
 			case LOAD_SELECTED: this.updateLoadDrawing((Integer) data); break;
 			case FEEDER_SELECTED: this.updateFeederInformationBox((Integer) data); break;
 			case BRANCH_SELECTED: this.updateBranchInformationBox((Integer) data); break;
+			case AGENT_NOTIFICATION : this.processAgentNotification((AgentNotification) data); break;
+			case AGENT_STOPPED: this.processAgentStop(); break;
 			default: break;
 		}
 	}
@@ -144,6 +153,35 @@ public class NetworkPaneController extends Controller {
 		Line l = networkPane.getBranchPaneMap().get(selectedBranch).getBranchLine();
 		l.setStroke(Color.DARKORANGE);
 		l.setStrokeWidth(2);
+	}
+	
+	private void processAgentNotification(AgentNotification agentNotification) {
+		Integer switchChanged = agentNotification.getIntegerNotification(AgentNotificationType.SWITCH_STATE_CHANGED);
+		
+		networkPane.setAgentCirclePosition(switchChanged);
+		
+		Environment environment = SimuladorRede.getEnvironment();
+		
+		//atualiza informações das conexões dos feeders e loads
+		EnvironmentUtils.updateFeedersConnections(environment);
+			
+		Branch sw = environment.getBranch(switchChanged);
+		networkPane.updateBranch(sw);
+			
+		//atualiza status dos nós na tela
+		environment.getNetworkNodes().forEach((node) -> networkPane.updateNetworkNode(node));
+	}
+	
+	private void processAgentStop() {
+		Environment environment = SimuladorRede.getEnvironment();
+		
+		//atualiza informações das conexões dos feeders e loads
+		EnvironmentUtils.updateFeedersConnections(environment);
+			
+		environment.getSwitches().forEach((sw) -> networkPane.updateBranch(sw));
+			
+		//atualiza status dos nós na tela
+		environment.getNetworkNodes().forEach((node) -> networkPane.updateNetworkNode(node));
 	}
 	
 	@Override

@@ -2,5 +2,5 @@ package br.com.guisi.simulador.rede.constants;
 
 public enum AgentNotificationType {
 
-	CONTADOR;
+	SWITCH_STATE_CHANGED;
 }

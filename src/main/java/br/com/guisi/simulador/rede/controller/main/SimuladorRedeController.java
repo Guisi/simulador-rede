@@ -48,28 +48,6 @@ public class SimuladorRedeController extends Controller {
 		this.loadEnvironmentFromFile(f);*/
 	}
 	
-	/*private void updateAgentStatus(QLearningStatus qLearningStatus) {
-		qLearningStatus.setHandled(true);
-		networkPane.setAgentCirclePosition(qLearningStatus.getCurrentState());
-		
-		List<Integer> switchesChanged = qLearningStatus.getSwitchesChanged();
-		if (!switchesChanged.isEmpty()) {
-			Environment environment = getEnvironment();
-			
-			//atualiza informações das conexões dos feeders e loads
-			EnvironmentUtils.updateFeedersConnections(environment);
-			
-			//atualiza status dos switches na tela
-			switchesChanged.forEach((swNum) -> {
-				Branch sw = environment.getBranch(swNum);
-				networkPane.updateBranch(sw);
-			});
-			
-			//atualiza status dos nós na tela
-			environment.getNetworkNodes().forEach((node) -> networkPane.updateNetworkNode(node));
-		}
-	}*/
-	
 	@Override
 	public Node getView() {
 		return root;
