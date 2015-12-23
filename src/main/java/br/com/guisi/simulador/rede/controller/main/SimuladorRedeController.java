@@ -2,7 +2,9 @@ package br.com.guisi.simulador.rede.controller.main;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
 
@@ -12,6 +14,8 @@ public class SimuladorRedeController extends Controller {
 
 	@FXML
 	private VBox root;
+	@FXML
+	private ScrollPane scrollPane;
 	
 	@FXML
 	private VBox networkBoxLeft;
@@ -23,6 +27,9 @@ public class SimuladorRedeController extends Controller {
 	public void initializeController(Object... data) {
 		this.listenToEvent(EventType.AGENT_RUNNING);
 		this.listenToEvent(EventType.AGENT_STOPPED);
+		
+		scrollPane.prefWidthProperty().bind(SimuladorRede.getPrimaryStage().widthProperty());
+		scrollPane.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
 		
 		//menu
 		root.getChildren().add(0, getController(MenuPaneController.class).getView());

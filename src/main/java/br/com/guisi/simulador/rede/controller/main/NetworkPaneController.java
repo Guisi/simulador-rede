@@ -3,7 +3,6 @@ package br.com.guisi.simulador.rede.controller.main;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
@@ -32,8 +31,6 @@ public class NetworkPaneController extends Controller {
 	private VBox root;
 	
 	@FXML
-	private ScrollPane networkScrollPane;
-	@FXML
 	private Slider zoomSlider;
 	
 	private ZoomingPane zoomingPane;
@@ -57,8 +54,8 @@ public class NetworkPaneController extends Controller {
 		zoomingPane = new ZoomingPane(networkPane);
 		zoomingPane.getStyleClass().add("networkPane");
 		zoomingPane.zoomFactorProperty().bind(zoomSlider.valueProperty());
-		networkScrollPane.setContent(zoomingPane);
-		networkScrollPane.getStyleClass().add("networkPane");
+		
+		root.getChildren().add(zoomingPane);
 	}
 	
 	@Override
