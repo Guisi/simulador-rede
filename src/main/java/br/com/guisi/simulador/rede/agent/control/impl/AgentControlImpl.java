@@ -28,14 +28,16 @@ public class AgentControlImpl implements AgentControl {
 	
 	private Agent agent;
 	
+	private AgentTask agentTask;
+	
 	@Override
 	public void run(TaskExecutionType taskExecutionType) {
 		if (SimuladorRede.getEnvironment().isValidForReconfiguration()) {
 			if (agent == null) {
 				this.reset();
 			}
-	
-			AgentTask agentTask = new AgentTask(agent, taskExecutionType);
+			
+			agentTask = new AgentTask(agent, taskExecutionType);
 			
 			agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
 				eventBus.fire(EventType.AGENT_NOTIFICATION, newState);
@@ -44,6 +46,7 @@ public class AgentControlImpl implements AgentControl {
 			agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
 	            if (newState == Worker.State.SUCCEEDED) {
 	            	eventBus.fire(EventType.AGENT_STOPPED);
+	            	agent.deleteObservers();
 	            }
 	        });
 			

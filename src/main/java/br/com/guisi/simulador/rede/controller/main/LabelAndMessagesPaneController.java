@@ -51,6 +51,8 @@ public class LabelAndMessagesPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
+		tvBrokenConstraints.getItems().clear();
+		tvSwitchesOperations.getItems().clear();
 	}
 	
 	private void onEnvironmentLoaded() {
@@ -149,7 +151,6 @@ public class LabelAndMessagesPaneController extends Controller {
 			SwitchOperation switchOperation = new SwitchOperation();
 			switchOperation.getMessage().setValue("Switch " + switchChanged + (sw.isClosed() ? " closed" : " opened") );
 			tvSwitchesOperations.getItems().add(switchOperation);
-			//System.out.println("-- Atualizou " + switchChanged);
 		}
 	}
 	
