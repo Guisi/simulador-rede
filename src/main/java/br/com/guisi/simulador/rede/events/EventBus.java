@@ -43,6 +43,7 @@ public class EventBus {
 	 */
 	public void fire(EventType eventType, Object data) {
 		registers.get(eventType).forEach(listener -> listener.onEvent(eventType, data));
+		System.out.println("-- Disparou " + eventType);
 	}
 	
 	public void fire(EventType eventType) {

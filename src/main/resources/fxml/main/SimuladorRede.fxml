@@ -11,7 +11,7 @@
 
 <VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="714.0" prefWidth="1200.0" style="-fx-background-color: #FFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.main.SimuladorRedeController">
    <children>
-      <ScrollPane fx:id="scrollPane">
+      <ScrollPane fx:id="scrollPane" styleClass="scrollPane">
          <content>
             <HBox style="-fx-background-color: #FFF;">
                <children>
