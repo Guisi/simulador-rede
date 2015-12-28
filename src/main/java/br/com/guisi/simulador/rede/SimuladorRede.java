@@ -61,7 +61,7 @@ public class SimuladorRede extends Application {
 		primaryStage.setTitle("Simulador");
 		primaryStage.getIcons().add(new Image("/img/bolt.png"));
 		scene.getStylesheets().add("/css/estilo.css");
-		primaryStage.setMaximized(true);
+		//TODO remover primaryStage.setMaximized(true);
 		
 		primaryStage.setOnCloseRequest((event) -> {
 			try {

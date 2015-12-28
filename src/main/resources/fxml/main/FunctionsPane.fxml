@@ -8,7 +8,7 @@
    <children>
       <TitledPane expanded="false" text="Functions">
          <content>
-            <TabPane fx:id="tabPaneFunctions" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" />
+            <TabPane fx:id="tabPaneFunctions" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="750.0" tabClosingPolicy="UNAVAILABLE" />
          </content>
       </TitledPane>
    </children>

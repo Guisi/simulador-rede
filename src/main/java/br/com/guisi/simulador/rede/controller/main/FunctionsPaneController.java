@@ -98,11 +98,11 @@ public class FunctionsPaneController extends Controller {
 			TableColumn<FunctionItem, String> tcFunctionName = new TableColumn<FunctionItem, String>();
 			tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getFunctionName());
 			tcFunctionName.setStyle("-fx-font-weight: bold; -fx-alignment: center-right;");
-			tcFunctionName.setPrefWidth(292);
+			tcFunctionName.setPrefWidth(400);
 			tv.getColumns().add(tcFunctionName);
 			
 			TableColumn<FunctionItem, String> tcFunctionResult = new TableColumn<FunctionItem, String>();
-			tcFunctionResult.setPrefWidth(292);
+			tcFunctionResult.setPrefWidth(350);
 			tcFunctionResult.setCellValueFactory(cellData -> cellData.getValue().getFunctionResult());
 			tv.getColumns().add(tcFunctionResult);
 			

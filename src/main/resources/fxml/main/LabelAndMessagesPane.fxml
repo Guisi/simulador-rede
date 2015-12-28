@@ -9,22 +9,22 @@
    <children>
       <TitledPane expanded="false" text="Labels and Messages">
          <content>
-            <TabPane prefHeight="170.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
+            <TabPane prefHeight="170.0" prefWidth="750.0" tabClosingPolicy="UNAVAILABLE">
                <tabs>
                   <Tab text="Warnings and Broken Constraints">
                      <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="170.0" prefWidth="600.0">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="170.0" prefWidth="750.0">
                            <children>
-                              <TableView fx:id="tvBrokenConstraints" prefHeight="140.0" prefWidth="600.0" />
+                              <TableView fx:id="tvBrokenConstraints" prefHeight="140.0" prefWidth="750.0" />
                            </children>
                         </AnchorPane>
                      </content>
                   </Tab>
                   <Tab text="Labels">
                      <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="600.0">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="750.0">
                            <children>
-                              <GridPane prefHeight="90.0" prefWidth="600.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
+                              <GridPane prefHeight="90.0" prefWidth="750.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" spacing="15.0">
                                        <children>
@@ -75,7 +75,7 @@
                      <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <TableView fx:id="tvSwitchesOperations" prefHeight="140.0" prefWidth="600.0" />
+                              <TableView fx:id="tvSwitchesOperations" prefHeight="140.0" prefWidth="750.0" />
                            </children>
                         </AnchorPane>
                      </content>

@@ -10,6 +10,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.controller.Controller;
@@ -17,6 +20,7 @@ import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.events.EventType;
+import br.com.guisi.simulador.rede.view.tableview.NodeProperty;
 
 public class ElementsDetailsPaneController extends Controller {
 
@@ -27,21 +31,9 @@ public class ElementsDetailsPaneController extends Controller {
 	
 	/** Loads */
 	@FXML
-	private VBox boxLoadInfo;
-	@FXML
 	private ComboBox<Integer> cbLoadNumber;
 	@FXML
-	private Label lblLoadFeeder;
-	@FXML
-	private Label lblLoadActivePower;
-	@FXML
-	private Label lblLoadReactivePower;
-	@FXML
-	private Label lblLoadPriority;
-	@FXML
-	private Label lblLoadStatus;
-	@FXML
-	private Label lblLoadCurrentVoltage;
+	private TableView<NodeProperty> tvLoadDetails;
 	@FXML
 	private Button btnPreviousLoad;
 	@FXML
@@ -49,45 +41,19 @@ public class ElementsDetailsPaneController extends Controller {
 	
 	/** Feeders */
 	@FXML
-	private VBox boxFeederInfo;
-	@FXML
 	private ComboBox<Integer> cbFeederNumber;
 	@FXML
-	private Label lblFeederActivePower;
-	@FXML
-	private Label lblFeederReactivePower;
-	@FXML
-	private Label lblFeederEnergizedLoads;
-	@FXML
-	private Label lblFeederUsedPower;
-	@FXML
-	private Label lblFeederAvailablePower;
+	private TableView<NodeProperty> tvFeederDetails;
 	@FXML
 	private Button btnPreviousFeeder;
 	@FXML
 	private Button btnNextFeeder;
-	
+
 	/** Branches */
-	@FXML
-	private VBox boxBranchInfo;
 	@FXML
 	private ComboBox<Integer> cbBranchNumber;
 	@FXML
-	private Label lblBranchDe;
-	@FXML
-	private Label lblBranchPara;
-	@FXML
-	private Label lblBranchMaxCurrent;
-	@FXML
-	private Label lblBranchInstantCurrent;
-	@FXML
-	private Label lblBranchLossesMW;
-	@FXML
-	private Label lblBranchResistance;
-	@FXML
-	private Label lblBranchReactance;
-	@FXML
-	private Label lblBranchStatus;
+	private TableView<NodeProperty> tvBranchDetails;
 	@FXML
 	private Button btnPreviousBranch;
 	@FXML
@@ -101,6 +67,11 @@ public class ElementsDetailsPaneController extends Controller {
 		this.listenToEvent(EventType.LOAD_SELECTED);
 		this.listenToEvent(EventType.FEEDER_SELECTED);
 		this.listenToEvent(EventType.BRANCH_SELECTED);
+		
+		// tabela de propriedades do load
+		this.initializeTable(tvLoadDetails);
+		this.initializeTable(tvFeederDetails);
+		this.initializeTable(tvBranchDetails);
 	}
 	
 	@Override
@@ -117,34 +88,45 @@ public class ElementsDetailsPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
+		
 		cbLoadNumber.setValue(null);
-		lblLoadFeeder.setText("");
-		lblLoadActivePower.setText("");
-		lblLoadReactivePower.setText("");
-		lblLoadPriority.setText("");
-		lblLoadStatus.setText("");
-		lblLoadCurrentVoltage.setText("");
+		cbLoadNumber.setItems(FXCollections.observableArrayList());
+		tvLoadDetails.getItems().clear();
 		
 		cbFeederNumber.setValue(null);
-		lblFeederActivePower.setText("");
-		lblFeederReactivePower.setText("");
-		lblFeederEnergizedLoads.setText("");
-		lblFeederUsedPower.setText("");
-		lblFeederAvailablePower.setText("");
+		cbFeederNumber.setItems(FXCollections.observableArrayList());
+		tvFeederDetails.getItems().clear();
 		
 		cbBranchNumber.setValue(null);
-		lblBranchDe.setText("");
-		lblBranchPara.setText("");
-		lblBranchMaxCurrent.setText("");
-		lblBranchInstantCurrent.setText("");
-		lblBranchLossesMW.setText("");
-		lblBranchResistance.setText("");
-		lblBranchReactance.setText("");
-		lblBranchStatus.setText("");
-		
-		cbLoadNumber.setItems(FXCollections.observableArrayList());
-		cbFeederNumber.setItems(FXCollections.observableArrayList());
 		cbBranchNumber.setItems(FXCollections.observableArrayList());
+		tvBranchDetails.getItems().clear();
+	}
+
+	private void initializeTable(TableView<NodeProperty> tableView) {
+		tableView.widthProperty().addListener((source, oldWidth, newWidth) -> {
+			Pane header = (Pane) tableView.lookup("TableHeaderRow");
+			if (header.isVisible()) {
+				header.setMaxHeight(0);
+				header.setMinHeight(0);
+				header.setPrefHeight(0);
+				header.setVisible(false);
+			}
+		});
+		tableView.setItems(FXCollections.observableArrayList());
+		tableView.setPlaceholder(new Label(""));
+		tableView.setStyle("-fx-focus-color: transparent; -fx-box-border: transparent;");
+
+		TableColumn<NodeProperty, String> tcPropertyName = new TableColumn<NodeProperty, String>();
+		tcPropertyName.setCellValueFactory(cellData -> cellData.getValue().getPropertyName());
+		tcPropertyName.setStyle("-fx-alignment: center-right; -fx-font-weight: bold;");
+		tcPropertyName.setPrefWidth(150);
+		tableView.getColumns().add(tcPropertyName);
+		
+		TableColumn<NodeProperty, String> tcPropertyValue = new TableColumn<NodeProperty, String>();
+		tcPropertyValue.setCellValueFactory(cellData -> cellData.getValue().getPropertyValue());
+		tcPropertyValue.setStyle("-fx-alignment: center-left;");
+		tcPropertyValue.setPrefWidth(100);
+		tableView.getColumns().add(tcPropertyValue);
 	}
 	
 	private void onEnvironmentLoaded() {
@@ -163,14 +145,16 @@ public class ElementsDetailsPaneController extends Controller {
 	 * @param networkNodeStackPane
 	 */
 	private void updateLoadInformationBox(Integer selectedLoad) {
-		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_3);
+		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
 		Load load = getEnvironment().getLoad(selectedLoad);
-		lblLoadFeeder.setText(load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : "");
-		lblLoadActivePower.setText(df.format(load.getActivePower()));
-		lblLoadReactivePower.setText(df.format(load.getReactivePower()));
-		lblLoadPriority.setText(String.valueOf(load.getPriority()));
-		lblLoadStatus.setText(load.isOn() ? "On" : "Off");
-		lblLoadCurrentVoltage.setText(df.format(load.getCurrentVoltagePU()));
+		
+		tvLoadDetails.getItems().clear();
+		tvLoadDetails.getItems().add(new NodeProperty("Feeder:", load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : ""));
+		tvLoadDetails.getItems().add(new NodeProperty("Active Power kW:", df.format(load.getActivePower())));
+		tvLoadDetails.getItems().add(new NodeProperty("Reactive Power kVar:", df.format(load.getReactivePower())));
+		tvLoadDetails.getItems().add(new NodeProperty("Priority:", String.valueOf(load.getPriority())));
+		tvLoadDetails.getItems().add(new NodeProperty("Status:", load.isOn() ? "On" : "Off"));
+		tvLoadDetails.getItems().add(new NodeProperty("Current Voltage pu:", df.format(load.getCurrentVoltagePU())));
 		cbLoadNumber.valueProperty().setValue(selectedLoad);
 	}
 	
@@ -179,13 +163,15 @@ public class ElementsDetailsPaneController extends Controller {
 	 * @param networkNodeStackPane
 	 */
 	private void updateFeederInformationBox(Integer selectedFeeder) {
-		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_3);
+		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
 		Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
-		lblFeederActivePower.setText(df.format(feeder.getActivePower()));
-		lblFeederReactivePower.setText(df.format(feeder.getReactivePower()));
-		lblFeederUsedPower.setText(df.format(feeder.getUsedPower()));
-		lblFeederEnergizedLoads.setText(String.valueOf(feeder.getEnergizedLoads()));
-		lblFeederAvailablePower.setText(df.format(feeder.getAvailablePower()));
+		
+		tvFeederDetails.getItems().clear();
+		tvFeederDetails.getItems().add(new NodeProperty("Active Power kW:", df.format(feeder.getActivePower())));
+		tvFeederDetails.getItems().add(new NodeProperty("Reactive Power kVar:", df.format(feeder.getReactivePower())));
+		tvFeederDetails.getItems().add(new NodeProperty("Energized Loads:", String.valueOf(feeder.getEnergizedLoads())));
+		tvFeederDetails.getItems().add(new NodeProperty("Used Active Power:", df.format(feeder.getUsedPower())));
+		tvFeederDetails.getItems().add(new NodeProperty("Available Active Power:", df.format(feeder.getAvailablePower())));
 		cbFeederNumber.valueProperty().set(selectedFeeder);
 	}
 	
@@ -196,14 +182,16 @@ public class ElementsDetailsPaneController extends Controller {
 	private void updateBranchInformationBox(Integer selectedBranch) {
 		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_3);
 		Branch branch = getEnvironment().getBranch(selectedBranch);
-		lblBranchDe.setText(branch.getNode1().getNodeNumber().toString());
-		lblBranchPara.setText(branch.getNode2().getNodeNumber().toString());
-		lblBranchMaxCurrent.setText(df.format(branch.getMaxCurrent()));
-		lblBranchInstantCurrent.setText(df.format(branch.getInstantCurrent()));
-		lblBranchLossesMW.setText(df.format(branch.getLossesMW()));
-		lblBranchResistance.setText(df.format(branch.getResistance()));
-		lblBranchReactance.setText(df.format(branch.getReactance()));
-		lblBranchStatus.setText(branch.isClosed() ? "Closed" : "Open");
+		
+		tvBranchDetails.getItems().clear();
+		tvBranchDetails.getItems().add(new NodeProperty("From:", branch.getNode1().getNodeNumber().toString()));
+		tvBranchDetails.getItems().add(new NodeProperty("To:", branch.getNode2().getNodeNumber().toString()));
+		tvBranchDetails.getItems().add(new NodeProperty("Max Current A:", df.format(branch.getMaxCurrent())));
+		tvBranchDetails.getItems().add(new NodeProperty("Instant Current A:", df.format(branch.getInstantCurrent())));
+		tvBranchDetails.getItems().add(new NodeProperty("Resistance \u03A9:", df.format(branch.getResistance())));
+		tvBranchDetails.getItems().add(new NodeProperty("Reactance \u03A9:", df.format(branch.getReactance())));
+		tvBranchDetails.getItems().add(new NodeProperty("Status:", branch.isClosed() ? "Closed" : "Open"));
+		tvBranchDetails.getItems().add(new NodeProperty("Losses MW:", df.format(branch.getLossesMW())));
 		cbBranchNumber.valueProperty().set(selectedBranch);
 	}
 	
