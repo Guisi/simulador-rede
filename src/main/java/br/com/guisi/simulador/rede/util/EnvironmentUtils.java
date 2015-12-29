@@ -1,17 +1,19 @@
 package br.com.guisi.simulador.rede.util;
 
 import java.io.File;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import br.com.guisi.simulador.rede.constants.Status;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -22,142 +24,175 @@ import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
 
 
-
 public class EnvironmentUtils {
 
 	private EnvironmentUtils() {}
 	
 	public static Environment getEnvironmentFromFile(File csvFile) throws Exception {
-		
-		List<String> lines = Files.readAllLines(Paths.get(csvFile.getAbsolutePath()), Charset.forName("ISO-8859-1"));
-		
-		//carrega os loads e feeders
-		Map<Integer, NetworkNode> nodeMap = new HashMap<>();
-		List<String> loadLines = getLoadLines(lines);
-		for (String line : loadLines) {
-			line = line.replace(".", "").replace(",", ".");
-			String[] colunas = line.split(";");
-			
-			//tipo, feeder ou load
-			boolean isLoad = "L".equalsIgnoreCase(colunas[0]);
-			
-			//numero da carga
-			Integer nodeNum = Integer.valueOf(colunas[1]);
-			
-			//posicao X
-			Integer x = Integer.valueOf(colunas[2]);
-			
-			//posicao Y
-			Integer y = Integer.valueOf(colunas[3]);
-			
-			//potencia ativa
-			double activePower = Double.parseDouble(colunas[4]);
-			
-			//potencia reativa
-			double reactivePower = Double.parseDouble(colunas[5]);
-			
-			//prioridade
-			int priority = 0;
-			if (isLoad) {
-				 priority = Integer.valueOf(colunas[6]);
-			}
-			
-			String feederColor = StringUtils.isNotBlank(colunas[7]) ? colunas[7] : "#FFFFFF";
-			String loadColor = StringUtils.isNotBlank(colunas[8]) ? colunas[8] : "#FFFFFF";
-			
-			boolean statusValue = Integer.parseInt(colunas[9]) == 1;
-			Status status = statusValue ? Status.ON : Status.OFF;
-			
-			NetworkNode node;
-			if (isLoad) {
-				node = new Load(nodeNum, x, y, activePower, reactivePower, status, priority);
-			} else {
-				node = new Feeder(nodeNum, x, y, activePower, reactivePower, feederColor, loadColor, status);
-			}
-			nodeMap.put(nodeNum, node);
-		}
-		
-		//carrega os branches
-		Map<Integer, Branch> branchMap = new HashMap<>();
-		List<String> branchLines = getBranchLines(lines);
-		for (String line : branchLines) {
-			line = line.replace(".", "").replace(",", ".");
-			String[] colunas = line.split(";");
-			
-			//numero do branch
-			Integer branchNum = Integer.parseInt(colunas[0]);
-			
-			//numero da carga de
-			Integer loadFrom = Integer.parseInt(colunas[1]);
-			NetworkNode node1 = nodeMap.get(loadFrom);
-			
-			//numero da carga para
-			Integer loadTo = Integer.parseInt(colunas[2]);
-			NetworkNode node2 = nodeMap.get(loadTo);
-			
-			//corrent maxima
-			double maxCurrent = Double.parseDouble(colunas[3]);
-			
-			//resistencia
-			double resistance = Double.parseDouble(colunas[4]);
-			
-			//reatancia
-			double reactance = Double.parseDouble(colunas[5]);
-			
-			//status do branch
-			int branchStatus = Integer.parseInt(colunas[6]);
-			SwitchState switchState = branchStatus == 0 ? SwitchState.OPEN : SwitchState.CLOSED;
-			
-			boolean switchBranch = Integer.parseInt(colunas[7]) == 1;
-			
-			Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, switchState, switchBranch);
-			branchMap.put(branchNum, branch);
-			
-			//adiciona a branch nos dois loads os quais ela conecta
-			node1.addBranch(branch);
-			node2.addBranch(branch);
-		}
-		
-		int sizeX = nodeMap.values().stream().max(Comparator.comparing(node -> node.getX())).get().getX();
-		int sizeY = nodeMap.values().stream().max(Comparator.comparing(node -> node.getY())).get().getY();
-		
-		return new Environment(sizeX, sizeY, nodeMap, branchMap);
-	}
-	
-	private static List<String> getLoadLines(List<String> lines) {
-		return getLines("-- Loads/Feeders --", lines);
-	}
-	
-	private static List<String> getBranchLines(List<String> lines) {
-		return getLines("-- Branches --", lines);
-	}
-	
-	private static List<String> getLines(String label, List<String> lines) {
-		List<String> filteredLines = new ArrayList<String>();
+		try (XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(csvFile))) {
+			XSSFSheet ws = wb.getSheetAt(0);
 
-		boolean found = false;
-		for (Iterator<String> iterator = lines.iterator(); iterator.hasNext();) {
-			String line = iterator.next();
-			
-			if (!found && line.contains(label)) {
-				iterator.next();
-				line = iterator.next();
-				found = true;
+			//carrega os loads e feeders
+			Map<Integer, NetworkNode> nodeMap = new HashMap<>();
+			List<XSSFRow> loadLines = getLoadLines(ws);
+			for (XSSFRow line : loadLines) {
+				int col = 1;
+				
+				//tipo, feeder ou load
+				boolean isLoad = "L".equalsIgnoreCase(getStringCellValue(line.getCell(col++)));
+				
+				//numero da carga
+				Integer nodeNum = getIntegerCellValue(line.getCell(col++));
+				
+				//posicao X
+				Integer x = getIntegerCellValue(line.getCell(col++));
+				
+				//posicao Y
+				Integer y = getIntegerCellValue(line.getCell(col++));
+				
+				//potencia ativa
+				double activePower = getDoubleCellValue(line.getCell(col++));
+				
+				//potencia reativa
+				double reactivePower = getDoubleCellValue(line.getCell(col++));
+				
+				//prioridade
+				int priority = 0;
+				if (isLoad) {
+					priority = getIntegerCellValue(line.getCell(col));
+				}
+				col++;
+				
+				String color = getStringCellValue(line.getCell(col++));
+				String feederColor = StringUtils.isNotBlank(color) ? color : "#FFFFFF";
+				
+				color = getStringCellValue(line.getCell(col++));
+				String loadColor = StringUtils.isNotBlank(color) ? color : "#FFFFFF";
+				
+				boolean statusValue = getIntegerCellValue(line.getCell(col++)) == 1;
+				Status status = statusValue ? Status.ON : Status.OFF;
+				
+				NetworkNode node;
+				if (isLoad) {
+					node = new Load(nodeNum, x, y, activePower, reactivePower, status, priority);
+				} else {
+					node = new Feeder(nodeNum, x, y, activePower, reactivePower, feederColor, loadColor, status);
+				}
+				nodeMap.put(nodeNum, node);
+
 			}
 			
-			if (found) {
-				if (isEmptyLine(line)) {
-				 break;	
+			//carrega os branches
+			Map<Integer, Branch> branchMap = new HashMap<>();
+			List<XSSFRow> branchLines = getBranchLines(ws);
+			for (XSSFRow line : branchLines) {
+				int col = 1;
+				
+				//numero do branch
+				Integer branchNum = getIntegerCellValue(line.getCell(col++));
+				
+				//numero da carga de
+				Integer loadFrom = getIntegerCellValue(line.getCell(col++));
+				NetworkNode node1 = nodeMap.get(loadFrom);
+				
+				//numero da carga para
+				Integer loadTo = getIntegerCellValue(line.getCell(col++));
+				NetworkNode node2 = nodeMap.get(loadTo);
+				
+				//corrent maxima
+				double maxCurrent = getDoubleCellValue(line.getCell(col++));
+				
+				//resistencia
+				double resistance = getDoubleCellValue(line.getCell(col++));
+				
+				//reatancia
+				double reactance = getDoubleCellValue(line.getCell(col++));
+				
+				//status do branch
+				int branchStatus = getIntegerCellValue(line.getCell(col++));
+				SwitchState switchState = branchStatus == 0 ? SwitchState.OPEN : SwitchState.CLOSED;
+				
+				boolean switchBranch = getIntegerCellValue(line.getCell(col++)) == 1;
+				
+				Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, switchState, switchBranch);
+				branchMap.put(branchNum, branch);
+				
+				//adiciona a branch nos dois loads os quais ela conecta
+				node1.addBranch(branch);
+				node2.addBranch(branch);
+			}
+			
+			int sizeX = nodeMap.values().stream().max(Comparator.comparing(node -> node.getX())).get().getX();
+			int sizeY = nodeMap.values().stream().max(Comparator.comparing(node -> node.getY())).get().getY();
+
+			return new Environment(sizeX, sizeY, nodeMap, branchMap);
+		}
+	}
+	
+	private static List<XSSFRow> getLoadLines(XSSFSheet ws) {
+		return getLines("-- Loads/Feeders --", ws);
+	}
+	
+	private static List<XSSFRow> getBranchLines(XSSFSheet ws) {
+		return getLines("-- Branches --", ws);
+	}
+	
+	private static List<XSSFRow> getLines(String label, XSSFSheet ws) {
+		List<XSSFRow> filteredLines = new ArrayList<XSSFRow>();
+
+		int loadsStartRow = 0;
+		int rowNum = ws.getLastRowNum();
+		for (int i = 0; i <= rowNum; i++) {
+			XSSFRow row = ws.getRow(i);
+	        
+			if (row != null) {
+				XSSFCell cell = row.getCell(1);
+				if (cell != null && cell.getCellType() == Cell.CELL_TYPE_STRING
+						&& label.equals(cell.getStringCellValue())) {
+					loadsStartRow = i + 2; //pula cabeçalho;
+					break;
 				}
-				filteredLines.add(line);
+			}
+		}
+		
+		if (loadsStartRow > 0) {
+			XSSFRow row = ws.getRow(loadsStartRow);
+			while (row != null && row.getCell(1).getCellType() != Cell.CELL_TYPE_BLANK) {
+				filteredLines.add(row);
+				row = ws.getRow(++loadsStartRow);
 			}
 		}
 		
 		return filteredLines;
 	}
 	
-	private static boolean isEmptyLine(String line) {
-		return StringUtils.replace(line, ";", "").isEmpty();
+	private static String getStringCellValue(Cell cell) {
+		return String.valueOf(getCellValue(cell));
+	}
+	
+	private static Double getDoubleCellValue(Cell cell) {
+		Object cellValue = getCellValue(cell);
+		if (cellValue instanceof Double) {
+			return (Double) cellValue;
+		} else {
+			return Double.valueOf((String) cellValue);
+		}
+	}
+	
+	private static Integer getIntegerCellValue(Cell cell) {
+		return getDoubleCellValue(cell).intValue();
+	}
+	
+	private static Object getCellValue(Cell cell) {
+		if (cell == null) {
+			return null;
+		}
+		
+		switch (cell.getCellType()) {
+			case Cell.CELL_TYPE_STRING: return cell.getStringCellValue();
+			case Cell.CELL_TYPE_NUMERIC: return cell.getNumericCellValue();
+			default: return null;
+		}
 	}
 	
 	/**

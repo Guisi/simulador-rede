@@ -64,7 +64,8 @@ public class MenuPaneController extends Controller {
 		fileChooser.setTitle("Open CSV File");
 		fileChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/Desktop"));
 		fileChooser.getExtensionFilters().clear();
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLSX", "*.xlsx"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLS", "*.xls"));
 		File csvFile = fileChooser.showOpenDialog(null);
 		
 		if (csvFile != null) {
