@@ -38,10 +38,7 @@ public class FunctionEditController extends Controller {
 	private FunctionsController parentController;
 	
 	@Override
-	public void initializeController(Object... data) {
-		this.functionItem = (FunctionItem) data[0];
-		this.parentController = (FunctionsController) data[1];
-		
+	public void initializeController() {
 		cbFunctionType.setItems(FXCollections.observableArrayList());
 		for (FunctionType functionType : FunctionType.values()) {
 			cbFunctionType.getItems().add(functionType.getDescription());
@@ -55,8 +52,14 @@ public class FunctionEditController extends Controller {
             codeArea.setStyleSpans(0, JavaKeywords.computeHighlighting(newText));
         });
         vBoxInternal.getChildren().add(5, codeArea);
-
-        txFunctionName.setText(this.functionItem.getFunctionName().get());
+	}
+	
+	@Override
+	public void initializeControllerData(Object... data) {
+		this.functionItem = (FunctionItem) data[0];
+		this.parentController = (FunctionsController) data[1];
+		
+		txFunctionName.setText(this.functionItem.getFunctionName().get());
         String functionType = functionItem.getFunctionType().get();
         if (StringUtils.isNotBlank(functionType)) {
         	cbFunctionType.setValue(functionType);

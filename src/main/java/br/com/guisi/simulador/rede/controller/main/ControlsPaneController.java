@@ -38,7 +38,7 @@ public class ControlsPaneController extends Controller {
 	private ComboBox<TaskExecutionType> cbTaskExecutionType;
 
 	@Override
-	public void initializeController(Object... data) {
+	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN);
 		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
 		this.listenToEvent(EventType.AGENT_RUNNING);
@@ -53,6 +53,10 @@ public class ControlsPaneController extends Controller {
 		
 		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
 		cbTaskExecutionType.setValue(TaskExecutionType.STEP_BY_STEP);
+	}
+	
+	@Override
+	public void initializeControllerData(Object... data) {
 	}
 	
 	@Override

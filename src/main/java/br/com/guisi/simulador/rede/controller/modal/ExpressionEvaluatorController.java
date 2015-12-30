@@ -31,7 +31,7 @@ public class ExpressionEvaluatorController extends Controller {
 	private EvaluationObject evaluationObject;
 	
 	@Override
-	public void initializeController(Object... data) {
+	public void initializeController() {
 		evaluationObject = new EvaluationObject();
 		evaluationObject.setEnvironment(getEnvironment());
 		
@@ -43,6 +43,10 @@ public class ExpressionEvaluatorController extends Controller {
             codeArea.setStyleSpans(0, JavaKeywords.computeHighlighting(newText));
         });
         vBoxInternal.getChildren().add(0, codeArea);
+	}
+	
+	@Override
+	public void initializeControllerData(Object... data) {
 	}
 	
 	public void evaluateExpression() {

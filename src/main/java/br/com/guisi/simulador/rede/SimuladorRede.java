@@ -105,8 +105,9 @@ public class SimuladorRede extends Application {
 	    		stage.getScene().setRoot(myPane);
 	    	}
 	    	controller.setStage(stage);
-	    	controller.initializeController(data);
+	    	controller.initializeController();
 		}
+		controller.initializeControllerData(data);
 		stage.centerOnScreen();
 
 		if (!stage.isShowing()) {

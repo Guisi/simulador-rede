@@ -199,15 +199,19 @@ public class NetworkPane extends Pane {
 		Line line = branchPane.getBranchLine();
 		line.setStroke(Color.BLACK);
 		line.setStrokeWidth(1.3);
-		if (!branch.isClosed()) {
+		if (branch.isClosed()) {
+			line.getStrokeDashArray().clear();
+		} else {
 			line.getStrokeDashArray().addAll(2d, 5d);
 		}
 		
 		Rectangle rect = branchPane.getSwitchRectangle();
 		rect.setFill(branch.isClosed() ? Color.BLACK : Color.WHITE);
-		if (!branch.isClosed()) {
+		rect.setStrokeWidth(1);
+		if (branch.isClosed()) {
+			rect.setStroke(Color.BLACK);
+		} else {
 			rect.setStroke(Color.GRAY);
-			rect.setStrokeWidth(1);
 		}
 	}
 	

@@ -27,7 +27,9 @@ public abstract class Controller implements EventListener {
 	 */
 	public abstract Node getView();
 	
-	public abstract void initializeController(Object... data);
+	public abstract void initializeController();
+	
+	public abstract void initializeControllerData(Object... data);
 	
 	private Stage stage;
 
@@ -45,7 +47,8 @@ public abstract class Controller implements EventListener {
 	
 	public <T extends Controller> T getController(Class<T> controllerClass, Object...data) {
 		T controller = SimuladorRede.getCtx().getBean(controllerClass);
-		controller.initializeController(data);
+		controller.initializeController();
+		controller.initializeControllerData(data);
 		return controller;
 	}
 	

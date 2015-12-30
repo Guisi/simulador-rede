@@ -39,8 +39,12 @@ public class FunctionsController extends Controller {
 	private List<FunctionItem> functions;
 	
 	@Override
-	public void initializeController(Object... data) {
+	public void initializeController() {
 		this.initializeTable();
+	}
+	
+	@Override
+	public void initializeControllerData(Object... data) {
 	}
 	
 	private void initializeTable() {
