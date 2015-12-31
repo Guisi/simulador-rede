@@ -1,16 +1,22 @@
 package br.com.guisi.simulador.rede.controller.main;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.agent.AgentNotification;
-import br.com.guisi.simulador.rede.constants.AgentNotificationType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -27,9 +33,9 @@ public class LabelAndMessagesPaneController extends Controller {
 	private TableView<BrokenConstraint> tvBrokenConstraints;
 	@FXML
 	private TableView<SwitchOperation> tvSwitchesOperations;
-
+	
 	@Override
-	public void initializeController(Object... data) {
+	public void initializeController() {
 		this.initializeTables();
 		
 		this.listenToEvent(EventType.RESET_SCREEN);
@@ -39,12 +45,16 @@ public class LabelAndMessagesPaneController extends Controller {
 	}
 	
 	@Override
+	public void initializeControllerData(Object... data) {
+	}
+	
+	@Override
 	public void onEvent(EventType eventType, Object data) {
 		switch (eventType) {
 			case POWER_FLOW_COMPLETED: this.updateWarningsBrokenConstraints(); break;
 			case RESET_SCREEN: this.resetScreen(); break;
 			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
-			case AGENT_NOTIFICATION : this.processAgentNotification((AgentNotification) data); break;
+			case AGENT_NOTIFICATION : this.processAgentNotification(data); break;
 			default: break;
 		}
 	}
@@ -89,6 +99,7 @@ public class LabelAndMessagesPaneController extends Controller {
 				header.setVisible(false);
 			}
 		});
+		tvSwitchesOperations.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		tvSwitchesOperations.setItems(FXCollections.observableArrayList());
 		tvSwitchesOperations.setPlaceholder(new Label("No switches operations yet"));
 		TableColumn<SwitchOperation, String> tcSwitchOperation = new TableColumn<SwitchOperation, String>();
@@ -143,14 +154,39 @@ public class LabelAndMessagesPaneController extends Controller {
 		}
 	}
 	
-	private void processAgentNotification(AgentNotification agentNotification) {
-		Integer switchChanged = agentNotification.getIntegerNotification(AgentNotificationType.SWITCH_STATE_CHANGED);
+	private void processAgentNotification(Object data) {
+		Integer[] switchesChanged = (Integer[]) data;
 		
-		if (switchChanged != null) {
-			Branch sw = SimuladorRede.getEnvironment().getBranch(switchChanged);
-			SwitchOperation switchOperation = new SwitchOperation();
-			switchOperation.getMessage().setValue("Switch " + switchChanged + (sw.isClosed() ? " closed" : " opened") );
-			tvSwitchesOperations.getItems().add(switchOperation);
+		if (switchesChanged != null) {
+			for (Integer switchChanged : switchesChanged) {
+				Branch sw = SimuladorRede.getEnvironment().getBranch(switchChanged);
+				SwitchOperation switchOperation = new SwitchOperation();
+				switchOperation.getMessage().setValue("Switch " + switchChanged + (sw.isClosed() ? " closed" : " opened") );
+				tvSwitchesOperations.getItems().add(switchOperation);
+			}
+		}
+	}
+	
+	public void exportSwitchOperations() {
+		StringBuilder sb = new StringBuilder();
+		tvSwitchesOperations.getItems().forEach((operation) -> sb.append(operation.getMessage().getValue()).append(System.lineSeparator()));
+		
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Save .txt file");
+		fileChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/Desktop"));
+		fileChooser.getExtensionFilters().clear();
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("TXT", "*.txt"));
+		File txtFile = fileChooser.showSaveDialog(null);
+		
+		if (txtFile != null) {
+			try (FileWriter writer = new FileWriter(txtFile)) {
+				writer.write(sb.toString());
+			} catch (IOException e) {
+				e.printStackTrace();
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setContentText(e.getMessage());
+				alert.showAndWait();
+			}
 		}
 	}
 	

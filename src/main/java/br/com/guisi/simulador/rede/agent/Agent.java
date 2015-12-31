@@ -6,39 +6,34 @@ import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 
 public abstract class Agent extends Observable {
 	
-	protected AgentNotification agentNotification;
+	protected AgentStatus agentStatus;
 	private boolean stopRequest;
 	private int stepCount = 1;
 	
 	public final void run(TaskExecutionType taskExecutionType) {
 		this.stopRequest = false;
 
-		switch (taskExecutionType) {
-			case STEP_BY_STEP:
+		while (!stopRequest) {
+			synchronized (this) {
 				this.runNextEpisode();
-				break;
-
-			case CONTINUOUS_UPDATE_END_ONLY:
-			case CONTINUOUS_UPDATE_EVERY_STEP:
-				while (!stopRequest) {
-					synchronized (this) {
-						this.runNextEpisode();
-						
-						if (taskExecutionType.isNotifyObservers()) {
-							generateAgentNotification();
-						}
-					}
+				
+				if (taskExecutionType.isNotifyObservers()) {
+					generateAgentNotification();
 				}
-			default:
-				break;
+				
+				switch (taskExecutionType) {
+					case STEP_BY_STEP: stop(); break;
+					default: break;
+				}
+			}
 		}
 	}
 	
 	public void generateAgentNotification() {
-		agentNotification = new AgentNotification(stepCount++);
+		agentStatus = new AgentStatus(stepCount++);
 		setNotifications();
 		setChanged();
-		notifyObservers(agentNotification);
+		notifyObservers(agentStatus);
 	}
 	
 	protected abstract void runNextEpisode();
@@ -49,8 +44,8 @@ public abstract class Agent extends Observable {
 		stopRequest = true;
 	}
 
-	public AgentNotification getAgentNotification() {
-		return agentNotification;
+	public AgentStatus getAgentNotification() {
+		return agentStatus;
 	}
 	
 }

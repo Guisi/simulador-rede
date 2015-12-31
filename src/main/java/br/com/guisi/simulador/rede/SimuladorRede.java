@@ -61,7 +61,7 @@ public class SimuladorRede extends Application {
 		primaryStage.setTitle("Simulador");
 		primaryStage.getIcons().add(new Image("/img/bolt.png"));
 		scene.getStylesheets().add("/css/estilo.css");
-		//TODO remover primaryStage.setMaximized(true);
+		primaryStage.setMaximized(true);
 		
 		primaryStage.setOnCloseRequest((event) -> {
 			try {
@@ -75,20 +75,20 @@ public class SimuladorRede extends Application {
 		primaryStage.show();
 	}
 	
-	public static void showModalScene(String title, Class<?> controllerClass, Object... data) {
-    	showScene(title, controllerClass, true, data);
+	public static Controller showModalScene(String title, Class<?> controllerClass, boolean visible, Object... data) {
+    	return showScene(title, controllerClass, true, visible, data);
     }
 	
-	public static void showUtilityScene(String title, Class<?> controllerClass, Object... data) {
-    	showScene(title, controllerClass, false, data);
+	public static Controller showUtilityScene(String title, Class<?> controllerClass, boolean visible, Object... data) {
+    	return showScene(title, controllerClass, false, visible, data);
     }
 	
-	public static void showScene(String title, Class<?> controllerClass, boolean modal, Object... data) {
+	public static Controller showScene(String title, Class<?> controllerClass, boolean modal, boolean visible, Object... data) {
 		Controller controller = (Controller) ctx.getBean(controllerClass);
 		Stage stage = controller.getStage();
 
 		if (stage == null) {
-			stage = new Stage(StageStyle.UTILITY);
+			stage = new Stage(StageStyle.DECORATED);
 	    	stage.initModality(modal ? Modality.APPLICATION_MODAL : Modality.NONE);
 	    	stage.initOwner(primaryStage);
 	    	stage.setTitle(title);
@@ -115,6 +115,8 @@ public class SimuladorRede extends Application {
     	} else {
     		stage.requestFocus();
     	}
+		
+		return controller;
     }
 	
 	/**

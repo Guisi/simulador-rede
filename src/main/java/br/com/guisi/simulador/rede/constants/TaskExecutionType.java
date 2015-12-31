@@ -4,7 +4,7 @@ public enum TaskExecutionType {
 
 	CONTINUOUS_UPDATE_EVERY_STEP("Continuous - Update every step", true),
 	CONTINUOUS_UPDATE_END_ONLY("Continuous - Update only at the end", false),
-	STEP_BY_STEP("Step by step", false);
+	STEP_BY_STEP("Step by step", true);
 	
 	private final String label;
 	private final boolean notifyObservers;

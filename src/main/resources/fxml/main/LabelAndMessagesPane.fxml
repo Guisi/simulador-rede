@@ -75,7 +75,12 @@
                      <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <TableView fx:id="tvSwitchesOperations" prefHeight="140.0" prefWidth="750.0" />
+                              <VBox alignment="CENTER_RIGHT">
+                                 <children>
+                                    <Button mnemonicParsing="false" onAction="#exportSwitchOperations" text="Save .txt" />
+                                    <TableView fx:id="tvSwitchesOperations" prefHeight="115.0" prefWidth="750.0" />
+                                 </children>
+                              </VBox>
                            </children>
                         </AnchorPane>
                      </content>

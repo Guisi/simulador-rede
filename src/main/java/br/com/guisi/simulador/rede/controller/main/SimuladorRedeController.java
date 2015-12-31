@@ -22,11 +22,10 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private VBox networkBoxRight;
 	
-	
 	@Override
-	public void initializeController(Object... data) {
-		this.listenToEvent(EventType.AGENT_RUNNING);
-		this.listenToEvent(EventType.AGENT_STOPPED);
+	public void initializeController() {
+		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
+		this.listenToEvent(EventType.RESET_SCREEN);
 		
 		scrollPane.prefWidthProperty().bind(SimuladorRede.getPrimaryStage().widthProperty());
 		scrollPane.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
@@ -48,11 +47,35 @@ public class SimuladorRedeController extends Controller {
 		
 		//NetworkPane
 		networkBoxRight.getChildren().add(getController(NetworkPaneController.class).getView());
+		//networkPaneController = SimuladorRede.showUtilityScene("Electric Network", NetworkPaneController.class, false);
 		
 		this.fireEvent(EventType.RESET_SCREEN);
 		
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.csv");
 		this.loadEnvironmentFromFile(f);*/
+	}
+	
+	@Override
+	public void initializeControllerData(Object... data) {
+	}
+	
+	@Override
+	public void onEvent(EventType eventType, Object data) {
+		switch (eventType) {
+			case ENVIRONMENT_LOADED: processEnvironmentLoaded(); break;
+			case RESET_SCREEN: processResetScreen(); break; 
+			default: break;
+		}
+	}
+	
+	private void processEnvironmentLoaded() {
+		//networkPaneController.getStage().show();
+	}
+	
+	private void processResetScreen() {
+		/*if (networkPaneController != null) {
+			networkPaneController.getStage().hide();
+		}*/
 	}
 	
 	@Override

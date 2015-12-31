@@ -14,8 +14,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import br.com.guisi.simulador.rede.agent.AgentNotification;
-import br.com.guisi.simulador.rede.constants.AgentNotificationType;
 import br.com.guisi.simulador.rede.constants.FunctionType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -37,7 +35,7 @@ public class FunctionsPaneController extends Controller {
 	private List<FunctionItem> functions;
 
 	@Override
-	public void initializeController(Object... data) {
+	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN);
 		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
 		this.listenToEvent(EventType.FUNCTIONS_UPDATED);
@@ -55,13 +53,17 @@ public class FunctionsPaneController extends Controller {
 	}
 	
 	@Override
+	public void initializeControllerData(Object... data) {
+	}
+	
+	@Override
 	public void onEvent(EventType eventType, Object data) {
 		switch (eventType) {
 			case RESET_SCREEN: this.resetScreen(); break;
 			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
 			case FUNCTIONS_UPDATED: this.updateFunctionsTables(); break;
 			case POWER_FLOW_COMPLETED: this.evaluateFunctionsExpressions(null); break;
-			case AGENT_NOTIFICATION : this.processAgentNotification((AgentNotification) data); break;
+			//case AGENT_NOTIFICATION : this.processAgentNotification((AgentUpdates) data); break;
 			case AGENT_STOPPED: this.processAgentStop(); break;
 			default: break;
 		}
@@ -171,13 +173,9 @@ public class FunctionsPaneController extends Controller {
 		}
 	}
 	
-	private void processAgentNotification(AgentNotification agentNotification) {
-		Integer switchChanged = agentNotification.getIntegerNotification(AgentNotificationType.SWITCH_STATE_CHANGED);
-		
-		if (switchChanged != null) {
-			this.evaluateFunctionsExpressions("Switching Operations:");
-		}
-	}
+	/*private void processAgentNotification(AgentUpdates agentUpdates) {
+		this.evaluateFunctionsExpressions("Switching Operations:");
+	}*/
 	
 	private void processAgentStop() {
 		this.evaluateFunctionsExpressions("Switching Operations:");

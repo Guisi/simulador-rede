@@ -41,10 +41,19 @@ public class FunctionsController extends Controller {
 	@Override
 	public void initializeController() {
 		this.initializeTable();
+		this.listenToEvent(EventType.FUNCTION_UPDATE);
 	}
 	
 	@Override
 	public void initializeControllerData(Object... data) {
+	}
+	
+	@Override
+	public void onEvent(EventType eventType, Object data) {
+		switch (eventType) {
+			case FUNCTION_UPDATE: updateList((FunctionItem) data); break;
+			default: break;
+		}
 	}
 	
 	private void initializeTable() {
@@ -80,11 +89,11 @@ public class FunctionsController extends Controller {
 	}
 	
 	private void editFunctionItem(FunctionItem functionItem) {
-		SimuladorRede.showModalScene("Edit Function", FunctionEditController.class, functionItem, this);
+		SimuladorRede.showModalScene("Edit Function", FunctionEditController.class, true, functionItem);
 	}
 	
 	public void newFunction() {
-		SimuladorRede.showModalScene("Edit Function", FunctionEditController.class, new FunctionItem(), this);
+		SimuladorRede.showModalScene("Edit Function", FunctionEditController.class, true, new FunctionItem());
 	}
 	
 	public void removeFunction() {

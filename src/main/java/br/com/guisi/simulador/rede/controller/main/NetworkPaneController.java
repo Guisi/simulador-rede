@@ -10,8 +10,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.agent.AgentNotification;
-import br.com.guisi.simulador.rede.constants.AgentNotificationType;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -41,7 +39,7 @@ public class NetworkPaneController extends Controller {
 	private Integer selectedBranch;
 	
 	@Override
-	public void initializeController(Object... data) {
+	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN);
 		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
 		this.listenToEvent(EventType.LOAD_SELECTED);
@@ -59,6 +57,10 @@ public class NetworkPaneController extends Controller {
 	}
 	
 	@Override
+	public void initializeControllerData(Object... data) {
+	}
+	
+	@Override
 	public void onEvent(EventType eventType, Object data) {
 		switch (eventType) {
 			case RESET_SCREEN: this.resetScreen(); break;
@@ -66,7 +68,7 @@ public class NetworkPaneController extends Controller {
 			case LOAD_SELECTED: this.updateLoadDrawing((Integer) data); break;
 			case FEEDER_SELECTED: this.updateFeederInformationBox((Integer) data); break;
 			case BRANCH_SELECTED: this.updateBranchInformationBox((Integer) data); break;
-			case AGENT_NOTIFICATION : this.processAgentNotification((AgentNotification) data); break;
+			//case AGENT_NOTIFICATION : this.processAgentNotification((AgentUpdates) data); break;
 			case AGENT_STOPPED: this.processAgentStop(); break;
 			default: break;
 		}
@@ -152,8 +154,8 @@ public class NetworkPaneController extends Controller {
 		l.setStrokeWidth(2);
 	}
 	
-	private void processAgentNotification(AgentNotification agentNotification) {
-		Integer switchChanged = agentNotification.getIntegerNotification(AgentNotificationType.SWITCH_STATE_CHANGED);
+	/*private void processAgentNotification(AgentUpdates agentUpdates) {
+		Integer switchChanged = agentUpdates.getIntegerNotification(AgentNotificationType.SWITCH_STATE_CHANGED);
 		
 		networkPane.setAgentCirclePosition(switchChanged);
 		
@@ -167,7 +169,7 @@ public class NetworkPaneController extends Controller {
 			
 		//atualiza status dos nós na tela
 		environment.getNetworkNodes().forEach((node) -> networkPane.updateNetworkNode(node));
-	}
+	}*/
 	
 	private void processAgentStop() {
 		Environment environment = SimuladorRede.getEnvironment();

@@ -91,7 +91,7 @@ public class QLearningAgent extends Agent {
 	
 	@Override
 	protected void setNotifications() {
-		agentNotification.putNotification(AgentNotificationType.SWITCH_STATE_CHANGED, currentState);
+		agentStatus.putNotification(AgentNotificationType.SWITCH_STATE_CHANGED, currentState);
 	}
 	
 	public QValue getBestQValue(Integer state) {

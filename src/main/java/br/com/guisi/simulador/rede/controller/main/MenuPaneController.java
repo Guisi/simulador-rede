@@ -36,13 +36,17 @@ public class MenuPaneController extends Controller {
 	private MenuItem miExpressionEvaluator;
 	
 	@Override
-	public void initializeController(Object... data) {
+	public void initializeController() {
 		menuBar.prefWidthProperty().bind(SimuladorRede.getPrimaryStage().widthProperty());
 		
 		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
 		this.listenToEvent(EventType.AGENT_RUNNING);
 		this.listenToEvent(EventType.AGENT_STOPPED);
 		this.listenToEvent(EventType.RESET_SCREEN);
+	}
+	
+	@Override
+	public void initializeControllerData(Object... data) {
 	}
 	
 	@Override
@@ -119,15 +123,15 @@ public class MenuPaneController extends Controller {
 	}
 	
 	public void showPriorityModal() {
-		SimuladorRede.showModalScene("Priority Values", PriorityConfigController.class);
+		SimuladorRede.showModalScene("Priority Values", PriorityConfigController.class, true);
 	}
 	
 	public void showExpressionEvaluatorWindow() {
-		SimuladorRede.showUtilityScene("Expression Evaluator", ExpressionEvaluatorController.class);
+		SimuladorRede.showUtilityScene("Expression Evaluator", ExpressionEvaluatorController.class, true);
 	}
 	
 	public void showFunctionsWindow() {
-		SimuladorRede.showModalScene("Functions", FunctionsController.class);
+		SimuladorRede.showModalScene("Functions", FunctionsController.class, true);
 	}
 
 	private void resetScreen() {

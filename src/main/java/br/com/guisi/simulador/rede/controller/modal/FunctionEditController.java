@@ -16,6 +16,7 @@ import org.fxmisc.richtext.LineNumberFactory;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.FunctionType;
 import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
 import br.com.guisi.simulador.rede.util.richtext.JavaKeywords;
 
@@ -35,7 +36,6 @@ public class FunctionEditController extends Controller {
 	private CodeArea codeArea;
 	
 	private FunctionItem functionItem;
-	private FunctionsController parentController;
 	
 	@Override
 	public void initializeController() {
@@ -57,7 +57,6 @@ public class FunctionEditController extends Controller {
 	@Override
 	public void initializeControllerData(Object... data) {
 		this.functionItem = (FunctionItem) data[0];
-		this.parentController = (FunctionsController) data[1];
 		
 		txFunctionName.setText(this.functionItem.getFunctionName().get());
         String functionType = functionItem.getFunctionType().get();
@@ -84,7 +83,7 @@ public class FunctionEditController extends Controller {
 		this.functionItem.getFunctionName().set(functionName);
 		this.functionItem.getFunctionType().set(functionType);
         this.functionItem.setFunctionExpression(codeArea.getText());
-        this.parentController.updateList(this.functionItem);
+        this.fireEvent(EventType.FUNCTION_UPDATE, this.functionItem);
         SimuladorRede.closeScene(this);
 	}
 	

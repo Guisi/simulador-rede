@@ -61,7 +61,7 @@ public class ElementsDetailsPaneController extends Controller {
 	
 
 	@Override
-	public void initializeController(Object... data) {
+	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN);
 		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
 		this.listenToEvent(EventType.LOAD_SELECTED);
@@ -72,6 +72,10 @@ public class ElementsDetailsPaneController extends Controller {
 		this.initializeTable(tvLoadDetails);
 		this.initializeTable(tvFeederDetails);
 		this.initializeTable(tvBranchDetails);
+	}
+	
+	@Override
+	public void initializeControllerData(Object... data) {
 	}
 	
 	@Override

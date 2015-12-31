@@ -5,10 +5,10 @@ import java.util.Observer;
 
 import javafx.concurrent.Task;
 import br.com.guisi.simulador.rede.agent.Agent;
-import br.com.guisi.simulador.rede.agent.AgentNotification;
+import br.com.guisi.simulador.rede.agent.AgentStatus;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 
-public class AgentTask extends Task<AgentNotification> implements Observer {
+public class AgentTask extends Task<AgentStatus> implements Observer {
 
 	private final Agent agent;
 	private final TaskExecutionType taskExecutionType;
@@ -21,7 +21,7 @@ public class AgentTask extends Task<AgentNotification> implements Observer {
 	}
 
 	@Override
-	protected AgentNotification call() throws Exception {
+	protected AgentStatus call() throws Exception {
 		agent.run(taskExecutionType);
 		
 		agent.generateAgentNotification();
@@ -31,6 +31,6 @@ public class AgentTask extends Task<AgentNotification> implements Observer {
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		updateValue((AgentNotification) arg);
+		updateValue((AgentStatus) arg);
 	}
 }
