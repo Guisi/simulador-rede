@@ -17,6 +17,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
+import br.com.guisi.simulador.rede.agent.status.AgentStatus;
+import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -41,7 +44,7 @@ public class LabelAndMessagesPaneController extends Controller {
 		this.listenToEvent(EventType.RESET_SCREEN);
 		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
 		this.listenToEvent(EventType.POWER_FLOW_COMPLETED);
-		this.listenToEvent(EventType.AGENT_NOTIFICATION);
+		//this.listenToEvent(EventType.AGENT_NOTIFICATION);
 	}
 	
 	@Override
@@ -155,14 +158,19 @@ public class LabelAndMessagesPaneController extends Controller {
 	}
 	
 	private void processAgentNotification(Object data) {
-		Integer[] switchesChanged = (Integer[]) data;
+		AgentStatus agentStatus = (AgentStatus) data;
 		
-		if (switchesChanged != null) {
-			for (Integer switchChanged : switchesChanged) {
-				Branch sw = SimuladorRede.getEnvironment().getBranch(switchChanged);
-				SwitchOperation switchOperation = new SwitchOperation();
-				switchOperation.getMessage().setValue("Switch " + switchChanged + (sw.isClosed() ? " closed" : " opened") );
-				tvSwitchesOperations.getItems().add(switchOperation);
+		if (agentStatus != null) {
+			int ini = tvSwitchesOperations.getItems().size();
+			for (int i = ini; i < agentStatus.getStepStatus().size(); i++) {
+				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
+				Integer switchChanged = agentStepStatus.getIntegerInformation(AgentInformationType.SWITCH_STATE_CHANGED);
+				if (switchChanged != null) {
+					Branch sw = SimuladorRede.getEnvironment().getBranch(switchChanged);
+					SwitchOperation switchOperation = new SwitchOperation();
+					switchOperation.getMessage().setValue("Switch " + switchChanged + (sw.isClosed() ? " closed" : " opened") );
+					tvSwitchesOperations.getItems().add(switchOperation);
+				}
 			}
 		}
 	}

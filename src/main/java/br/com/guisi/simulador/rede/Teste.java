@@ -12,7 +12,20 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(String.format("%03d", 0));
+		int cont = 0;
+		double[][] arr = new double[2][100000000]; 
+		
+		while (true) {
+			arr[0][cont] = cont;
+			arr[1][cont] = 1;
+			
+			cont++;
+			
+			if (cont%100000 == 0) {
+				System.out.println(cont);
+				Thread.sleep(1000);
+			}
+		}
 	}
 	
 	public static void teste() throws Exception {

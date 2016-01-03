@@ -41,7 +41,6 @@ public class FunctionsPaneController extends Controller {
 		this.listenToEvent(EventType.FUNCTIONS_UPDATED);
 		this.listenToEvent(EventType.POWER_FLOW_COMPLETED);
 		this.listenToEvent(EventType.AGENT_NOTIFICATION);
-		this.listenToEvent(EventType.AGENT_STOPPED);
 		
 		for (Tab tab: tabPaneFunctions.getTabs()) {
 			@SuppressWarnings("unchecked")
@@ -63,8 +62,7 @@ public class FunctionsPaneController extends Controller {
 			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
 			case FUNCTIONS_UPDATED: this.updateFunctionsTables(); break;
 			case POWER_FLOW_COMPLETED: this.evaluateFunctionsExpressions(null); break;
-			//case AGENT_NOTIFICATION : this.processAgentNotification((AgentUpdates) data); break;
-			case AGENT_STOPPED: this.processAgentStop(); break;
+			case AGENT_NOTIFICATION : this.processAgentNotification(); break;
 			default: break;
 		}
 	}
@@ -173,14 +171,10 @@ public class FunctionsPaneController extends Controller {
 		}
 	}
 	
-	/*private void processAgentNotification(AgentUpdates agentUpdates) {
-		this.evaluateFunctionsExpressions("Switching Operations:");
-	}*/
-	
-	private void processAgentStop() {
+	private void processAgentNotification() {
 		this.evaluateFunctionsExpressions("Switching Operations:");
 	}
-
+	
 	@Override
 	public Node getView() {
 		return root;

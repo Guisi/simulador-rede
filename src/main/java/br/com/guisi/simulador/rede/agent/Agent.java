@@ -2,11 +2,13 @@ package br.com.guisi.simulador.rede.agent;
 
 import java.util.Observable;
 
+import br.com.guisi.simulador.rede.agent.status.AgentStatus;
+import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 
 public abstract class Agent extends Observable {
 	
-	protected AgentStatus agentStatus;
+	private AgentStatus agentStatus = new AgentStatus();
 	private boolean stopRequest;
 	private int stepCount = 1;
 	
@@ -16,9 +18,10 @@ public abstract class Agent extends Observable {
 		while (!stopRequest) {
 			synchronized (this) {
 				this.runNextEpisode();
+				this.generateAgentInformations();
 				
 				if (taskExecutionType.isNotifyObservers()) {
-					generateAgentNotification();
+					this.notifyAgentObservers();
 				}
 				
 				switch (taskExecutionType) {
@@ -29,16 +32,22 @@ public abstract class Agent extends Observable {
 		}
 	}
 	
-	public void generateAgentNotification() {
-		agentStatus = new AgentStatus(stepCount++);
-		setNotifications();
+	private void generateAgentInformations() {
+		AgentStepStatus agentStepStatus = new AgentStepStatus(stepCount++);
+		putInformations(agentStepStatus);
+		agentStatus.getStepStatus().add(agentStepStatus);
+	}
+	
+	private void notifyAgentObservers() {
 		setChanged();
-		notifyObservers(agentStatus);
+		AgentStatus copy = new AgentStatus();
+		copy.getStepStatus().addAll(agentStatus.getStepStatus());
+		notifyObservers(copy);
 	}
 	
 	protected abstract void runNextEpisode();
 	
-	protected abstract void setNotifications();
+	protected abstract void putInformations(AgentStepStatus agentStepStatus);
 	
 	public final void stop() {
 		stopRequest = true;
