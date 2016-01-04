@@ -1,16 +1,23 @@
 package br.com.guisi.simulador.rede.agent;
 
-import java.util.Observable;
+import javafx.application.Platform;
+
+import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
+import br.com.guisi.simulador.rede.events.EventBus;
+import br.com.guisi.simulador.rede.events.EventType;
 
-public abstract class Agent extends Observable {
+public abstract class Agent {
+	
+	@Inject
+	private EventBus eventBus;
 	
 	private AgentStatus agentStatus = new AgentStatus();
 	private boolean stopRequest;
-	private int stepCount = 1;
+	private int step = 1;
 	
 	public final void run(TaskExecutionType taskExecutionType) {
 		this.stopRequest = false;
@@ -20,9 +27,18 @@ public abstract class Agent extends Observable {
 				this.runNextEpisode();
 				this.generateAgentInformations();
 				
-				if (taskExecutionType.isNotifyObservers()) {
-					this.notifyAgentObservers();
+				if (taskExecutionType.isNotifyEveryStep()) {
+					try {
+						if (step % 1000 == 0) {
+							this.notifyAgentObservers();
+							Thread.sleep(100);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
+				
+				step++;
 				
 				switch (taskExecutionType) {
 					case STEP_BY_STEP: stop(); break;
@@ -30,19 +46,22 @@ public abstract class Agent extends Observable {
 				}
 			}
 		}
+		
+		this.notifyAgentObservers();
 	}
 	
 	private void generateAgentInformations() {
-		AgentStepStatus agentStepStatus = new AgentStepStatus(stepCount++);
+		AgentStepStatus agentStepStatus = new AgentStepStatus(step);
 		putInformations(agentStepStatus);
 		agentStatus.getStepStatus().add(agentStepStatus);
 	}
 	
 	private void notifyAgentObservers() {
-		setChanged();
 		AgentStatus copy = new AgentStatus();
 		copy.getStepStatus().addAll(agentStatus.getStepStatus());
-		notifyObservers(copy);
+		Platform.runLater(() -> {
+			eventBus.fire(EventType.AGENT_NOTIFICATION, copy);
+		});
 	}
 	
 	protected abstract void runNextEpisode();
@@ -52,9 +71,4 @@ public abstract class Agent extends Observable {
 	public final void stop() {
 		stopRequest = true;
 	}
-
-	public AgentStatus getAgentNotification() {
-		return agentStatus;
-	}
-	
 }

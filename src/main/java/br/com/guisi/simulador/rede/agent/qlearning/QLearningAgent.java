@@ -7,6 +7,7 @@ import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
@@ -92,7 +93,9 @@ public class QLearningAgent extends Agent {
 	
 	@Override
 	protected void putInformations(AgentStepStatus agentStepStatus) {
-		agentStepStatus.putInformation(AgentInformationType.SWITCH_STATE_CHANGED, currentState);
+		Environment environment = SimuladorRede.getEnvironment();
+		SwitchOperation switchOperation = new SwitchOperation(currentState, environment.getBranch(currentState).getSwitchState());
+		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATION, switchOperation);
 	}
 	
 	public QValue getBestQValue(Integer state) {

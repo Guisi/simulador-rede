@@ -39,14 +39,9 @@ public class AgentControlImpl implements AgentControl {
 			
 			agentTask = new AgentTask(agent, taskExecutionType);
 			
-			agentTask.valueProperty().addListener((observableValue, oldState, newState) -> {
-				eventBus.fire(EventType.AGENT_NOTIFICATION, newState);
-			});
-			
 			agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
 	            if (newState == Worker.State.SUCCEEDED) {
 	            	eventBus.fire(EventType.AGENT_STOPPED);
-	            	agent.deleteObservers();
 	            }
 	        });
 			

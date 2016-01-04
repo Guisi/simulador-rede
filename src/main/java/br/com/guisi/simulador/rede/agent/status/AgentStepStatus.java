@@ -22,6 +22,11 @@ public class AgentStepStatus {
 		return (Integer) getInformation(agentInformationType);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public <T> T getInformation(AgentInformationType agentInformationType, Class<T> clazz) {
+		return (T) getInformation(agentInformationType);
+	}
+	
 	public Object getInformation(AgentInformationType agentInformationType) {
 		return informationMap.get(agentInformationType);
 	}

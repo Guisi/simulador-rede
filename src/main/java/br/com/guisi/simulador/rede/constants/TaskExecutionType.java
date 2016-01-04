@@ -7,19 +7,19 @@ public enum TaskExecutionType {
 	STEP_BY_STEP("Step by step", true);
 	
 	private final String label;
-	private final boolean notifyObservers;
+	private final boolean notifyEveryStep;
 
-	private TaskExecutionType(String label, boolean notifyObservers) {
+	private TaskExecutionType(String label, boolean notifyEveryStep) {
 		this.label = label;
-		this.notifyObservers = notifyObservers;
+		this.notifyEveryStep = notifyEveryStep;
 	}
 
 	public String getLabel() {
 		return label;
 	}
 	
-	public boolean isNotifyObservers() {
-		return notifyObservers;
+	public boolean isNotifyEveryStep() {
+		return notifyEveryStep;
 	}
 
 	public String toString() {

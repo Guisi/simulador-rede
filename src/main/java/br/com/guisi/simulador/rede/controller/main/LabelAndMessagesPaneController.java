@@ -16,15 +16,14 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.controller.Controller;
-import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EventType;
-import br.com.guisi.simulador.rede.view.tableview.BrokenConstraint;
-import br.com.guisi.simulador.rede.view.tableview.SwitchOperation;
+import br.com.guisi.simulador.rede.view.tableview.BrokenConstraintRow;
+import br.com.guisi.simulador.rede.view.tableview.SwitchOperationRow;
 
 public class LabelAndMessagesPaneController extends Controller {
 
@@ -33,9 +32,9 @@ public class LabelAndMessagesPaneController extends Controller {
 	@FXML
 	private VBox root;
 	@FXML
-	private TableView<BrokenConstraint> tvBrokenConstraints;
+	private TableView<BrokenConstraintRow> tvBrokenConstraints;
 	@FXML
-	private TableView<SwitchOperation> tvSwitchesOperations;
+	private TableView<SwitchOperationRow> tvSwitchesOperations;
 	
 	@Override
 	public void initializeController() {
@@ -44,7 +43,7 @@ public class LabelAndMessagesPaneController extends Controller {
 		this.listenToEvent(EventType.RESET_SCREEN);
 		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
 		this.listenToEvent(EventType.POWER_FLOW_COMPLETED);
-		//this.listenToEvent(EventType.AGENT_NOTIFICATION);
+		this.listenToEvent(EventType.AGENT_NOTIFICATION);
 	}
 	
 	@Override
@@ -86,7 +85,7 @@ public class LabelAndMessagesPaneController extends Controller {
 		tvBrokenConstraints.setItems(FXCollections.observableArrayList());
 		tvBrokenConstraints.setPlaceholder(new Label("No broken constraints found"));
 
-		TableColumn<BrokenConstraint, String> tcBrokenConstraint = new TableColumn<BrokenConstraint, String>();
+		TableColumn<BrokenConstraintRow, String> tcBrokenConstraint = new TableColumn<BrokenConstraintRow, String>();
 		tcBrokenConstraint.setCellValueFactory(cellData -> cellData.getValue().getMessage());
 		tcBrokenConstraint.setStyle("-fx-alignment: center-left; -fx-text-fill: red;");
 		tcBrokenConstraint.setPrefWidth(590);
@@ -105,7 +104,7 @@ public class LabelAndMessagesPaneController extends Controller {
 		tvSwitchesOperations.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		tvSwitchesOperations.setItems(FXCollections.observableArrayList());
 		tvSwitchesOperations.setPlaceholder(new Label("No switches operations yet"));
-		TableColumn<SwitchOperation, String> tcSwitchOperation = new TableColumn<SwitchOperation, String>();
+		TableColumn<SwitchOperationRow, String> tcSwitchOperation = new TableColumn<SwitchOperationRow, String>();
 		tcSwitchOperation.setCellValueFactory(cellData -> cellData.getValue().getMessage());
 		tcSwitchOperation.setStyle("-fx-alignment: center-left; -fx-text-fill: red;");
 		tcSwitchOperation.setPrefWidth(590);
@@ -131,7 +130,7 @@ public class LabelAndMessagesPaneController extends Controller {
 					}
 				}
 				if (msg != null) {
-					BrokenConstraint constraint = new BrokenConstraint();
+					BrokenConstraintRow constraint = new BrokenConstraintRow();
 					constraint.getMessage().setValue("Load " + load.getNodeNumber() + ": " + msg);
 					tvBrokenConstraints.getItems().add(constraint);
 				}
@@ -139,7 +138,7 @@ public class LabelAndMessagesPaneController extends Controller {
 			
 			getEnvironment().getFeeders().forEach((feeder) -> {
 				if (feeder.isOn() && feeder.isPowerOverflow()) {
-					BrokenConstraint constraint = new BrokenConstraint();
+					BrokenConstraintRow constraint = new BrokenConstraintRow();
 					constraint.getMessage().setValue("Feeder " + feeder.getNodeNumber() 
 							+ ": Power overflow (max: " + feeder.getActivePower() + ", required: " + feeder.getUsedPower() + ")");
 					tvBrokenConstraints.getItems().add(constraint);
@@ -148,7 +147,7 @@ public class LabelAndMessagesPaneController extends Controller {
 			
 			getEnvironment().getBranches().forEach((branch) -> {
 				if (branch.isClosed() && branch.isMaxCurrentOverflow()) {
-					BrokenConstraint constraint = new BrokenConstraint();
+					BrokenConstraintRow constraint = new BrokenConstraintRow();
 					constraint.getMessage().setValue("Branch " + branch.getNumber() 
 							+ ": Max current overflow (max: " + branch.getMaxCurrent() + ", required: " + branch.getInstantCurrent() + ")");
 					tvBrokenConstraints.getItems().add(constraint);
@@ -164,12 +163,11 @@ public class LabelAndMessagesPaneController extends Controller {
 			int ini = tvSwitchesOperations.getItems().size();
 			for (int i = ini; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
-				Integer switchChanged = agentStepStatus.getIntegerInformation(AgentInformationType.SWITCH_STATE_CHANGED);
-				if (switchChanged != null) {
-					Branch sw = SimuladorRede.getEnvironment().getBranch(switchChanged);
-					SwitchOperation switchOperation = new SwitchOperation();
-					switchOperation.getMessage().setValue("Switch " + switchChanged + (sw.isClosed() ? " closed" : " opened") );
-					tvSwitchesOperations.getItems().add(switchOperation);
+				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
+				if (switchOperation != null) {
+					SwitchOperationRow row = new SwitchOperationRow();
+					row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState()).toString());
+					tvSwitchesOperations.getItems().add(row);
 				}
 			}
 		}

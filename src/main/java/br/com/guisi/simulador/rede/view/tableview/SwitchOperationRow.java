@@ -5,13 +5,13 @@ import java.io.Serializable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class SwitchOperation implements Serializable {
+public class SwitchOperationRow implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	private StringProperty message;
 	
-	public SwitchOperation() {
+	public SwitchOperationRow() {
 		this.message = new SimpleStringProperty();
 	}
 	

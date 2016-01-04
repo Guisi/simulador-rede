@@ -20,7 +20,7 @@ import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.events.EventType;
-import br.com.guisi.simulador.rede.view.tableview.NodeProperty;
+import br.com.guisi.simulador.rede.view.tableview.NodePropertyRow;
 
 public class ElementsDetailsPaneController extends Controller {
 
@@ -33,7 +33,7 @@ public class ElementsDetailsPaneController extends Controller {
 	@FXML
 	private ComboBox<Integer> cbLoadNumber;
 	@FXML
-	private TableView<NodeProperty> tvLoadDetails;
+	private TableView<NodePropertyRow> tvLoadDetails;
 	@FXML
 	private Button btnPreviousLoad;
 	@FXML
@@ -43,7 +43,7 @@ public class ElementsDetailsPaneController extends Controller {
 	@FXML
 	private ComboBox<Integer> cbFeederNumber;
 	@FXML
-	private TableView<NodeProperty> tvFeederDetails;
+	private TableView<NodePropertyRow> tvFeederDetails;
 	@FXML
 	private Button btnPreviousFeeder;
 	@FXML
@@ -53,7 +53,7 @@ public class ElementsDetailsPaneController extends Controller {
 	@FXML
 	private ComboBox<Integer> cbBranchNumber;
 	@FXML
-	private TableView<NodeProperty> tvBranchDetails;
+	private TableView<NodePropertyRow> tvBranchDetails;
 	@FXML
 	private Button btnPreviousBranch;
 	@FXML
@@ -106,7 +106,7 @@ public class ElementsDetailsPaneController extends Controller {
 		tvBranchDetails.getItems().clear();
 	}
 
-	private void initializeTable(TableView<NodeProperty> tableView) {
+	private void initializeTable(TableView<NodePropertyRow> tableView) {
 		tableView.widthProperty().addListener((source, oldWidth, newWidth) -> {
 			Pane header = (Pane) tableView.lookup("TableHeaderRow");
 			if (header.isVisible()) {
@@ -120,13 +120,13 @@ public class ElementsDetailsPaneController extends Controller {
 		tableView.setPlaceholder(new Label(""));
 		tableView.setStyle("-fx-focus-color: transparent; -fx-box-border: transparent;");
 
-		TableColumn<NodeProperty, String> tcPropertyName = new TableColumn<NodeProperty, String>();
+		TableColumn<NodePropertyRow, String> tcPropertyName = new TableColumn<NodePropertyRow, String>();
 		tcPropertyName.setCellValueFactory(cellData -> cellData.getValue().getPropertyName());
 		tcPropertyName.setStyle("-fx-alignment: center-right; -fx-font-weight: bold;");
 		tcPropertyName.setPrefWidth(150);
 		tableView.getColumns().add(tcPropertyName);
 		
-		TableColumn<NodeProperty, String> tcPropertyValue = new TableColumn<NodeProperty, String>();
+		TableColumn<NodePropertyRow, String> tcPropertyValue = new TableColumn<NodePropertyRow, String>();
 		tcPropertyValue.setCellValueFactory(cellData -> cellData.getValue().getPropertyValue());
 		tcPropertyValue.setStyle("-fx-alignment: center-left;");
 		tcPropertyValue.setPrefWidth(100);
@@ -153,12 +153,12 @@ public class ElementsDetailsPaneController extends Controller {
 		Load load = getEnvironment().getLoad(selectedLoad);
 		
 		tvLoadDetails.getItems().clear();
-		tvLoadDetails.getItems().add(new NodeProperty("Feeder:", load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : ""));
-		tvLoadDetails.getItems().add(new NodeProperty("Active Power kW:", df.format(load.getActivePower())));
-		tvLoadDetails.getItems().add(new NodeProperty("Reactive Power kVar:", df.format(load.getReactivePower())));
-		tvLoadDetails.getItems().add(new NodeProperty("Priority:", String.valueOf(load.getPriority())));
-		tvLoadDetails.getItems().add(new NodeProperty("Status:", load.isOn() ? "On" : "Off"));
-		tvLoadDetails.getItems().add(new NodeProperty("Current Voltage pu:", df.format(load.getCurrentVoltagePU())));
+		tvLoadDetails.getItems().add(new NodePropertyRow("Feeder:", load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : ""));
+		tvLoadDetails.getItems().add(new NodePropertyRow("Active Power kW:", df.format(load.getActivePower())));
+		tvLoadDetails.getItems().add(new NodePropertyRow("Reactive Power kVar:", df.format(load.getReactivePower())));
+		tvLoadDetails.getItems().add(new NodePropertyRow("Priority:", String.valueOf(load.getPriority())));
+		tvLoadDetails.getItems().add(new NodePropertyRow("Status:", load.isOn() ? "On" : "Off"));
+		tvLoadDetails.getItems().add(new NodePropertyRow("Current Voltage pu:", df.format(load.getCurrentVoltagePU())));
 		cbLoadNumber.valueProperty().setValue(selectedLoad);
 	}
 	
@@ -171,11 +171,11 @@ public class ElementsDetailsPaneController extends Controller {
 		Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
 		
 		tvFeederDetails.getItems().clear();
-		tvFeederDetails.getItems().add(new NodeProperty("Active Power kW:", df.format(feeder.getActivePower())));
-		tvFeederDetails.getItems().add(new NodeProperty("Reactive Power kVar:", df.format(feeder.getReactivePower())));
-		tvFeederDetails.getItems().add(new NodeProperty("Energized Loads:", String.valueOf(feeder.getEnergizedLoads())));
-		tvFeederDetails.getItems().add(new NodeProperty("Used Active Power:", df.format(feeder.getUsedPower())));
-		tvFeederDetails.getItems().add(new NodeProperty("Available Active Power:", df.format(feeder.getAvailablePower())));
+		tvFeederDetails.getItems().add(new NodePropertyRow("Active Power kW:", df.format(feeder.getActivePower())));
+		tvFeederDetails.getItems().add(new NodePropertyRow("Reactive Power kVar:", df.format(feeder.getReactivePower())));
+		tvFeederDetails.getItems().add(new NodePropertyRow("Energized Loads:", String.valueOf(feeder.getEnergizedLoads())));
+		tvFeederDetails.getItems().add(new NodePropertyRow("Used Active Power:", df.format(feeder.getUsedPower())));
+		tvFeederDetails.getItems().add(new NodePropertyRow("Available Active Power:", df.format(feeder.getAvailablePower())));
 		cbFeederNumber.valueProperty().set(selectedFeeder);
 	}
 	
@@ -188,14 +188,14 @@ public class ElementsDetailsPaneController extends Controller {
 		Branch branch = getEnvironment().getBranch(selectedBranch);
 		
 		tvBranchDetails.getItems().clear();
-		tvBranchDetails.getItems().add(new NodeProperty("From:", branch.getNode1().getNodeNumber().toString()));
-		tvBranchDetails.getItems().add(new NodeProperty("To:", branch.getNode2().getNodeNumber().toString()));
-		tvBranchDetails.getItems().add(new NodeProperty("Max Current A:", df.format(branch.getMaxCurrent())));
-		tvBranchDetails.getItems().add(new NodeProperty("Instant Current A:", df.format(branch.getInstantCurrent())));
-		tvBranchDetails.getItems().add(new NodeProperty("Resistance \u03A9:", df.format(branch.getResistance())));
-		tvBranchDetails.getItems().add(new NodeProperty("Reactance \u03A9:", df.format(branch.getReactance())));
-		tvBranchDetails.getItems().add(new NodeProperty("Status:", branch.isClosed() ? "Closed" : "Open"));
-		tvBranchDetails.getItems().add(new NodeProperty("Losses MW:", df.format(branch.getLossesMW())));
+		tvBranchDetails.getItems().add(new NodePropertyRow("From:", branch.getNode1().getNodeNumber().toString()));
+		tvBranchDetails.getItems().add(new NodePropertyRow("To:", branch.getNode2().getNodeNumber().toString()));
+		tvBranchDetails.getItems().add(new NodePropertyRow("Max Current A:", df.format(branch.getMaxCurrent())));
+		tvBranchDetails.getItems().add(new NodePropertyRow("Instant Current A:", df.format(branch.getInstantCurrent())));
+		tvBranchDetails.getItems().add(new NodePropertyRow("Resistance \u03A9:", df.format(branch.getResistance())));
+		tvBranchDetails.getItems().add(new NodePropertyRow("Reactance \u03A9:", df.format(branch.getReactance())));
+		tvBranchDetails.getItems().add(new NodePropertyRow("Status:", branch.isClosed() ? "Closed" : "Open"));
+		tvBranchDetails.getItems().add(new NodePropertyRow("Losses MW:", df.format(branch.getLossesMW())));
 		cbBranchNumber.valueProperty().set(selectedBranch);
 	}
 	
