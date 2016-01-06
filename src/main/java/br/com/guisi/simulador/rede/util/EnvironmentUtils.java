@@ -114,7 +114,9 @@ public class EnvironmentUtils {
 				
 				boolean switchBranch = getIntegerCellValue(line.getCell(col++)) == 1;
 				
-				Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, switchState, switchBranch);
+				boolean fault = getIntegerCellValue(line.getCell(col++)) == 1;
+				
+				Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, switchState, switchBranch, fault);
 				branchMap.put(branchNum, branch);
 				
 				//adiciona a branch nos dois loads os quais ela conecta

@@ -17,12 +17,14 @@ public class Branch {
 	private double reactance;
 	private boolean switchBranch;
 	private SwitchState switchState;
+	private boolean fault;
+	
 	private int switchOperations;
-
 	private double instantCurrent;
 	private double lossesMW;
 	
-	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, double reactance, SwitchState switchState, boolean switchBranch) {
+	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, 
+			double reactance, SwitchState switchState, boolean switchBranch, boolean fault) {
 		this.number = number;
 		this.node1 = node1;
 		this.node2 = node2;
@@ -32,6 +34,7 @@ public class Branch {
 		this.switchState = switchState;
 		this.switchBranch = switchBranch;
 		this.branchId = new BranchId(node1.getNodeNumber(), node2.getNodeNumber());
+		this.fault = fault;
 	}
 	
 	/**
@@ -201,6 +204,18 @@ public class Branch {
 
 	public void setLossesMW(double lossesMW) {
 		this.lossesMW = lossesMW;
+	}
+	
+	/**
+	 * Retorna se possui uma falta no switch
+	 * @return
+	 */
+	public boolean isFault() {
+		return fault;
+	}
+
+	public void setFault(boolean fault) {
+		this.fault = fault;
 	}
 
 	@Override

@@ -6,9 +6,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Shape;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.controller.Controller;
@@ -33,10 +30,6 @@ public class NetworkPaneController extends Controller {
 	
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
-	
-	private Integer selectedLoad;
-	private Integer selectedFeeder;
-	private Integer selectedBranch;
 	
 	@Override
 	public void initializeController() {
@@ -65,9 +58,9 @@ public class NetworkPaneController extends Controller {
 		switch (eventType) {
 			case RESET_SCREEN: this.resetScreen(); break;
 			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
-			case LOAD_SELECTED: this.updateLoadDrawing((Integer) data); break;
-			case FEEDER_SELECTED: this.updateFeederInformationBox((Integer) data); break;
-			case BRANCH_SELECTED: this.updateBranchInformationBox((Integer) data); break;
+			case LOAD_SELECTED: this.processLoadSelected(data); break;
+			case FEEDER_SELECTED: this.processFeederSelected(data); break;
+			case BRANCH_SELECTED: this.processBranchSelected(data); break;
 			//case AGENT_NOTIFICATION : this.processAgentNotification((AgentUpdates) data); break;
 			case AGENT_STOPPED: this.processAgentStop(); break;
 			default: break;
@@ -99,7 +92,7 @@ public class NetworkPaneController extends Controller {
 		
 		//Desenha loads e feeders
 		getEnvironment().getNetworkNodeMap().values().forEach((node) -> {
-			NetworkNodeStackPane loadStack = networkPane.drawLoad(node, getEnvironment());
+			NetworkNodeStackPane loadStack = networkPane.drawNetworkNode(node, getEnvironment());
 			loadStack.setOnMouseClicked((event) -> {
 				Integer nodeNumber = ((NetworkNodeStackPane)event.getSource()).getNetworkNodeNumber();
 				this.fireEvent(node.isLoad() ? EventType.LOAD_SELECTED : EventType.FEEDER_SELECTED, nodeNumber);
@@ -124,34 +117,16 @@ public class NetworkPaneController extends Controller {
 		networkPane.setSnapToPixel(false);
 	}
 	
-	private void updateLoadDrawing(Integer selected) {
-		if (selectedLoad != null) {
-			networkPane.updateNetworkNode(getEnvironment().getLoad(selectedLoad));
-		}
-		selectedLoad = selected;
-		Shape shape = networkPane.getLoadPaneMap().get(selectedLoad).getNetworkNodeShape();
-		shape.setStroke(Color.DARKORANGE);
-		shape.setStrokeWidth(2);
+	private void processLoadSelected(Object data) {
+		networkPane.selectLoad((Integer) data);
 	}
 	
-	private void updateFeederInformationBox(Integer selected) {
-		if (selectedFeeder != null) {
-			networkPane.updateNetworkNode(getEnvironment().getFeeder(selectedFeeder));
-		}
-		selectedFeeder = selected;
-		Shape shape = networkPane.getLoadPaneMap().get(selectedFeeder).getNetworkNodeShape();
-		shape.setStroke(Color.DARKORANGE);
-		shape.setStrokeWidth(2);
+	private void processFeederSelected(Object data) {
+		networkPane.selectFeeder((Integer) data);
 	}
 	
-	private void updateBranchInformationBox(Integer selected) {
-		if (selectedBranch != null) {
-			networkPane.updateBranch(getEnvironment().getBranch(selectedBranch));
-		}
-		selectedBranch = selected;
-		Line l = networkPane.getBranchPaneMap().get(selectedBranch).getBranchLine();
-		l.setStroke(Color.DARKORANGE);
-		l.setStrokeWidth(2);
+	private void processBranchSelected(Object data) {
+		networkPane.selectBranch((Integer) data);
 	}
 	
 	/*private void processAgentNotification(AgentUpdates agentUpdates) {
@@ -177,10 +152,13 @@ public class NetworkPaneController extends Controller {
 		//atualiza informações das conexões dos feeders e loads
 		EnvironmentUtils.updateFeedersConnections(environment);
 			
-		environment.getSwitches().forEach((sw) -> networkPane.updateBranch(sw));
+		environment.getSwitches().forEach((sw) -> networkPane.updateBranchDrawing(sw));
 			
-		//atualiza status dos nós na tela
-		environment.getNetworkNodes().forEach((node) -> networkPane.updateNetworkNode(node));
+		//atualiza status dos loads na tela
+		environment.getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
+		
+		//atualiza status dos feeders na tela
+		environment.getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
 	}
 	
 	@Override

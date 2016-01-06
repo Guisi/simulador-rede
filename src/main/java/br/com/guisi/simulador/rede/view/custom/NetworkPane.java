@@ -20,6 +20,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
@@ -32,8 +33,154 @@ public class NetworkPane extends Pane {
 	private Map<Integer, NetworkNodeStackPane> networkNodePaneMap = new HashMap<Integer, NetworkNodeStackPane>();
 	private Map<Integer, BranchStackPane> branchPaneMap = new HashMap<Integer, BranchStackPane>();
 	private Integer agentPosition;
+	
+	private Integer selectedLoad;
+	private Integer selectedFeeder;
+	private Integer selectedBranch;
+	
+	/**
+	 * Guarda o load selecionado e atualiza estilo
+	 * @param selected
+	 */
+	public void selectLoad(Integer selected) {
+		Integer lastSelectedLoad = selectedLoad;
+		selectedLoad = selected;
+		if (lastSelectedLoad != null) {
+			this.updateLoadDrawing(SimuladorRede.getEnvironment().getLoad(lastSelectedLoad));
+		}
+		this.updateLoadDrawing(SimuladorRede.getEnvironment().getLoad(selectedLoad));
+	}
+	
+	/**
+	 * Atualiza o estilo do load passado
+	 * @param load
+	 */
+	public void updateLoadDrawing(Load load) {
+		boolean selected = selectedLoad != null && selectedLoad.equals(load.getNodeNumber());
+		
+		NetworkNodeStackPane networkNodePane = networkNodePaneMap.get(load.getNodeNumber());
 
-	public NetworkNodeStackPane drawLoad(NetworkNode networkNode, Environment environment) {
+		Shape shape = networkNodePane.getNetworkNodeShape();
+		shape.setStroke(selected ? Color.DARKORANGE : Color.BLACK);
+		shape.setStrokeWidth(selected ? 2 : 1);
+		
+		Color networkNodeColor = load.isOn() ? Color.web(load.getColor()) : Color.BLACK;
+		Text txt = networkNodePane.getNetworkNodeText();
+		if (load.isSupplied()) {
+			txt.setFont(Font.font("Verdana", FontWeight.NORMAL, 11));
+			txt.setFill(Color.BLACK);
+		} else {
+			txt.setFont(Font.font("Verdana", FontWeight.BOLD, 11));
+			txt.setFill(Color.RED);
+		}
+		shape.setFill(networkNodeColor);
+	}
+	
+	/**
+	 * Guarda o feeder selecionado e atualiza estilo
+	 * @param selected
+	 */
+	public void selectFeeder(Integer selected) {
+		Integer lastSelectedFeeder = selectedFeeder;
+		selectedFeeder = selected;
+		if (lastSelectedFeeder != null) {
+			this.updateFeederDrawing(SimuladorRede.getEnvironment().getFeeder(lastSelectedFeeder));
+		}
+		this.updateFeederDrawing(SimuladorRede.getEnvironment().getFeeder(selectedFeeder));
+	}
+	
+	/**
+	 * Atualiza o estilo do feeder passado
+	 * @param feeder
+	 */
+	public void updateFeederDrawing(Feeder feeder) {
+		boolean selected = selectedFeeder != null && selectedFeeder.equals(feeder.getNodeNumber());
+		
+		NetworkNodeStackPane networkNodePane = networkNodePaneMap.get(feeder.getNodeNumber());
+
+		Shape shape = networkNodePane.getNetworkNodeShape();
+		shape.setStroke(selected ? Color.DARKORANGE : Color.BLACK);
+		shape.setStrokeWidth(selected ? 2 : 1);
+		
+		Color networkNodeColor = Color.web(feeder.getFeederColor());
+		Text txt = networkNodePane.getNetworkNodeText();
+		txt.setFill(feeder.isPowerOverflow() ? Color.RED : Color.BLACK);
+		txt.setFont(Font.font("Verdana", feeder.isPowerOverflow() ? FontWeight.BOLD : FontWeight.NORMAL, 11));
+		shape.setFill(networkNodeColor);
+	}
+	
+	/**
+	 * Guarda o branch selecionado e atualiza estilo
+	 * @param selected
+	 */
+	public void selectBranch(Integer selected) {
+		Integer lastSelectedBranch = selectedBranch;
+		selectedBranch = selected;
+		if (lastSelectedBranch != null) {
+			this.updateBranchDrawing(SimuladorRede.getEnvironment().getBranch(lastSelectedBranch));
+		}
+		this.updateBranchDrawing(SimuladorRede.getEnvironment().getBranch(selectedBranch));
+	}
+	
+	/**
+	 * Atualiza o estilo do branch passado
+	 * @param branch
+	 */
+	public void updateBranchDrawing(Branch branch) {
+		boolean selected = selectedBranch != null && selectedBranch.equals(branch.getNumber());
+		
+		BranchStackPane branchPane = branchPaneMap.get(branch.getNumber());
+
+		Text txt = branchPane.getBranchText();
+		txt.setFill(branch.isMaxCurrentOverflow() ? Color.RED : Color.BLACK);
+		
+		Line line = branchPane.getBranchLine();
+		line.setStroke(selected ? Color.DARKORANGE : Color.BLACK);
+		line.setStrokeWidth(selected ? 2 : 1.3);
+		if (branch.isClosed()) {
+			line.getStrokeDashArray().clear();
+		} else {
+			line.getStrokeDashArray().addAll(2d, 5d);
+		}
+		
+		Rectangle rect = branchPane.getSwitchRectangle();
+		rect.setFill(branch.isClosed() ? Color.BLACK : Color.WHITE);
+		rect.setStrokeWidth(1);
+		if (branch.isClosed()) {
+			rect.setStroke(Color.BLACK);
+		} else {
+			rect.setStroke(Color.GRAY);
+		}
+	}
+	
+	/**
+	 * Define a posição onde o agente está
+	 * @param branchNumber
+	 */
+	public void setAgentCirclePosition(Integer branchNumber) {
+		setAgentCircleVisibility(agentPosition, false);
+		agentPosition = branchNumber;
+		setAgentCircleVisibility(agentPosition, true);
+	}
+	
+	/**
+	 * Mostra ou esconde o círculo do agente no branch passado
+	 * @param branchNumber
+	 * @param visible
+	 */
+	private void setAgentCircleVisibility(Integer branchNumber, boolean visible) {
+		if (branchNumber != null) {
+			BranchStackPane branchPane = branchPaneMap.get(branchNumber);
+			if (branchPane != null) {
+				Circle c = branchPane.getAgentCircle();
+				if (c != null) {
+					c.setVisible(visible);
+				}
+			}
+		}
+	}
+
+	public NetworkNodeStackPane drawNetworkNode(NetworkNode networkNode, Environment environment) {
 		Text text = new Text(DecimalFormat.getNumberInstance().format(networkNode.getNodeNumber()));
 		text.setBoundsType(TextBoundsType.VISUAL);
 		NetworkNodeStackPane stack = new NetworkNodeStackPane(networkNode.getNodeNumber());
@@ -58,42 +205,15 @@ public class NetworkPane extends Pane {
 		getChildren().add(stack);
 
 		networkNodePaneMap.put(networkNode.getNodeNumber(), stack);
-		this.updateNetworkNode(networkNode);
+		if (networkNode.isLoad()) {
+			this.updateLoadDrawing((Load) networkNode);
+		} else {
+			this.updateFeederDrawing((Feeder) networkNode);
+		}
 
 		return stack;
 	}
-
-	public void updateNetworkNode(NetworkNode networkNode) {
-		NetworkNodeStackPane networkNodePane = networkNodePaneMap.get(networkNode.getNodeNumber());
-
-		Shape shape = networkNodePane.getNetworkNodeShape();
-		shape.setStroke(Color.BLACK);
-		shape.setStrokeWidth(1);
 		
-		Color networkNodeColor;
-		if (networkNode.isLoad()) {
-			Load load = (Load) networkNode;
-			networkNodeColor = load.isOn() ? Color.web(load.getColor()) : Color.BLACK;
-			
-			Text txt = networkNodePane.getNetworkNodeText();
-			if (load.isSupplied()) {
-				txt.setFont(Font.font("Verdana", FontWeight.NORMAL, 11));
-				txt.setFill(Color.BLACK);
-			} else {
-				txt.setFont(Font.font("Verdana", FontWeight.BOLD, 11));
-				txt.setFill(Color.RED);
-			}
-		} else {
-			Feeder feeder = (Feeder) networkNode;
-			networkNodeColor = Color.web(feeder.getFeederColor());
-			
-			Text txt = networkNodePane.getNetworkNodeText();
-			txt.setFill(feeder.isPowerOverflow() ? Color.RED : Color.BLACK);
-			txt.setFont(Font.font("Verdana", feeder.isPowerOverflow() ? FontWeight.BOLD : FontWeight.NORMAL, 11));
-		}
-		shape.setFill(networkNodeColor);
-	}
-
 	public void drawBranch(Branch branch, int sizeX, int sizeY, EventHandler<MouseEvent> mouseClicked) {
 		BranchStackPane sp = new BranchStackPane(branch.getNumber());
 		branchPaneMap.put(branch.getNumber(), sp);
@@ -187,52 +307,9 @@ public class NetworkPane extends Pane {
 		
 		box.toFront();
 		
-		this.updateBranch(branch);
+		this.updateBranchDrawing(branch);
 	}
 	
-	public void updateBranch(Branch branch) {
-		BranchStackPane branchPane = branchPaneMap.get(branch.getNumber());
-
-		Text txt = branchPane.getBranchText();
-		txt.setFill(branch.isMaxCurrentOverflow() ? Color.RED : Color.BLACK);
-		
-		Line line = branchPane.getBranchLine();
-		line.setStroke(Color.BLACK);
-		line.setStrokeWidth(1.3);
-		if (branch.isClosed()) {
-			line.getStrokeDashArray().clear();
-		} else {
-			line.getStrokeDashArray().addAll(2d, 5d);
-		}
-		
-		Rectangle rect = branchPane.getSwitchRectangle();
-		rect.setFill(branch.isClosed() ? Color.BLACK : Color.WHITE);
-		rect.setStrokeWidth(1);
-		if (branch.isClosed()) {
-			rect.setStroke(Color.BLACK);
-		} else {
-			rect.setStroke(Color.GRAY);
-		}
-	}
-	
-	public void setAgentCirclePosition(Integer branchNumber) {
-		setAgentCircleVisibility(agentPosition, false);
-		agentPosition = branchNumber;
-		setAgentCircleVisibility(agentPosition, true);
-	}
-	
-	private void setAgentCircleVisibility(Integer branchNumber, boolean visible) {
-		if (branchNumber != null) {
-			BranchStackPane branchPane = branchPaneMap.get(branchNumber);
-			if (branchPane != null) {
-				Circle c = branchPane.getAgentCircle();
-				if (c != null) {
-					c.setVisible(visible);
-				}
-			}
-		}
-	}
-
 	/**
 	 * Desenha um grid para facilitar a visualização do plano cartesiano
 	 */
