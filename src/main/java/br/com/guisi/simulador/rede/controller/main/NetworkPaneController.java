@@ -41,12 +41,7 @@ public class NetworkPaneController extends Controller {
 		this.listenToEvent(EventType.AGENT_NOTIFICATION);
 		this.listenToEvent(EventType.AGENT_STOPPED);
 		
-		networkPane = new NetworkPane();
-		zoomingPane = new ZoomingPane(networkPane);
-		zoomingPane.getStyleClass().add("networkPane");
-		zoomingPane.zoomFactorProperty().bind(zoomSlider.valueProperty());
-		
-		root.getChildren().add(zoomingPane);
+		this.resetScreen();
 	}
 	
 	@Override
@@ -68,8 +63,17 @@ public class NetworkPaneController extends Controller {
 	}
 	
 	private void resetScreen() {
+		root.getChildren().clear();
 		root.setVisible(false);
 		zoomSlider.setValue(1);
+		
+		networkPane = new NetworkPane();
+		zoomingPane = new ZoomingPane(networkPane);
+		zoomingPane.getStyleClass().add("networkPane");
+		zoomingPane.zoomFactorProperty().bind(zoomSlider.valueProperty());
+		
+		root.getChildren().add(zoomSlider);
+		root.getChildren().add(zoomingPane);
 	}
 	
 	private void onEnvironmentLoaded() {

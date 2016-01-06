@@ -7,10 +7,12 @@ import java.util.Map;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -32,7 +34,6 @@ public class NetworkPane extends Pane {
 
 	private Map<Integer, NetworkNodeStackPane> networkNodePaneMap = new HashMap<Integer, NetworkNodeStackPane>();
 	private Map<Integer, BranchStackPane> branchPaneMap = new HashMap<Integer, BranchStackPane>();
-	private Integer agentPosition;
 	
 	private Integer selectedLoad;
 	private Integer selectedFeeder;
@@ -132,7 +133,9 @@ public class NetworkPane extends Pane {
 		BranchStackPane branchPane = branchPaneMap.get(branch.getNumber());
 
 		Text txt = branchPane.getBranchText();
-		txt.setFill(branch.isMaxCurrentOverflow() ? Color.RED : Color.BLACK);
+		if (txt != null) {
+			txt.setFill(branch.isMaxCurrentOverflow() ? Color.RED : Color.BLACK);
+		}
 		
 		Line line = branchPane.getBranchLine();
 		line.setStroke(selected ? Color.DARKORANGE : Color.BLACK);
@@ -144,42 +147,17 @@ public class NetworkPane extends Pane {
 		}
 		
 		Rectangle rect = branchPane.getSwitchRectangle();
-		rect.setFill(branch.isClosed() ? Color.BLACK : Color.WHITE);
-		rect.setStrokeWidth(1);
-		if (branch.isClosed()) {
-			rect.setStroke(Color.BLACK);
-		} else {
-			rect.setStroke(Color.GRAY);
-		}
-	}
-	
-	/**
-	 * Define a posição onde o agente está
-	 * @param branchNumber
-	 */
-	public void setAgentCirclePosition(Integer branchNumber) {
-		setAgentCircleVisibility(agentPosition, false);
-		agentPosition = branchNumber;
-		setAgentCircleVisibility(agentPosition, true);
-	}
-	
-	/**
-	 * Mostra ou esconde o círculo do agente no branch passado
-	 * @param branchNumber
-	 * @param visible
-	 */
-	private void setAgentCircleVisibility(Integer branchNumber, boolean visible) {
-		if (branchNumber != null) {
-			BranchStackPane branchPane = branchPaneMap.get(branchNumber);
-			if (branchPane != null) {
-				Circle c = branchPane.getAgentCircle();
-				if (c != null) {
-					c.setVisible(visible);
-				}
+		if (!branch.isFault()) {
+			rect.setFill(branch.isClosed() ? Color.BLACK : Color.WHITE);
+			rect.setStrokeWidth(1);
+			if (branch.isClosed()) {
+				rect.setStroke(Color.BLACK);
+			} else {
+				rect.setStroke(Color.GRAY);
 			}
 		}
 	}
-
+	
 	public NetworkNodeStackPane drawNetworkNode(NetworkNode networkNode, Environment environment) {
 		Text text = new Text(DecimalFormat.getNumberInstance().format(networkNode.getNodeNumber()));
 		text.setBoundsType(TextBoundsType.VISUAL);
@@ -238,6 +216,12 @@ public class NetworkPane extends Pane {
 			endX -= Constants.BRANCH_TYPE_PX * 1.5;
 		}
 
+		/** agrupa rectangle e text */
+		VBox box = new VBox();
+		box.setAlignment(Pos.CENTER);
+		box.setSpacing(2);
+		sp.getChildren().add(box);
+		
 		/** Linha branch */
 		Line l = new Line();
 		l.setStartX(startX);
@@ -254,39 +238,34 @@ public class NetworkPane extends Pane {
 		sp.setLayoutY(Math.min(l.getEndY(), l.getStartY()));
 
 		/** Label branch */
-		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_2);
-		String power = " (" + df.format(branch.getMaxCurrent()) + ")";
-		Text text = new Text(power);
-		text.setFont(Font.font(10));
-		text.setBoundsType(TextBoundsType.VISUAL);
-		text.setOnMouseClicked(mouseClicked);
-		sp.setBranchText(text);
+		if (!branch.isFault()) {
+			DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_2);
+			String power = " (" + df.format(branch.getMaxCurrent()) + ")";
+			Text text = new Text(power);
+			text.setFont(Font.font(10));
+			text.setBoundsType(TextBoundsType.VISUAL);
+			text.setOnMouseClicked(mouseClicked);
+			sp.setBranchText(text);
+			box.getChildren().add(text);
+		}
 
 		/** Tipo branch */
 		Rectangle r = new Rectangle();
-		r.setWidth(Constants.BRANCH_TYPE_PX * 2);
-		r.setHeight(Constants.BRANCH_TYPE_PX);
 		r.setOnMouseClicked(mouseClicked);
 		r.setVisible(branch.isSwitchBranch());
 		sp.setSwitchRectangle(r);
-		
-		/** agrupa rectangle e text */
-		VBox box = new VBox();
-		box.setAlignment(Pos.CENTER);
-		box.setSpacing(2);
-		box.getChildren().add(text);
 		box.getChildren().add(r);
-		sp.getChildren().add(box);
-
-		if (branch.isSwitchBranch()) {
-			Circle c = new Circle();
-			c.setRadius(4);
-			c.setFill(Color.GREEN);
-			c.setVisible(false);
-			box.getChildren().add(c);
+		
+		if (branch.isFault()) {
+			r.setWidth(Constants.BRANCH_TYPE_PX * 4);
+			r.setHeight(Constants.BRANCH_TYPE_PX * 3);
+			Image img = new Image(getClass().getResourceAsStream("/img/fault-bolt.png"));
+			ImagePattern imagePattern = new ImagePattern(img);
+			r.setFill(imagePattern);
 			box.setPadding(new Insets(0, 0, 0, 0));
-			sp.setAgentCircle(c);
 		} else {
+			r.setWidth(Constants.BRANCH_TYPE_PX * 2);
+			r.setHeight(Constants.BRANCH_TYPE_PX);
 			box.setPadding(new Insets(0, 0, Constants.BRANCH_TYPE_PX, 0));
 		}
 
@@ -301,6 +280,9 @@ public class NetworkPane extends Pane {
 				angle -= 180;
 			} else if (angle < -90) {
 				angle += 180;
+			}
+			if (branch.isFault()) {
+				sp.setLayoutX(sp.getLayoutX() - Constants.BRANCH_TYPE_PX / 2);
 			}
 			box.setRotate(angle);
 		}
@@ -369,4 +351,6 @@ public class NetworkPane extends Pane {
 	public Map<Integer, BranchStackPane> getBranchPaneMap() {
 		return branchPaneMap;
 	}
+	
+	
 }
