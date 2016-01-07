@@ -228,6 +228,14 @@ public class Branch {
 	public boolean hasFault() {
 		return SwitchState.FAULT.equals(switchState);
 	}
+	
+	/**
+	 * Retorna se branch está desligado para isolamento de falta
+	 * @return
+	 */
+	public boolean isIsolated() {
+		return SwitchState.ISOLATED.equals(switchState);
+	}
 
 	@Override
 	public int hashCode() {

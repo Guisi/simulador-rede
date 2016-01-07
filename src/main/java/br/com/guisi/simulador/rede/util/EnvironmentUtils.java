@@ -391,9 +391,9 @@ public class EnvironmentUtils {
 	}
 	
 	private static void isolateNextSwitchesRecursive(Branch branch, NetworkNode lastNetworkNode) {
-		for (NetworkNode networkNode : branch.getConnectedLoads()) {
+		branch.getConnectedLoads().forEach((networkNode) -> {
 			if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
-				for (Branch connectedBranch : networkNode.getBranches()) {
+				networkNode.getBranches().forEach((connectedBranch) -> {
 					if (!connectedBranch.equals(branch)) {
 						if (connectedBranch.isSwitchBranch()) {
 							connectedBranch.isolateSwitch();
@@ -401,23 +401,9 @@ public class EnvironmentUtils {
 							isolateNextSwitchesRecursive(connectedBranch, networkNode);
 						}
 					}
-				}
-			}
-		}
-		
-		/*branch.getConnectedLoads().forEach((networkNode) -> {
-			if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
-				networkNode.getBranches().forEach((connectedBranch) -> {
-					if (!connectedBranch.equals(branch)) {
-						if (branch.isSwitchBranch()) {
-							branch.isolateSwitch();
-						} else {
-							isolateNextSwitchesRecursive(connectedBranch, networkNode);
-						}
-					}
 				});
 			}
-		});*/
+		});
 	}
 	
 	/*public static void main(String[] args) {

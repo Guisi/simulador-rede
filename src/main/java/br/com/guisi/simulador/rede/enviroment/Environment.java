@@ -59,7 +59,11 @@ public class Environment {
 	 * @return
 	 */
 	public Branch getRandomSwitch() {
-		return switches.get(RANDOM.nextInt(switches.size()));
+		Branch sw;
+		do {
+			sw = switches.get(RANDOM.nextInt(switches.size()));
+		} while (sw.hasFault() || sw.isIsolated());
+		return sw;
 	}
 	
 	/**
