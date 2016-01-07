@@ -94,6 +94,9 @@ public class MenuPaneController extends Controller {
 				String errors = EnvironmentUtils.validateRadialState(environment);
 				
 				if (StringUtils.isEmpty(errors)) {
+					//isola as faltas
+					EnvironmentUtils.isolateFaultSwitches(environment);
+					
 					//executa o fluxo de potência
 					powerFlowSuccess = PowerFlow.execute(environment);
 
@@ -110,6 +113,7 @@ public class MenuPaneController extends Controller {
 				}
 				
 				this.fireEvent(EventType.ENVIRONMENT_LOADED);
+
 				if (powerFlowSuccess) {
 					this.fireEvent(EventType.POWER_FLOW_COMPLETED);
 				}

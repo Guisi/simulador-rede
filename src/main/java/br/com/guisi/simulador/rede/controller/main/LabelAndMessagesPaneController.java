@@ -166,7 +166,7 @@ public class LabelAndMessagesPaneController extends Controller {
 				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
 				if (switchOperation != null) {
 					SwitchOperationRow row = new SwitchOperationRow();
-					row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState()).toString());
+					row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState().getDescription()).toString());
 					tvSwitchesOperations.getItems().add(row);
 				}
 			}

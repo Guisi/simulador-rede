@@ -194,7 +194,7 @@ public class ElementsDetailsPaneController extends Controller {
 		tvBranchDetails.getItems().add(new NodePropertyRow("Instant Current A:", df.format(branch.getInstantCurrent())));
 		tvBranchDetails.getItems().add(new NodePropertyRow("Resistance \u03A9:", df.format(branch.getResistance())));
 		tvBranchDetails.getItems().add(new NodePropertyRow("Reactance \u03A9:", df.format(branch.getReactance())));
-		tvBranchDetails.getItems().add(new NodePropertyRow("Status:", branch.isClosed() ? "Closed" : "Open"));
+		tvBranchDetails.getItems().add(new NodePropertyRow("Status:", branch.getSwitchState().getDescription()));
 		tvBranchDetails.getItems().add(new NodePropertyRow("Losses MW:", df.format(branch.getLossesMW())));
 		cbBranchNumber.valueProperty().set(selectedBranch);
 	}

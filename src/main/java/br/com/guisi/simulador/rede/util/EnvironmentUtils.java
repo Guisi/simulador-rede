@@ -110,11 +110,13 @@ public class EnvironmentUtils {
 				
 				//status do branch
 				int branchStatus = getIntegerCellValue(line.getCell(col++));
-				SwitchState switchState = branchStatus == 0 ? SwitchState.OPEN : SwitchState.CLOSED;
-				
+
 				boolean switchBranch = getIntegerCellValue(line.getCell(col++)) == 1;
 				
 				boolean fault = getIntegerCellValue(line.getCell(col++)) == 1;
+				
+				SwitchState switchState = fault ? SwitchState.FAULT
+						: branchStatus == 0 ? SwitchState.OPEN : SwitchState.CLOSED;
 				
 				Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, switchState, switchBranch, fault);
 				branchMap.put(branchNum, branch);
@@ -293,18 +295,17 @@ public class EnvironmentUtils {
 	 * @throws IllegalStateException
 	 */
 	public static Feeder getFeeder(NetworkNode networkNode) throws IllegalStateException {
-		return (Feeder) searchFeederRecursive(networkNode, networkNode, null);
+		return (Feeder) searchFeederRecursive(networkNode, null);
 	}
 	
 	/**
 	 * Procura pelo feeder do load recursivamente
-	 * @param observedLoad
 	 * @param connectedLoad
 	 * @param lastConnectedLoad
 	 * @return
 	 * @throws IllegalStateException
 	 */
-	private static NetworkNode searchFeederRecursive(NetworkNode observedLoad, NetworkNode connectedLoad, NetworkNode lastConnectedLoad) throws IllegalStateException {
+	private static NetworkNode searchFeederRecursive(NetworkNode connectedLoad, NetworkNode lastConnectedLoad) {
 		List<NetworkNode> connectedNodes = connectedLoad.getConnectedNodes();
 		connectedNodes.remove(lastConnectedLoad);
 
@@ -313,7 +314,7 @@ public class EnvironmentUtils {
 				return networkNode;
 			}
 
-			NetworkNode feeder = searchFeederRecursive(observedLoad, networkNode, connectedLoad);
+			NetworkNode feeder = searchFeederRecursive(networkNode, connectedLoad);
 			if (feeder != null) {
 				return feeder;
 			}
@@ -329,18 +330,17 @@ public class EnvironmentUtils {
 	 * @throws IllegalStateException
 	 */
 	public static List<NetworkNode> getRouteToFeeder(NetworkNode networkNode) {
-		return searchRouteToFeederRecursive(networkNode, networkNode, null);
+		return searchRouteToFeederRecursive(networkNode, null);
 	}
 	
 	/**
 	 * Monta a rota até o feeder recursivamente
-	 * @param observedLoad
 	 * @param connectedLoad
 	 * @param lastConnectedLoad
 	 * @return
 	 * @throws IllegalStateException
 	 */
-	private static List<NetworkNode> searchRouteToFeederRecursive(NetworkNode observedLoad, NetworkNode connectedLoad, NetworkNode lastConnectedLoad) {
+	private static List<NetworkNode> searchRouteToFeederRecursive(NetworkNode connectedLoad, NetworkNode lastConnectedLoad) {
 		List<NetworkNode> route = new ArrayList<>();
 		route.add(connectedLoad);
 		
@@ -353,7 +353,7 @@ public class EnvironmentUtils {
 				return route;
 			}
 
-			List<NetworkNode> childrenRoute = searchRouteToFeederRecursive(observedLoad, networkNode, connectedLoad);
+			List<NetworkNode> childrenRoute = searchRouteToFeederRecursive(networkNode, connectedLoad);
 			if (childrenRoute != null) {
 				route.addAll(childrenRoute);
 				return route;
@@ -380,6 +380,44 @@ public class EnvironmentUtils {
 			}
 		}
 		return branches;
+	}
+	
+	public static void isolateFaultSwitches(Environment environment) {
+		environment.getBranches().forEach((branch) -> {
+			if (branch.isSwitchBranch() && branch.hasFault()) {
+				isolateNextSwitchesRecursive(branch, null);
+			}
+		});
+	}
+	
+	private static void isolateNextSwitchesRecursive(Branch branch, NetworkNode lastNetworkNode) {
+		for (NetworkNode networkNode : branch.getConnectedLoads()) {
+			if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
+				for (Branch connectedBranch : networkNode.getBranches()) {
+					if (!connectedBranch.equals(branch)) {
+						if (connectedBranch.isSwitchBranch()) {
+							connectedBranch.isolateSwitch();
+						} else {
+							isolateNextSwitchesRecursive(connectedBranch, networkNode);
+						}
+					}
+				}
+			}
+		}
+		
+		/*branch.getConnectedLoads().forEach((networkNode) -> {
+			if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
+				networkNode.getBranches().forEach((connectedBranch) -> {
+					if (!connectedBranch.equals(branch)) {
+						if (branch.isSwitchBranch()) {
+							branch.isolateSwitch();
+						} else {
+							isolateNextSwitchesRecursive(connectedBranch, networkNode);
+						}
+					}
+				});
+			}
+		});*/
 	}
 	
 	/*public static void main(String[] args) {

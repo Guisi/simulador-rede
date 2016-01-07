@@ -147,7 +147,7 @@ public class NetworkPane extends Pane {
 		}
 		
 		Rectangle rect = branchPane.getSwitchRectangle();
-		if (!branch.isFault()) {
+		if (!branch.hasFault()) {
 			rect.setFill(branch.isClosed() ? Color.BLACK : Color.WHITE);
 			rect.setStrokeWidth(1);
 			if (branch.isClosed()) {
@@ -238,7 +238,7 @@ public class NetworkPane extends Pane {
 		sp.setLayoutY(Math.min(l.getEndY(), l.getStartY()));
 
 		/** Label branch */
-		if (!branch.isFault()) {
+		if (!branch.hasFault()) {
 			DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_2);
 			String power = " (" + df.format(branch.getMaxCurrent()) + ")";
 			Text text = new Text(power);
@@ -256,7 +256,7 @@ public class NetworkPane extends Pane {
 		sp.setSwitchRectangle(r);
 		box.getChildren().add(r);
 		
-		if (branch.isFault()) {
+		if (branch.hasFault()) {
 			r.setWidth(Constants.BRANCH_TYPE_PX * 4);
 			r.setHeight(Constants.BRANCH_TYPE_PX * 3);
 			Image img = new Image(getClass().getResourceAsStream("/img/fault-bolt.png"));
@@ -281,7 +281,7 @@ public class NetworkPane extends Pane {
 			} else if (angle < -90) {
 				angle += 180;
 			}
-			if (branch.isFault()) {
+			if (branch.hasFault()) {
 				sp.setLayoutX(sp.getLayoutX() - Constants.BRANCH_TYPE_PX / 2);
 			}
 			box.setRotate(angle);

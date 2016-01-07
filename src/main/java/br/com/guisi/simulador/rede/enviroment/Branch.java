@@ -1,5 +1,8 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 /**
  * Classe representando uma branch
@@ -17,7 +20,6 @@ public class Branch {
 	private double reactance;
 	private boolean switchBranch;
 	private SwitchState switchState;
-	private boolean fault;
 	
 	private int switchOperations;
 	private double instantCurrent;
@@ -34,7 +36,6 @@ public class Branch {
 		this.switchState = switchState;
 		this.switchBranch = switchBranch;
 		this.branchId = new BranchId(node1.getNodeNumber(), node2.getNodeNumber());
-		this.fault = fault;
 	}
 	
 	/**
@@ -61,6 +62,14 @@ public class Branch {
 	 */
 	public NetworkNode getConnectedLoad(NetworkNode networkNode) {
 		return node1.equals(networkNode) ? node2 : node1;
+	}
+	
+	/**
+	 * Retorna os nodes que o branch conecta
+	 * @return
+	 */
+	public List<NetworkNode> getConnectedLoads() {
+		return Arrays.asList(node1, node2);
 	}
 	
 	/**
@@ -131,8 +140,14 @@ public class Branch {
 	 * e incrementa o switchOperation
 	 */
 	public void reverse() {
-		switchState = switchState == SwitchState.OPEN ? SwitchState.CLOSED : SwitchState.OPEN;
-		incrementSwitchOperation();
+		if (switchState == SwitchState.OPEN || switchState == SwitchState.CLOSED) {
+			switchState = switchState == SwitchState.OPEN ? SwitchState.CLOSED : SwitchState.OPEN;
+			incrementSwitchOperation();
+		}
+	}
+	
+	public void isolateSwitch() {
+		switchState = SwitchState.ISOLATED;
 	}
 
 	/**
@@ -210,12 +225,8 @@ public class Branch {
 	 * Retorna se possui uma falta no switch
 	 * @return
 	 */
-	public boolean isFault() {
-		return fault;
-	}
-
-	public void setFault(boolean fault) {
-		this.fault = fault;
+	public boolean hasFault() {
+		return SwitchState.FAULT.equals(switchState);
 	}
 
 	@Override
