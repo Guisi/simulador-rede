@@ -1,6 +1,7 @@
 package br.com.guisi.simulador.rede.util;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.complex.Complex;
@@ -14,36 +15,58 @@ import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
+import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 
 public class PowerFlow {
 	
-	public static boolean execute(Environment environment) throws Exception {
-		//atualiza informações das conexões dos feeders e loads
-		EnvironmentUtils.updateFeedersConnections(environment);
-
-		//executa power flow
-		boolean success = true;//TODO remove executePowerFlow(environment);
-
+	public static void execute(Environment environment) throws Exception {
 		//zera o valor de potencia usado dos feeders
 		environment.getFeeders().forEach((feeder) -> {
 			feeder.setUsedPower(0);
 		});
+
+		//executa power flow
+		executePowerFlow(environment);
 		
 		//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
 		environment.getFeeders().forEach((feeder) -> {
 			feeder.getBranches().forEach((branch) -> feeder.addUsedPower(branch.getInstantCurrent()));
 		});
-		
-		return success;
 	}
 	
-	private static boolean executePowerFlow(Environment environment) throws Exception {
-		double[][] mpcBus = mountMpcBus(environment);
+	private static void executePowerFlow(Environment environment) throws Exception {
+		/*monta lista somente com os nodes que sejam feeders ou que estejam
+		conectados a um feeder*/
+		List<NetworkNode> nodes = environment.getNetworkNodes();
+		List<NetworkNode> activeNodes = new ArrayList<>();
+		for (NetworkNode networkNode : nodes) {
+			if (networkNode.isFeeder() || ((Load)networkNode).getFeeder() != null) {
+				activeNodes.add(networkNode);
+			}
+		}
 		
-		double[][] mpcGen = mountMpcGen(environment);
+		/*se não existe nenhum load ativo, não executa powerflow*/
+		long loads = activeNodes.stream().filter((node) -> node.isLoad()).count();
+		if (loads == 0) {
+			//throw new Exception("No active load found, power flow can't be executed!");
+			return;
+		}
 		
-		double[][] mpcBranch = mountMpcBranch(environment);
+		/*monta lista somente com os branches que estejam conectados a nodes ativos*/
+		List<Branch> branches = environment.getBranches();
+		List<Branch> activeBranches = new ArrayList<>();
+		for (Branch branch : branches) {
+			if (activeNodes.contains(branch.getNode1()) && activeNodes.contains(branch.getNode2())) {
+				activeBranches.add(branch);
+			}
+		}
+		
+		double[][] mpcBus = mountMpcBus(activeNodes);
+		
+		double[][] mpcGen = mountMpcGen(environment.getFeeders());
+		
+		double[][] mpcBranch = mountMpcBranch(activeBranches);
 		
 		try {
 			MatlabProxy proxy = Matlab.getMatlabProxy();
@@ -90,21 +113,19 @@ public class PowerFlow {
 						branch.setLossesMW(losses);
 					}
 				}
-				return true;
+			} else {
+				throw new Exception("Newton's method power flow did not converge");
 			}
-			return false;
 		} catch (MatlabConnectionException | MatlabInvocationException e) {
 			throw new Exception(e);
 		}
 	}
 	
-	private static double[][] mountMpcBus(Environment environment) {
-		List<NetworkNode> nodes = environment.getNetworkNodes();
-		
-		double[] nodeNums = new double[nodes.size()];
-		double[] nodeTypes = new double[nodes.size()];
-		double[] loadActivePowerMW = new double[nodes.size()];
-		double[] loadReactivePowerMVar = new double[nodes.size()];
+	private static double[][] mountMpcBus(List<NetworkNode> activeNodes) {
+		double[] nodeNums = new double[activeNodes.size()];
+		double[] nodeTypes = new double[activeNodes.size()];
+		double[] loadActivePowerMW = new double[activeNodes.size()];
+		double[] loadReactivePowerMVar = new double[activeNodes.size()];
 		double[] area = new double[nodeNums.length];
 		double[] voltageMagnitude = new double[nodeNums.length];
 		double[] baseKV = new double[nodeNums.length];
@@ -112,8 +133,8 @@ public class PowerFlow {
 		double[] restricaoMax = new double[nodeNums.length];
 		double[] restricaoMin = new double[nodeNums.length];
 
-		for (int i = 0; i < nodes.size(); i++) {
-			NetworkNode node = nodes.get(i);
+		for (int i = 0; i < activeNodes.size(); i++) {
+			NetworkNode node = activeNodes.get(i);
 			
 			//numeros dos loads/feeders
 			nodeNums[i] = node.getNodeNumber();
@@ -180,9 +201,7 @@ public class PowerFlow {
 		return mpcBus;
 	}
 	
-	private static double[][] mountMpcGen(Environment environment) {
-		List<Feeder> feeders = environment.getFeeders();
-		
+	private static double[][] mountMpcGen(List<Feeder> feeders) {
 		double[] busG = new double[feeders.size()];
 		double[] potenciaGeradaMW = new double[feeders.size()];
 		double[] potenciaGeradaMVar = new double[feeders.size()];
@@ -246,9 +265,7 @@ public class PowerFlow {
 		return mpcGen;
 	}
 	
-	private static double[][] mountMpcBranch(Environment environment) {
-		List<Branch> branches = environment.getBranches();
-		
+	private static double[][] mountMpcBranch(List<Branch> branches) {
 		double[] branchFrom = new double[branches.size()];
 		double[] branchTo = new double[branches.size()];
 		double[] resistenciaPu = new double[branches.size()];

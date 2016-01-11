@@ -97,19 +97,22 @@ public class MenuPaneController extends Controller {
 					//isola as faltas
 					EnvironmentUtils.isolateFaultSwitches(environment);
 					
+					//atualiza informações das conexões dos feeders e loads
+					EnvironmentUtils.updateFeedersConnections(environment);
+					
 					//executa o fluxo de potência
-					powerFlowSuccess = PowerFlow.execute(environment);
-
-					if (!powerFlowSuccess) {
-						errors = "Error: Newton's method power flow did not converge in 10 iterations.";
+					try {
+						//PowerFlow.execute(environment);
+						powerFlowSuccess = true;
+					} catch (Exception e) {
+						Alert alert = new Alert(AlertType.ERROR);
+						alert.setContentText(e.getMessage());
+						alert.showAndWait();
 					}
-				}
-				
-				if (StringUtils.isNotEmpty(errors)) {
+				} else {
 					Alert alert = new Alert(AlertType.ERROR);
 					alert.setContentText(errors);
 					alert.showAndWait();
-					return;
 				}
 				
 				this.fireEvent(EventType.ENVIRONMENT_LOADED);

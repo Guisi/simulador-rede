@@ -36,6 +36,10 @@ public class PriorityConfigController extends Controller {
 	
 	@Override
 	public void initializeController() {
+	}
+	
+	@Override
+	public void initializeControllerData(Object... data) {
 		Map<PreferenceKey, String> preferences = SimuladorRede.getPreferences();
 		
 		tfPriority1.setText(preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_1));
@@ -47,10 +51,6 @@ public class PriorityConfigController extends Controller {
 		tfPriority2.textProperty().addListener(new DoubleTextFieldListener(tfPriority2));
 		tfPriority3.textProperty().addListener(new DoubleTextFieldListener(tfPriority3));
 		tfPriority4.textProperty().addListener(new DoubleTextFieldListener(tfPriority4));
-	}
-	
-	@Override
-	public void initializeControllerData(Object... data) {
 	}
 	
 	public void save() {

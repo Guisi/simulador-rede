@@ -147,6 +147,7 @@ public class NetworkPane extends Pane {
 		}
 		
 		Rectangle rect = branchPane.getSwitchRectangle();
+		rect.setVisible(branch.isSwitchBranch() || branch.hasFault());
 		if (!branch.hasFault()) {
 			rect.setFill(branch.isClosed() ? Color.BLACK : Color.WHITE);
 			rect.setStrokeWidth(1);
@@ -252,7 +253,6 @@ public class NetworkPane extends Pane {
 		/** Tipo branch */
 		Rectangle r = new Rectangle();
 		r.setOnMouseClicked(mouseClicked);
-		r.setVisible(branch.isSwitchBranch());
 		sp.setSwitchRectangle(r);
 		box.getChildren().add(r);
 		

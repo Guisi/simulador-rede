@@ -22,6 +22,8 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private VBox networkBoxRight;
 	
+	private NetworkPaneController networkPaneController;
+	
 	@Override
 	public void initializeController() {
 		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
@@ -46,8 +48,8 @@ public class SimuladorRedeController extends Controller {
 		networkBoxLeft.getChildren().add(getController(LabelAndMessagesPaneController.class).getView());
 		
 		//NetworkPane
-		networkBoxRight.getChildren().add(getController(NetworkPaneController.class).getView());
-		//networkPaneController = SimuladorRede.showUtilityScene("Electric Network", NetworkPaneController.class, false);
+		//networkBoxRight.getChildren().add(getController(NetworkPaneController.class).getView());
+		networkPaneController = (NetworkPaneController) SimuladorRede.showUtilityScene("Electric Network", NetworkPaneController.class, false);
 		
 		this.fireEvent(EventType.RESET_SCREEN);
 		
@@ -69,13 +71,13 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	private void processEnvironmentLoaded() {
-		//networkPaneController.getStage().show();
+		networkPaneController.getStage().show();
 	}
 	
 	private void processResetScreen() {
-		/*if (networkPaneController != null) {
+		if (networkPaneController != null) {
 			networkPaneController.getStage().hide();
-		}*/
+		}
 	}
 	
 	@Override

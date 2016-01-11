@@ -384,7 +384,7 @@ public class EnvironmentUtils {
 	
 	public static void isolateFaultSwitches(Environment environment) {
 		environment.getBranches().forEach((branch) -> {
-			if (branch.isSwitchBranch() && branch.hasFault()) {
+			if (branch.hasFault()) {
 				isolateNextSwitchesRecursive(branch, null);
 			}
 		});

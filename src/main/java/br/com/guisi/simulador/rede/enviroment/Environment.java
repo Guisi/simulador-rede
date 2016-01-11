@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import br.com.guisi.simulador.rede.util.EnvironmentUtils;
+
 /**
  * Classe representando um ambiente simulado de uma rede de energia elétrica
  * 
@@ -22,6 +24,7 @@ public class Environment {
 	private final List<Feeder> feeders;
 	private final List<Branch> branches;
 	private final List<Branch> switches;
+	private final List<Branch> faults;
 	
 	private final Random RANDOM = new Random(System.currentTimeMillis());
 	
@@ -44,6 +47,7 @@ public class Environment {
 		
 		branches = new ArrayList<Branch>();
 		switches = new ArrayList<Branch>();
+		faults = new ArrayList<>();
 		branchMap.values().forEach((branch) -> {
 			this.branchFromToMap.put(branch.getBranchId(), branch);
 			
@@ -51,7 +55,12 @@ public class Environment {
 			if (branch.isSwitchBranch()) {
 				switches.add(branch);
 			}
+			
+			if (branch.hasFault()) {
+				faults.add(branch);
+			}
 		});
+		
 	}
 	
 	/**
@@ -67,6 +76,14 @@ public class Environment {
 	}
 	
 	/**
+	 * Retorna um branch com falta aleatoriamente
+	 * @return
+	 */
+	public Branch getRandomFault() {
+		return faults.isEmpty() ? null : faults.get(RANDOM.nextInt(faults.size()));
+	}
+	
+	/**
 	 * Inverte estado do switch
 	 * 
 	 * @param switchNumber
@@ -74,6 +91,8 @@ public class Environment {
 	public void reverseSwitch(Integer switchNumber) {
 		Branch switchBranch = getBranch(switchNumber);
 		switchBranch.reverse();
+		
+		EnvironmentUtils.updateFeedersConnections(this);
 	}
 	
 	/**

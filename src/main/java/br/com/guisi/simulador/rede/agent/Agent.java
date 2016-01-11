@@ -29,7 +29,7 @@ public abstract class Agent {
 				
 				if (taskExecutionType.isNotifyEveryStep()) {
 					try {
-						if (step % 1000 == 0) {
+						if (step % 10 == 0) {
 							this.notifyAgentObservers();
 							Thread.sleep(100);
 						}

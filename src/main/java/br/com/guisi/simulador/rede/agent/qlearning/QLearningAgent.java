@@ -11,6 +11,7 @@ import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.util.PowerFlow;
 
 @Named
 public class QLearningAgent extends Agent {
@@ -21,6 +22,8 @@ public class QLearningAgent extends Agent {
 	@PostConstruct
 	public void init() {
 		this.qTable = new QTable();
+		
+		//SimuladorRede.getEnvironment()
 	}
 	
 	/**
@@ -46,6 +49,12 @@ public class QLearningAgent extends Agent {
 		
 		//altera o estado do switch
 		environment.reverseSwitch(currentState);
+		
+		try {
+			PowerFlow.execute(environment);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		//verifica no ambiente qual é o resultado de executar a ação
 		//ActionResult actionResult = environment.executeAction(state, action);

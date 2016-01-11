@@ -1,6 +1,7 @@
 package br.com.guisi.simulador.rede;
 
 import java.io.File;
+import java.util.Random;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -12,20 +13,9 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		int cont = 0;
-		double[][] arr = new double[2][100000000]; 
+		Random RANDOM = new Random(System.currentTimeMillis());
 		
-		while (true) {
-			arr[0][cont] = cont;
-			arr[1][cont] = 1;
-			
-			cont++;
-			
-			if (cont%100000 == 0) {
-				System.out.println(cont);
-				Thread.sleep(1000);
-			}
-		}
+		System.out.println(RANDOM.nextInt(2));
 	}
 	
 	public static void teste() throws Exception {
