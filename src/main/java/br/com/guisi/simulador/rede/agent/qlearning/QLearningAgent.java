@@ -1,5 +1,6 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -7,41 +8,57 @@ import javax.inject.Named;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
-import br.com.guisi.simulador.rede.agent.annotations.QLearning;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.status.LearningProperty;
 import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
+import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.enviroment.SwitchState;
 
 @Named
-@QLearning
 public class QLearningAgent extends Agent {
 	
 	private QTable qTable;
-	private Integer currentState;
+	private Branch firstSwitch;
+	private Branch secondSwitch;
 
 	@PostConstruct
 	public void init() {
 		this.reset();
-		currentState = 1;
 	}
 	
 	@Override
 	public void reset() {
 		this.qTable = new QTable();
-		
 	}
 	
 	/**
 	 * Realiza uma interação no ambiente
-	 * @param state
+	 * @param agentStepStatus
 	 * @return {@link Integer} estado para o qual o agente se moveu
 	 */
 	@Override
-	protected void runNextEpisode() {
-		/*Environment environment = SimuladorRede.getEnvironment();
+	protected void runNextEpisode(AgentStepStatus agentStepStatus) {
+		Environment environment = SimuladorRede.getEnvironment();
+		
+		List<SwitchOperation> switchOperations = new ArrayList<>();
+		
+		//busca o switch a ser aberto
+		firstSwitch = getClosestSwitch(environment, secondSwitch, SwitchState.CLOSED);
+		if (!firstSwitch.hasFault()) {
+			firstSwitch.reverse();
+			switchOperations.add(new SwitchOperation(firstSwitch.getNumber(), firstSwitch.getSwitchState()));
+		}
+		
+		//busca o switch a ser fechado
+		secondSwitch = getClosestSwitch(environment, firstSwitch, SwitchState.OPEN);
+		secondSwitch.reverse();
+		switchOperations.add(new SwitchOperation(secondSwitch.getNumber(), secondSwitch.getSwitchState()));
+		
+		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATIONS, switchOperations);
 
-		currentState = environment.getRandomSwitch().getNumber();
+		/*currentState = environment.getRandomSwitch().getNumber();
 		
 		//Se randomico menor que E-greedy, escolhe melhor acao
 		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
@@ -106,11 +123,30 @@ public class QLearningAgent extends Agent {
         */
 	}
 	
-	@Override
-	protected void putInformations(AgentStepStatus agentStepStatus) {
-		Environment environment = SimuladorRede.getEnvironment();
-		SwitchOperation switchOperation = new SwitchOperation(currentState, environment.getBranch(currentState).getSwitchState());
-		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATION, switchOperation);
+	/**
+	 * Busca o switch mais próximo ao switch passado
+	 * @param environment
+	 * @param refSwitch Switch de referência para busca do mais próximo 
+	 * @param switchState Estado a ser utilizado como filtro na busca
+	 * @return
+	 */
+	public Branch getClosestSwitch(Environment environment, Branch refSwitch, SwitchState switchState) {
+		Branch sw = null;
+
+		//se o estado atual está nulo, é a primeira interação
+		if (refSwitch == null) {
+			//verifica se existe alguma falta 
+			sw = environment.getRandomFault();
+			//se não existe, inicia por um switch aberto aleatório
+			if (sw == null) {
+				sw = environment.getRandomSwitch(switchState);
+			}
+		} else {
+			//senão, busca o switch
+			sw = environment.getClosestSwitch(refSwitch, switchState);
+		}
+		
+		return sw;
 	}
 	
 	public QValue getBestQValue(Integer state) {
@@ -127,5 +163,16 @@ public class QLearningAgent extends Agent {
 	
 	public List<QValue> getQValues(Integer state) {
 		return qTable.getQValues(state);
+	}
+	
+	@Override
+	public List<LearningProperty> getLearningProperties(Integer state) {
+		List<QValue> qValues = this.getQValues(state);
+		List<LearningProperty> learningProperties = new ArrayList<>();
+		for (QValue qValue : qValues) {
+			LearningProperty row = new LearningProperty("Q(s, " + qValue.getQKey().getAction().getDescription() + "):", String.valueOf(qValue.getReward()));
+			learningProperties.add(row);
+		}
+		return learningProperties;
 	}
 }

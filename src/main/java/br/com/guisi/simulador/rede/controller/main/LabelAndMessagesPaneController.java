@@ -21,12 +21,11 @@ import javafx.stage.FileChooser;
 import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.agent.annotations.QLearning;
-import br.com.guisi.simulador.rede.agent.qlearning.QLearningAgent;
-import br.com.guisi.simulador.rede.agent.qlearning.QValue;
+import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.status.LearningProperty;
 import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -49,8 +48,7 @@ public class LabelAndMessagesPaneController extends Controller {
 	private TableView<PropertyRow> tvAgentLearning;
 	
 	@Inject
-	@QLearning
-	private QLearningAgent agent;
+	private AgentControl agentControl;
 	
 	@Override
 	public void initializeController() {
@@ -72,7 +70,7 @@ public class LabelAndMessagesPaneController extends Controller {
 		switch (eventType) {
 			case POWER_FLOW_COMPLETED: this.updateWarningsBrokenConstraints(); break;
 			case RESET_SCREEN: this.resetScreen(); break;
-			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
+			case ENVIRONMENT_LOADED: this.processEnvironmentLoaded(); break;
 			case AGENT_NOTIFICATION : this.processAgentNotification(data); break;
 			case BRANCH_SELECTED: this.processBranchSelected(data); break;
 			default: break;
@@ -86,8 +84,9 @@ public class LabelAndMessagesPaneController extends Controller {
 		tvSwitchesOperations.getItems().clear();
 	}
 	
-	private void onEnvironmentLoaded() {
+	private void processEnvironmentLoaded() {
 		root.setVisible(true);
+		agentControl.init();
 	}
 
 	private void initializeTables() {
@@ -207,11 +206,15 @@ public class LabelAndMessagesPaneController extends Controller {
 			int ini = tvSwitchesOperations.getItems().size();
 			for (int i = ini; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
-				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
-				if (switchOperation != null) {
-					SwitchOperationRow row = new SwitchOperationRow();
-					row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState().getDescription()).toString());
-					tvSwitchesOperations.getItems().add(row);
+				
+				@SuppressWarnings("unchecked")
+				List<SwitchOperation> switchOperations = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATIONS, List.class);
+				if (switchOperations != null) {
+					for (SwitchOperation switchOperation : switchOperations) {
+						SwitchOperationRow row = new SwitchOperationRow();
+						row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState().getDescription()).toString());
+						tvSwitchesOperations.getItems().add(row);
+					}
 				}
 			}
 		}
@@ -249,9 +252,9 @@ public class LabelAndMessagesPaneController extends Controller {
 			PropertyRow row = new PropertyRow("S: ", "Switch " + branch.getNumber());
 			tvAgentLearning.getItems().add(row);
 			
-			List<QValue> qValues = agent.getQValues(branch.getNumber());
-			for (QValue qValue : qValues) {
-				row = new PropertyRow("Q(s, " + qValue.getQKey().getAction().getDescription() + "):", String.valueOf(qValue.getReward()));
+			List<LearningProperty> learningProperties = agentControl.getAgent().getLearningProperties(branch.getNumber());
+			for (LearningProperty learningProperty : learningProperties) {
+				row = new PropertyRow(learningProperty.getProperty(), learningProperty.getValue());
 				tvAgentLearning.getItems().add(row);
 			}
 		}

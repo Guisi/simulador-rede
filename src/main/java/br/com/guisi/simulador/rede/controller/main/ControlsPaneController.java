@@ -63,7 +63,7 @@ public class ControlsPaneController extends Controller {
 	public void onEvent(EventType eventType, Object data) {
 		switch (eventType) {
 			case RESET_SCREEN: this.resetScreen(); break;
-			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
+			case ENVIRONMENT_LOADED: this.processEnvironmentLoaded(); break;
 			case AGENT_RUNNING: this.enableDisableScreen(true); break;
 			case AGENT_STOPPED: this.enableDisableScreen(false); break;
 			default: break;
@@ -74,8 +74,9 @@ public class ControlsPaneController extends Controller {
 		root.setVisible(false);
 	}
 	
-	private void onEnvironmentLoaded() {
+	private void processEnvironmentLoaded() {
 		root.setVisible(true);
+		agentControl.init();
 	}
 	
 	private void enableDisableScreen(boolean disable) {

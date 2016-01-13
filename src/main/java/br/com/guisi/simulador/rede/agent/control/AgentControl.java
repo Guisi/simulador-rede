@@ -1,5 +1,6 @@
 package br.com.guisi.simulador.rede.agent.control;
 
+import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 
 public interface AgentControl {
@@ -10,4 +11,7 @@ public interface AgentControl {
 	
 	void reset();
 	
+	void init();
+	
+	Agent getAgent();
 }

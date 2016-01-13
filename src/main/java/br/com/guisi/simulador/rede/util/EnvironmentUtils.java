@@ -380,11 +380,7 @@ public class EnvironmentUtils {
 	}
 	
 	public static void isolateFaultSwitches(Environment environment) {
-		environment.getBranches().forEach((branch) -> {
-			if (branch.hasFault()) {
-				isolateNextSwitchesRecursive(branch, null);
-			}
-		});
+		environment.getFaults().forEach((branch) -> isolateNextSwitchesRecursive(branch, null));
 	}
 	
 	private static void isolateNextSwitchesRecursive(Branch branch, NetworkNode lastNetworkNode) {
@@ -401,6 +397,55 @@ public class EnvironmentUtils {
 				});
 			}
 		});
+	}
+	
+	/**
+	 * Monta uma lista com os switches mais próximos conforme o estado passado
+	 * @param branch
+	 * @param switchState
+	 * @return
+	 */
+	public static List<Branch> getClosestSwitches(Branch branch, SwitchState switchState) {
+		return getClosestSwitchesRecursive(0, Integer.MAX_VALUE, branch, null, switchState);
+	}
+	
+	/**
+	 * Monta uma lista com os switches mais próximos recursivamente
+	 * @param distance
+	 * @param closestDistance
+	 * @param branch
+	 * @param lastNetworkNode
+	 * @param switchState
+	 * @return
+	 */
+	private static List<Branch> getClosestSwitchesRecursive(int distance, int closestDistance,
+			Branch branch, NetworkNode lastNetworkNode, SwitchState switchState) {
+
+		List<Branch> closestSwitches = null;
+		
+		if (distance < closestDistance) {
+			distance++;
+			
+			closestSwitches = new ArrayList<>();
+			for (NetworkNode networkNode : branch.getConnectedLoads()) {
+				if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
+					for (Branch connectedBranch : networkNode.getBranches()) {
+						if (!connectedBranch.equals(branch)) {
+							if (connectedBranch.isSwitchBranch() && connectedBranch.getSwitchState() == switchState) {
+								closestSwitches.add(connectedBranch);
+								closestDistance = distance;
+							} else {
+								List<Branch> lst = getClosestSwitchesRecursive(distance, closestDistance, connectedBranch, networkNode, switchState);
+								if (lst != null) {
+									closestSwitches.addAll(lst);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return closestSwitches;
 	}
 	
 	/*public static void main(String[] args) {

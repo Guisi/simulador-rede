@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
+
+import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 
 /**
  * Classe representando um ambiente simulado de uma rede de energia elétrica
@@ -65,12 +68,9 @@ public class Environment {
 	 * Retorna um switch aleatório
 	 * @return
 	 */
-	public Branch getRandomSwitch() {
-		Branch sw;
-		do {
-			sw = switches.get(RANDOM.nextInt(switches.size()));
-		} while (sw.hasFault() || sw.isIsolated());
-		return sw;
+	public Branch getRandomSwitch(SwitchState switchState) {
+		List<Branch> openSwitches = switches.stream().filter((sw) -> sw.getSwitchState() == switchState).collect(Collectors.toList());
+		return openSwitches.isEmpty() ? null : openSwitches.get(RANDOM.nextInt(openSwitches.size()));
 	}
 	
 	/**
@@ -137,9 +137,14 @@ public class Environment {
 		return branchFromToMap.get(new BranchId(nodeFrom, nodeTo));
 	}
 	
-	public Branch getClosestSwitch() {
-		//(Math.abs(x - goal.x) + Math.abs(y - goal.y))
-		return null;
+	/**
+	 * Retorna o switch mais próximo com o estado passado
+	 * @param switchState
+	 * @return
+	 */
+	public Branch getClosestSwitch(Branch currentSwitch, SwitchState switchState) {
+		List<Branch> closestSwitches = EnvironmentUtils.getClosestSwitches(currentSwitch, switchState);
+		return closestSwitches.isEmpty() ? null : closestSwitches.get(RANDOM.nextInt(closestSwitches.size()));
 	}
 	
 	/**
@@ -215,13 +220,21 @@ public class Environment {
 	}
 	
 	/**
+	 * Retorna um {@link List<Branch>} com todas as branches que contém falta
+	 * @return {@link List<Branch>}
+	 */
+	public List<Branch> getFaults() {
+		return faults;
+	}
+
+	/**
 	 * Retorna verdadeiro se ambiente é válido para reconfiguração
 	 * Passo 1: valida se existem switches abertos
 	 * @return
 	 */
 	public boolean isValidForReconfiguration() {
-		//o primeiro passo é validar se existem switches abertos
-		//pois se todos os switches estiverem fechados, não há como reconfigurar
+		//TODO validar por rede individual
+		//valida se existem switches abertos, pois se todos os switches estiverem fechados, não há como reconfigurar
 		boolean hasOpenSwitch = false;
 		for (Branch switc : switches) {
 			if (switc.isOpen()) {

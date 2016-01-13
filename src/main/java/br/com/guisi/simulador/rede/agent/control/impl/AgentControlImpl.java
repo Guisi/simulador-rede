@@ -6,26 +6,30 @@ import javafx.scene.control.Alert.AlertType;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
+
+import org.springframework.context.ApplicationContext;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
-import br.com.guisi.simulador.rede.agent.annotations.QLearning;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
+import br.com.guisi.simulador.rede.agent.qlearning.QLearningAgent;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.events.EventBus;
 import br.com.guisi.simulador.rede.events.EventType;
 
 @Named
+@Singleton
 public class AgentControlImpl implements AgentControl {
 
 	@Inject
 	private EventBus eventBus;
 	
 	@Inject
-	@QLearning
-	private Agent agent;
+	private ApplicationContext context;
 	
 	private AgentTask agentTask;
+	private Agent agent;
 	
 	@Override
 	public void run(TaskExecutionType taskExecutionType) {
@@ -54,6 +58,18 @@ public class AgentControlImpl implements AgentControl {
 	
 	@Override
 	public void reset() {
-		agent.reset();
+		agent = context.getBean(QLearningAgent.class);
+	}
+	
+	@Override
+	public void init() {
+		if (agent == null) {
+			this.reset();
+		}
+	}
+	
+	@Override
+	public Agent getAgent() {
+		return agent;
 	}
 }

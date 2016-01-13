@@ -1,11 +1,14 @@
 package br.com.guisi.simulador.rede.agent;
 
+import java.util.List;
+
 import javafx.application.Platform;
 
 import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.status.LearningProperty;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.events.EventBus;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -24,14 +27,16 @@ public abstract class Agent {
 
 		while (!stopRequest) {
 			synchronized (this) {
-				this.runNextEpisode();
-				this.generateAgentInformations();
+				AgentStepStatus agentStepStatus = new AgentStepStatus(step);
+				agentStatus.getStepStatus().add(agentStepStatus);
+
+				this.runNextEpisode(agentStepStatus);
 				
 				if (taskExecutionType.isNotifyEveryStep()) {
 					try {
 						if (step % 10 == 0) {
 							this.notifyAgentObservers();
-							Thread.sleep(100);
+							Thread.sleep(10);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -50,12 +55,6 @@ public abstract class Agent {
 		this.notifyAgentObservers();
 	}
 	
-	private void generateAgentInformations() {
-		AgentStepStatus agentStepStatus = new AgentStepStatus(step);
-		putInformations(agentStepStatus);
-		agentStatus.getStepStatus().add(agentStepStatus);
-	}
-	
 	private void notifyAgentObservers() {
 		AgentStatus copy = new AgentStatus();
 		copy.getStepStatus().addAll(agentStatus.getStepStatus());
@@ -65,13 +64,13 @@ public abstract class Agent {
 		});
 	}
 	
-	protected abstract void runNextEpisode();
-	
-	protected abstract void putInformations(AgentStepStatus agentStepStatus);
+	protected abstract void runNextEpisode(AgentStepStatus agentStepStatus);
 	
 	public abstract void reset();
 	
 	public final void stop() {
 		stopRequest = true;
 	}
+	
+	public abstract List<LearningProperty> getLearningProperties(Integer state);
 }
