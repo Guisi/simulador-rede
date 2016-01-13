@@ -39,11 +39,35 @@ public class Branch {
 	}
 	
 	/**
-	 * Retorna se a branch está ligada
+	 * Retorna se o switch está fechado (ligado)
 	 * @return boolean
 	 */
 	public boolean isClosed() {
 		return SwitchState.CLOSED.equals(switchState);
+	}
+	
+	/**
+	 * Retorna se o switch está aberto (desligado)
+	 * @return
+	 */
+	public boolean isOpen() {
+		return SwitchState.OPEN.equals(switchState);
+	}
+	
+	/**
+	 * Retorna se possui uma falta no switch
+	 * @return
+	 */
+	public boolean hasFault() {
+		return SwitchState.FAULT.equals(switchState);
+	}
+	
+	/**
+	 * Retorna se branch está desligado para isolamento de falta
+	 * @return
+	 */
+	public boolean isIsolated() {
+		return SwitchState.ISOLATED.equals(switchState);
 	}
 	
 	/**
@@ -221,22 +245,6 @@ public class Branch {
 		this.lossesMW = lossesMW;
 	}
 	
-	/**
-	 * Retorna se possui uma falta no switch
-	 * @return
-	 */
-	public boolean hasFault() {
-		return SwitchState.FAULT.equals(switchState);
-	}
-	
-	/**
-	 * Retorna se branch está desligado para isolamento de falta
-	 * @return
-	 */
-	public boolean isIsolated() {
-		return SwitchState.ISOLATED.equals(switchState);
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;

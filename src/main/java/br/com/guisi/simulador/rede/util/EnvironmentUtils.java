@@ -234,14 +234,11 @@ public class EnvironmentUtils {
 		});
 		
 		//depois, verifica se todos os loads estão conectados a algum feeder
-		environment.getNetworkNodeMap().values().forEach((node) -> {
-			if (node.isLoad()) {
-				Load load = (Load) node;
-				Feeder feeder = getFeeder(load);
-				load.setFeeder(feeder);
-				if (feeder != null) {
-					feeder.incrementEnergizedLoads();
-				}
+		environment.getLoads().forEach((load) -> {
+			Feeder feeder = getFeeder(load);
+			load.setFeeder(feeder);
+			if (feeder != null) {
+				feeder.incrementEnergizedLoads();
 			}
 		});
 	}

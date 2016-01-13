@@ -5,14 +5,14 @@ import java.io.Serializable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class NodePropertyRow implements Serializable {
+public class PropertyRow implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	private StringProperty propertyName;
 	private StringProperty propertyValue;
 	
-	public NodePropertyRow(String propertyName, String propertyValue) {
+	public PropertyRow(String propertyName, String propertyValue) {
 		super();
 		this.propertyName = new SimpleStringProperty();
 		this.propertyName.setValue(propertyName);

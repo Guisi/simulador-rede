@@ -25,6 +25,9 @@ public class PowerFlow {
 		environment.getFeeders().forEach((feeder) -> {
 			feeder.setUsedPower(0);
 		});
+		
+		//atualiza informações das conexões dos feeders e loads
+		EnvironmentUtils.updateFeedersConnections(environment);
 
 		//executa power flow
 		executePowerFlow(environment);
@@ -39,6 +42,7 @@ public class PowerFlow {
 		/*monta lista somente com os nodes que sejam feeders ou que estejam
 		conectados a um feeder*/
 		List<NetworkNode> nodes = environment.getNetworkNodes();
+		nodes.forEach((node) -> node.setCurrentVoltagePU(0));
 		List<NetworkNode> activeNodes = new ArrayList<>();
 		for (NetworkNode networkNode : nodes) {
 			if (networkNode.isFeeder() || ((Load)networkNode).getFeeder() != null) {
@@ -55,6 +59,10 @@ public class PowerFlow {
 		
 		/*monta lista somente com os branches que estejam conectados a nodes ativos*/
 		List<Branch> branches = environment.getBranches();
+		branches.forEach((branch) -> {
+			branch.setInstantCurrent(0);
+			branch.setLossesMW(0);
+		});
 		List<Branch> activeBranches = new ArrayList<>();
 		for (Branch branch : branches) {
 			if (activeNodes.contains(branch.getNode1()) && activeNodes.contains(branch.getNode2())) {

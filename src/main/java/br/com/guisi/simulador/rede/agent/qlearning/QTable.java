@@ -38,7 +38,7 @@ public class QTable extends HashMap<QKey, QValue> {
 	 */
 	public List<QValue> getQValues(Integer state) {
 		List<QValue> qValues = new ArrayList<>();
-		for (SwitchState action : SwitchState.values()) {
+		for (SwitchState action : SwitchState.OPERATIONAL_SWITCHES) {
 			QValue qValue = getQValue(new QKey(state, action));
 			qValues.add(qValue);
 		}
@@ -54,17 +54,14 @@ public class QTable extends HashMap<QKey, QValue> {
 		//Recupera valores para o estado
 		List<QValue> qValues = getQValues(state);
 		
-		if (!qValues.isEmpty()) {
-			//Verifica o maior valor de recompensa
-			double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
-			
-			//filtra por todas as acoes cuja recompensa seja igual a maior
-			qValues = qValues.stream().filter(valor -> valor.getReward() == max).collect(Collectors.toList());
-			
-			//retorna uma das melhores acoes aleatoriamente
-			return qValues.get(new Random(System.currentTimeMillis()).nextInt(qValues.size()));
-		}
-		return null;
+		//Verifica o maior valor de recompensa
+		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
+		
+		//filtra por todas as acoes cuja recompensa seja igual a maior
+		qValues = qValues.stream().filter(valor -> valor.getReward() == max).collect(Collectors.toList());
+		
+		//retorna uma das melhores acoes aleatoriamente
+		return qValues.get(new Random(System.currentTimeMillis()).nextInt(qValues.size()));
 	}
 	
 	/**

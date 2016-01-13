@@ -9,4 +9,5 @@ public interface AgentControl {
 	void stop();
 	
 	void reset();
+	
 }

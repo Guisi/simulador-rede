@@ -12,7 +12,7 @@ import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
-import br.com.guisi.simulador.rede.util.EnvironmentUtils;
+import br.com.guisi.simulador.rede.util.PowerFlow;
 import br.com.guisi.simulador.rede.view.custom.BranchStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkPane;
@@ -153,8 +153,11 @@ public class NetworkPaneController extends Controller {
 	private void processAgentStop() {
 		Environment environment = SimuladorRede.getEnvironment();
 		
-		//atualiza informações das conexões dos feeders e loads
-		EnvironmentUtils.updateFeedersConnections(environment);
+		try {
+			PowerFlow.execute(environment);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 			
 		environment.getSwitches().forEach((sw) -> networkPane.updateBranchDrawing(sw));
 			
@@ -163,6 +166,8 @@ public class NetworkPaneController extends Controller {
 		
 		//atualiza status dos feeders na tela
 		environment.getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
+		
+		this.fireEvent(EventType.POWER_FLOW_COMPLETED);
 	}
 	
 	@Override

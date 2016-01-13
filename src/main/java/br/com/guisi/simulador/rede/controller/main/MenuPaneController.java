@@ -97,12 +97,9 @@ public class MenuPaneController extends Controller {
 					//isola as faltas
 					EnvironmentUtils.isolateFaultSwitches(environment);
 					
-					//atualiza informações das conexões dos feeders e loads
-					EnvironmentUtils.updateFeedersConnections(environment);
-					
 					//executa o fluxo de potência
 					try {
-						//PowerFlow.execute(environment);
+						PowerFlow.execute(environment);
 						powerFlowSuccess = true;
 					} catch (Exception e) {
 						Alert alert = new Alert(AlertType.ERROR);

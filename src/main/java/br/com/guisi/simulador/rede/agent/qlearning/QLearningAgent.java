@@ -1,19 +1,20 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
+import br.com.guisi.simulador.rede.agent.annotations.QLearning;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
-import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Environment;
-import br.com.guisi.simulador.rede.enviroment.SwitchState;
-import br.com.guisi.simulador.rede.util.PowerFlow;
 
 @Named
+@QLearning
 public class QLearningAgent extends Agent {
 	
 	private QTable qTable;
@@ -21,9 +22,14 @@ public class QLearningAgent extends Agent {
 
 	@PostConstruct
 	public void init() {
+		this.reset();
+		currentState = 1;
+	}
+	
+	@Override
+	public void reset() {
 		this.qTable = new QTable();
 		
-		//SimuladorRede.getEnvironment()
 	}
 	
 	/**
@@ -33,7 +39,7 @@ public class QLearningAgent extends Agent {
 	 */
 	@Override
 	protected void runNextEpisode() {
-		Environment environment = SimuladorRede.getEnvironment();
+		/*Environment environment = SimuladorRede.getEnvironment();
 
 		currentState = environment.getRandomSwitch().getNumber();
 		
@@ -76,7 +82,7 @@ public class QLearningAgent extends Agent {
         double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * nextStateQ) - q);
         
         //atualiza sua QTable com o valor calculado pelo algoritmo
-        qValue.setReward(value);
+        qValue.setReward(value);*/
         
         //incrementa contagem de episódios
         //this.getStatus().incrementEpisodesCount();
@@ -117,5 +123,9 @@ public class QLearningAgent extends Agent {
 	
 	public double getLowerReward() {
 		return qTable.getLowerReward();
+	}
+	
+	public List<QValue> getQValues(Integer state) {
+		return qTable.getQValues(state);
 	}
 }

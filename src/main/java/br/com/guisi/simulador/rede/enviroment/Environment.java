@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import br.com.guisi.simulador.rede.util.EnvironmentUtils;
-
 /**
  * Classe representando um ambiente simulado de uma rede de energia elétrica
  * 
@@ -91,8 +89,6 @@ public class Environment {
 	public void reverseSwitch(Integer switchNumber) {
 		Branch switchBranch = getBranch(switchNumber);
 		switchBranch.reverse();
-		
-		EnvironmentUtils.updateFeedersConnections(this);
 	}
 	
 	/**
@@ -224,18 +220,16 @@ public class Environment {
 	 * @return
 	 */
 	public boolean isValidForReconfiguration() {
-		return true;
-		
 		//o primeiro passo é validar se existem switches abertos
 		//pois se todos os switches estiverem fechados, não há como reconfigurar
-		/*boolean hasOpenSwitch = false;
+		boolean hasOpenSwitch = false;
 		for (Branch switc : switches) {
-			if (!switc.isClosed()) {
+			if (switc.isOpen()) {
 				hasOpenSwitch = true;
 				break;
 			}
 		}
 		
-		return hasOpenSwitch;*/
+		return hasOpenSwitch;
 	}
 }

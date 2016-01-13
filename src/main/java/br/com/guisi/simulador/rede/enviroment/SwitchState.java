@@ -10,8 +10,8 @@ public enum SwitchState {
 	OPEN("Open"), CLOSED("Closed"), ISOLATED("Isolated"), FAULT("Fault");
 	
 	private static final Random RANDOM = new Random(System.currentTimeMillis());
-	private static final List<SwitchState> VALUES = Collections.unmodifiableList(Arrays.asList(OPEN, CLOSED));
-	private static final int SIZE = VALUES.size();
+	public static final List<SwitchState> OPERATIONAL_SWITCHES = Collections.unmodifiableList(Arrays.asList(OPEN, CLOSED));
+	private static final int SIZE = OPERATIONAL_SWITCHES.size();
 	
 	private final String description;
 	
@@ -24,6 +24,6 @@ public enum SwitchState {
 	}
 
 	public static SwitchState getRandomAction() {
-		return VALUES.get(RANDOM.nextInt(SIZE));
+		return OPERATIONAL_SWITCHES.get(RANDOM.nextInt(SIZE));
 	}
 }

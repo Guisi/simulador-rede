@@ -61,12 +61,15 @@ public abstract class Agent {
 		copy.getStepStatus().addAll(agentStatus.getStepStatus());
 		Platform.runLater(() -> {
 			eventBus.fire(EventType.AGENT_NOTIFICATION, copy);
+			eventBus.fire(EventType.POWER_FLOW_COMPLETED);
 		});
 	}
 	
 	protected abstract void runNextEpisode();
 	
 	protected abstract void putInformations(AgentStepStatus agentStepStatus);
+	
+	public abstract void reset();
 	
 	public final void stop() {
 		stopRequest = true;
