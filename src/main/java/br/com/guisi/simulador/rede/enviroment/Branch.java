@@ -21,7 +21,6 @@ public class Branch {
 	private boolean switchBranch;
 	private SwitchState switchState;
 	
-	private int switchOperations;
 	private double instantCurrent;
 	private double lossesMW;
 	
@@ -105,13 +104,6 @@ public class Branch {
 	}
 	
 	/**
-	 * Incrementa o número de operações desta branch em 1
-	 */
-	private void incrementSwitchOperation() {
-		this.switchOperations++;
-	}
-
-	/**
 	 * Retorna a capacidade máxima desta branch (em ampères)
 	 * @return double
 	 */
@@ -166,7 +158,6 @@ public class Branch {
 	public void reverse() {
 		if (switchState == SwitchState.OPEN || switchState == SwitchState.CLOSED) {
 			switchState = switchState == SwitchState.OPEN ? SwitchState.CLOSED : SwitchState.OPEN;
-			incrementSwitchOperation();
 		}
 	}
 	
@@ -219,14 +210,6 @@ public class Branch {
 
 	public void setInstantCurrent(double instantCurrent) {
 		this.instantCurrent = instantCurrent;
-	}
-
-	/**
-	 * Retorna o número de operações de switch desta branch
-	 * @return int
-	 */
-	public int getSwitchOperations() {
-		return switchOperations;
 	}
 
 	public BranchId getBranchId() {

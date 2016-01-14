@@ -12,9 +12,11 @@ import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.LearningProperty;
 import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
+import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.util.PowerFlow;
 
 @Named
 public class QLearningAgent extends Agent {
@@ -44,66 +46,47 @@ public class QLearningAgent extends Agent {
 		
 		List<SwitchOperation> switchOperations = new ArrayList<>();
 		
-		//busca o switch a ser aberto
-		firstSwitch = getClosestSwitch(environment, secondSwitch, SwitchState.CLOSED);
-		if (!firstSwitch.hasFault()) {
-			firstSwitch.reverse();
-			switchOperations.add(new SwitchOperation(firstSwitch.getNumber(), firstSwitch.getSwitchState()));
-		}
-		
-		//busca o switch a ser fechado
-		secondSwitch = getClosestSwitch(environment, firstSwitch, SwitchState.OPEN);
-		secondSwitch.reverse();
-		switchOperations.add(new SwitchOperation(secondSwitch.getNumber(), secondSwitch.getSwitchState()));
-		
-		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATIONS, switchOperations);
-
-		/*currentState = environment.getRandomSwitch().getNumber();
-		
 		//Se randomico menor que E-greedy, escolhe melhor acao
 		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
 		
 		//TODO remover
 		randomAction = true;
 		
-		SwitchState action = randomAction 
-				? SwitchState.getRandomAction() 
-						: qTable.getBestAction(currentState);
+		//busca o switch a ser aberto
+		firstSwitch = getClosestSwitch(environment, secondSwitch, SwitchState.CLOSED);
 		
-		//altera o estado do switch
-		environment.reverseSwitch(currentState);
-		
-		try {
-			PowerFlow.execute(environment);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (randomAction) {
+			//TODO adicionar while verificando se a rede está radial
+			
+			if (!firstSwitch.hasFault()) {
+				firstSwitch.reverse();
+				switchOperations.add(new SwitchOperation(firstSwitch.getNumber(), firstSwitch.getSwitchState()));
+			}
+			
+			//busca o switch a ser fechado
+			secondSwitch = getClosestSwitch(environment, firstSwitch, SwitchState.OPEN);
+			secondSwitch.reverse();
+			switchOperations.add(new SwitchOperation(secondSwitch.getNumber(), secondSwitch.getSwitchState()));
+			
+			agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATIONS, switchOperations);
+			
+			try {
+				//executa o fluxo de potência
+				PowerFlow.execute(environment);
+				
+				//TODO só atualizar quando mexer nos switches mesmo??
+				
+				//atualiza o qValue do primeiro switch
+				updateQValue(firstSwitch);
+				
+				//atualiza o qValue do segundo switch
+				updateQValue(secondSwitch);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
-		//verifica no ambiente qual é o resultado de executar a ação
-		//ActionResult actionResult = environment.executeAction(state, action);
-		
-		//recupera estado para o qual se moveu (será o mesmo atual caso não pode realizar a ação)
-		Integer nextState = environment.getRandomSwitch().getNumber();//TODO actionResult.getNextState();
-		
-		//recupera em sua QTable o valor de recompensa para o estado/ação que estava antes
-		QValue qValue = qTable.getQValue(currentState, action);
-        double q = qValue.getReward();
-        
-        //recupera em sua QTable o melhor valor para o estado para o qual se moveu
-        double nextStateQ = qTable.getBestQValue(nextState).getReward();
-        
-        //recupera a recompensa retornada pelo ambiente por ter realizado a ação
-        double r = 0;//TODO actionResult.getReward();
-
-        //Algoritmo Q-Learning -> calcula o novo valor para o estado/ação que estava antes
-        double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * nextStateQ) - q);
-        
-        //atualiza sua QTable com o valor calculado pelo algoritmo
-        qValue.setReward(value);*/
-        
-        //incrementa contagem de episódios
-        //this.getStatus().incrementEpisodesCount();
-
         /*
         //verifica se mudou política, somente se ação não foi aleatória
         boolean changedPolicy = false;
@@ -121,6 +104,26 @@ public class QLearningAgent extends Agent {
         	nextState = environment.getRandomInitialStateForAgent();
         }
         */
+	}
+	
+	private void updateQValue(Branch sw) {
+		//recupera em sua QTable o valor de recompensa para o estado/ação que estava antes
+		QValue qValue = qTable.getQValue(sw.getNumber(), sw.getSwitchState());
+        double q = qValue.getReward();
+        
+        //recupera em sua QTable o melhor valor para o estado para o qual se moveu
+        //TODO ver o que vai ser esse nextState 
+        //double nextStateQ = qTable.getBestQValue(nextState).getReward();
+        
+        //recupera a recompensa retornada pelo ambiente por ter realizado a ação
+        double r = 0;//TODO actionResult.getReward();
+
+        //Algoritmo Q-Learning -> calcula o novo valor para o estado/ação que estava antes
+        //TODO double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * nextStateQ) - q);
+        double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * q) - q);
+        
+        //atualiza sua QTable com o valor calculado pelo algoritmo
+        qValue.setReward(value);
 	}
 	
 	/**

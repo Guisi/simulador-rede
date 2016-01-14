@@ -30,7 +30,7 @@ public class PowerFlow {
 		EnvironmentUtils.updateFeedersConnections(environment);
 
 		//executa power flow
-		//TODO remover executePowerFlow(environment);
+		executePowerFlow(environment);
 		
 		//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
 		environment.getFeeders().forEach((feeder) -> {

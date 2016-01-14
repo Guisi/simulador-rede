@@ -6,6 +6,7 @@ import javafx.application.Platform;
 
 import javax.inject.Inject;
 
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.LearningProperty;
@@ -24,8 +25,9 @@ public abstract class Agent {
 	
 	public final void run(TaskExecutionType taskExecutionType) {
 		this.stopRequest = false;
+		boolean isEnvironmentValid = SimuladorRede.getEnvironment().isValidForReconfiguration();
 
-		while (!stopRequest) {
+		while (!stopRequest && isEnvironmentValid) {
 			synchronized (this) {
 				AgentStepStatus agentStepStatus = new AgentStepStatus(step);
 				agentStatus.getStepStatus().add(agentStepStatus);
@@ -49,6 +51,8 @@ public abstract class Agent {
 					case STEP_BY_STEP: stop(); break;
 					default: break;
 				}
+				
+				isEnvironmentValid = SimuladorRede.getEnvironment().isValidForReconfiguration();
 			}
 		}
 		

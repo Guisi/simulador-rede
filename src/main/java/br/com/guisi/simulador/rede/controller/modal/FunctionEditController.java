@@ -66,6 +66,8 @@ public class FunctionEditController extends Controller {
         String functionExpression = this.functionItem.getFunctionExpression();
         if (StringUtils.isNotEmpty(functionExpression)) {
         	codeArea.replaceText(functionExpression);
+        } else {
+        	codeArea.clear();
         }
 	}
 	

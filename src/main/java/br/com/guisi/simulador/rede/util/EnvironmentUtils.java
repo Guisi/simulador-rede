@@ -430,11 +430,16 @@ public class EnvironmentUtils {
 			for (NetworkNode networkNode : branch.getConnectedLoads()) {
 				if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
 					for (Branch connectedBranch : networkNode.getBranches()) {
-						if (!connectedBranch.equals(branch)) {
+						//se o branch conectado não é o branch pelo qual já passou
+						//e se o branch conectado está aberto ou fechado, ou se está saindo de uma área isolada
+						if (!connectedBranch.equals(branch) && (connectedBranch.isOpen() || connectedBranch.isClosed() || branch.isIsolated() || branch.hasFault())) {
+							
+							//se encontrou o switch conforme o estado, adiciona na lista
 							if (connectedBranch.isSwitchBranch() && connectedBranch.getSwitchState() == switchState) {
 								closestSwitches.add(connectedBranch);
 								closestDistance = distance;
 							} else {
+								//se não, continua navegação
 								List<Branch> lst = getClosestSwitchesRecursive(distance, closestDistance, connectedBranch, networkNode, switchState);
 								if (lst != null) {
 									closestSwitches.addAll(lst);
