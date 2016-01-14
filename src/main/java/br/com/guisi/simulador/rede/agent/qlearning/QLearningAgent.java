@@ -52,6 +52,8 @@ public class QLearningAgent extends Agent {
 		//TODO remover
 		randomAction = true;
 		
+		//TODO pensar em lógica para evitar ficar voltando para switch que já passou
+		
 		//busca o switch a ser aberto
 		firstSwitch = getClosestSwitch(environment, secondSwitch, SwitchState.CLOSED);
 		
