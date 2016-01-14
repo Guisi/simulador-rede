@@ -86,7 +86,6 @@ public class LabelAndMessagesPaneController extends Controller {
 	
 	private void processEnvironmentLoaded() {
 		root.setVisible(true);
-		agentControl.init();
 	}
 
 	private void initializeTables() {

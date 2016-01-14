@@ -76,7 +76,7 @@ public class ControlsPaneController extends Controller {
 	
 	private void processEnvironmentLoaded() {
 		root.setVisible(true);
-		agentControl.init();
+		agentControl.reset();
 	}
 	
 	private void enableDisableScreen(boolean disable) {

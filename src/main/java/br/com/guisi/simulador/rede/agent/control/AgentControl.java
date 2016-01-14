@@ -11,7 +11,5 @@ public interface AgentControl {
 	
 	void reset();
 	
-	void init();
-	
 	Agent getAgent();
 }

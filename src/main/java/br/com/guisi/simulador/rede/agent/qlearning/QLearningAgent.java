@@ -6,6 +6,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
+import org.springframework.context.annotation.Scope;
+
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
@@ -19,6 +21,7 @@ import br.com.guisi.simulador.rede.enviroment.SwitchState;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
 @Named
+@Scope("prototype")
 public class QLearningAgent extends Agent {
 	
 	private QTable qTable;
@@ -54,12 +57,10 @@ public class QLearningAgent extends Agent {
 		
 		//TODO pensar em lógica para evitar ficar voltando para switch que já passou
 		
-		//busca o switch a ser aberto
-		firstSwitch = getClosestSwitch(environment, secondSwitch, SwitchState.CLOSED);
-		
 		if (randomAction) {
-			//TODO adicionar while verificando se a rede está radial
-			
+			//busca o switch a ser aberto
+			firstSwitch = getClosestSwitch(environment, secondSwitch, SwitchState.CLOSED);
+
 			if (!firstSwitch.hasFault()) {
 				firstSwitch.reverse();
 				switchOperations.add(new SwitchOperation(firstSwitch.getNumber(), firstSwitch.getSwitchState()));
@@ -68,6 +69,10 @@ public class QLearningAgent extends Agent {
 			//busca o switch a ser fechado
 			secondSwitch = getClosestSwitch(environment, firstSwitch, SwitchState.OPEN);
 			secondSwitch.reverse();
+			
+			//TODO adicionar while verificando se a rede está radial
+			//somente para o switch fechado, pois abrir switch não causa perda de radialidade
+			
 			switchOperations.add(new SwitchOperation(secondSwitch.getNumber(), secondSwitch.getSwitchState()));
 			
 			agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATIONS, switchOperations);

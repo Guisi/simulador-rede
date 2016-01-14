@@ -34,13 +34,25 @@ public class AgentControlImpl implements AgentControl {
 	@Override
 	public void run(TaskExecutionType taskExecutionType) {
 		if (SimuladorRede.getEnvironment().isValidForReconfiguration()) {
-			agentTask = new AgentTask(agent, taskExecutionType);
+			agentTask = new AgentTask(getAgent(), taskExecutionType);
 			
 			agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
 	            if (newState == Worker.State.SUCCEEDED) {
 	            	eventBus.fire(EventType.AGENT_STOPPED);
 	            }
 	        });
+			
+			agentTask.exceptionProperty().addListener((observable, oldValue, newValue) ->  {
+				if (newValue != null) {
+					eventBus.fire(EventType.AGENT_STOPPED);
+					
+					Exception ex = (Exception) newValue;
+					ex.printStackTrace();
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setContentText(ex.getMessage());
+					alert.showAndWait();
+				}
+			});
 			
 			eventBus.fire(EventType.AGENT_RUNNING);
 	
@@ -53,7 +65,7 @@ public class AgentControlImpl implements AgentControl {
 
 	@Override
 	public void stop() {
-		agent.stop();
+		getAgent().stop();
 	}
 	
 	@Override
@@ -62,14 +74,10 @@ public class AgentControlImpl implements AgentControl {
 	}
 	
 	@Override
-	public void init() {
+	public Agent getAgent() {
 		if (agent == null) {
 			this.reset();
 		}
-	}
-	
-	@Override
-	public Agent getAgent() {
 		return agent;
 	}
 }

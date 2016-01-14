@@ -16,7 +16,7 @@ public class AgentTask extends Task<Void> {
 	}
 
 	@Override
-	protected Void call() throws Exception {
+	protected Void call() {
 		agent.run(taskExecutionType);
 		return null;
 	}
