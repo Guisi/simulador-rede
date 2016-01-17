@@ -1,7 +1,12 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
@@ -17,6 +22,7 @@ import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
@@ -27,6 +33,10 @@ public class QLearningAgent extends Agent {
 	private QTable qTable;
 	private Branch firstSwitch;
 	private Branch secondSwitch;
+	
+	private Map<Integer, List<SwitchDistance>> visitedSwitchesMap;
+	
+	private final Random RANDOM = new Random(System.currentTimeMillis());
 
 	@PostConstruct
 	public void init() {
@@ -36,6 +46,7 @@ public class QLearningAgent extends Agent {
 	@Override
 	public void reset() {
 		this.qTable = new QTable();
+		this.visitedSwitchesMap = new HashMap<>();
 	}
 	
 	/**
@@ -59,7 +70,7 @@ public class QLearningAgent extends Agent {
 		
 		if (randomAction) {
 			//busca o switch a ser aberto
-			firstSwitch = getClosestSwitch(environment, secondSwitch, SwitchState.CLOSED);
+			firstSwitch = getClosestSwitch(environment, firstSwitch, SwitchState.CLOSED);
 
 			if (!firstSwitch.hasFault()) {
 				firstSwitch.reverse();
@@ -152,8 +163,43 @@ public class QLearningAgent extends Agent {
 				sw = environment.getRandomSwitch(switchState);
 			}
 		} else {
-			//senão, busca o switch
-			sw = environment.getClosestSwitch(refSwitch, switchState);
+			//senão, busca o switch mais próximo
+			
+			//busca uma lista dos switches mais próximos
+			List<SwitchDistance> closestSwitches = environment.getClosestSwitches(refSwitch, switchState);
+			
+			//quando está procurando um switch para abrir, verifica switches já visitados
+			List<SwitchDistance> visitedSwitches = null;
+			if (switchState == SwitchState.CLOSED) {
+				visitedSwitches = visitedSwitchesMap.get(refSwitch.getNumber());
+				if (visitedSwitches != null) {
+					//se para o switch de referência, já foi visitado todos os mais próximos, limpa a lista de visitados
+					if (visitedSwitches.containsAll(closestSwitches)) {
+						visitedSwitches.clear();
+					} else {
+						//senão, remove os já visitados para que visite os demais
+						closestSwitches.removeAll(visitedSwitches);
+					}
+				} else {
+					visitedSwitches = new ArrayList<>();
+					visitedSwitchesMap.put(refSwitch.getNumber(), visitedSwitches);
+				}
+			}
+
+			//Verifica o menor valor de distância encontrado
+			Integer minDistance = closestSwitches.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
+			
+			//filtra por todos os switches da lista com a menor distância
+			closestSwitches = closestSwitches.stream().filter(valor -> valor.getDistance() == minDistance).collect(Collectors.toList());
+			
+			//retorna um dos switches mais próximos aleatoriamente
+			SwitchDistance switchDistance = closestSwitches.get(RANDOM.nextInt(closestSwitches.size()));
+			sw = switchDistance.getTheSwitch();
+			
+			//adiciona o switch na lista de visitados
+			if (switchState == SwitchState.CLOSED) {
+				visitedSwitches.add(switchDistance);
+			}
 		}
 		
 		return sw;

@@ -21,7 +21,7 @@ public abstract class Agent {
 	
 	private AgentStatus agentStatus = new AgentStatus();
 	private boolean stopRequest;
-	private int step = 1;
+	private int step = 0;
 	
 	public final void run(TaskExecutionType taskExecutionType) {
 		this.stopRequest = false;
@@ -29,23 +29,19 @@ public abstract class Agent {
 
 		while (!stopRequest && isEnvironmentValid) {
 			synchronized (this) {
-				AgentStepStatus agentStepStatus = new AgentStepStatus(step);
+				AgentStepStatus agentStepStatus = new AgentStepStatus(step++);
 				agentStatus.getStepStatus().add(agentStepStatus);
 
 				this.runNextEpisode(agentStepStatus);
 				
 				if (taskExecutionType.isNotifyEveryStep()) {
 					try {
-						if (step % 10 == 0) {
-							this.notifyAgentObservers();
-							Thread.sleep(10);
-						}
+						this.notifyAgentObservers();
+						Thread.sleep(250);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-				
-				step++;
 				
 				switch (taskExecutionType) {
 					case STEP_BY_STEP: stop(); break;
@@ -61,6 +57,7 @@ public abstract class Agent {
 	
 	private void notifyAgentObservers() {
 		AgentStatus copy = new AgentStatus();
+		copy.setSteps(step);
 		copy.getStepStatus().addAll(agentStatus.getStepStatus());
 		Platform.runLater(() -> {
 			eventBus.fire(EventType.AGENT_NOTIFICATION, copy);

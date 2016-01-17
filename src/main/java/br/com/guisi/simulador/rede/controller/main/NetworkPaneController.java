@@ -1,5 +1,7 @@
 package br.com.guisi.simulador.rede.controller.main;
 
+import java.util.List;
+
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -7,12 +9,15 @@ import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
+import br.com.guisi.simulador.rede.agent.status.AgentStatus;
+import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
-import br.com.guisi.simulador.rede.util.PowerFlow;
 import br.com.guisi.simulador.rede.view.custom.BranchStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkPane;
@@ -30,6 +35,8 @@ public class NetworkPaneController extends Controller {
 	
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
+	
+	private int stepUpdateReceived;
 	
 	@Override
 	public void initializeController() {
@@ -56,7 +63,7 @@ public class NetworkPaneController extends Controller {
 			case LOAD_SELECTED: this.processLoadSelected(data); break;
 			case FEEDER_SELECTED: this.processFeederSelected(data); break;
 			case BRANCH_SELECTED: this.processBranchSelected(data); break;
-			//case AGENT_NOTIFICATION : this.processAgentNotification((AgentUpdates) data); break;
+			case AGENT_NOTIFICATION : this.processAgentNotification(data); break;
 			case AGENT_STOPPED: this.processAgentStop(); break;
 			default: break;
 		}
@@ -66,6 +73,7 @@ public class NetworkPaneController extends Controller {
 		root.getChildren().clear();
 		root.setVisible(false);
 		zoomSlider.setValue(1);
+		stepUpdateReceived = 0;
 		
 		networkPane = new NetworkPane();
 		zoomingPane = new ZoomingPane(networkPane);
@@ -133,41 +141,43 @@ public class NetworkPaneController extends Controller {
 		networkPane.selectBranch((Integer) data);
 	}
 	
-	/*private void processAgentNotification(AgentUpdates agentUpdates) {
-		Integer switchChanged = agentUpdates.getIntegerNotification(AgentNotificationType.SWITCH_STATE_CHANGED);
+	private void processAgentNotification(Object data) {
+		AgentStatus agentStatus = (AgentStatus) data;
 		
-		networkPane.setAgentCirclePosition(switchChanged);
-		
-		Environment environment = SimuladorRede.getEnvironment();
-		
-		//atualiza informações das conexões dos feeders e loads
-		EnvironmentUtils.updateFeedersConnections(environment);
+		if (agentStatus != null) {
+			Environment environment = SimuladorRede.getEnvironment();
 			
-		Branch sw = environment.getBranch(switchChanged);
-		networkPane.updateBranch(sw);
+			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
+				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
+				
+				@SuppressWarnings("unchecked")
+				List<SwitchOperation> switchOperations = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATIONS, List.class);
+				if (switchOperations != null) {
+					for (SwitchOperation switchOperation : switchOperations) {
+						Branch sw = environment.getBranch(switchOperation.getSwitchNumber());
+						networkPane.updateBranchDrawing(sw);
+					}
+					//atualiza status dos nós na tela
+					if (!switchOperations.isEmpty()) {
+						environment.getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
+					}
+				}
+			}
 			
-		//atualiza status dos nós na tela
-		environment.getNetworkNodes().forEach((node) -> networkPane.updateNetworkNode(node));
-	}*/
+			stepUpdateReceived = agentStatus.getStepStatus().size();
+		}
+	}
 	
 	private void processAgentStop() {
 		Environment environment = SimuladorRede.getEnvironment();
 		
-		try {
-			PowerFlow.execute(environment);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-			
 		environment.getSwitches().forEach((sw) -> networkPane.updateBranchDrawing(sw));
-			
+
 		//atualiza status dos loads na tela
 		environment.getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
 		
 		//atualiza status dos feeders na tela
 		environment.getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
-		
-		this.fireEvent(EventType.POWER_FLOW_COMPLETED);
 	}
 	
 	@Override

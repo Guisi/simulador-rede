@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class AgentStatus {
 
+	private int steps;
 	private List<AgentStepStatus> stepStatus = new ArrayList<>();
 
 	public List<AgentStepStatus> getStepStatus() {
@@ -17,6 +18,14 @@ public class AgentStatus {
 		this.stepStatus = stepStatus;
 	}
 	
+	public int getSteps() {
+		return steps;
+	}
+
+	public void setSteps(int steps) {
+		this.steps = steps;
+	}
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);

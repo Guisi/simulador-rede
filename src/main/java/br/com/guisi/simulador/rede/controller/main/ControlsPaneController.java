@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
@@ -14,6 +15,7 @@ import javafx.scene.layout.VBox;
 import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
+import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -36,6 +38,8 @@ public class ControlsPaneController extends Controller {
 	private Button btnStopAgent;
 	@FXML
 	private ComboBox<TaskExecutionType> cbTaskExecutionType;
+	@FXML
+	private Label lblSteps;
 
 	@Override
 	public void initializeController() {
@@ -66,6 +70,7 @@ public class ControlsPaneController extends Controller {
 			case ENVIRONMENT_LOADED: this.processEnvironmentLoaded(); break;
 			case AGENT_RUNNING: this.enableDisableScreen(true); break;
 			case AGENT_STOPPED: this.enableDisableScreen(false); break;
+			case AGENT_NOTIFICATION: this.processAgentNotification(data); break;
 			default: break;
 		}
 	}
@@ -77,6 +82,14 @@ public class ControlsPaneController extends Controller {
 	private void processEnvironmentLoaded() {
 		root.setVisible(true);
 		agentControl.reset();
+	}
+	
+	private void processAgentNotification(Object data) {
+		AgentStatus agentStatus = (AgentStatus) data;
+		
+		if (agentStatus != null) {
+			lblSteps.setText(String.valueOf(agentStatus.getSteps()));
+		}
 	}
 	
 	private void enableDisableScreen(boolean disable) {

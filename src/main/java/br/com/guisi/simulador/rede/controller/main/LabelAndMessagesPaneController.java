@@ -50,6 +50,8 @@ public class LabelAndMessagesPaneController extends Controller {
 	@Inject
 	private AgentControl agentControl;
 	
+	private int stepUpdateReceived;
+	
 	@Override
 	public void initializeController() {
 		this.initializeTables();
@@ -79,6 +81,7 @@ public class LabelAndMessagesPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
+		this.stepUpdateReceived = 0;
 		tvBrokenConstraints.getItems().clear();
 		tvSwitchesOperations.getItems().clear();
 		tvSwitchesOperations.getItems().clear();
@@ -202,8 +205,7 @@ public class LabelAndMessagesPaneController extends Controller {
 		AgentStatus agentStatus = (AgentStatus) data;
 		
 		if (agentStatus != null) {
-			int ini = tvSwitchesOperations.getItems().size();
-			for (int i = ini; i < agentStatus.getStepStatus().size(); i++) {
+			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 				
 				@SuppressWarnings("unchecked")
@@ -216,6 +218,7 @@ public class LabelAndMessagesPaneController extends Controller {
 					}
 				}
 			}
+			stepUpdateReceived = agentStatus.getStepStatus().size();
 		}
 	}
 	

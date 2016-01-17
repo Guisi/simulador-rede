@@ -39,12 +39,14 @@ public class AgentControlImpl implements AgentControl {
 			agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
 	            if (newState == Worker.State.SUCCEEDED) {
 	            	eventBus.fire(EventType.AGENT_STOPPED);
+	            	eventBus.fire(EventType.POWER_FLOW_COMPLETED);
 	            }
 	        });
 			
 			agentTask.exceptionProperty().addListener((observable, oldValue, newValue) ->  {
 				if (newValue != null) {
 					eventBus.fire(EventType.AGENT_STOPPED);
+					eventBus.fire(EventType.POWER_FLOW_COMPLETED);
 					
 					Exception ex = (Exception) newValue;
 					ex.printStackTrace();

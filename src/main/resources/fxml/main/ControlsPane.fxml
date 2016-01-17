@@ -13,6 +13,12 @@
             <Button fx:id="btnStopAgent" disable="true" mnemonicParsing="false" onAction="#stopAgent" />
             <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Execution Type:" />
             <ComboBox fx:id="cbTaskExecutionType" />
+            <HBox alignment="CENTER" spacing="3.0">
+               <children>
+                  <Label style="-fx-font-weight: bold;" text="Steps:" />
+                  <Label fx:id="lblSteps" />
+               </children>
+            </HBox>
          </children>
       </HBox>
    </children>

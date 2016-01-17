@@ -1,7 +1,7 @@
 package br.com.guisi.simulador.rede.enviroment;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,17 +143,11 @@ public class Environment {
 	 * @param switchState
 	 * @return
 	 */
-	public Branch getClosestSwitch(Branch currentSwitch, SwitchState switchState) {
+	public List<SwitchDistance> getClosestSwitches(Branch currentSwitch, SwitchState switchState) {
 		List<SwitchDistance> closestSwitches = EnvironmentUtils.getClosestSwitches(currentSwitch, switchState);
-		
-		//verifica a menor distância
-		Integer min = closestSwitches.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
-		
-		//filtra por todos os switches com a menor distância
-		closestSwitches = closestSwitches.stream().filter(value -> value.getDistance().equals(min)).collect(Collectors.toList());
-		
-		//retorna aleatoriamente caso existir mais de um
-		return closestSwitches.isEmpty() ? null : closestSwitches.get(RANDOM.nextInt(closestSwitches.size())).getTheSwitch();
+		//ordena lista para que os switches mais próximos fiquem no início da lista
+		Collections.sort(closestSwitches);
+		return closestSwitches;
 	}
 	
 	/**
