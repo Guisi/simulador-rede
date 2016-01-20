@@ -37,7 +37,7 @@ public abstract class Agent {
 				if (taskExecutionType.isNotifyEveryStep()) {
 					try {
 						this.notifyAgentObservers();
-						Thread.sleep(250);
+						Thread.sleep(50);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
