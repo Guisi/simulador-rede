@@ -37,7 +37,7 @@ public abstract class Agent {
 				if (taskExecutionType.isNotifyEveryStep()) {
 					try {
 						this.notifyAgentObservers();
-						Thread.sleep(50);
+						Thread.sleep(30);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -61,7 +61,6 @@ public abstract class Agent {
 		copy.getStepStatus().addAll(agentStatus.getStepStatus());
 		Platform.runLater(() -> {
 			eventBus.fire(EventType.AGENT_NOTIFICATION, copy);
-			eventBus.fire(EventType.POWER_FLOW_COMPLETED);
 		});
 	}
 	

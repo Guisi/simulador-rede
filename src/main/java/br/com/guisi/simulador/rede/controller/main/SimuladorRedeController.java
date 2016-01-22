@@ -47,6 +47,9 @@ public class SimuladorRedeController extends Controller {
 		//Painel das funções
 		networkBoxLeft.getChildren().add(getController(FunctionsPaneController.class).getView());
 		
+		//Painel dos gráficos
+		networkBoxLeft.getChildren().add(getController(ChartsPaneController.class).getView());
+		
 		//NetworkPane
 		networkBoxRight.getChildren().add(getController(NetworkPaneController.class).getView());
 		//networkPaneController = (NetworkPaneController) SimuladorRede.showUtilityScene("Electric Network", NetworkPaneController.class, false);

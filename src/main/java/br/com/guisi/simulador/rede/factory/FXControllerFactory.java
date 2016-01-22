@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import br.com.guisi.simulador.rede.controller.main.ChartsPaneController;
 import br.com.guisi.simulador.rede.controller.main.ControlsPaneController;
 import br.com.guisi.simulador.rede.controller.main.ElementsDetailsPaneController;
 import br.com.guisi.simulador.rede.controller.main.FunctionsPaneController;
@@ -92,6 +93,12 @@ public class FXControllerFactory{
 	@Lazy
 	public NetworkPaneController networkPaneController(){
 		return (NetworkPaneController) loadController(NetworkPaneController.FXML_FILE);
+	}
+	
+	@Bean
+	@Lazy
+	public ChartsPaneController chartsPaneController(){
+		return (ChartsPaneController) loadController(ChartsPaneController.FXML_FILE);
 	}
 	
 	/**

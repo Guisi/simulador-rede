@@ -77,6 +77,7 @@ public class ControlsPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
+		lblSteps.setText("");
 	}
 	
 	private void processEnvironmentLoaded() {

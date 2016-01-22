@@ -48,7 +48,11 @@ public class Load extends NetworkNode {
 	 * @return boolean
 	 */
 	public boolean isSupplied() {
-		return isOn() && feeder != null && !isCurrentVoltageAboveLimit() && !isCurrentVoltageBelowLimit();
+		return isOn() && feeder != null && !hasBrokenConstraint();
+	}
+	
+	public boolean hasBrokenConstraint() {
+		return isCurrentVoltageAboveLimit() || isCurrentVoltageBelowLimit();
 	}
 
 	@Override

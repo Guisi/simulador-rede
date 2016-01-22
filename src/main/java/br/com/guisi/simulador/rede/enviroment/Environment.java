@@ -229,6 +229,14 @@ public class Environment {
 	public List<Branch> getFaults() {
 		return faults;
 	}
+	
+	/**
+	 * Retorna a soma da perda de potência de todos os branches fechados
+	 * @return
+	 */
+	public double getTotalPowerLost() {
+		return branches.stream().filter((branch) -> branch.isClosed()).mapToDouble((branch) -> branch.getLossesMW()).sum();
+	}
 
 	/**
 	 * Retorna verdadeiro se ambiente é válido para reconfiguração
@@ -236,7 +244,6 @@ public class Environment {
 	 * @return
 	 */
 	public boolean isValidForReconfiguration() {
-		//TODO validar por rede individual
 		//valida se existem switches abertos, pois se todos os switches estiverem fechados, não há como reconfigurar
 		boolean hasOpenSwitch = false;
 		for (Branch switc : switches) {

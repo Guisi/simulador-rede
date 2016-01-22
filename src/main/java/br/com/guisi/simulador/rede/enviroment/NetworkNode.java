@@ -88,6 +88,20 @@ public abstract class NetworkNode {
 	public boolean isOn() {
 		return Status.ON.equals(status);
 	}
+	
+	/**
+	 * Desliga o load
+	 */
+	public void turnOff() {
+		this.status = Status.OFF;
+	}
+	
+	/**
+	 * Liga o load
+	 */
+	public void turnOn() {
+		this.status = Status.ON;
+	}
 
 	/**
 	 * Retorna a posição X deste nó no ambiente

@@ -3,9 +3,11 @@ package br.com.guisi.simulador.rede.agent.qlearning;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +24,8 @@ import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.enviroment.Feeder;
+import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
@@ -36,6 +40,7 @@ public class QLearningAgent extends Agent {
 	private Branch secondSwitch;
 	
 	private Map<Integer, List<SwitchDistance>> visitedSwitchesMap;
+	private Set<Load> turnedOffLoads;
 	
 	private final Random RANDOM = new Random(System.currentTimeMillis());
 
@@ -48,6 +53,7 @@ public class QLearningAgent extends Agent {
 	public void reset() {
 		this.qTable = new QTable();
 		this.visitedSwitchesMap = new HashMap<>();
+		this.turnedOffLoads = new HashSet<>();
 	}
 	
 	/**
@@ -66,44 +72,19 @@ public class QLearningAgent extends Agent {
 		randomAction = true;
 		
 		if (randomAction) {
-			//busca o switch a ser aberto
-			firstSwitch = getClosestSwitch(environment, firstSwitch, SwitchState.CLOSED, null).getTheSwitch();
-
-			if (!firstSwitch.hasFault()) {
-				firstSwitch.reverse();
-			}
+			//reativa loads desativados no episódio anterior
+			turnedOffLoads.forEach((load) -> load.turnOn());
+			turnedOffLoads.clear();
 			
-			//busca o switch a ser fechado
-			//continua procurando enquanto não estiver radial
-			//somente para o switch fechado, pois abrir switch não causa perda de radialidade
-			String errors = null;
-			List<SwitchDistance> switchesToIgnore = new ArrayList<>();
-			do {
-				SwitchDistance secondSwitchDistance = getClosestSwitch(environment, firstSwitch, SwitchState.OPEN, switchesToIgnore);
-				secondSwitch = secondSwitchDistance != null ? secondSwitchDistance.getTheSwitch() : null;
-				if (secondSwitchDistance != null) {
-					secondSwitch.reverse();
-				
-					errors = EnvironmentUtils.validateRadialState(environment);
+			//faz as mudanças de status dos switches
+			this.doSwitchChanges(environment, agentStepStatus);
 			
-					if (!errors.isEmpty()) {
-						secondSwitch.reverse();
-						switchesToIgnore.add(secondSwitchDistance);
-					}
-				}
-			} while (secondSwitch != null && !errors.isEmpty());
-			
-			//atualiza status com os switches alterados
-			List<SwitchOperation> switchOperations = new ArrayList<>();
-			switchOperations.add(new SwitchOperation(firstSwitch.getNumber(), firstSwitch.getSwitchState()));
-			if (secondSwitch != null) {
-				switchOperations.add(new SwitchOperation(secondSwitch.getNumber(), secondSwitch.getSwitchState()));
-			}
-			agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATIONS, switchOperations);
-				
 			try {
 				//executa o fluxo de potência
 				PowerFlow.execute(environment);
+				
+				//verifica loads a serem desativados caso existam restrições 
+				this.turnOffLoadsIfNecessary(environment);
 				
 				//TODO só atualizar quando mexer nos switches mesmo??
 				
@@ -115,10 +96,100 @@ public class QLearningAgent extends Agent {
 					updateQValue(secondSwitch);
 				}
 				
+				this.generateAgentStatus(environment, agentStepStatus);
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * Identifica o par de switch para ser aberto/fechado, garantindo que a radialidade seja mantida
+	 * @param environment
+	 * @param agentStepStatus
+	 */
+	private void doSwitchChanges(Environment environment, AgentStepStatus agentStepStatus) {
+		//busca o switch a ser aberto
+		firstSwitch = getClosestSwitch(environment, firstSwitch, SwitchState.CLOSED, null).getTheSwitch();
+
+		if (!firstSwitch.hasFault()) {
+			firstSwitch.reverse();
+		}
+		
+		//busca o switch a ser fechado
+		//continua procurando enquanto não estiver radial
+		//somente para o switch fechado, pois abrir switch não causa perda de radialidade
+		String errors = null;
+		List<SwitchDistance> switchesToIgnore = new ArrayList<>();
+		do {
+			SwitchDistance secondSwitchDistance = getClosestSwitch(environment, firstSwitch, SwitchState.OPEN, switchesToIgnore);
+			secondSwitch = secondSwitchDistance != null ? secondSwitchDistance.getTheSwitch() : null;
+			if (secondSwitchDistance != null) {
+				secondSwitch.reverse();
+			
+				errors = EnvironmentUtils.validateRadialState(environment);
+		
+				if (!errors.isEmpty()) {
+					secondSwitch.reverse();
+					switchesToIgnore.add(secondSwitchDistance);
+				}
+			}
+		} while (secondSwitch != null && !errors.isEmpty());
+		
+		//atualiza status com os switches alterados
+		List<SwitchOperation> switchOperations = new ArrayList<>();
+		switchOperations.add(new SwitchOperation(firstSwitch.getNumber(), firstSwitch.getSwitchState()));
+		if (secondSwitch != null) {
+			switchOperations.add(new SwitchOperation(secondSwitch.getNumber(), secondSwitch.getSwitchState()));
+		}
+		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATIONS, switchOperations);
+	}
+	
+	/**
+	 * Desliga loads se existirem restrições
+	 * @param environment
+	 * @throws Exception
+	 */
+	private void turnOffLoadsIfNecessary(Environment environment) throws Exception {
+		
+		for (Feeder feeder : environment.getFeeders()) {
+			
+			List<Load> onLoads = getFeederLoadsOn(feeder);
+			boolean hasFeederBrokenLoads = hasFeederBrokenLoads(feeder);
+			while (hasFeederBrokenLoads) {
+				//Verifica a menor prioridade encontrada entre os loads do feeder em questão
+				int minPriority = onLoads.stream().min(Comparator.comparing(load -> load.getPriority())).get().getPriority();
+				
+				//filtra por todos os loads com a menor prioridade
+				List<Load> minPriorityLoads = onLoads.stream().filter(load -> load.getPriority() == minPriority).collect(Collectors.toList());
+
+				//desliga um dos loads de menor prioridade aleatoriamente
+				Load minPriorityLoad = minPriorityLoads.get(RANDOM.nextInt(minPriorityLoads.size()));
+				minPriorityLoad.turnOff();
+				turnedOffLoads.add(minPriorityLoad);
+				onLoads.remove(minPriorityLoad);
+				
+				//executa o fluxo de potência
+				PowerFlow.execute(environment);
+				
+				//verifica novamente se continuam existindo loads com restrição violada
+				hasFeederBrokenLoads = hasFeederBrokenLoads(feeder);
+			}
+		}
+	}
+	
+	private void generateAgentStatus(Environment environment, AgentStepStatus agentStepStatus) {
+		//seta total de perdas
+		agentStepStatus.putInformation(AgentInformationType.TOTAL_POWER_LOST, environment.getTotalPowerLost());
+	}
+	
+	private boolean hasFeederBrokenLoads(Feeder feeder) {
+		return feeder.getServedLoads().stream().anyMatch((load) -> load.isOn() && load.hasBrokenConstraint());
+	}
+	
+	private List<Load> getFeederLoadsOn(Feeder feeder) {
+		return feeder.getServedLoads().stream().filter((load) -> load.isOn()).collect(Collectors.toList());
 	}
 	
 	private void updateQValue(Branch sw) {

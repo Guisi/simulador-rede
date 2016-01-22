@@ -61,7 +61,7 @@ public class FunctionsPaneController extends Controller {
 			case RESET_SCREEN: this.resetScreen(); break;
 			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
 			case FUNCTIONS_UPDATED: this.updateFunctionsTables(); break;
-			case POWER_FLOW_COMPLETED: this.evaluateFunctionsExpressions(null); break;
+			case POWER_FLOW_COMPLETED: this.processPowerflowCompleted(); break;
 			case AGENT_NOTIFICATION : this.processAgentNotification(); break;
 			default: break;
 		}
@@ -169,6 +169,10 @@ public class FunctionsPaneController extends Controller {
 			}
 			functionItem.getFunctionResult().set(functionResult);
 		}
+	}
+	
+	private void processPowerflowCompleted() {
+		this.evaluateFunctionsExpressions(null);
 	}
 	
 	private void processAgentNotification() {

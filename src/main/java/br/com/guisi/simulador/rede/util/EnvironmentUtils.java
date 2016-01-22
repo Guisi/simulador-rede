@@ -231,7 +231,7 @@ public class EnvironmentUtils {
 	public static void updateFeedersConnections(Environment environment) {
 		//zera valores consolidados do feeder
 		environment.getFeeders().forEach((feeder) -> {
-			feeder.setEnergizedLoads(0);
+			feeder.getServedLoads().clear();
 		});
 		
 		//depois, verifica se todos os loads estão conectados a algum feeder
@@ -239,7 +239,7 @@ public class EnvironmentUtils {
 			Feeder feeder = getFeeder(load);
 			load.setFeeder(feeder);
 			if (feeder != null) {
-				feeder.incrementEnergizedLoads();
+				feeder.getServedLoads().add(load);
 			}
 		});
 	}
