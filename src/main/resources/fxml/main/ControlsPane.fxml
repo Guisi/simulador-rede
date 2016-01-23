@@ -11,6 +11,7 @@
          <children>
             <Button fx:id="btnRunAgent" mnemonicParsing="false" onAction="#runAgent" />
             <Button fx:id="btnStopAgent" disable="true" mnemonicParsing="false" onAction="#stopAgent" />
+            <Button fx:id="btnResetAgent" mnemonicParsing="false" onAction="#resetAgent" />
             <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Execution Type:" />
             <ComboBox fx:id="cbTaskExecutionType" />
             <HBox alignment="CENTER" spacing="3.0">

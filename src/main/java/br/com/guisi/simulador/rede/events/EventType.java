@@ -8,7 +8,8 @@ package br.com.guisi.simulador.rede.events;
 public enum EventType {
 
 	RESET_SCREEN,
-	
+
+	RELOAD_ENVIRONMENT,
 	ENVIRONMENT_LOADED,
 	
 	FUNCTIONS_UPDATED,

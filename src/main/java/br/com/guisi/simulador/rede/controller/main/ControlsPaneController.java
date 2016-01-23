@@ -1,11 +1,15 @@
 package br.com.guisi.simulador.rede.controller.main;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -37,23 +41,28 @@ public class ControlsPaneController extends Controller {
 	@FXML
 	private Button btnStopAgent;
 	@FXML
+	private Button btnResetAgent;
+	@FXML
 	private ComboBox<TaskExecutionType> cbTaskExecutionType;
 	@FXML
 	private Label lblSteps;
 
 	@Override
 	public void initializeController() {
-		this.listenToEvent(EventType.RESET_SCREEN);
-		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
-		this.listenToEvent(EventType.AGENT_RUNNING);
-		this.listenToEvent(EventType.AGENT_STOPPED);
-		this.listenToEvent(EventType.AGENT_NOTIFICATION);
+		this.listenToEvent(EventType.RESET_SCREEN,
+				EventType.ENVIRONMENT_LOADED,
+				EventType.AGENT_RUNNING,
+				EventType.AGENT_STOPPED, 
+				EventType.AGENT_NOTIFICATION);
 
 		Image imageCheck = new Image(getClass().getResourceAsStream("/img/check.png"));
 		btnRunAgent.setGraphic(new ImageView(imageCheck));
 		
 		Image imageDelete = new Image(getClass().getResourceAsStream("/img/delete.png"));
 		btnStopAgent.setGraphic(new ImageView(imageDelete));
+		
+		Image imageReset = new Image(getClass().getResourceAsStream("/img/reset.png"));
+		btnResetAgent.setGraphic(new ImageView(imageReset));
 		
 		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
 		cbTaskExecutionType.setValue(TaskExecutionType.STEP_BY_STEP);
@@ -78,11 +87,11 @@ public class ControlsPaneController extends Controller {
 	private void resetScreen() {
 		root.setVisible(false);
 		lblSteps.setText("");
+		agentControl.reset();
 	}
 	
 	private void processEnvironmentLoaded() {
 		root.setVisible(true);
-		agentControl.reset();
 	}
 	
 	private void processAgentNotification(Object data) {
@@ -96,6 +105,7 @@ public class ControlsPaneController extends Controller {
 	private void enableDisableScreen(boolean disable) {
 		btnRunAgent.setDisable(disable);
 		btnStopAgent.setDisable(!disable);
+		btnResetAgent.setDisable(disable);
 		cbTaskExecutionType.setDisable(disable);
 	}
 	
@@ -110,6 +120,15 @@ public class ControlsPaneController extends Controller {
 	
 	public void stopAgent() {
 		agentControl.stop();
+	}
+	
+	public void resetAgent() {
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setContentText("Confirma o reset do aprendizado?");
+		Optional<ButtonType> result = alert.showAndWait();
+		if ((result.isPresent()) && (result.get() == ButtonType.OK)) {
+			this.fireEvent(EventType.RELOAD_ENVIRONMENT);
+		}
 	}
 	
 	@Override

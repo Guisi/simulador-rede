@@ -56,11 +56,11 @@ public class LabelAndMessagesPaneController extends Controller {
 	public void initializeController() {
 		this.initializeTables();
 		
-		this.listenToEvent(EventType.RESET_SCREEN);
-		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
-		this.listenToEvent(EventType.POWER_FLOW_COMPLETED);
-		this.listenToEvent(EventType.AGENT_NOTIFICATION);
-		this.listenToEvent(EventType.BRANCH_SELECTED);
+		this.listenToEvent(EventType.RESET_SCREEN,
+				EventType.ENVIRONMENT_LOADED,
+				EventType.POWER_FLOW_COMPLETED,
+				EventType.AGENT_NOTIFICATION,
+				EventType.BRANCH_SELECTED);
 	}
 	
 	@Override
@@ -84,7 +84,7 @@ public class LabelAndMessagesPaneController extends Controller {
 		this.stepUpdateReceived = 0;
 		tvBrokenConstraints.getItems().clear();
 		tvSwitchesOperations.getItems().clear();
-		tvSwitchesOperations.getItems().clear();
+		tvAgentLearning.getItems().clear();
 	}
 	
 	private void processEnvironmentLoaded() {

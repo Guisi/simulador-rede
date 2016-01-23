@@ -26,8 +26,7 @@ public class SimuladorRedeController extends Controller {
 	
 	@Override
 	public void initializeController() {
-		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
-		this.listenToEvent(EventType.RESET_SCREEN);
+		this.listenToEvent(EventType.RESET_SCREEN, EventType.ENVIRONMENT_LOADED);
 		
 		scrollPane.prefWidthProperty().bind(SimuladorRede.getPrimaryStage().widthProperty());
 		scrollPane.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());

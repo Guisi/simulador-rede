@@ -36,11 +36,11 @@ public class FunctionsPaneController extends Controller {
 
 	@Override
 	public void initializeController() {
-		this.listenToEvent(EventType.RESET_SCREEN);
-		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
-		this.listenToEvent(EventType.FUNCTIONS_UPDATED);
-		this.listenToEvent(EventType.POWER_FLOW_COMPLETED);
-		this.listenToEvent(EventType.AGENT_NOTIFICATION);
+		this.listenToEvent(EventType.RESET_SCREEN,
+				EventType.ENVIRONMENT_LOADED,
+				EventType.FUNCTIONS_UPDATED,
+				EventType.POWER_FLOW_COMPLETED,
+				EventType.AGENT_NOTIFICATION);
 		
 		for (Tab tab: tabPaneFunctions.getTabs()) {
 			@SuppressWarnings("unchecked")

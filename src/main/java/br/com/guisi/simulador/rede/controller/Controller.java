@@ -60,8 +60,12 @@ public abstract class Controller implements EventListener {
 	 * Registra este controller para escutar um determinada evento
 	 * @param eventType
 	 */
-	public void listenToEvent(EventType eventType){
-		eventBus.register(eventType, this);
+	public void listenToEvent(EventType... eventTypes){
+		if (eventTypes != null) {
+			for (EventType eventType : eventTypes) {
+				eventBus.register(eventType, this);
+			}
+		}
 	}
 	
 	/**

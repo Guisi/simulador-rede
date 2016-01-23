@@ -40,13 +40,13 @@ public class NetworkPaneController extends Controller {
 	
 	@Override
 	public void initializeController() {
-		this.listenToEvent(EventType.RESET_SCREEN);
-		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
-		this.listenToEvent(EventType.LOAD_SELECTED);
-		this.listenToEvent(EventType.FEEDER_SELECTED);
-		this.listenToEvent(EventType.BRANCH_SELECTED);
-		this.listenToEvent(EventType.AGENT_NOTIFICATION);
-		this.listenToEvent(EventType.AGENT_STOPPED);
+		this.listenToEvent(EventType.RESET_SCREEN,
+				EventType.ENVIRONMENT_LOADED,
+				EventType.LOAD_SELECTED,
+				EventType.FEEDER_SELECTED,
+				EventType.BRANCH_SELECTED,
+				EventType.AGENT_NOTIFICATION,
+				EventType.AGENT_STOPPED);
 		
 		this.resetScreen();
 	}

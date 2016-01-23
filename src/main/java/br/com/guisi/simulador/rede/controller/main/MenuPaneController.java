@@ -35,14 +35,17 @@ public class MenuPaneController extends Controller {
 	@FXML
 	private MenuItem miExpressionEvaluator;
 	
+	private File xlsFile;
+	
 	@Override
 	public void initializeController() {
 		menuBar.prefWidthProperty().bind(SimuladorRede.getPrimaryStage().widthProperty());
 		
-		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
-		this.listenToEvent(EventType.AGENT_RUNNING);
-		this.listenToEvent(EventType.AGENT_STOPPED);
-		this.listenToEvent(EventType.RESET_SCREEN);
+		this.listenToEvent(EventType.ENVIRONMENT_LOADED,
+				EventType.AGENT_RUNNING,
+				EventType.AGENT_STOPPED,
+				EventType.RESET_SCREEN,
+				EventType.RELOAD_ENVIRONMENT);
 	}
 	
 	@Override
@@ -56,6 +59,7 @@ public class MenuPaneController extends Controller {
 			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
 			case AGENT_RUNNING: this.enableDisableScreen(true); break;
 			case AGENT_STOPPED: this.enableDisableScreen(false); break;
+			case RELOAD_ENVIRONMENT: this.reloadEnvironment(); break;
 			default: break;
 		}
 	}
@@ -70,21 +74,26 @@ public class MenuPaneController extends Controller {
 		fileChooser.getExtensionFilters().clear();
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLSX", "*.xlsx"));
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLS", "*.xls"));
-		File csvFile = fileChooser.showOpenDialog(null);
+		xlsFile = fileChooser.showOpenDialog(null);
 		
-		if (csvFile != null) {
+		if (xlsFile != null) {
 			this.fireEvent(EventType.RESET_SCREEN);
-			this.loadEnvironmentFromFile(csvFile);
+			this.loadEnvironmentFromFile(xlsFile);
 		}
+	}
+	
+	private void reloadEnvironment() {
+		this.fireEvent(EventType.RESET_SCREEN);
+		this.loadEnvironmentFromFile(xlsFile);
 	}
 	
 	/**
 	 * Carrega o ambiente a partir do arquivo
-	 * @param csvFile
+	 * @param xlsFile
 	 */
-	private void loadEnvironmentFromFile(File csvFile) {
+	private void loadEnvironmentFromFile(File xlsFile) {
 		try {
-			Environment environment = EnvironmentUtils.getEnvironmentFromFile(csvFile);
+			Environment environment = EnvironmentUtils.getEnvironmentFromFile(xlsFile);
 			SimuladorRede.setEnvironment(environment);
 			
 			if (getEnvironment() != null) {

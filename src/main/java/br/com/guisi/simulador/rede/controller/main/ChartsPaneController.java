@@ -40,11 +40,11 @@ public class ChartsPaneController extends Controller {
 	
 	@Override
 	public void initializeController() {
-		this.listenToEvent(EventType.RESET_SCREEN);
-		this.listenToEvent(EventType.ENVIRONMENT_LOADED);
-		this.listenToEvent(EventType.AGENT_NOTIFICATION);
-		this.listenToEvent(EventType.AGENT_RUNNING);
-		this.listenToEvent(EventType.AGENT_STOPPED);
+		this.listenToEvent(EventType.RESET_SCREEN,
+						   EventType.ENVIRONMENT_LOADED,
+						   EventType.AGENT_NOTIFICATION,
+						   EventType.AGENT_RUNNING,
+						   EventType.AGENT_STOPPED);
 	
 		totalPowerLostTooltips = new HashMap<>();
 		this.createCharts();
@@ -90,6 +90,7 @@ public class ChartsPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
+		totalPowerLostSeries.getData().clear();
 	}
 	
 	private void processEnvironmentLoaded() {
