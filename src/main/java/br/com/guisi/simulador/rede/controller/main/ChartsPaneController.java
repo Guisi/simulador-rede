@@ -71,9 +71,10 @@ public class ChartsPaneController extends Controller {
 
 		//total power lost
         final NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel("Steps");
+        xAxis.setLabel("Iteraction");
         final NumberAxis yAxis = new NumberAxis();
         yAxis.setUpperBound(0.1);
+        yAxis.setLabel("Losses MW");
         
         final LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
         lineChart.setPrefHeight(300);

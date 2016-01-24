@@ -10,6 +10,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javafx.application.Platform;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
@@ -28,6 +30,7 @@ import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.util.AlertUtils;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
@@ -99,7 +102,10 @@ public class QLearningAgent extends Agent {
 				this.generateAgentStatus(environment, agentStepStatus);
 				
 			} catch (Exception e) {
-				e.printStackTrace();
+				stop();
+				Platform.runLater(() -> {
+					AlertUtils.showStacktraceAlert(e);
+				});
 			}
 		}
 	}
@@ -153,6 +159,7 @@ public class QLearningAgent extends Agent {
 	 */
 	private void turnOffLoadsIfNecessary(Environment environment) throws Exception {
 		
+		int cont = 0;
 		for (Feeder feeder : environment.getFeeders()) {
 			
 			List<Load> onLoads = getFeederLoadsOn(feeder);
@@ -165,18 +172,25 @@ public class QLearningAgent extends Agent {
 				List<Load> minPriorityLoads = onLoads.stream().filter(load -> load.getPriority() == minPriority).collect(Collectors.toList());
 
 				//desliga um dos loads de menor prioridade aleatoriamente
-				Load minPriorityLoad = minPriorityLoads.get(RANDOM.nextInt(minPriorityLoads.size()));
-				minPriorityLoad.turnOff();
-				turnedOffLoads.add(minPriorityLoad);
-				onLoads.remove(minPriorityLoad);
+				//Load minPriorityLoad = minPriorityLoads.get(RANDOM.nextInt(minPriorityLoads.size()));
+				
+				//desliga o load com a menor tensão
+				double minCurrent = minPriorityLoads.stream().min(Comparator.comparing(load -> load.getCurrentVoltagePU())).get().getCurrentVoltagePU();
+				Load minCurrentLoad = minPriorityLoads.stream().filter(load -> load.getCurrentVoltagePU() == minCurrent).findFirst().get();
+				
+				minCurrentLoad.turnOff();
+				turnedOffLoads.add(minCurrentLoad);
+				onLoads.remove(minCurrentLoad);
 				
 				//executa o fluxo de potência
 				PowerFlow.execute(environment);
+				cont++;
 				
 				//verifica novamente se continuam existindo loads com restrição violada
 				hasFeederBrokenLoads = hasFeederBrokenLoads(feeder);
 			}
 		}
+		System.out.println("Execuções: " + cont);
 	}
 	
 	private void generateAgentStatus(Environment environment, AgentStepStatus agentStepStatus) {

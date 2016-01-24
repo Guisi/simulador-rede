@@ -33,7 +33,6 @@ public class ExpressionEvaluatorController extends Controller {
 	@Override
 	public void initializeController() {
 		evaluationObject = new EvaluationObject();
-		evaluationObject.setEnvironment(getEnvironment());
 		
 		codeArea = new CodeArea();
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
@@ -47,6 +46,7 @@ public class ExpressionEvaluatorController extends Controller {
 	
 	@Override
 	public void initializeControllerData(Object... data) {
+		evaluationObject.setEnvironment(getEnvironment());
 	}
 	
 	public void evaluateExpression() {

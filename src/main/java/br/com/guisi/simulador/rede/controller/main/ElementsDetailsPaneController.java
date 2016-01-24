@@ -184,7 +184,7 @@ public class ElementsDetailsPaneController extends Controller {
 	 * @param branchNode
 	 */
 	private void updateBranchInformationBox(Integer selectedBranch) {
-		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_3);
+		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
 		Branch branch = getEnvironment().getBranch(selectedBranch);
 		
 		tvBranchDetails.getItems().clear();
