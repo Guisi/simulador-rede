@@ -176,7 +176,7 @@ public class FunctionsPaneController extends Controller {
 	}
 	
 	private void processAgentNotification() {
-		this.evaluateFunctionsExpressions("Switching Operations:");
+		this.evaluateFunctionsExpressions(null);
 	}
 	
 	@Override

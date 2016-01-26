@@ -1,6 +1,8 @@
 package br.com.guisi.simulador.rede;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Random;
 
 import javax.script.Invocable;
@@ -13,9 +15,11 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		Random RANDOM = new Random(System.currentTimeMillis());
+		long i = 7;
 		
-		System.out.println(RANDOM.nextInt(2));
+		System.out.println(BigDecimal.valueOf(i).divide(BigDecimal.valueOf(2), 0, RoundingMode.CEILING));
+		
+		System.out.println(Math.ceil((double)i/2));
 	}
 	
 	public static void teste() throws Exception {

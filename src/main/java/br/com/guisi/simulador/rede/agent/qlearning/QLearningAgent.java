@@ -1,13 +1,12 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
@@ -43,7 +42,7 @@ public class QLearningAgent extends Agent {
 	private Branch secondSwitch;
 	
 	private Map<Integer, List<SwitchDistance>> visitedSwitchesMap;
-	private Set<Load> turnedOffLoads;
+	private List<Load> turnedOffLoads;
 	
 	private final Random RANDOM = new Random(System.currentTimeMillis());
 
@@ -56,7 +55,7 @@ public class QLearningAgent extends Agent {
 	public void reset() {
 		this.qTable = new QTable();
 		this.visitedSwitchesMap = new HashMap<>();
-		this.turnedOffLoads = new HashSet<>();
+		this.turnedOffLoads = new ArrayList<>();
 	}
 	
 	/**
@@ -103,6 +102,7 @@ public class QLearningAgent extends Agent {
 				
 			} catch (Exception e) {
 				stop();
+				e.printStackTrace();
 				Platform.runLater(() -> {
 					AlertUtils.showStacktraceAlert(e);
 				});
@@ -163,47 +163,70 @@ public class QLearningAgent extends Agent {
 		for (Feeder feeder : environment.getFeeders()) {
 			
 			List<Load> onLoads = getFeederLoadsOn(feeder);
-			boolean hasFeederBrokenLoads = hasFeederBrokenLoads(feeder);
-			while (hasFeederBrokenLoads) {
-				//Verifica a menor prioridade encontrada entre os loads do feeder em questão
-				int minPriority = onLoads.stream().min(Comparator.comparing(load -> load.getPriority())).get().getPriority();
-				
-				//filtra por todos os loads com a menor prioridade
-				List<Load> minPriorityLoads = onLoads.stream().filter(load -> load.getPriority() == minPriority).collect(Collectors.toList());
 
-				//desliga um dos loads de menor prioridade aleatoriamente
-				//Load minPriorityLoad = minPriorityLoads.get(RANDOM.nextInt(minPriorityLoads.size()));
+			//primeiro desliga os loads com restrição em grupos até que não existam mais restrições
+			long brokenLoadsQuantity = getFeederBrokenLoadsQuantity(feeder);
+			while (brokenLoadsQuantity > 0) {
 				
-				//desliga o load com a menor tensão
-				double minCurrent = minPriorityLoads.stream().min(Comparator.comparing(load -> load.getCurrentVoltagePU())).get().getCurrentVoltagePU();
-				Load minCurrentLoad = minPriorityLoads.stream().filter(load -> load.getCurrentVoltagePU() == minCurrent).findFirst().get();
-				
-				minCurrentLoad.turnOff();
-				turnedOffLoads.add(minCurrentLoad);
-				onLoads.remove(minCurrentLoad);
+				double quantity = Math.ceil((double)brokenLoadsQuantity/2);
+				for (int i = 0; i < quantity; i++) {
+					//Verifica a menor prioridade encontrada entre os loads do feeder em questão
+					int minPriority = onLoads.stream().min(Comparator.comparing(load -> load.getPriority())).get().getPriority();
+					
+					//filtra por todos os loads com a menor prioridade
+					List<Load> minPriorityLoads = onLoads.stream().filter(load -> load.getPriority() == minPriority).collect(Collectors.toList());
+					
+					//desliga um dos loads de menor prioridade aleatoriamente
+					//Load minPriorityLoad = minPriorityLoads.get(RANDOM.nextInt(minPriorityLoads.size()));
+					
+					//desliga o load com a menor tensão
+					double minCurrent = minPriorityLoads.stream().min(Comparator.comparing(load -> load.getCurrentVoltagePU())).get().getCurrentVoltagePU();
+					Load minCurrentLoad = minPriorityLoads.stream().filter(load -> load.getCurrentVoltagePU() == minCurrent).findFirst().get();
+					
+					minCurrentLoad.turnOff();
+					turnedOffLoads.add(minCurrentLoad);
+					onLoads.remove(minCurrentLoad);
+				}
 				
 				//executa o fluxo de potência
 				PowerFlow.execute(environment);
 				cont++;
 				
 				//verifica novamente se continuam existindo loads com restrição violada
-				hasFeederBrokenLoads = hasFeederBrokenLoads(feeder);
+				brokenLoadsQuantity = getFeederBrokenLoadsQuantity(feeder);
+			}
+			
+			//depois religa um a um até que alguma restrição seja criada (e reverte a ação que criou esta restrição)
+			List<Load> offLoads = new ArrayList<>(turnedOffLoads);
+			Collections.reverse(offLoads);
+			for (Load load : offLoads) {
+				load.turnOn();
+				PowerFlow.execute(environment);
+				cont++;
+				
+				if (getFeederBrokenLoadsQuantity(feeder) > 0) {
+					load.turnOff();
+					PowerFlow.execute(environment);
+					cont++;
+					break;
+				}
+				turnedOffLoads.remove(load);
 			}
 		}
 		System.out.println("Execuções: " + cont);
 	}
 	
-	private void generateAgentStatus(Environment environment, AgentStepStatus agentStepStatus) {
-		//seta total de perdas
-		agentStepStatus.putInformation(AgentInformationType.TOTAL_POWER_LOST, environment.getTotalPowerLost());
-	}
-	
-	private boolean hasFeederBrokenLoads(Feeder feeder) {
-		return feeder.getServedLoads().stream().anyMatch((load) -> load.isOn() && load.hasBrokenConstraint());
+	private long getFeederBrokenLoadsQuantity(Feeder feeder) {
+		return feeder.getServedLoads().stream().filter((load) -> load.isOn() && load.hasBrokenConstraint()).count();
 	}
 	
 	private List<Load> getFeederLoadsOn(Feeder feeder) {
 		return feeder.getServedLoads().stream().filter((load) -> load.isOn()).collect(Collectors.toList());
+	}
+	
+	private void generateAgentStatus(Environment environment, AgentStepStatus agentStepStatus) {
+		//seta total de perdas
+		agentStepStatus.putInformation(AgentInformationType.TOTAL_POWER_LOST, environment.getTotalPowerLost());
 	}
 	
 	private void updateQValue(Branch sw) {
