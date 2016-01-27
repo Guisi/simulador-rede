@@ -20,6 +20,12 @@
                   <Label fx:id="lblSteps" />
                </children>
             </HBox>
+            <HBox alignment="CENTER" spacing="3.0">
+               <children>
+                  <Label style="-fx-font-weight: bold;" text="Time:" />
+                  <Label fx:id="lblTimer" />
+               </children>
+            </HBox>
          </children>
       </HBox>
    </children>

@@ -35,7 +35,7 @@ public class SimuladorRedeController extends Controller {
 		root.getChildren().add(0, getController(MenuPaneController.class).getView());
 		
 		//controls
-		networkBoxLeft.getChildren().add(getController(ControlsPaneController.class).getView());
+		root.getChildren().add(1, getController(ControlsPaneController.class).getView());
 		
 		//Painel dos detalhes dos elementos da rede
 		networkBoxLeft.getChildren().add(getController(ElementsDetailsPaneController.class).getView());

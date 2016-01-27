@@ -1,9 +1,14 @@
 package br.com.guisi.simulador.rede.controller.main;
 
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Optional;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -15,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import javax.inject.Inject;
 
@@ -46,7 +52,12 @@ public class ControlsPaneController extends Controller {
 	private ComboBox<TaskExecutionType> cbTaskExecutionType;
 	@FXML
 	private Label lblSteps;
-
+	@FXML
+	private Label lblTimer;
+	
+	private LocalTime localTime;
+	private Timeline timeline;
+	
 	@Override
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
@@ -66,6 +77,16 @@ public class ControlsPaneController extends Controller {
 		
 		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
 		cbTaskExecutionType.setValue(TaskExecutionType.STEP_BY_STEP);
+		
+		timeline = new Timeline();
+		timeline.setCycleCount(Timeline.INDEFINITE);
+		KeyFrame keyFrame = new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent event) {
+				localTime = localTime.plusMinutes(1);
+				lblTimer.setText(localTime.toString());
+			}
+		});
+		timeline.getKeyFrames().add(keyFrame);
 	}
 	
 	@Override
@@ -77,8 +98,8 @@ public class ControlsPaneController extends Controller {
 		switch (eventType) {
 			case RESET_SCREEN: this.resetScreen(); break;
 			case ENVIRONMENT_LOADED: this.processEnvironmentLoaded(); break;
-			case AGENT_RUNNING: this.enableDisableScreen(true); break;
-			case AGENT_STOPPED: this.enableDisableScreen(false); break;
+			case AGENT_RUNNING: this.processAgentRunning(); break;
+			case AGENT_STOPPED: this.processAgentStopped(); break;
 			case AGENT_NOTIFICATION: this.processAgentNotification(data); break;
 			default: break;
 		}
@@ -86,8 +107,11 @@ public class ControlsPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
-		lblSteps.setText("");
+		lblSteps.setText("0");
 		agentControl.reset();
+		localTime = LocalTime.MIN;
+		lblTimer.setText(localTime.toString());
+		timeline.stop();
 	}
 	
 	private void processEnvironmentLoaded() {
@@ -107,6 +131,16 @@ public class ControlsPaneController extends Controller {
 		btnStopAgent.setDisable(!disable);
 		btnResetAgent.setDisable(disable);
 		cbTaskExecutionType.setDisable(disable);
+	}
+	
+	private void processAgentRunning() {
+		this.enableDisableScreen(true);
+		timeline.playFromStart();
+	}
+	
+	private void processAgentStopped() {
+		this.enableDisableScreen(false);
+		timeline.stop();
 	}
 	
 	/*********************************

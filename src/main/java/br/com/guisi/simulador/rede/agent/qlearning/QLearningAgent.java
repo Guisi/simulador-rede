@@ -159,7 +159,6 @@ public class QLearningAgent extends Agent {
 	 */
 	private void turnOffLoadsIfNecessary(Environment environment) throws Exception {
 		
-		int cont = 0;
 		for (Feeder feeder : environment.getFeeders()) {
 			
 			List<Load> onLoads = getFeederLoadsOn(feeder);
@@ -190,7 +189,6 @@ public class QLearningAgent extends Agent {
 				
 				//executa o fluxo de potência
 				PowerFlow.execute(environment);
-				cont++;
 				
 				//verifica novamente se continuam existindo loads com restrição violada
 				brokenLoadsQuantity = getFeederBrokenLoadsQuantity(feeder);
@@ -202,18 +200,15 @@ public class QLearningAgent extends Agent {
 			for (Load load : offLoads) {
 				load.turnOn();
 				PowerFlow.execute(environment);
-				cont++;
 				
 				if (getFeederBrokenLoadsQuantity(feeder) > 0) {
 					load.turnOff();
 					PowerFlow.execute(environment);
-					cont++;
 					break;
 				}
 				turnedOffLoads.remove(load);
 			}
 		}
-		System.out.println("Execuções: " + cont);
 	}
 	
 	private long getFeederBrokenLoadsQuantity(Feeder feeder) {

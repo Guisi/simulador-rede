@@ -1,9 +1,7 @@
 package br.com.guisi.simulador.rede;
 
 import java.io.File;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Random;
+import java.time.LocalTime;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -15,11 +13,14 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		long i = 7;
+		LocalTime localTime = LocalTime.MIN;
 		
-		System.out.println(BigDecimal.valueOf(i).divide(BigDecimal.valueOf(2), 0, RoundingMode.CEILING));
+		System.out.println(localTime);
 		
-		System.out.println(Math.ceil((double)i/2));
+		System.out.println(localTime.plusMinutes(1));
+		
+		System.out.println(localTime);
+		
 	}
 	
 	public static void teste() throws Exception {
