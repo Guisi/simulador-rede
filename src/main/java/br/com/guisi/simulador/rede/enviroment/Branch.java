@@ -3,6 +3,8 @@ package br.com.guisi.simulador.rede.enviroment;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 
 /**
  * Classe representando uma branch
@@ -22,7 +24,8 @@ public class Branch {
 	private SwitchState switchState;
 	
 	private double instantCurrent;
-	private double lossesMW;
+	private double activeLossMW;
+	private double reactiveLossMVar;
 	
 	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, 
 			double reactance, SwitchState switchState, boolean switchBranch, boolean fault) {
@@ -217,17 +220,29 @@ public class Branch {
 	}
 
 	/**
-	 * Perda em megawatts
+	 * Perda ativa em megawatts
 	 * @return
 	 */
-	public double getLossesMW() {
-		return lossesMW;
+	public double getActiveLossMW() {
+		return activeLossMW;
 	}
 
-	public void setLossesMW(double lossesMW) {
-		this.lossesMW = lossesMW;
+	public void setActiveLossMW(double activeLossMW) {
+		this.activeLossMW = activeLossMW;
 	}
-	
+
+	/**
+	 * Perda reativa em mega volt ampères
+	 * @return
+	 */
+	public double getReactiveLossMVar() {
+		return reactiveLossMVar;
+	}
+
+	public void setReactiveLossMVar(double reactiveLossMVar) {
+		this.reactiveLossMVar = reactiveLossMVar;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -255,8 +270,7 @@ public class Branch {
 
 	@Override
 	public String toString() {
-		return "Branch [branchNum=" + number + ", node1=" + node1.getNodeNumber() + ", node2=" + node2.getNodeNumber() + ", branchPower=" + maxCurrent + ", resistance=" + resistance
-				+ ", reactance=" + reactance + ", switchState=" + switchState + ", switchBranch=" + switchBranch + ", instantCurrent=" + instantCurrent + ", lossesMW=" + lossesMW + "]";
+		return ToStringBuilder.reflectionToString(this);
 	}
 	
 }

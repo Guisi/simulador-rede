@@ -33,8 +33,11 @@ public class ChartsPaneController extends Controller {
 	@FXML
 	private TabPane tabPaneCharts;
 	
-	private XYChart.Series<Number, Number> totalPowerLostSeries;
-	private Map<Node, Tooltip> totalPowerLostTooltips;
+	private XYChart.Series<Number, Number> totalActivePowerLostSeries;
+	private Map<Node, Tooltip> totalActivePowerLostTooltips;
+	
+	private XYChart.Series<Number, Number> totalReactivePowerLostSeries;
+	private Map<Node, Tooltip> totalReactivePowerLostTooltips;
 	
 	private int stepUpdateReceived;
 	
@@ -46,7 +49,8 @@ public class ChartsPaneController extends Controller {
 						   EventType.AGENT_RUNNING,
 						   EventType.AGENT_STOPPED);
 	
-		totalPowerLostTooltips = new HashMap<>();
+		totalActivePowerLostTooltips = new HashMap<>();
+		totalReactivePowerLostTooltips = new HashMap<>();
 		this.createCharts();
 	}
 	
@@ -74,15 +78,20 @@ public class ChartsPaneController extends Controller {
         xAxis.setLabel("Iteraction");
         final NumberAxis yAxis = new NumberAxis();
         yAxis.setUpperBound(0.1);
-        yAxis.setLabel("Losses MW");
+        yAxis.setLabel("Losses %");
         
         final LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
         lineChart.setPrefHeight(300);
-        lineChart.setLegendVisible(false);
+        lineChart.setLegendVisible(true);
         lineChart.setAnimated(false);
         
-        totalPowerLostSeries = new XYChart.Series<>();
-        lineChart.getData().add(totalPowerLostSeries);
+        totalActivePowerLostSeries = new XYChart.Series<>();
+        totalActivePowerLostSeries.setName("Active Power Lost (MW)");
+        lineChart.getData().add(totalActivePowerLostSeries);
+        
+        totalReactivePowerLostSeries = new XYChart.Series<>();
+        totalReactivePowerLostSeries.setName("Reactive Power Lost (MVar)");
+        lineChart.getData().add(totalReactivePowerLostSeries);
         
         Tab tab = new Tab("Total Power Lost");
         tab.setContent(lineChart);
@@ -91,7 +100,8 @@ public class ChartsPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
-		totalPowerLostSeries.getData().clear();
+		totalActivePowerLostSeries.getData().clear();
+		totalReactivePowerLostSeries.getData().clear();
 	}
 	
 	private void processEnvironmentLoaded() {
@@ -105,14 +115,24 @@ public class ChartsPaneController extends Controller {
 			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 				
-				Double totalPowerLost = agentStepStatus.getInformation(AgentInformationType.TOTAL_POWER_LOST, Double.class);
-				if (totalPowerLost != null) {
-					BigDecimal value = new BigDecimal(totalPowerLost);
-				    value = value.setScale(10, RoundingMode.HALF_UP);
+				Double totalActivePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOST_PERCENTUAL, Double.class);
+				if (totalActivePowerLost != null) {
+					BigDecimal value = new BigDecimal(totalActivePowerLost);
+				    value = value.setScale(5, RoundingMode.HALF_UP);
 					
 					Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
-					totalPowerLostSeries.getData().add(chartData);
-		            totalPowerLostTooltips.put(chartData.getNode(), TooltipUtils.hackTooltipStartTiming(new Tooltip(value.toString())));
+					totalActivePowerLostSeries.getData().add(chartData);
+		            totalActivePowerLostTooltips.put(chartData.getNode(), TooltipUtils.hackTooltipStartTiming(new Tooltip(value.toString())));
+				}
+				
+				Double totalReactivePowerLost = agentStepStatus.getInformation(AgentInformationType.REACTIVE_POWER_LOST_PERCENTUAL, Double.class);
+				if (totalReactivePowerLost != null) {
+					BigDecimal value = new BigDecimal(totalReactivePowerLost);
+				    value = value.setScale(5, RoundingMode.HALF_UP);
+					
+					Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+					totalReactivePowerLostSeries.getData().add(chartData);
+		            totalReactivePowerLostTooltips.put(chartData.getNode(), TooltipUtils.hackTooltipStartTiming(new Tooltip(value.toString())));
 				}
 			}
 			stepUpdateReceived = agentStatus.getStepStatus().size();
@@ -120,13 +140,19 @@ public class ChartsPaneController extends Controller {
 	}
 	
 	private void processAgentStopped() {
-		for (Entry<Node, Tooltip> entry : totalPowerLostTooltips.entrySet()) {
+		for (Entry<Node, Tooltip> entry : totalActivePowerLostTooltips.entrySet()) {
+			Tooltip.install(entry.getKey(), entry.getValue());
+		}
+		for (Entry<Node, Tooltip> entry : totalReactivePowerLostTooltips.entrySet()) {
 			Tooltip.install(entry.getKey(), entry.getValue());
 		}
 	}
 	
 	private void processAgentRunning() {
-		for (Entry<Node, Tooltip> entry : totalPowerLostTooltips.entrySet()) {
+		for (Entry<Node, Tooltip> entry : totalActivePowerLostTooltips.entrySet()) {
+			Tooltip.uninstall(entry.getKey(), entry.getValue());
+		}
+		for (Entry<Node, Tooltip> entry : totalReactivePowerLostTooltips.entrySet()) {
 			Tooltip.uninstall(entry.getKey(), entry.getValue());
 		}
 	}

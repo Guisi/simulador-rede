@@ -185,7 +185,7 @@ public class LabelAndMessagesPaneController extends Controller {
 				if (feeder.isOn() && feeder.isPowerOverflow()) {
 					BrokenConstraintRow constraint = new BrokenConstraintRow();
 					constraint.getMessage().setValue("Feeder " + feeder.getNodeNumber() 
-							+ ": Power overflow (max: " + feeder.getActivePower() + ", required: " + feeder.getUsedPower() + ")");
+							+ ": Power overflow (max: " + feeder.getActivePowerKW() + ", required: " + feeder.getUsedPower() + ")");
 					tvBrokenConstraints.getItems().add(constraint);
 				}
 			});

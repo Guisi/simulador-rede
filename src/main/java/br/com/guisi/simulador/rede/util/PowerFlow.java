@@ -30,7 +30,7 @@ public class PowerFlow {
 		EnvironmentUtils.updateFeedersConnections(environment);
 
 		//executa power flow
-		executePowerFlow(environment);
+		//TODO remover executePowerFlow(environment);
 		
 		//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
 		environment.getFeeders().forEach((feeder) -> {
@@ -61,7 +61,8 @@ public class PowerFlow {
 		List<Branch> branches = environment.getBranches();
 		branches.forEach((branch) -> {
 			branch.setInstantCurrent(0);
-			branch.setLossesMW(0);
+			branch.setActiveLossMW(0);
+			branch.setReactiveLossMVar(0);
 		});
 		List<Branch> activeBranches = new ArrayList<>();
 		for (Branch branch : branches) {
@@ -117,8 +118,11 @@ public class PowerFlow {
 						double actualCurrent = (sAtual / (branch.getNode2().getCurrentVoltagePU() * Constants.TENSAO_BASE)) * Constants.POTENCIA_BASE;
 						branch.setInstantCurrent(actualCurrent);
 						
-						double losses = Math.abs(mpcBranchRetLine[13] + mpcBranchRetLine[15]);
-						branch.setLossesMW(losses);
+						double lossMW = Math.abs(mpcBranchRetLine[13] + mpcBranchRetLine[15]);
+						branch.setActiveLossMW(lossMW);
+						
+						double lossMVar = Math.abs(mpcBranchRetLine[14] + mpcBranchRetLine[16]);
+						branch.setReactiveLossMVar(lossMVar);
 					}
 				}
 			} else {
@@ -154,11 +158,11 @@ public class PowerFlow {
 			if (node.isLoad() && node.isOn()) {
 				//potencia ativa dos loads em megawatts (Pd) (se a carga estiver desligada, 0) 
 				//carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
-				loadActivePowerMW[i] = node.getActivePower() / 1000 * 0.9;
+				loadActivePowerMW[i] = node.getActivePowerKW() / 1000 * 0.9;
 				
 				//potencia reativa dos loads em Mega Volt Ampère (Qd) (se a carga estiver desligada, 0) 
 				//carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
-				loadReactivePowerMVar[i] = node.getReactivePower() / 1000 * 0.75;
+				loadReactivePowerMVar[i] = node.getReactivePowerKVar() / 1000 * 0.75;
 			}
 			
 			//area sempre 1
@@ -229,11 +233,11 @@ public class PowerFlow {
 			
 			//Potência Injetada em MW (Pg) (segundo o Fausto, nao faz diferenca o valor passado aqui)
 			//carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
-			potenciaGeradaMW[i] = feeder.getActivePower() / 1000;
+			potenciaGeradaMW[i] = feeder.getActivePowerKW() / 1000;
 			
 			//Potência Injetada em MVar (Qg)
 			//carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
-			potenciaGeradaMVar[i] = feeder.getReactivePower() / 1000;
+			potenciaGeradaMVar[i] = feeder.getReactivePowerKVar() / 1000;
 			
 			 //nao precisamos de valores maximos e minimos de capacidade do feeder
 			//Potência máxima de cada geração em MVar

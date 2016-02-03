@@ -221,7 +221,17 @@ public class QLearningAgent extends Agent {
 	
 	private void generateAgentStatus(Environment environment, AgentStepStatus agentStepStatus) {
 		//seta total de perdas
-		agentStepStatus.putInformation(AgentInformationType.TOTAL_POWER_LOST, environment.getTotalPowerLost());
+		double activePowerLostMW = environment.getActivePowerLostMW();
+		double activePowerDemandMW = environment.getActivePowerDemandMW();
+		if (activePowerDemandMW > 0) {
+			agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOST_PERCENTUAL, activePowerLostMW / activePowerDemandMW * 100);
+		}
+		
+		double reactivePowerLostMVar = environment.getReactivePowerLostMVar();
+		double reactivePowerDemandMVar = environment.getReactivePowerDemandMVar();
+		if (reactivePowerLostMVar > 0) {
+			agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOST_PERCENTUAL, reactivePowerLostMVar / reactivePowerDemandMVar * 100);
+		}
 	}
 	
 	private void updateQValue(Branch sw) {

@@ -231,11 +231,35 @@ public class Environment {
 	}
 	
 	/**
-	 * Retorna a soma da perda de potência de todos os branches fechados
+	 * Retorna a soma da perda de potência ativa de todos os branches fechados
 	 * @return
 	 */
-	public double getTotalPowerLost() {
-		return branches.stream().filter((branch) -> branch.isClosed()).mapToDouble((branch) -> branch.getLossesMW()).sum();
+	public double getActivePowerLostMW() {
+		return branches.stream().filter((branch) -> branch.isClosed()).mapToDouble((branch) -> branch.getActiveLossMW()).sum();
+	}
+	
+	/**
+	 * Retorna a soma da perda de potência reativa de todos os branches fechados
+	 * @return
+	 */
+	public double getReactivePowerLostMVar() {
+		return branches.stream().filter((branch) -> branch.isClosed()).mapToDouble((branch) -> branch.getReactiveLossMVar()).sum();
+	}
+	
+	/**
+	 * Retorna a soma da demanda de potência ativa de todos os loads da rede
+	 * @return
+	 */
+	public double getActivePowerDemandMW() {
+		return loads.stream().filter((load) -> load.isOn()).mapToDouble((load) -> load.getActivePowerKW()).sum() / 1000;
+	}
+	
+	/**
+	 * Retorna a soma da demanda de potência reativa de todos os loads da rede
+	 * @return
+	 */
+	public double getReactivePowerDemandMVar() {
+		return loads.stream().filter((load) -> load.isOn()).mapToDouble((load) -> load.getReactivePowerKVar()).sum() / 1000;
 	}
 
 	/**

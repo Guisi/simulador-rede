@@ -154,8 +154,8 @@ public class ElementsDetailsPaneController extends Controller {
 		
 		tvLoadDetails.getItems().clear();
 		tvLoadDetails.getItems().add(new PropertyRow("Feeder:", load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : ""));
-		tvLoadDetails.getItems().add(new PropertyRow("Active Power kW:", df.format(load.getActivePower())));
-		tvLoadDetails.getItems().add(new PropertyRow("Reactive Power kVar:", df.format(load.getReactivePower())));
+		tvLoadDetails.getItems().add(new PropertyRow("Active Power kW:", df.format(load.getActivePowerKW())));
+		tvLoadDetails.getItems().add(new PropertyRow("Reactive Power kVar:", df.format(load.getReactivePowerKVar())));
 		tvLoadDetails.getItems().add(new PropertyRow("Priority:", String.valueOf(load.getPriority())));
 		tvLoadDetails.getItems().add(new PropertyRow("Status:", load.isOn() ? "On" : "Off"));
 		tvLoadDetails.getItems().add(new PropertyRow("Current Voltage pu:", df.format(load.getCurrentVoltagePU())));
@@ -171,8 +171,8 @@ public class ElementsDetailsPaneController extends Controller {
 		Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
 		
 		tvFeederDetails.getItems().clear();
-		tvFeederDetails.getItems().add(new PropertyRow("Active Power kW:", df.format(feeder.getActivePower())));
-		tvFeederDetails.getItems().add(new PropertyRow("Reactive Power kVar:", df.format(feeder.getReactivePower())));
+		tvFeederDetails.getItems().add(new PropertyRow("Active Power kW:", df.format(feeder.getActivePowerKW())));
+		tvFeederDetails.getItems().add(new PropertyRow("Reactive Power kVar:", df.format(feeder.getReactivePowerKVar())));
 		tvFeederDetails.getItems().add(new PropertyRow("Energized Loads:", String.valueOf(feeder.getServedLoads().size())));
 		tvFeederDetails.getItems().add(new PropertyRow("Used Active Power:", df.format(feeder.getUsedPower())));
 		tvFeederDetails.getItems().add(new PropertyRow("Available Active Power:", df.format(feeder.getAvailablePower())));
@@ -195,7 +195,8 @@ public class ElementsDetailsPaneController extends Controller {
 		tvBranchDetails.getItems().add(new PropertyRow("Resistance \u03A9:", df.format(branch.getResistance())));
 		tvBranchDetails.getItems().add(new PropertyRow("Reactance \u03A9:", df.format(branch.getReactance())));
 		tvBranchDetails.getItems().add(new PropertyRow("Status:", branch.getSwitchState().getDescription()));
-		tvBranchDetails.getItems().add(new PropertyRow("Losses MW:", df.format(branch.getLossesMW())));
+		tvBranchDetails.getItems().add(new PropertyRow("Active Loss MW:", df.format(branch.getActiveLossMW())));
+		tvBranchDetails.getItems().add(new PropertyRow("Reactive Loss MVar:", df.format(branch.getReactiveLossMVar())));
 		cbBranchNumber.valueProperty().set(selectedBranch);
 	}
 	
