@@ -54,6 +54,8 @@ public class ControlsPaneController extends Controller {
 	private Label lblSteps;
 	@FXML
 	private Label lblTimer;
+	@FXML
+	private ComboBox<String> cbAgentStoppingCriteria;
 	
 	private LocalTime localTime;
 	private Timeline timeline;

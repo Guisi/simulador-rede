@@ -22,6 +22,9 @@
                   </VBox>
                   <VBox fx:id="networkBoxRight" />
                </children>
+               <padding>
+                  <Insets left="3.0" />
+               </padding>
             </HBox>
          </content>
       </ScrollPane>
