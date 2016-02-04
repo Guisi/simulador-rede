@@ -30,7 +30,7 @@ public class PowerFlow {
 		EnvironmentUtils.updateFeedersConnections(environment);
 
 		//executa power flow
-		//TODO remover executePowerFlow(environment);
+		executePowerFlow(environment);
 		
 		//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
 		environment.getFeeders().forEach((feeder) -> {
@@ -158,11 +158,11 @@ public class PowerFlow {
 			if (node.isLoad() && node.isOn()) {
 				//potencia ativa dos loads em megawatts (Pd) (se a carga estiver desligada, 0) 
 				//carga da planilha deve estar em kW, pois dividimos por 1000 para transformar em mW
-				loadActivePowerMW[i] = node.getActivePowerKW() / 1000 * 0.9;
+				loadActivePowerMW[i] = node.getActivePowerKW() / 1000;
 				
 				//potencia reativa dos loads em Mega Volt Ampère (Qd) (se a carga estiver desligada, 0) 
 				//carga da planilha deve estar em kVar, pois dividimos por 1000 para transformar em mVar
-				loadReactivePowerMVar[i] = node.getReactivePowerKVar() / 1000 * 0.75;
+				loadReactivePowerMVar[i] = node.getReactivePowerKVar() / 1000;
 			}
 			
 			//area sempre 1

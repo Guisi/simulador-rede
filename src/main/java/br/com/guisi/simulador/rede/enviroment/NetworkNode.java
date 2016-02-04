@@ -140,7 +140,7 @@ public abstract class NetworkNode {
 	 * @return double
 	 */
 	public double getActivePowerKW() {
-		return activePowerKW;
+		return activePowerKW * 0.9; //TODO usar 100%
 	}
 	
 	/**
@@ -148,7 +148,7 @@ public abstract class NetworkNode {
 	 * @return double
 	 */
 	public double getReactivePowerKVar() {
-		return reactivePowerKVar;
+		return reactivePowerKVar * 0.75; //TODO usar 100%
 	}
 
 	/**
