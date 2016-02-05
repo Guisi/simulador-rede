@@ -7,17 +7,19 @@
 
 <VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.main.ControlsPaneController">
    <children>
-      <HBox alignment="CENTER_LEFT" spacing="15.0">
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
          <children>
-            <Button fx:id="btnRunAgent" mnemonicParsing="false" onAction="#runAgent" />
-            <Button fx:id="btnStopAgent" disable="true" mnemonicParsing="false" onAction="#stopAgent" />
-            <Button fx:id="btnResetAgent" mnemonicParsing="false" onAction="#resetAgent" />
-            <VBox alignment="CENTER_LEFT" spacing="5.0">
+            <VBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
-                        <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Execution Type:" />
-                        <ComboBox fx:id="cbTaskExecutionType" />
+                        <Button fx:id="btnRunAgent" mnemonicParsing="false" onAction="#runAgent" />
+                        <Button fx:id="btnStopAgent" disable="true" mnemonicParsing="false" onAction="#stopAgent" />
+                        <Button fx:id="btnResetAgent" mnemonicParsing="false" onAction="#resetAgent" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
                         <HBox alignment="CENTER" spacing="3.0">
                            <children>
                               <Label style="-fx-font-weight: bold;" text="Steps:" />
@@ -32,6 +34,16 @@
                         </HBox>
                      </children>
                   </HBox>
+               </children>
+            </VBox>
+            <VBox alignment="CENTER_LEFT" spacing="5.0">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Execution Type:" />
+                        <ComboBox fx:id="cbTaskExecutionType" />
+                     </children>
+                  </HBox>
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
                         <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Stopping Criteria:" />
@@ -44,6 +56,6 @@
       </HBox>
    </children>
    <padding>
-      <Insets bottom="5.0" left="5.0" top="5.0" />
+      <Insets bottom="5.0" left="8.0" top="5.0" />
    </padding>
 </VBox>

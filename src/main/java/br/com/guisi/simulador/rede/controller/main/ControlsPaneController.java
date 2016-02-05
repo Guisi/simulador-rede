@@ -26,6 +26,7 @@ import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
+import br.com.guisi.simulador.rede.constants.StoppingCriteriaType;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -55,7 +56,7 @@ public class ControlsPaneController extends Controller {
 	@FXML
 	private Label lblTimer;
 	@FXML
-	private ComboBox<String> cbAgentStoppingCriteria;
+	private ComboBox<StoppingCriteriaType> cbAgentStoppingCriteria;
 	
 	private LocalTime localTime;
 	private Timeline timeline;
@@ -79,6 +80,9 @@ public class ControlsPaneController extends Controller {
 		
 		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
 		cbTaskExecutionType.setValue(TaskExecutionType.STEP_BY_STEP);
+		
+		cbAgentStoppingCriteria.setItems(FXCollections.observableArrayList(Arrays.asList(StoppingCriteriaType.values())));
+		cbAgentStoppingCriteria.setValue(StoppingCriteriaType.STEP_NUMBER);
 		
 		timeline = new Timeline();
 		timeline.setCycleCount(Timeline.INDEFINITE);
