@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import javafx.application.Platform;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
@@ -29,7 +27,6 @@ import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
-import br.com.guisi.simulador.rede.util.AlertUtils;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
@@ -102,11 +99,11 @@ public class QLearningAgent extends Agent {
 				
 			} catch (Exception e) {
 				//TODO rever
-				stop();
+				/*stop();
 				e.printStackTrace();
 				Platform.runLater(() -> {
 					AlertUtils.showStacktraceAlert(e);
-				});
+				});*/
 			}
 		}
 	}
@@ -224,17 +221,12 @@ public class QLearningAgent extends Agent {
 	
 	private void generateAgentStatus(Environment environment, AgentStepStatus agentStepStatus) {
 		//seta total de perdas
-		double activePowerLostMW = environment.getActivePowerLostMW();
-		double activePowerDemandMW = environment.getActivePowerDemandMW();
-		if (activePowerDemandMW > 0) {
-			agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOSS_PERCENTAGE, activePowerLostMW / activePowerDemandMW * 100);
-		}
+		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOST, environment.getActivePowerLostMW());
+		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOST, environment.getReactivePowerLostMVar());
 		
-		double reactivePowerLostMVar = environment.getReactivePowerLostMVar();
-		double reactivePowerDemandMVar = environment.getReactivePowerDemandMVar();
-		if (reactivePowerLostMVar > 0) {
-			agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOSS_PERCENTAGE, reactivePowerLostMVar / reactivePowerDemandMVar * 100);
-		}
+		//seta demanda
+		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_DEMAND, environment.getActivePowerDemandMW());
+		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_DEMAND, environment.getReactivePowerDemandMVar());
 	}
 	
 	private void updateQValue(Branch sw) {

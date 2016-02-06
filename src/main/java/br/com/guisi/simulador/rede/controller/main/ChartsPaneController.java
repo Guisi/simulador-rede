@@ -32,10 +32,12 @@ public class ChartsPaneController extends Controller {
 	@FXML
 	private TabPane tabPaneCharts;
 	
-	private XYChart.Series<Number, Number> totalActivePowerLostSeries;
+	private XYChart.Series<Number, Number> activePowerLostPercentageSeries;
+	private XYChart.Series<Number, Number> activePowerLostSeries;
 	private Map<Node, Tooltip> totalActivePowerLostTooltips;
 	
-	private XYChart.Series<Number, Number> totalReactivePowerLostSeries;
+	private XYChart.Series<Number, Number> reactivePowerLostPercentageSeries;
+	private XYChart.Series<Number, Number> reactivePowerLostSeries;
 	private Map<Node, Tooltip> totalReactivePowerLostTooltips;
 	
 	private int stepUpdateReceived;
@@ -72,35 +74,61 @@ public class ChartsPaneController extends Controller {
 	private void createCharts() {
 		tabPaneCharts.getTabs().clear();
 
-		//total power lost
-        final NumberAxis xAxis = new NumberAxis();
+		//total power lost %
+        NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel("Iteraction");
-        final NumberAxis yAxis = new NumberAxis();
+        NumberAxis yAxis = new NumberAxis();
         yAxis.setUpperBound(0.1);
         yAxis.setLabel("Losses %");
         
-        final LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
         lineChart.setPrefHeight(300);
         lineChart.setLegendVisible(true);
         lineChart.setAnimated(false);
         
-        totalActivePowerLostSeries = new XYChart.Series<>();
-        totalActivePowerLostSeries.setName("Active Power Lost (MW)");
-        lineChart.getData().add(totalActivePowerLostSeries);
+        activePowerLostPercentageSeries = new XYChart.Series<>();
+        activePowerLostPercentageSeries.setName("Active Power Lost (MW)");
+        lineChart.getData().add(activePowerLostPercentageSeries);
         
-        totalReactivePowerLostSeries = new XYChart.Series<>();
-        totalReactivePowerLostSeries.setName("Reactive Power Lost (MVar)");
-        lineChart.getData().add(totalReactivePowerLostSeries);
+        reactivePowerLostPercentageSeries = new XYChart.Series<>();
+        reactivePowerLostPercentageSeries.setName("Reactive Power Lost (MVar)");
+        lineChart.getData().add(reactivePowerLostPercentageSeries);
         
-        Tab tab = new Tab("Total Power Lost");
+        Tab tab = new Tab("Power Lost %");
+        tab.setContent(lineChart);
+		tabPaneCharts.getTabs().add(tab);
+		
+		//total power lost MW/MVar
+        xAxis = new NumberAxis();
+        xAxis.setLabel("Iteraction");
+        yAxis = new NumberAxis();
+        yAxis.setUpperBound(0.1);
+        yAxis.setLabel("Losses MW/MVar");
+        
+        lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setPrefHeight(300);
+        lineChart.setLegendVisible(true);
+        lineChart.setAnimated(false);
+        
+        activePowerLostSeries = new XYChart.Series<>();
+        activePowerLostSeries.setName("Active Power Lost (MW)");
+        lineChart.getData().add(activePowerLostSeries);
+        
+        reactivePowerLostSeries = new XYChart.Series<>();
+        reactivePowerLostSeries.setName("Reactive Power Lost (MVar)");
+        lineChart.getData().add(reactivePowerLostSeries);
+		
+		tab = new Tab("Power Lost MW/MVar");
         tab.setContent(lineChart);
 		tabPaneCharts.getTabs().add(tab);
 	}
 	
 	private void resetScreen() {
 		root.setVisible(false);
-		totalActivePowerLostSeries.getData().clear();
-		totalReactivePowerLostSeries.getData().clear();
+		activePowerLostPercentageSeries.getData().clear();
+		reactivePowerLostPercentageSeries.getData().clear();
+		activePowerLostSeries.getData().clear();
+		reactivePowerLostSeries.getData().clear();
 	}
 	
 	private void processEnvironmentLoaded() {
@@ -114,23 +142,37 @@ public class ChartsPaneController extends Controller {
 			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 				
-				Double totalActivePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOSS_PERCENTAGE, Double.class);
-				if (totalActivePowerLost != null) {
-					BigDecimal value = new BigDecimal(totalActivePowerLost);
-				    value = value.setScale(5, RoundingMode.HALF_UP);
+				Double activePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOST, Double.class);
+				Double activePowerDemand = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_DEMAND, Double.class);
+				if (activePowerLost != null) {
+					BigDecimal value = new BigDecimal(activePowerLost).setScale(5, RoundingMode.HALF_UP);
 					
 					Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
-					totalActivePowerLostSeries.getData().add(chartData);
+					activePowerLostSeries.getData().add(chartData);
+					
+					if (activePowerDemand != null) {
+						value = new BigDecimal(activePowerLost / activePowerDemand * 100).setScale(5, RoundingMode.HALF_UP);
+					}
+					
+					chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+					activePowerLostPercentageSeries.getData().add(chartData);
 		            //totalActivePowerLostTooltips.put(chartData.getNode(), TooltipUtils.hackTooltipStartTiming(new Tooltip(value.toString())));
 				}
-				
-				Double totalReactivePowerLost = agentStepStatus.getInformation(AgentInformationType.REACTIVE_POWER_LOSS_PERCENTAGE, Double.class);
-				if (totalReactivePowerLost != null) {
-					BigDecimal value = new BigDecimal(totalReactivePowerLost);
-				    value = value.setScale(5, RoundingMode.HALF_UP);
+
+				Double reactivePowerLost = agentStepStatus.getInformation(AgentInformationType.REACTIVE_POWER_LOST, Double.class);
+				Double reactivePowerDemand = agentStepStatus.getInformation(AgentInformationType.REACTIVE_POWER_DEMAND, Double.class);
+				if (reactivePowerLost != null) {
+					BigDecimal value = new BigDecimal(reactivePowerLost).setScale(5, RoundingMode.HALF_UP);
 					
 					Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
-					totalReactivePowerLostSeries.getData().add(chartData);
+					reactivePowerLostSeries.getData().add(chartData);
+					
+					if (reactivePowerDemand != null) {
+						value = new BigDecimal(reactivePowerLost / reactivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP);
+					}
+					
+					chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+					reactivePowerLostPercentageSeries.getData().add(chartData);
 		            //totalReactivePowerLostTooltips.put(chartData.getNode(), TooltipUtils.hackTooltipStartTiming(new Tooltip(value.toString())));
 				}
 			}
