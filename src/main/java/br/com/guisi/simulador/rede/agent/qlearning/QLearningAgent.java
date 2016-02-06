@@ -101,6 +101,7 @@ public class QLearningAgent extends Agent {
 				this.generateAgentStatus(environment, agentStepStatus);
 				
 			} catch (Exception e) {
+				//TODO rever
 				stop();
 				e.printStackTrace();
 				Platform.runLater(() -> {
@@ -160,9 +161,9 @@ public class QLearningAgent extends Agent {
 	private void turnOffLoadsIfNecessary(Environment environment) throws Exception {
 		
 		for (Feeder feeder : environment.getFeeders()) {
+			List<Load> turnedOffLoads = new ArrayList<>();
 			
 			List<Load> onLoads = getFeederLoadsOn(feeder);
-
 			//primeiro desliga os loads com restrição em grupos até que não existam mais restrições
 			long brokenLoadsQuantity = getFeederBrokenLoadsQuantity(feeder);
 			while (brokenLoadsQuantity > 0) {
@@ -208,6 +209,8 @@ public class QLearningAgent extends Agent {
 				}
 				turnedOffLoads.remove(load);
 			}
+			
+			this.turnedOffLoads.addAll(turnedOffLoads);
 		}
 	}
 	
@@ -224,13 +227,13 @@ public class QLearningAgent extends Agent {
 		double activePowerLostMW = environment.getActivePowerLostMW();
 		double activePowerDemandMW = environment.getActivePowerDemandMW();
 		if (activePowerDemandMW > 0) {
-			agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOST_PERCENTUAL, activePowerLostMW / activePowerDemandMW * 100);
+			agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOSS_PERCENTAGE, activePowerLostMW / activePowerDemandMW * 100);
 		}
 		
 		double reactivePowerLostMVar = environment.getReactivePowerLostMVar();
 		double reactivePowerDemandMVar = environment.getReactivePowerDemandMVar();
 		if (reactivePowerLostMVar > 0) {
-			agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOST_PERCENTUAL, reactivePowerLostMVar / reactivePowerDemandMVar * 100);
+			agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOSS_PERCENTAGE, reactivePowerLostMVar / reactivePowerDemandMVar * 100);
 		}
 	}
 	

@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
+import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.qlearning.QLearningAgent;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.events.EventBus;
@@ -32,9 +33,9 @@ public class AgentControlImpl implements AgentControl {
 	private Agent agent;
 	
 	@Override
-	public void run(TaskExecutionType taskExecutionType) {
+	public void run(TaskExecutionType taskExecutionType, StoppingCriteria stoppingCriteria) {
 		if (SimuladorRede.getEnvironment().isValidForReconfiguration()) {
-			agentTask = new AgentTask(getAgent(), taskExecutionType);
+			agentTask = new AgentTask(getAgent(), taskExecutionType, stoppingCriteria);
 			
 			agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
 	            if (newState == Worker.State.SUCCEEDED) {

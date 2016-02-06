@@ -21,7 +21,6 @@ import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
-import br.com.guisi.simulador.rede.util.TooltipUtils;
 
 public class ChartsPaneController extends Controller {
 
@@ -115,24 +114,24 @@ public class ChartsPaneController extends Controller {
 			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 				
-				Double totalActivePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOST_PERCENTUAL, Double.class);
+				Double totalActivePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOSS_PERCENTAGE, Double.class);
 				if (totalActivePowerLost != null) {
 					BigDecimal value = new BigDecimal(totalActivePowerLost);
 				    value = value.setScale(5, RoundingMode.HALF_UP);
 					
 					Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
 					totalActivePowerLostSeries.getData().add(chartData);
-		            totalActivePowerLostTooltips.put(chartData.getNode(), TooltipUtils.hackTooltipStartTiming(new Tooltip(value.toString())));
+		            //totalActivePowerLostTooltips.put(chartData.getNode(), TooltipUtils.hackTooltipStartTiming(new Tooltip(value.toString())));
 				}
 				
-				Double totalReactivePowerLost = agentStepStatus.getInformation(AgentInformationType.REACTIVE_POWER_LOST_PERCENTUAL, Double.class);
+				Double totalReactivePowerLost = agentStepStatus.getInformation(AgentInformationType.REACTIVE_POWER_LOSS_PERCENTAGE, Double.class);
 				if (totalReactivePowerLost != null) {
 					BigDecimal value = new BigDecimal(totalReactivePowerLost);
 				    value = value.setScale(5, RoundingMode.HALF_UP);
 					
 					Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
 					totalReactivePowerLostSeries.getData().add(chartData);
-		            totalReactivePowerLostTooltips.put(chartData.getNode(), TooltipUtils.hackTooltipStartTiming(new Tooltip(value.toString())));
+		            //totalReactivePowerLostTooltips.put(chartData.getNode(), TooltipUtils.hackTooltipStartTiming(new Tooltip(value.toString())));
 				}
 			}
 			stepUpdateReceived = agentStatus.getStepStatus().size();

@@ -48,6 +48,7 @@
                      <children>
                         <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Stopping Criteria:" />
                         <ComboBox fx:id="cbAgentStoppingCriteria" />
+                        <TextField fx:id="tfStoppingCriteria" alignment="CENTER_RIGHT" prefWidth="70.0" />
                      </children>
                   </HBox>
                </children>

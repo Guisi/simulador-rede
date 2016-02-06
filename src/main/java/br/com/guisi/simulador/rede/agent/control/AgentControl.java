@@ -5,7 +5,7 @@ import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 
 public interface AgentControl {
 
-	void run(TaskExecutionType taskExecutionType);
+	void run(TaskExecutionType taskExecutionType, StoppingCriteria stoppingCriteria);
 	
 	void stop();
 	

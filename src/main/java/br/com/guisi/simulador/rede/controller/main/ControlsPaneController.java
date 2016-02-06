@@ -17,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
@@ -24,9 +25,13 @@ import javafx.util.Duration;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
+import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
+import br.com.guisi.simulador.rede.agent.control.impl.StepNumberStoppingCriteria;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
-import br.com.guisi.simulador.rede.constants.StoppingCriteriaType;
+import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -34,7 +39,7 @@ import br.com.guisi.simulador.rede.events.EventType;
 public class ControlsPaneController extends Controller {
 
 	public static final String FXML_FILE = "/fxml/main/ControlsPane.fxml";
-
+	
 	@Inject
 	private AgentControl agentControl;
 	
@@ -56,7 +61,9 @@ public class ControlsPaneController extends Controller {
 	@FXML
 	private Label lblTimer;
 	@FXML
-	private ComboBox<StoppingCriteriaType> cbAgentStoppingCriteria;
+	private ComboBox<StoppingCriteria> cbAgentStoppingCriteria;
+	@FXML
+	private TextField tfStoppingCriteria;
 	
 	private LocalTime localTime;
 	private Timeline timeline;
@@ -81,8 +88,21 @@ public class ControlsPaneController extends Controller {
 		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
 		cbTaskExecutionType.setValue(TaskExecutionType.STEP_BY_STEP);
 		
-		cbAgentStoppingCriteria.setItems(FXCollections.observableArrayList(Arrays.asList(StoppingCriteriaType.values())));
-		cbAgentStoppingCriteria.setValue(StoppingCriteriaType.STEP_NUMBER);
+		StepNumberStoppingCriteria stepNumberStoppingCriteria = new StepNumberStoppingCriteria();
+		cbAgentStoppingCriteria.setItems(FXCollections.observableArrayList(stepNumberStoppingCriteria));
+		cbAgentStoppingCriteria.setValue(stepNumberStoppingCriteria);
+		
+		tfStoppingCriteria.focusedProperty().addListener((observable, oldValue, newValue) -> {
+			if (!newValue && StringUtils.isBlank(tfStoppingCriteria.getText())) {
+				tfStoppingCriteria.setText(Constants.STOPPING_CRITERIA_STEP_NUMBER);
+			}
+		});
+		
+		tfStoppingCriteria.textProperty().addListener((observable, oldValue, newValue) -> {
+				if (newValue.length() > 10 || !newValue.matches("\\d*")) {
+					tfStoppingCriteria.setText(oldValue);
+		        }
+		    });
 		
 		timeline = new Timeline();
 		timeline.setCycleCount(Timeline.INDEFINITE);
@@ -118,6 +138,7 @@ public class ControlsPaneController extends Controller {
 		localTime = LocalTime.MIN;
 		lblTimer.setText(localTime.toString());
 		timeline.stop();
+		tfStoppingCriteria.setText(Constants.STOPPING_CRITERIA_STEP_NUMBER);
 	}
 	
 	private void processEnvironmentLoaded() {
@@ -137,6 +158,8 @@ public class ControlsPaneController extends Controller {
 		btnStopAgent.setDisable(!disable);
 		btnResetAgent.setDisable(disable);
 		cbTaskExecutionType.setDisable(disable);
+		cbAgentStoppingCriteria.setDisable(disable);
+		tfStoppingCriteria.setDisable(disable);
 	}
 	
 	private void processAgentRunning() {
@@ -155,7 +178,9 @@ public class ControlsPaneController extends Controller {
 	 *********************************
 	 *********************************/
 	public void runAgent() {
-		agentControl.run(cbTaskExecutionType.getValue());
+		StoppingCriteria stoppingCriteria = cbAgentStoppingCriteria.getValue();
+		stoppingCriteria.setValue(tfStoppingCriteria.getText());
+		agentControl.run(cbTaskExecutionType.getValue(), stoppingCriteria);
 	}
 	
 	public void stopAgent() {

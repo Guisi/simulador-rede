@@ -1,12 +1,22 @@
 package br.com.guisi.simulador.rede.controller.main;
 
+import java.io.File;
+
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+
+import org.apache.commons.lang3.StringUtils;
+
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
+import br.com.guisi.simulador.rede.util.EnvironmentUtils;
+import br.com.guisi.simulador.rede.util.PowerFlow;
 
 public class SimuladorRedeController extends Controller {
 
@@ -55,8 +65,53 @@ public class SimuladorRedeController extends Controller {
 		
 		this.fireEvent(EventType.RESET_SCREEN);
 		
-		/*File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.csv");
-		this.loadEnvironmentFromFile(f);*/
+		//TODO remover
+		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		this.loadEnvironmentFromFile(f);
+	}
+	
+	private void loadEnvironmentFromFile(File xlsFile) {
+		try {
+			Environment environment = EnvironmentUtils.getEnvironmentFromFile(xlsFile);
+			SimuladorRede.setEnvironment(environment);
+			
+			if (environment != null) {
+				boolean powerFlowSuccess = false;
+				
+				//primeiro valida se rede está radial
+				String errors = EnvironmentUtils.validateRadialState(environment);
+				
+				if (StringUtils.isEmpty(errors)) {
+					//isola as faltas
+					EnvironmentUtils.isolateFaultSwitches(environment);
+					
+					//executa o fluxo de potência
+					try {
+						PowerFlow.execute(environment);
+						powerFlowSuccess = true;
+					} catch (Exception e) {
+						Alert alert = new Alert(AlertType.ERROR);
+						alert.setContentText(e.getMessage());
+						alert.showAndWait();
+					}
+				} else {
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setContentText(errors);
+					alert.showAndWait();
+				}
+				
+				this.fireEvent(EventType.ENVIRONMENT_LOADED);
+
+				if (powerFlowSuccess) {
+					this.fireEvent(EventType.POWER_FLOW_COMPLETED);
+				}
+			}
+		} catch (Exception e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setContentText(e.getMessage());
+			e.printStackTrace();
+			alert.showAndWait();
+		}
 	}
 	
 	@Override

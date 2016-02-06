@@ -12,6 +12,8 @@ public interface Constants {
 	/* Fator de desconto (gamma) */
 	double DISCOUNT_FACTOR = 0.9;
 	
+	String STOPPING_CRITERIA_STEP_NUMBER = "100";
+	
 	/** network interface */
 	int NETWORK_PANE_PADDING = 30;
 	int NETWORK_GRID_SIZE_PX = 70;

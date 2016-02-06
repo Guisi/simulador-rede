@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.LearningProperty;
@@ -23,11 +24,11 @@ public abstract class Agent {
 	private boolean stopRequest;
 	private int step = 0;
 	
-	public final void run(TaskExecutionType taskExecutionType) {
+	public final void run(TaskExecutionType taskExecutionType, StoppingCriteria stoppingCriteria) {
 		this.stopRequest = false;
 		boolean isEnvironmentValid = SimuladorRede.getEnvironment().isValidForReconfiguration();
 
-		while (!stopRequest && isEnvironmentValid) {
+		while (!stopRequest && isEnvironmentValid && !stoppingCriteria.wasReached(step)) {
 			synchronized (this) {
 				AgentStepStatus agentStepStatus = new AgentStepStatus(step++);
 				agentStatus.getStepStatus().add(agentStepStatus);
@@ -37,7 +38,7 @@ public abstract class Agent {
 				if (taskExecutionType.isNotifyEveryStep()) {
 					try {
 						this.notifyAgentObservers();
-						Thread.sleep(30);
+						Thread.sleep(50);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

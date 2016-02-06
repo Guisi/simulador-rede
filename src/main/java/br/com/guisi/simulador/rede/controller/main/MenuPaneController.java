@@ -96,7 +96,7 @@ public class MenuPaneController extends Controller {
 			Environment environment = EnvironmentUtils.getEnvironmentFromFile(xlsFile);
 			SimuladorRede.setEnvironment(environment);
 			
-			if (getEnvironment() != null) {
+			if (environment != null) {
 				boolean powerFlowSuccess = false;
 				
 				//primeiro valida se rede está radial
