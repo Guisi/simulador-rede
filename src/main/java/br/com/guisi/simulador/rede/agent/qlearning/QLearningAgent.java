@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import javafx.application.Platform;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
@@ -27,6 +29,7 @@ import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.util.AlertUtils;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
@@ -84,27 +87,25 @@ public class QLearningAgent extends Agent {
 				
 				//verifica loads a serem desativados caso existam restrições 
 				this.turnOffLoadsIfNecessary(environment);
-				
-				//TODO só atualizar quando mexer nos switches mesmo??
-				
-				//atualiza o qValue do primeiro switch
-				updateQValue(firstSwitch);
-				
-				//atualiza o qValue do segundo switch
-				if (secondSwitch != null) {
-					updateQValue(secondSwitch);
-				}
-				
-				this.generateAgentStatus(environment, agentStepStatus);
-				
 			} catch (Exception e) {
+				System.err.println(e.getMessage());
 				//TODO rever
-				/*stop();
-				e.printStackTrace();
+				stop();
 				Platform.runLater(() -> {
 					AlertUtils.showStacktraceAlert(e);
-				});*/
+				});
 			}
+			//TODO só atualizar quando mexer nos switches mesmo??
+			
+			//atualiza o qValue do primeiro switch
+			updateQValue(firstSwitch);
+			
+			//atualiza o qValue do segundo switch
+			if (secondSwitch != null) {
+				updateQValue(secondSwitch);
+			}
+			
+			this.generateAgentStatus(environment, agentStepStatus);
 		}
 	}
 	
@@ -186,7 +187,11 @@ public class QLearningAgent extends Agent {
 				}
 				
 				//executa o fluxo de potência
-				PowerFlow.execute(environment);
+				//try {
+					PowerFlow.execute(environment);
+				//} catch (Exception e) {
+				//	System.err.println(e.getMessage());
+				//}
 				
 				//verifica novamente se continuam existindo loads com restrição violada
 				brokenLoadsQuantity = getFeederBrokenLoadsQuantity(feeder);
@@ -197,11 +202,19 @@ public class QLearningAgent extends Agent {
 			Collections.reverse(offLoads);
 			for (Load load : offLoads) {
 				load.turnOn();
-				PowerFlow.execute(environment);
+				//try {
+					PowerFlow.execute(environment);
+				//} catch (Exception e) {
+				//	System.err.println(e.getMessage());
+				//}
 				
 				if (getFeederBrokenLoadsQuantity(feeder) > 0) {
 					load.turnOff();
-					PowerFlow.execute(environment);
+					//try {
+						PowerFlow.execute(environment);
+					//} catch (Exception e) {
+					//	System.err.println(e.getMessage());
+					//}
 					break;
 				}
 				turnedOffLoads.remove(load);

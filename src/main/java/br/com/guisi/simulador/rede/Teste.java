@@ -1,7 +1,6 @@
 package br.com.guisi.simulador.rede;
 
 import java.io.File;
-import java.time.LocalTime;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -13,14 +12,16 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		LocalTime localTime = LocalTime.MIN;
-		
-		System.out.println(localTime);
-		
-		System.out.println(localTime.plusMinutes(1));
-		
-		System.out.println(localTime);
-		
+		long ini = System.currentTimeMillis();
+		double total = 549755813888l;
+		double l = 0;
+		for (double i = 0; i < total; i++) {
+			l = l + 1;
+			if (l % 100000000 == 0) {
+				System.out.println("L: " + l + " - " + l/total*100);
+			}
+		}
+		System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
 	}
 	
 	public static void teste() throws Exception {
