@@ -57,3 +57,7 @@
     -fx-padding: 0;
     -fx-shape: null;
 }
+
+.thick-chart .chart-series-line {    
+	-fx-stroke-width: 1px;
+}

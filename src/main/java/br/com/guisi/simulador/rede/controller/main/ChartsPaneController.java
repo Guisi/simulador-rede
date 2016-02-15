@@ -85,9 +85,11 @@ public class ChartsPaneController extends Controller {
         lineChart.setPrefHeight(300);
         lineChart.setLegendVisible(true);
         lineChart.setAnimated(false);
+        lineChart.setCreateSymbols(false);
+        lineChart.getStyleClass().add("thick-chart");
         
         activePowerLostPercentageSeries = new XYChart.Series<>();
-        activePowerLostPercentageSeries.setName("Active Power Lost (MW)");
+        activePowerLostPercentageSeries.setName("Active Power Lost (MW)\nMin Value");
         lineChart.getData().add(activePowerLostPercentageSeries);
         
         reactivePowerLostPercentageSeries = new XYChart.Series<>();
@@ -109,6 +111,8 @@ public class ChartsPaneController extends Controller {
         lineChart.setPrefHeight(300);
         lineChart.setLegendVisible(true);
         lineChart.setAnimated(false);
+        lineChart.setCreateSymbols(false);
+        lineChart.getStyleClass().add("thick-chart");
         
         activePowerLostSeries = new XYChart.Series<>();
         activePowerLostSeries.setName("Active Power Lost (MW)");
