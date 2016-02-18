@@ -208,14 +208,11 @@ public class LabelAndMessagesPaneController extends Controller {
 			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 				
-				@SuppressWarnings("unchecked")
-				List<SwitchOperation> switchOperations = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATIONS, List.class);
-				if (switchOperations != null) {
-					for (SwitchOperation switchOperation : switchOperations) {
-						SwitchOperationRow row = new SwitchOperationRow();
-						row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState().getDescription()).toString());
-						tvSwitchesOperations.getItems().add(row);
-					}
+				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
+				if (switchOperation != null) {
+					SwitchOperationRow row = new SwitchOperationRow();
+					row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState().getDescription()).toString());
+					tvSwitchesOperations.getItems().add(row);
 				}
 			}
 			stepUpdateReceived = agentStatus.getStepStatus().size();

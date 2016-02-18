@@ -108,8 +108,7 @@ public class MenuPaneController extends Controller {
 					
 					//executa o fluxo de potência
 					try {
-						PowerFlow.execute(environment);
-						powerFlowSuccess = true;
+						powerFlowSuccess = PowerFlow.execute(environment);
 					} catch (Exception e) {
 						Alert alert = new Alert(AlertType.ERROR);
 						alert.setContentText(e.getMessage());
@@ -125,6 +124,10 @@ public class MenuPaneController extends Controller {
 
 				if (powerFlowSuccess) {
 					this.fireEvent(EventType.POWER_FLOW_COMPLETED);
+				} else {
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setContentText("Newton's method power flow did not converge");
+					alert.showAndWait();
 				}
 			}
 		} catch (Exception e) {

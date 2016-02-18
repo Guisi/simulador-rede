@@ -1,7 +1,5 @@
 package br.com.guisi.simulador.rede.controller.main;
 
-import java.util.List;
-
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -150,17 +148,13 @@ public class NetworkPaneController extends Controller {
 			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 				
-				@SuppressWarnings("unchecked")
-				List<SwitchOperation> switchOperations = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATIONS, List.class);
-				if (switchOperations != null) {
-					for (SwitchOperation switchOperation : switchOperations) {
-						Branch sw = environment.getBranch(switchOperation.getSwitchNumber());
-						networkPane.updateBranchDrawing(sw);
-					}
+				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
+				if (switchOperation != null) {
+					Branch sw = environment.getBranch(switchOperation.getSwitchNumber());
+					networkPane.updateBranchDrawing(sw);
+
 					//atualiza status dos nós na tela
-					if (!switchOperations.isEmpty()) {
-						environment.getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
-					}
+					environment.getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
 				}
 			}
 			

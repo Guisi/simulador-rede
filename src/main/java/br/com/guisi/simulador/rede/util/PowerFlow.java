@@ -20,56 +20,65 @@ import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 
 public class PowerFlow {
 	
-	public static void execute(Environment environment) throws Exception {
-		//zera o valor de potencia usado dos feeders
-		environment.getFeeders().forEach((feeder) -> {
-			feeder.setUsedPower(0);
-		});
+	public static boolean execute(Environment environment) {
+		//zera os valores do power flow anterior
+		PowerFlow.resetPowerFlowValues(environment);
 		
 		//atualiza informações das conexões dos feeders e loads
 		EnvironmentUtils.updateFeedersConnections(environment);
 
 		//executa power flow
-		executePowerFlow(environment);
+		boolean success = executePowerFlow(environment);
 		
-		//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
-		environment.getFeeders().forEach((feeder) -> {
-			feeder.getBranches().forEach((branch) -> feeder.addUsedPower(branch.getInstantCurrent()));
-		});
+		if (success) {
+			//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
+			environment.getFeeders().forEach((feeder) -> {
+				feeder.getBranches().forEach((branch) -> feeder.addUsedPower(branch.getInstantCurrent()));
+			});
+		}
+		
+		return success;
 	}
 	
-	private static void executePowerFlow(Environment environment) throws Exception {
-		/*monta lista somente com os nodes que sejam feeders ou que estejam
-		conectados a um feeder*/
-		List<NetworkNode> nodes = environment.getNetworkNodes();
-		nodes.forEach((node) -> node.setCurrentVoltagePU(0));
-		List<NetworkNode> activeNodes = new ArrayList<>();
-		for (NetworkNode networkNode : nodes) {
-			if (networkNode.isFeeder() || ((Load)networkNode).getFeeder() != null) {
-				activeNodes.add(networkNode);
-			}
-		}
+	public static void resetPowerFlowValues(Environment environment) {
+		//zera o valor de potencia usado dos feeders
+		environment.getFeeders().forEach((feeder) -> {
+			feeder.setUsedPower(0);
+		});
 		
-		/*se não existe nenhum load ativo, não executa powerflow*/
-		long loads = activeNodes.stream().filter((node) -> node.isLoad()).count();
-		if (loads == 0) {
-			//throw new Exception("No active load found, power flow can't be executed!");
-			return;
-		}
+		//zera valores dos loads
+		environment.getNetworkNodes().forEach((node) -> node.setCurrentVoltagePU(0));
 		
-		/*monta lista somente com os branches que estejam conectados a nodes ativos*/
-		List<Branch> branches = environment.getBranches();
-		branches.forEach((branch) -> {
+		//zera valores dos branches
+		environment.getBranches().forEach((branch) -> {
 			branch.setInstantCurrent(0);
 			branch.setActiveLossMW(0);
 			branch.setReactiveLossMVar(0);
 		});
+	}
+	
+	private static boolean executePowerFlow(Environment environment) {
+		/*monta lista somente com os nodes que sejam feeders ou que estejam conectados a um feeder*/
+		List<NetworkNode> activeNodes = new ArrayList<>();
+		environment.getNetworkNodes().forEach((networkNode) -> {
+			if (networkNode.isFeeder() || ((Load)networkNode).getFeeder() != null) {
+				activeNodes.add(networkNode);
+			}
+		});
+		
+		/*se não existe nenhum load ativo, não executa powerflow*/
+		long loads = activeNodes.stream().filter((node) -> node.isLoad()).count();
+		if (loads == 0) {
+			return false;
+		}
+		
+		/*monta lista somente com os branches que estejam conectados a nodes ativos*/
 		List<Branch> activeBranches = new ArrayList<>();
-		for (Branch branch : branches) {
+		environment.getBranches().forEach((branch) -> {
 			if (activeNodes.contains(branch.getNode1()) && activeNodes.contains(branch.getNode2())) {
 				activeBranches.add(branch);
 			}
-		}
+		});
 		
 		double[][] mpcBus = mountMpcBus(activeNodes);
 		
@@ -92,9 +101,9 @@ public class PowerFlow {
 			proxy.eval("mpc = runpf(case_simulador(mpcBus, mpcGen, mpcBranch, potenciaBase), mpoption('OUT_ALL', 0));");
 			//System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
 			
-			double success = processor.getNumericArray("mpc.success").getRealValue(0);
+			boolean success = processor.getNumericArray("mpc.success").getRealValue(0) == 1;
 			
-			if (success == 1) {
+			if (success) {
 				//recupera informacoes das cargas
 				double[][] mpcBusRet = processor.getNumericArray("mpc.bus").getRealArray2D();
 				
@@ -125,11 +134,11 @@ public class PowerFlow {
 						branch.setReactiveLossMVar(lossMVar);
 					}
 				}
-			} else {
-				throw new Exception("Newton's method power flow did not converge");
 			}
+			
+			return success;
 		} catch (MatlabConnectionException | MatlabInvocationException e) {
-			throw new Exception(e);
+			throw new RuntimeException(e);
 		}
 	}
 	

@@ -76,7 +76,8 @@ public class PowerLossPercentagemChart extends GenericLineChart {
 		//calcula percentual da perda de potência ativa
 		Double activePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOST, Double.class);
 		Double activePowerDemand = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_DEMAND, Double.class);
-		BigDecimal value = new BigDecimal(activePowerLost / activePowerDemand * 100).setScale(5, RoundingMode.HALF_UP);
+		BigDecimal value = activePowerDemand.doubleValue() > 0 ? new BigDecimal(activePowerLost / activePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+
 		Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
 		activePowerLossSeries.getData().add(chartData);
 		minActivePowerLoss = minActivePowerLoss != null ? Math.min(minActivePowerLoss, value.doubleValue()) : value.doubleValue();
@@ -85,7 +86,7 @@ public class PowerLossPercentagemChart extends GenericLineChart {
 		//calcula percentual da perda de potência reativa
 		Double reactivePowerLost = agentStepStatus.getInformation(AgentInformationType.REACTIVE_POWER_LOST, Double.class);
 		Double reactivePowerDemand = agentStepStatus.getInformation(AgentInformationType.REACTIVE_POWER_DEMAND, Double.class);
-		value = new BigDecimal(reactivePowerLost / reactivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP);
+		value = reactivePowerDemand.doubleValue() > 0 ? new BigDecimal(reactivePowerLost / reactivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
 		chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
 		reactivePowerLossSeries.getData().add(chartData);
 		minReactivePowerLoss = minReactivePowerLoss != null ? Math.min(minReactivePowerLoss, value.doubleValue()) : value.doubleValue();

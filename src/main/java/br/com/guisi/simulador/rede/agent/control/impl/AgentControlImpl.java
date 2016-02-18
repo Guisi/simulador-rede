@@ -73,13 +73,13 @@ public class AgentControlImpl implements AgentControl {
 	
 	@Override
 	public void reset() {
-		agent = context.getBean(QLearningAgent.class);
+		agent = null;
 	}
 	
 	@Override
 	public Agent getAgent() {
 		if (agent == null) {
-			this.reset();
+			agent = context.getBean(QLearningAgent.class);
 		}
 		return agent;
 	}
