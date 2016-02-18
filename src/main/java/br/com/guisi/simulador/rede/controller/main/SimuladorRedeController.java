@@ -55,7 +55,6 @@ public class SimuladorRedeController extends Controller {
 		
 		this.fireEvent(EventType.RESET_SCREEN);
 		
-		//TODO remover
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
 		this.loadEnvironmentFromFile(f);*/
 	}
