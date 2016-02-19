@@ -23,6 +23,7 @@ import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 
 
 public class EnvironmentUtils {
@@ -203,10 +204,9 @@ public class EnvironmentUtils {
 	/**
 	 * Valida se existe algum ciclo fechado na rede
 	 * @param environment
-	 * @throws IllegalStateException
 	 */
-	public static String validateRadialState(Environment environment) {
-		StringBuilder msgs = new StringBuilder();
+	public static List<NonRadialNetworkException> validateRadialState(Environment environment) {
+		List<NonRadialNetworkException> exceptions = new ArrayList<>();
 		
 		environment.getNetworkNodeMap().values().forEach((node) -> {
 			try {
@@ -216,12 +216,12 @@ public class EnvironmentUtils {
 					Feeder feeder = (Feeder) node;
 					checkIfExistsConnectedFeeders(feeder, node, null);
 				}
-			} catch (IllegalStateException e) {
-				msgs.append(e.getMessage()).append("\n");
+			} catch (NonRadialNetworkException e) {
+				exceptions.add(e);
 			}
 		});
 		
-		return msgs.toString();
+		return exceptions;
 	}
 	
 	/**
@@ -260,7 +260,8 @@ public class EnvironmentUtils {
 		
 		for (NetworkNode networkNode : connectedNodes) {
 			if (checkedLoads.contains(networkNode)) {
-				throw new IllegalStateException("Existe algum ciclo fechado no qual o " + (observedLoad.isFeeder() ? "feeder " : "load ") + observedLoad.getNodeNumber() + " está incluso.");
+				String msg = "Existe algum ciclo fechado no qual o " + (observedLoad.isFeeder() ? "feeder " : "load ") + observedLoad.getNodeNumber() + " está incluso.";
+				throw new NonRadialNetworkException(msg, observedLoad);
 			}
 			
 			validateRadialStateRecursive(observedLoad, networkNode, connectedLoad, checkedLoads);
@@ -281,7 +282,7 @@ public class EnvironmentUtils {
 
 		connectedNodes.forEach((node) -> {
 			if (node.isFeeder()) {
-				throw new IllegalStateException("Os feeders " + observedFeeder.getNodeNumber() + " e " + node.getNodeNumber() + " estão conectados.");
+				throw new NonRadialNetworkException("Os feeders " + observedFeeder.getNodeNumber() + " e " + node.getNodeNumber() + " estão conectados.", observedFeeder);
 			}
 			checkIfExistsConnectedFeeders(observedFeeder, node, connectedLoad);
 		});

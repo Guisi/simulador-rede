@@ -1,6 +1,7 @@
 package br.com.guisi.simulador.rede.controller.main;
 
 import java.io.File;
+import java.util.List;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -10,9 +11,6 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-
-import org.apache.commons.lang3.StringUtils;
-
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.controller.modal.ExpressionEvaluatorController;
@@ -20,6 +18,7 @@ import br.com.guisi.simulador.rede.controller.modal.FunctionsController;
 import br.com.guisi.simulador.rede.controller.modal.PriorityConfigController;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
+import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
@@ -100,9 +99,9 @@ public class MenuPaneController extends Controller {
 				boolean powerFlowSuccess = false;
 				
 				//primeiro valida se rede está radial
-				String errors = EnvironmentUtils.validateRadialState(environment);
+				List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
 				
-				if (StringUtils.isEmpty(errors)) {
+				if (exceptions.isEmpty()) {
 					//isola as faltas
 					EnvironmentUtils.isolateFaultSwitches(environment);
 					
@@ -116,7 +115,9 @@ public class MenuPaneController extends Controller {
 					}
 				} else {
 					Alert alert = new Alert(AlertType.ERROR);
-					alert.setContentText(errors);
+					StringBuilder sb = new StringBuilder();
+					exceptions.forEach(ex -> sb.append(ex.getMessage()).append("\n")); 
+					alert.setContentText(sb.toString());
 					alert.showAndWait();
 				}
 				

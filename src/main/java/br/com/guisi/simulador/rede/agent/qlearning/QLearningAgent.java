@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -25,8 +27,10 @@ import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
+import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
@@ -39,7 +43,7 @@ public class QLearningAgent extends Agent {
 	private boolean radialNetwork;
 	
 	private Map<Integer, List<SwitchDistance>> visitedSwitchesMap;
-	private List<Load> turnedOffLoads;
+	private Set<Load> turnedOffLoads;
 	
 	private final Random RANDOM = new Random(System.currentTimeMillis());
 
@@ -52,14 +56,14 @@ public class QLearningAgent extends Agent {
 	public void reset() {
 		this.qTable = new QTable();
 		this.visitedSwitchesMap = new HashMap<>();
-		this.turnedOffLoads = new ArrayList<>();
+		this.turnedOffLoads = new LinkedHashSet<>();
 		
 		Environment environment = SimuladorRede.getEnvironment();
 		//verifica se existe alguma falta
 		this.currentSwitch = environment.getRandomFault();
 		//se não existe, inicia por um switch aberto aleatório
 		if (this.currentSwitch == null) {
-			this.currentSwitch = environment.getRandomSwitch(SwitchState.OPEN);
+			this.currentSwitch = environment.getRandomSwitch();
 		}
 	}
 	
@@ -83,31 +87,37 @@ public class QLearningAgent extends Agent {
 		SwitchState switchState = currentSwitch.isClosed() ? SwitchState.CLOSED : SwitchState.OPEN;
 		Branch nextSwitch = getClosestSwitch(environment, currentSwitch, switchState, null).getTheSwitch();
 		nextSwitch.reverse();
-		
-		radialNetwork = !EnvironmentUtils.validateRadialState(environment).isEmpty();
-		
-		//se a rede continua radial, verifica restrições
-		if (radialNetwork) {
-			//executa o fluxo de potência
-			PowerFlow.execute(environment);
 
-			//verifica loads a serem desativados caso existam restrições 
-			this.turnOffLoadsIfNecessary(environment);
-		} else {
-			//senão, desfaz a ação
+		//verifica se a rede continua radial
+		List<NonRadialNetworkException> nonRadialExceptions = EnvironmentUtils.validateRadialState(environment);
+		radialNetwork = nonRadialExceptions.isEmpty();
+		
+		if (!radialNetwork) {
+			//desfaz a ação
 			//nextSwitch.reverse();
 			
-			//zera valores do fluxo de potência anterior
-			PowerFlow.resetPowerFlowValues(environment);
-			
-			//desliga todos os loads
-			environment.getLoads().stream().filter((load) -> load.isOn()).forEach((load) -> {
-				load.turnOff();
-				turnedOffLoads.add(load);
+			//desliga todos os loads dos feeders envolvidos no circuito fechado
+			nonRadialExceptions.forEach(ex -> {
+				NetworkNode node = ex.getNetworkNode();
+				if (node.isFeeder()) {
+					Feeder feeder = (Feeder) node;
+					feeder.getServedLoads().stream().filter((load) -> load.isOn()).forEach((load) -> {
+						load.turnOff();
+						turnedOffLoads.add(load);
+					});
+				} else {
+					Load load = (Load) node;
+					load.turnOff();
+					turnedOffLoads.add(load);
+				}
 			});
-
-			//isso vai fazer com que a recompensa para esta ação seja a pior possível
 		}
+		
+		//executa o fluxo de potência
+		PowerFlow.execute(environment);
+
+		//verifica loads a serem desativados caso existam restrições 
+		this.turnOffLoadsIfNecessary(environment);
 		
 		//atualiza o qValue do switch
 		updateQValue(currentSwitch);
@@ -198,6 +208,13 @@ public class QLearningAgent extends Agent {
 			//seta demanda
 			agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_DEMAND, environment.getActivePowerDemandMW());
 			agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_DEMAND, environment.getReactivePowerDemandMVar());
+			
+			//seta soma das prioridades dos loads atendidos e não atendidos
+			agentStepStatus.putInformation(AgentInformationType.SUPPLIED_LOADS_VS_PRIORITY, environment.getSuppliedLoadsVsPriority());
+			agentStepStatus.putInformation(AgentInformationType.NOT_SUPPLIED_LOADS_VS_PRIORITY, environment.getNotSuppliedLoadsVsPriority());
+			
+			//min load current voltage pu
+			agentStepStatus.putInformation(AgentInformationType.MIN_LOAD_CURRENT_VOLTAGE_PU, environment.getMinLoadCurrentVoltagePU());			
 		}
 	}
 	

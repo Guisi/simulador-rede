@@ -2,6 +2,7 @@ package br.com.guisi.simulador.rede.enviroment;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
+import br.com.guisi.simulador.rede.util.PriorityUtils;
 
 /**
  * Classe representando um ambiente simulado de uma rede de energia elétrica
@@ -69,9 +71,13 @@ public class Environment {
 	 * Retorna um switch aleatório
 	 * @return
 	 */
+	public Branch getRandomSwitch() {
+		return getRandomSwitch(null);
+	}
+	
 	public Branch getRandomSwitch(SwitchState switchState) {
-		List<Branch> openSwitches = switches.stream().filter((sw) -> sw.getSwitchState() == switchState).collect(Collectors.toList());
-		return openSwitches.isEmpty() ? null : openSwitches.get(RANDOM.nextInt(openSwitches.size()));
+		List<Branch> lst = switchState == null ? switches : switches.stream().filter((sw) -> sw.getSwitchState() == switchState).collect(Collectors.toList());
+		return lst.isEmpty() ? null : lst.get(RANDOM.nextInt(lst.size()));
 	}
 	
 	/**
@@ -260,6 +266,31 @@ public class Environment {
 	 */
 	public double getReactivePowerDemandMVar() {
 		return loads.stream().filter((load) -> load.isOn()).mapToDouble((load) -> load.getReactivePowerKVar()).sum() / 1000;
+	}
+	
+	/**
+	 * Retorna a soma das prioridades dos loads atendidos
+	 * @return
+	 */
+	public double getSuppliedLoadsVsPriority() {
+		return loads.stream().filter((load) -> load.isSupplied()).mapToDouble((load) -> PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
+	}
+	
+	/**
+	 * Retorna a soma das prioridades dos loads não atendidos
+	 * @return
+	 */
+	public double getNotSuppliedLoadsVsPriority() {
+		return loads.stream().filter((load) -> !load.isSupplied()).mapToDouble((load) -> PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
+	}
+	
+	/**
+	 * Retorna o menor valor de corrente em PU entre os loads atendidos
+	 * @return
+	 */
+	public double getMinLoadCurrentVoltagePU() {
+		List<Load> suppliedLoads = loads.stream().filter((load) -> load.isOn() && load.getFeeder() != null).collect(Collectors.toList());
+		return suppliedLoads.isEmpty() ? 0d : suppliedLoads.stream().min(Comparator.comparing(load -> load.getCurrentVoltagePU())).get().getCurrentVoltagePU();
 	}
 
 	/**

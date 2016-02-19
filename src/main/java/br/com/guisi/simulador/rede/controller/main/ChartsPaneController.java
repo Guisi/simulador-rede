@@ -13,8 +13,11 @@ import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
+import br.com.guisi.simulador.rede.view.charts.MinLoadCurrentVoltagePUChart;
 import br.com.guisi.simulador.rede.view.charts.PowerLossChart;
-import br.com.guisi.simulador.rede.view.charts.PowerLossPercentagemChart;
+import br.com.guisi.simulador.rede.view.charts.PowerLossPercentageChart;
+import br.com.guisi.simulador.rede.view.charts.SuppliedLoadsChart;
+import br.com.guisi.simulador.rede.view.charts.SuppliedLoadsPercentageChart;
 
 public class ChartsPaneController extends Controller {
 
@@ -57,9 +60,15 @@ public class ChartsPaneController extends Controller {
 		lineCharts = new ArrayList<>();
 		
 		//total power lost %
-		lineCharts.add(new PowerLossPercentagemChart());
+		lineCharts.add(new PowerLossPercentageChart());
 		//total power lost MW/MVar
 		lineCharts.add(new PowerLossChart());
+		//% supplied loads x priority
+		lineCharts.add(new SuppliedLoadsPercentageChart());
+		//supplied loads x priority
+		lineCharts.add(new SuppliedLoadsChart());
+		//min load current voltage PU
+		lineCharts.add(new MinLoadCurrentVoltagePUChart());
 
 		lineCharts.forEach((chart) -> {
 			Tab tab = new Tab(chart.getChartTitle());

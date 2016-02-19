@@ -8,7 +8,7 @@ import javafx.scene.chart.XYChart;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 
-public class PowerLossPercentagemChart extends GenericLineChart {
+public class PowerLossPercentageChart extends GenericLineChart {
 
 	private XYChart.Series<Number, Number> activePowerLossSeries;
 	private XYChart.Series<Number, Number> reactivePowerLossSeries;
@@ -19,13 +19,13 @@ public class PowerLossPercentagemChart extends GenericLineChart {
 	private Double minReactivePowerLoss;
 	private Double maxReactivePowerLoss;
 	
-	public PowerLossPercentagemChart() {
+	public PowerLossPercentageChart() {
 		super();
 		
 		NumberAxis yAxis = (NumberAxis) this.getYAxis();
         yAxis.setUpperBound(0.1);
 		getXAxis().setLabel("Iteraction");
-		getYAxis().setLabel("Losses %");
+		getYAxis().setLabel("% Losses");
 		
 		activePowerLossSeries = new XYChart.Series<>();
         getData().add(activePowerLossSeries);
@@ -62,7 +62,7 @@ public class PowerLossPercentagemChart extends GenericLineChart {
 	
 	@Override
 	public String getChartTitle() {
-		return "Power Lost %";
+		return "% Power Loss";
 	}
 	
 	@Override

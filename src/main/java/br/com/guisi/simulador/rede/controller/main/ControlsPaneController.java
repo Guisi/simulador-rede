@@ -34,6 +34,7 @@ import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EventType;
 
 public class ControlsPaneController extends Controller {
@@ -150,7 +151,10 @@ public class ControlsPaneController extends Controller {
 	}
 	
 	private void setCurrentSwitchText() {
-		lblCurrentSwitch.setText(agentControl.getAgent().getCurrentState().getNumber().toString());
+		Branch currentState = agentControl.getAgent().getCurrentState();
+		if (currentState != null) {
+			lblCurrentSwitch.setText(currentState.getNumber().toString());
+		}
 	}
 	
 	private void processAgentNotification(Object data) {
