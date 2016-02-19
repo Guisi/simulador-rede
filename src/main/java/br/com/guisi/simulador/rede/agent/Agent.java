@@ -12,6 +12,7 @@ import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.LearningProperty;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
+import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EventBus;
 import br.com.guisi.simulador.rede.events.EventType;
 
@@ -74,4 +75,6 @@ public abstract class Agent {
 	}
 	
 	public abstract List<LearningProperty> getLearningProperties(Integer state);
+	
+	public abstract Branch getCurrentState();
 }

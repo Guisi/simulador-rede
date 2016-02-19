@@ -46,11 +46,14 @@ public class LabelAndMessagesPaneController extends Controller {
 	private TableView<SwitchOperationRow> tvSwitchesOperations;
 	@FXML
 	private TableView<PropertyRow> tvAgentLearning;
+	@FXML
+	private TableView<PropertyRow> tvGeneralInformation;
 	
 	@Inject
 	private AgentControl agentControl;
 	
 	private int stepUpdateReceived;
+	private PropertyRow nonRadialNetworkCount;
 	
 	@Override
 	public void initializeController() {
@@ -154,6 +157,33 @@ public class LabelAndMessagesPaneController extends Controller {
 		tcPropertyValue.setStyle("-fx-alignment: center-left;");
 		tcPropertyValue.setPrefWidth(395);
 		tvAgentLearning.getColumns().add(tcPropertyValue);
+		
+		// tabela de informações gerais
+		tvGeneralInformation.widthProperty().addListener((source, oldWidth, newWidth) -> {
+			Pane header = (Pane) tvGeneralInformation.lookup("TableHeaderRow");
+			if (header.isVisible()) {
+				header.setMaxHeight(0);
+				header.setMinHeight(0);
+				header.setPrefHeight(0);
+				header.setVisible(false);
+			}
+		});
+		
+		tvGeneralInformation.setItems(FXCollections.observableArrayList());
+		tcPropertyName = new TableColumn<PropertyRow, String>();
+		tcPropertyName.setCellValueFactory(cellData -> cellData.getValue().getPropertyName());
+		tcPropertyName.setStyle("-fx-alignment: center-right; -fx-font-weight: bold;");
+		tcPropertyName.setPrefWidth(395);
+		tvGeneralInformation.getColumns().add(tcPropertyName);
+		
+		tcPropertyValue = new TableColumn<PropertyRow, String>();
+		tcPropertyValue.setCellValueFactory(cellData -> cellData.getValue().getPropertyValue());
+		tcPropertyValue.setStyle("-fx-alignment: center-left;");
+		tcPropertyValue.setPrefWidth(395);
+		tvGeneralInformation.getColumns().add(tcPropertyValue);
+		
+		nonRadialNetworkCount = new PropertyRow("Non-radial network count", "0");
+		tvGeneralInformation.getItems().add(nonRadialNetworkCount);
 	}
 	
 	/**
@@ -213,6 +243,13 @@ public class LabelAndMessagesPaneController extends Controller {
 					SwitchOperationRow row = new SwitchOperationRow();
 					row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState().getDescription()).toString());
 					tvSwitchesOperations.getItems().add(row);
+				}
+				
+				Boolean radialNetwork = agentStepStatus.getInformation(AgentInformationType.RADIAL_NETWORK, Boolean.class);
+				if (radialNetwork != null && !radialNetwork) {
+					int nonRadialCount = Integer.parseInt(nonRadialNetworkCount.getPropertyValue().getValue());
+					nonRadialCount++;
+					nonRadialNetworkCount.getPropertyValue().setValue(String.valueOf(nonRadialCount));
 				}
 			}
 			stepUpdateReceived = agentStatus.getStepStatus().size();

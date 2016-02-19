@@ -77,19 +77,23 @@ public class PowerLossChart extends GenericLineChart {
 	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
 		//seta perda da potência ativa
 		Double activePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOST, Double.class);
-		BigDecimal value = new BigDecimal(activePowerLost).setScale(5, RoundingMode.HALF_UP);
-		Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
-		activePowerLossSeries.getData().add(chartData);
-		minActivePowerLoss = minActivePowerLoss != null ? Math.min(minActivePowerLoss, activePowerLost) : activePowerLost;
-		maxActivePowerLoss = maxActivePowerLoss != null ? Math.max(maxActivePowerLoss, activePowerLost) : activePowerLost;
+		if (activePowerLost != null) {
+			BigDecimal value = new BigDecimal(activePowerLost).setScale(5, RoundingMode.HALF_UP);
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			activePowerLossSeries.getData().add(chartData);
+			minActivePowerLoss = minActivePowerLoss != null ? Math.min(minActivePowerLoss, activePowerLost) : activePowerLost;
+			maxActivePowerLoss = maxActivePowerLoss != null ? Math.max(maxActivePowerLoss, activePowerLost) : activePowerLost;
+		}
 
 		//seta perda da potência reativa
 		Double reactivePowerLost = agentStepStatus.getInformation(AgentInformationType.REACTIVE_POWER_LOST, Double.class);
-		value = new BigDecimal(reactivePowerLost).setScale(5, RoundingMode.HALF_UP);
-		chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
-		reactivePowerLossSeries.getData().add(chartData);
-		minReactivePowerLoss = minReactivePowerLoss != null ? Math.min(minReactivePowerLoss, reactivePowerLost) : reactivePowerLost;
-		maxReactivePowerLoss = maxReactivePowerLoss != null ? Math.max(maxReactivePowerLoss, reactivePowerLost) : reactivePowerLost;
+		if (reactivePowerLost != null) {
+			BigDecimal value = new BigDecimal(reactivePowerLost).setScale(5, RoundingMode.HALF_UP);
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			reactivePowerLossSeries.getData().add(chartData);
+			minReactivePowerLoss = minReactivePowerLoss != null ? Math.min(minReactivePowerLoss, reactivePowerLost) : reactivePowerLost;
+			maxReactivePowerLoss = maxReactivePowerLoss != null ? Math.max(maxReactivePowerLoss, reactivePowerLost) : reactivePowerLost;
+		}
 		
 		this.updateSeriesName();
 	}

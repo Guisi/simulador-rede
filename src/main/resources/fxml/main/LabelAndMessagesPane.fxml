@@ -11,6 +11,15 @@
          <content>
             <TabPane prefHeight="170.0" prefWidth="750.0" tabClosingPolicy="UNAVAILABLE">
                <tabs>
+                  <Tab text="General Information">
+                     <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="170.0" prefWidth="750.0">
+                           <children>
+                              <TableView fx:id="tvGeneralInformation" prefHeight="140.0" prefWidth="750.0" />
+                           </children>
+                        </AnchorPane>
+                     </content>
+                  </Tab>
                   <Tab text="Labels">
                      <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="750.0">

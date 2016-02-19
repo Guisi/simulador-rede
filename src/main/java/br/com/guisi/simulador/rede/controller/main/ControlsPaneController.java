@@ -64,6 +64,8 @@ public class ControlsPaneController extends Controller {
 	private ComboBox<StoppingCriteria> cbAgentStoppingCriteria;
 	@FXML
 	private TextField tfStoppingCriteria;
+	@FXML
+	private Label lblCurrentSwitch;
 	
 	private LocalTime localTime;
 	private Timeline timeline;
@@ -73,7 +75,7 @@ public class ControlsPaneController extends Controller {
 		this.listenToEvent(EventType.RESET_SCREEN,
 				EventType.ENVIRONMENT_LOADED,
 				EventType.AGENT_RUNNING,
-				EventType.AGENT_STOPPED, 
+				EventType.AGENT_STOPPED,
 				EventType.AGENT_NOTIFICATION);
 
 		Image imageCheck = new Image(getClass().getResourceAsStream("/img/check.png"));
@@ -143,6 +145,12 @@ public class ControlsPaneController extends Controller {
 	
 	private void processEnvironmentLoaded() {
 		root.setVisible(true);
+		this.setCurrentSwitchText();
+		
+	}
+	
+	private void setCurrentSwitchText() {
+		lblCurrentSwitch.setText(agentControl.getAgent().getCurrentState().getNumber().toString());
 	}
 	
 	private void processAgentNotification(Object data) {
@@ -150,6 +158,8 @@ public class ControlsPaneController extends Controller {
 		
 		if (agentStatus != null) {
 			lblSteps.setText(String.valueOf(agentStatus.getSteps()));
+			
+			this.setCurrentSwitchText();
 		}
 	}
 	

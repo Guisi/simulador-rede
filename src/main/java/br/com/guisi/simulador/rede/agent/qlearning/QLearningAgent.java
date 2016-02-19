@@ -36,6 +36,7 @@ public class QLearningAgent extends Agent {
 	
 	private QTable qTable;
 	private Branch currentSwitch;
+	private boolean radialNetwork;
 	
 	private Map<Integer, List<SwitchDistance>> visitedSwitchesMap;
 	private List<Load> turnedOffLoads;
@@ -83,10 +84,10 @@ public class QLearningAgent extends Agent {
 		Branch nextSwitch = getClosestSwitch(environment, currentSwitch, switchState, null).getTheSwitch();
 		nextSwitch.reverse();
 		
-		String errors = EnvironmentUtils.validateRadialState(environment);
+		radialNetwork = !EnvironmentUtils.validateRadialState(environment).isEmpty();
 		
 		//se a rede continua radial, verifica restrições
-		if (errors.isEmpty()) {
+		if (radialNetwork) {
 			//executa o fluxo de potência
 			PowerFlow.execute(environment);
 
@@ -186,13 +187,18 @@ public class QLearningAgent extends Agent {
 		//atualiza status com o switch alterado
 		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATION, new SwitchOperation(currentSwitch.getNumber(), currentSwitch.getSwitchState()));
 		
-		//seta total de perdas
-		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOST, environment.getActivePowerLostMW());
-		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOST, environment.getReactivePowerLostMVar());
+		//booleano se a rede está radial
+		agentStepStatus.putInformation(AgentInformationType.RADIAL_NETWORK, radialNetwork);
 		
-		//seta demanda
-		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_DEMAND, environment.getActivePowerDemandMW());
-		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_DEMAND, environment.getReactivePowerDemandMVar());
+		if (radialNetwork) {
+			//seta total de perdas
+			agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOST, environment.getActivePowerLostMW());
+			agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOST, environment.getReactivePowerLostMVar());
+			
+			//seta demanda
+			agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_DEMAND, environment.getActivePowerDemandMW());
+			agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_DEMAND, environment.getReactivePowerDemandMVar());
+		}
 	}
 	
 	private void updateQValue(Branch sw) {
@@ -284,6 +290,11 @@ public class QLearningAgent extends Agent {
 	
 	public List<QValue> getQValues(Integer state) {
 		return qTable.getQValues(state);
+	}
+	
+	@Override
+	public Branch getCurrentState() {
+		return currentSwitch;
 	}
 	
 	@Override
