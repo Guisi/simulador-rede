@@ -14,7 +14,6 @@ public class Feeder extends NetworkNode {
 
 	private String feederColor;
 	private String loadColor;
-	private double usedPower;
 	private Set<Load> servedLoads;
 	
 	public Feeder(Integer nodeNumber, Integer x, Integer y, double activePower, double reactivePower, String feederColor, String loadColor, Status status) {
@@ -24,30 +23,6 @@ public class Feeder extends NetworkNode {
 		this.servedLoads = new HashSet<>();
 	}
 	
-	/**
-	 * Retorna verdadeiro se excedeu capacidade de potência do feeder
-	 * @return
-	 */
-	public boolean isPowerOverflow() {
-		return activePowerKW < usedPower;
-	}
-	
-	/**
-	 * Retorna a potência disponível deste feeder
-	 * @return double
-	 */
-	public double getAvailablePower() {
-		return activePowerKW - usedPower;
-	}
-	
-	/**
-	 * Adiciona um valor de potência ao total em uso deste feeder
-	 * @param usedPower
-	 */
-	public void addUsedPower(double usedPower) {
-		this.usedPower += usedPower;
-	}
-	
 	public String getFeederColor() {
 		return feederColor;
 	}
@@ -55,17 +30,25 @@ public class Feeder extends NetworkNode {
 	public String getLoadColor() {
 		return loadColor;
 	}
+	
+	public boolean isPowerOverflow() {
+		return getActivePowerMW() < getUsedActivePowerMW();
+	}
 
 	/**
 	 * Retorna o total de potência em uso deste feeder
 	 * @return double
 	 */
-	public double getUsedPower() {
-		return usedPower;
+	public double getUsedActivePowerMW() {
+		double sum = servedLoads.stream().filter(load -> load.isOn() && load.isSupplied()).mapToDouble(load -> load.getActivePowerKW()).sum() / 1000;
+		Set<Branch> branches = new HashSet<>();
+		servedLoads.forEach(load -> branches.addAll(load.getBranches()));
+		sum += branches.stream().filter(branch -> branch.isClosed()).mapToDouble(branch -> branch.getActiveLossMW()).sum();
+		return sum;
 	}
-
-	public void setUsedPower(double usedPower) {
-		this.usedPower = usedPower;
+	
+	public double getAvailableActivePowerMW() {
+		return getActivePowerMW() - getUsedActivePowerMW();
 	}
 
 	/**

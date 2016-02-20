@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import javafx.scene.chart.XYChart;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.constants.Constants;
 
 public class MinLoadCurrentVoltagePUChart extends GenericLineChart {
 
@@ -15,6 +16,11 @@ public class MinLoadCurrentVoltagePUChart extends GenericLineChart {
 	
 	public MinLoadCurrentVoltagePUChart() {
 		super();
+		
+        getYNumberAxis().setAutoRanging(false);
+        getYNumberAxis().setLowerBound(Constants.TENSAO_MIN_PU - 0.1);
+        getYNumberAxis().setUpperBound(Constants.TENSAO_MAX_PU + 0.1);
+        getYNumberAxis().setTickUnit(0.01);
 		
 		getXAxis().setLabel("Iteraction");
 		getYAxis().setLabel("Min Load Current Voltage (PU)");
@@ -50,6 +56,7 @@ public class MinLoadCurrentVoltagePUChart extends GenericLineChart {
 
 	@Override
 	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
+		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
 		Double minVoltage = agentStepStatus.getInformation(AgentInformationType.MIN_LOAD_CURRENT_VOLTAGE_PU, Double.class);
 		
 		if (minVoltage != null && minVoltage > 0) {

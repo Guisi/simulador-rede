@@ -7,20 +7,20 @@ import javafx.scene.chart.XYChart;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 
-public class SuppliedLoadsPercentageChart extends GenericLineChart {
+public class SuppliedLoadsActivePowerPercentageChart extends GenericLineChart {
 
 	private XYChart.Series<Number, Number> suppliedLoadsPercentageSeries;
 	
 	private Double minPercentage;
 	private Double maxPercentage;
 	
-	public SuppliedLoadsPercentageChart() {
+	public SuppliedLoadsActivePowerPercentageChart() {
 		super();
 		
 		getYNumberAxis().setLowerBound(0);
 		getYNumberAxis().setUpperBound(100);
 		getXAxis().setLabel("Iteraction");
-		getYAxis().setLabel("% Loads Supplied x Priority");
+		getYAxis().setLabel("% Loads Supplied Active Power MW x Priority");
 		
 		suppliedLoadsPercentageSeries = new XYChart.Series<>();
         getData().add(suppliedLoadsPercentageSeries);
@@ -43,7 +43,7 @@ public class SuppliedLoadsPercentageChart extends GenericLineChart {
 	
 	@Override
 	public String getChartTitle() {
-		return "% Loads Supplied x Priority";
+		return "% Loads Supplied Active Power MW x Priority";
 	}
 	
 	@Override
@@ -56,8 +56,8 @@ public class SuppliedLoadsPercentageChart extends GenericLineChart {
 		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
 		
 		//calcula percentual de loads atendidos considerando a prioridade
-		Double suppliedLoads = agentStepStatus.getInformation(AgentInformationType.SUPPLIED_LOADS_VS_PRIORITY, Double.class);
-		Double notSuppliedLoads = agentStepStatus.getInformation(AgentInformationType.NOT_SUPPLIED_LOADS_VS_PRIORITY, Double.class);
+		Double suppliedLoads = agentStepStatus.getInformation(AgentInformationType.SUPPLIED_LOADS_ACTIVE_POWER_VS_PRIORITY, Double.class);
+		Double notSuppliedLoads = agentStepStatus.getInformation(AgentInformationType.NOT_SUPPLIED_LOADS_ACTIVE_POWER_VS_PRIORITY, Double.class);
 		
 		if (suppliedLoads != null && notSuppliedLoads != null) {
 			Double total = suppliedLoads + notSuppliedLoads;

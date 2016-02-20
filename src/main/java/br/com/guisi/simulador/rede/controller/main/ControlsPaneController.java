@@ -153,7 +153,7 @@ public class ControlsPaneController extends Controller {
 	private void setCurrentSwitchText() {
 		Branch currentState = agentControl.getAgent().getCurrentState();
 		if (currentState != null) {
-			lblCurrentSwitch.setText(currentState.getNumber().toString());
+			lblCurrentSwitch.setText(currentState.getNumber().toString() + " (" + currentState.getSwitchState().getDescription() + ")");
 		}
 	}
 	

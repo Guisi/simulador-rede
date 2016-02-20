@@ -173,9 +173,11 @@ public class ElementsDetailsPaneController extends Controller {
 		tvFeederDetails.getItems().clear();
 		tvFeederDetails.getItems().add(new PropertyRow("Active Power kW:", df.format(feeder.getActivePowerKW())));
 		tvFeederDetails.getItems().add(new PropertyRow("Reactive Power kVar:", df.format(feeder.getReactivePowerKVar())));
-		tvFeederDetails.getItems().add(new PropertyRow("Energized Loads:", String.valueOf(feeder.getServedLoads().size())));
-		tvFeederDetails.getItems().add(new PropertyRow("Used Active Power:", df.format(feeder.getUsedPower())));
-		tvFeederDetails.getItems().add(new PropertyRow("Available Active Power:", df.format(feeder.getAvailablePower())));
+		tvFeederDetails.getItems().add(new PropertyRow("Connected Loads:", String.valueOf(feeder.getServedLoads().size())));
+		tvFeederDetails.getItems().add(new PropertyRow("Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> load.isSupplied()).count())));
+		tvFeederDetails.getItems().add(new PropertyRow("Not Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> !load.isSupplied()).count())));
+		tvFeederDetails.getItems().add(new PropertyRow("Used active power(MW):", df.format(feeder.getUsedActivePowerMW())));
+		tvFeederDetails.getItems().add(new PropertyRow("Available Active Power:", df.format(feeder.getAvailableActivePowerMW())));
 		cbFeederNumber.valueProperty().set(selectedFeeder);
 	}
 	

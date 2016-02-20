@@ -285,6 +285,22 @@ public class Environment {
 	}
 	
 	/**
+	 * Retorna a soma das prioridades dos loads atendidos x potência ativa MW
+	 * @return
+	 */
+	public double getSuppliedLoadsActivePowerMWVsPriority() {
+		return loads.stream().filter((load) -> load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW() * PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
+	}
+	
+	/**
+	 * Retorna a soma das prioridades dos loads não atendidos x potência ativa MW
+	 * @return
+	 */
+	public double getNotSuppliedLoadsActivePowerMWVsPriority() {
+		return loads.stream().filter((load) -> !load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW() * PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
+	}
+	
+	/**
 	 * Retorna o menor valor de corrente em PU entre os loads atendidos
 	 * @return
 	 */

@@ -31,7 +31,7 @@ public abstract class Agent {
 
 		while (!stopRequest && isEnvironmentValid && !stoppingCriteria.wasReached(step)) {
 			synchronized (this) {
-				AgentStepStatus agentStepStatus = new AgentStepStatus(step++);
+				AgentStepStatus agentStepStatus = new AgentStepStatus(++step);
 				agentStatus.getStepStatus().add(agentStepStatus);
 
 				this.runNextEpisode(agentStepStatus);

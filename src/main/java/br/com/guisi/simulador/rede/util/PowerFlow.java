@@ -28,24 +28,10 @@ public class PowerFlow {
 		EnvironmentUtils.updateFeedersConnections(environment);
 
 		//executa power flow
-		boolean success = executePowerFlow(environment);
-		
-		if (success) {
-			//atribui o valor de potencia usado dos feeders de acordo com o retorno do fluxo de potência
-			environment.getFeeders().forEach((feeder) -> {
-				feeder.getBranches().forEach((branch) -> feeder.addUsedPower(branch.getInstantCurrent()));
-			});
-		}
-		
-		return success;
+		return executePowerFlow(environment);
 	}
 	
 	public static void resetPowerFlowValues(Environment environment) {
-		//zera o valor de potencia usado dos feeders
-		environment.getFeeders().forEach((feeder) -> {
-			feeder.setUsedPower(0);
-		});
-		
 		//zera valores dos loads
 		environment.getNetworkNodes().forEach((node) -> node.setCurrentVoltagePU(0));
 		
@@ -67,7 +53,7 @@ public class PowerFlow {
 		});
 		
 		/*se não existe nenhum load ativo, não executa powerflow*/
-		long loads = activeNodes.stream().filter((node) -> node.isLoad()).count();
+		long loads = activeNodes.stream().filter((node) -> node.isLoad() && ((Load)node).isOn()).count();
 		if (loads == 0) {
 			return false;
 		}
@@ -111,7 +97,9 @@ public class PowerFlow {
 					Integer nodeNumber = (int) mpcBusRetLine[0];
 					NetworkNode node = environment.getNetworkNode(nodeNumber);
 					
-					node.setCurrentVoltagePU(mpcBusRetLine[7]); //tensão
+					if (node.isOn()) {
+						node.setCurrentVoltagePU(mpcBusRetLine[7]); //tensão
+					}
 				}
 				
 				double[][] mpcBranchRet = processor.getNumericArray("mpc.branch").getRealArray2D();

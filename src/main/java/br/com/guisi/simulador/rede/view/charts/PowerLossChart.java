@@ -22,8 +22,7 @@ public class PowerLossChart extends GenericLineChart {
 	public PowerLossChart() {
 		super();
 		
-		NumberAxis yAxis = (NumberAxis) this.getYAxis();
-        yAxis.setUpperBound(0.1);
+        getYNumberAxis().setUpperBound(0.1);
 		getXAxis().setLabel("Iteraction");
 		getYAxis().setLabel("Losses MW/MVar");
 		
@@ -40,7 +39,7 @@ public class PowerLossChart extends GenericLineChart {
 	
 	@Override
 	public String getChartTitle() {
-		return "Power Lost MW/MVar";
+		return "Power Loss MW/MVar";
 	}
 	
 	private void updateSeriesName() {
@@ -75,6 +74,9 @@ public class PowerLossChart extends GenericLineChart {
 
 	@Override
 	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
+		NumberAxis xAxis = (NumberAxis) this.getXAxis();
+		xAxis.setUpperBound(agentStepStatus.getStep());
+		
 		//seta perda da potência ativa
 		Double activePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOST, Double.class);
 		if (activePowerLost != null) {

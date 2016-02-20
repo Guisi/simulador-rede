@@ -139,7 +139,7 @@ public class NetworkPane extends Pane {
 		
 		Line line = branchPane.getBranchLine();
 		line.setStroke(selected ? Color.DARKORANGE : Color.BLACK);
-		line.setStrokeWidth(selected ? 2 : 1.3);
+		line.setStrokeWidth(selected ? 4 : 1.3);
 		if (branch.isClosed()) {
 			line.getStrokeDashArray().clear();
 		} else {

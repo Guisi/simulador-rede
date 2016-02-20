@@ -143,6 +143,10 @@ public abstract class NetworkNode {
 		return activePowerKW * 0.9; //TODO usar 100%
 	}
 	
+	public double getActivePowerMW() {
+		return getActivePowerKW() / 1000;
+	}
+	
 	/**
 	 * Retorna a potência reativa deste nó em KVar
 	 * @return double
