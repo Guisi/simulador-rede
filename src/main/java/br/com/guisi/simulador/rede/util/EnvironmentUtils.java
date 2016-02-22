@@ -448,15 +448,52 @@ public class EnvironmentUtils {
 		return closestSwitches;
 	}
 	
-	/*public static void main(String[] args) {
-		File f = new File("C:/Users/Guisi/Desktop/modelo.csv");
+	private static List<SwitchDistance> getSwitchesDistancesRecursive(Branch originalBranch, int distance, 
+			Branch lastBranch, NetworkNode lastNetworkNode, SwitchState switchState) {
+
+		distance++;
+		
+		List<SwitchDistance> closestSwitches = new ArrayList<>();
+		for (NetworkNode networkNode : lastBranch.getConnectedLoads()) {
+			if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
+				for (Branch connectedBranch : networkNode.getBranches()) {
+					//se o branch conectado não é o branch pelo qual já passou
+
+					if (!connectedBranch.equals(lastBranch)) {
+
+						//se encontrou o switch conforme o estado, adiciona na lista
+						if (connectedBranch.isSwitchBranch() && connectedBranch.getSwitchState() == switchState) {
+							closestSwitches.add(new SwitchDistance(distance, connectedBranch));
+						}
+						
+						//continua navegação até que chega ao final do ramo da rede
+						List<SwitchDistance> lst = getClosestSwitchesRecursive(originalBranch, distance, connectedBranch, networkNode, switchState);
+						closestSwitches.addAll(lst);
+					}
+				}
+			}
+		}
+		return closestSwitches;
+	}
+	
+	public static void main(String[] args) {
+		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {
 			environment = EnvironmentUtils.getEnvironmentFromFile(f);
+			
+			Branch branch = environment.getBranch(1);
+			
+			List<SwitchDistance> switchesDistances = getClosestSwitchesRecursive(branch, 0, branch, null, SwitchState.OPEN);
+			
+			for (SwitchDistance switchDistance : switchesDistances) {
+				System.out.println("Switch: " + switchDistance.getTheSwitch().getNumber() + " - Distance: " + switchDistance.getDistance());
+			}
+			
 			//EnvironmentUtils.validateEnvironment(environment);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}*/
+	}
 }

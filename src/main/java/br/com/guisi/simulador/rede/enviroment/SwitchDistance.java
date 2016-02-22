@@ -1,5 +1,7 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 public class SwitchDistance implements Comparable<SwitchDistance> {
 
 	private Integer distance;
@@ -52,5 +54,10 @@ public class SwitchDistance implements Comparable<SwitchDistance> {
 		} else if (!theSwitch.equals(other.theSwitch))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
 	}
 }
