@@ -53,7 +53,6 @@ public class LabelAndMessagesPaneController extends Controller {
 	private AgentControl agentControl;
 	
 	private int stepUpdateReceived;
-	private PropertyRow nonRadialNetworkCount;
 	
 	@Override
 	public void initializeController() {
@@ -181,9 +180,6 @@ public class LabelAndMessagesPaneController extends Controller {
 		tcPropertyValue.setStyle("-fx-alignment: center-left;");
 		tcPropertyValue.setPrefWidth(395);
 		tvGeneralInformation.getColumns().add(tcPropertyValue);
-		
-		nonRadialNetworkCount = new PropertyRow("Non-radial network count", "0");
-		tvGeneralInformation.getItems().add(nonRadialNetworkCount);
 	}
 	
 	/**
@@ -243,13 +239,6 @@ public class LabelAndMessagesPaneController extends Controller {
 					SwitchOperationRow row = new SwitchOperationRow();
 					row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState().getDescription()).toString());
 					tvSwitchesOperations.getItems().add(row);
-				}
-				
-				Boolean radialNetwork = agentStepStatus.getInformation(AgentInformationType.RADIAL_NETWORK, Boolean.class);
-				if (radialNetwork != null && !radialNetwork) {
-					int nonRadialCount = Integer.parseInt(nonRadialNetworkCount.getPropertyValue().getValue());
-					nonRadialCount++;
-					nonRadialNetworkCount.getPropertyValue().setValue(String.valueOf(nonRadialCount));
 				}
 			}
 			stepUpdateReceived = agentStatus.getStepStatus().size();

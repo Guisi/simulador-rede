@@ -3,6 +3,7 @@ package br.com.guisi.simulador.rede.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -400,66 +401,47 @@ public class EnvironmentUtils {
 			}
 		});
 	}
-	
+
 	/**
-	 * Monta uma lista com os switches mais próximos
+	 * Monta uma lista com as distâncias entre o switch passado como parâmetro e os demais switches com o estado passado
 	 * @param branch
 	 * @param switchState
 	 * @return
 	 */
-	public static List<SwitchDistance> getClosestSwitches(Branch branch, SwitchState switchState) {
-		return getClosestSwitchesRecursive(branch, 0, branch, null, switchState);
+	public static List<SwitchDistance> getSwitchesDistances(Branch branch, SwitchState switchState) {
+		List<Branch> visitedBranches = new ArrayList<>();
+		visitedBranches.add(branch);
+		
+		List<SwitchDistance> switchesDistances = getSwitchesDistancesRecursive(branch, 0, visitedBranches, new ArrayList<NetworkNode>(), switchState);
+		Collections.sort(switchesDistances);
+		return switchesDistances;
 	}
-	
+
 	/**
-	 * Monta uma lista com os switches mais próximos recursivamente
+	 * @param branch
 	 * @param distance
-	 * @param closestDistance
-	 * @param lastBranch
-	 * @param lastNetworkNode
+	 * @param visitedBranches
+	 * @param visitedNetworkNodes
 	 * @param switchState
 	 * @return
 	 */
-	private static List<SwitchDistance> getClosestSwitchesRecursive(Branch originalBranch, int distance, 
-			Branch lastBranch, NetworkNode lastNetworkNode, SwitchState switchState) {
+	private static List<SwitchDistance> getSwitchesDistancesRecursive(Branch branch, int distance, 
+			List<Branch> visitedBranches, List<NetworkNode> visitedNetworkNodes, SwitchState switchState) {
 
 		distance++;
-		
 		List<SwitchDistance> closestSwitches = new ArrayList<>();
-		for (NetworkNode networkNode : lastBranch.getConnectedLoads()) {
-			if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
+		for (NetworkNode networkNode : branch.getConnectedLoads()) {
+			
+			//se ainda não visitou este node
+			if (!visitedNetworkNodes.contains(networkNode)) {
+				visitedNetworkNodes.add(networkNode);
+				
 				for (Branch connectedBranch : networkNode.getBranches()) {
-					//se o branch conectado não é o branch pelo qual já passou
-					//e se o branch conectado está aberto ou fechado, ou se está saindo de uma área isolada
-					if (!connectedBranch.equals(lastBranch) && (connectedBranch.isOpen() || connectedBranch.isClosed() || originalBranch.isIsolated() || originalBranch.hasFault())) {
-						
-						//se encontrou o switch conforme o estado, adiciona na lista
-						if (connectedBranch.isSwitchBranch() && connectedBranch.getSwitchState() == switchState) {
-							closestSwitches.add(new SwitchDistance(distance, connectedBranch));
-						} else {
-							//se não, continua navegação
-							List<SwitchDistance> lst = getClosestSwitchesRecursive(originalBranch, distance, connectedBranch, networkNode, switchState);
-							closestSwitches.addAll(lst);
-						}
-					}
-				}
-			}
-		}
-		return closestSwitches;
-	}
-	
-	private static List<SwitchDistance> getSwitchesDistancesRecursive(Branch originalBranch, int distance, 
-			Branch lastBranch, NetworkNode lastNetworkNode, SwitchState switchState) {
 
-		distance++;
-		
-		List<SwitchDistance> closestSwitches = new ArrayList<>();
-		for (NetworkNode networkNode : lastBranch.getConnectedLoads()) {
-			if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
-				for (Branch connectedBranch : networkNode.getBranches()) {
-					//se o branch conectado não é o branch pelo qual já passou
-
-					if (!connectedBranch.equals(lastBranch)) {
+					//se é o branch de referência, pode navegar pelos branches isolados
+					//verifica também se ainda não visitou este branch
+					if ( (branch.hasFault() || !connectedBranch.isIsolated()) && !visitedBranches.contains(connectedBranch)) {
+						visitedBranches.add(connectedBranch);
 
 						//se encontrou o switch conforme o estado, adiciona na lista
 						if (connectedBranch.isSwitchBranch() && connectedBranch.getSwitchState() == switchState) {
@@ -467,8 +449,22 @@ public class EnvironmentUtils {
 						}
 						
 						//continua navegação até que chega ao final do ramo da rede
-						List<SwitchDistance> lst = getClosestSwitchesRecursive(originalBranch, distance, connectedBranch, networkNode, switchState);
-						closestSwitches.addAll(lst);
+						List<SwitchDistance> lst = getSwitchesDistancesRecursive(connectedBranch, distance, 
+								new ArrayList<Branch>(visitedBranches), new ArrayList<NetworkNode>(visitedNetworkNodes), switchState);
+						
+						//para cada sw retornado, verifica se já não existe um switch distance com distância menor
+						for (SwitchDistance switchDistance : lst) {
+							int index = closestSwitches.indexOf(switchDistance);
+							if (index >= 0) {
+								SwitchDistance closestSw = closestSwitches.get(index);
+								if (switchDistance.getDistance() < closestSw.getDistance()) {
+									closestSwitches.remove(index);
+									closestSwitches.add(switchDistance);
+								}
+							} else {
+								closestSwitches.add(switchDistance);
+							}
+						}
 					}
 				}
 			}
@@ -483,9 +479,12 @@ public class EnvironmentUtils {
 		try {
 			environment = EnvironmentUtils.getEnvironmentFromFile(f);
 			
-			Branch branch = environment.getBranch(1);
+			Branch branch = environment.getBranch(15);
 			
-			List<SwitchDistance> switchesDistances = getClosestSwitchesRecursive(branch, 0, branch, null, SwitchState.OPEN);
+			long ini = System.currentTimeMillis();
+			List<SwitchDistance> switchesDistances = getSwitchesDistances(branch, SwitchState.OPEN);
+			long fim = System.currentTimeMillis();
+			System.out.println("Tempo: " + (fim-ini));
 			
 			for (SwitchDistance switchDistance : switchesDistances) {
 				System.out.println("Switch: " + switchDistance.getTheSwitch().getNumber() + " - Distance: " + switchDistance.getDistance());

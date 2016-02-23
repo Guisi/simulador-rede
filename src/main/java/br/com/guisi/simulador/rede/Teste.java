@@ -7,21 +7,19 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.enviroment.SwitchState;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		long ini = System.currentTimeMillis();
-		double total = 549755813888l;
-		double l = 0;
-		for (double i = 0; i < total; i++) {
-			l = l + 1;
-			if (l % 100000000 == 0) {
-				System.out.println("L: " + l + " - " + l/total*100);
-			}
-		}
-		System.out.println("Tempo: " + (System.currentTimeMillis() - ini));
+		SwitchState switchState = SwitchState.OPEN;
+		String load1 = "";
+		String load2 = "";
+		
+		boolean b = (switchState == SwitchState.CLOSED) && (load1 != null) == (load2 != null);
+		
+		System.out.println(b);
 	}
 	
 	public static void teste() throws Exception {

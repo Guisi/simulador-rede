@@ -3,10 +3,8 @@ package br.com.guisi.simulador.rede.agent.qlearning;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,22 +28,17 @@ import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchState;
-import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
-import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
 @Named
 @Scope("prototype")
 public class QLearningAgent extends Agent {
 	
+	private final Random RANDOM = new Random(System.currentTimeMillis());
+
 	private QTable qTable;
 	private Branch currentSwitch;
-	private boolean radialNetwork;
-	
-	private Map<Integer, List<SwitchDistance>> visitedSwitchesMap;
 	private Set<Load> turnedOffLoads;
-	
-	private final Random RANDOM = new Random(System.currentTimeMillis());
 
 	@PostConstruct
 	public void init() {
@@ -55,7 +48,6 @@ public class QLearningAgent extends Agent {
 	@Override
 	public void reset() {
 		this.qTable = new QTable();
-		this.visitedSwitchesMap = new HashMap<>();
 		this.turnedOffLoads = new LinkedHashSet<>();
 		
 		Environment environment = SimuladorRede.getEnvironment();
@@ -80,51 +72,29 @@ public class QLearningAgent extends Agent {
 		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
 		
 		//reativa loads desativados no episódio anterior
-		turnedOffLoads.forEach((load) -> load.turnOn());
+		turnedOffLoads.forEach(load -> load.turnOn());
 		turnedOffLoads.clear();
 		
 		//faz as mudança de status do switch
 		SwitchState switchState = currentSwitch.isClosed() ? SwitchState.CLOSED : SwitchState.OPEN;
-		Branch nextSwitch = getClosestSwitch(environment, currentSwitch, switchState, null).getTheSwitch();
-		nextSwitch.reverse();
-
-		//verifica se a rede continua radial
-		List<NonRadialNetworkException> nonRadialExceptions = EnvironmentUtils.validateRadialState(environment);
-		radialNetwork = nonRadialExceptions.isEmpty();
+		Branch nextSwitch = getNextSwitch(environment, currentSwitch, switchState);
 		
-		if (!radialNetwork) {
-			//desfaz a ação
-			//nextSwitch.reverse();
+		if (nextSwitch != null) {
+			nextSwitch.reverse();
+	
+			//executa o fluxo de potência
+			PowerFlow.execute(environment);
+	
+			//verifica loads a serem desativados caso existam restrições 
+			this.turnOffLoadsIfNecessary(environment);
 			
-			//desliga todos os loads dos feeders envolvidos no circuito fechado
-			nonRadialExceptions.forEach(ex -> {
-				NetworkNode node = ex.getNetworkNode();
-				if (node.isFeeder()) {
-					Feeder feeder = (Feeder) node;
-					feeder.getServedLoads().stream().filter((load) -> load.isOn()).forEach((load) -> {
-						load.turnOff();
-						turnedOffLoads.add(load);
-					});
-				} else {
-					Load load = (Load) node;
-					load.turnOff();
-					turnedOffLoads.add(load);
-				}
-			});
+			//atualiza o qValue do switch
+			updateQValue(currentSwitch);
+			
+			this.currentSwitch = nextSwitch;
+			
+			this.generateAgentStatus(environment, agentStepStatus);
 		}
-		
-		//executa o fluxo de potência
-		PowerFlow.execute(environment);
-
-		//verifica loads a serem desativados caso existam restrições 
-		this.turnOffLoadsIfNecessary(environment);
-		
-		//atualiza o qValue do switch
-		updateQValue(currentSwitch);
-		
-		this.currentSwitch = nextSwitch;
-		
-		this.generateAgentStatus(environment, agentStepStatus);
 	}
 	
 	/**
@@ -197,9 +167,6 @@ public class QLearningAgent extends Agent {
 		//atualiza status com o switch alterado
 		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATION, new SwitchOperation(currentSwitch.getNumber(), currentSwitch.getSwitchState()));
 		
-		//booleano se a rede está radial
-		agentStepStatus.putInformation(AgentInformationType.RADIAL_NETWORK, radialNetwork);
-		
 		//seta total de perdas
 		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOST, environment.getActivePowerLostMW());
 		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOST, environment.getReactivePowerLostMVar());
@@ -241,58 +208,53 @@ public class QLearningAgent extends Agent {
 	}
 	
 	/**
-	 * Busca o switch mais próximo ao switch passado
+	 * Busca o próximo switch com base na recompensa da tabela Q e distância
 	 * @param environment
-	 * @param refSwitch switch de referência, a partir de onde serão buscados os mais próximos
+	 * @param refSwitch switch onde o agente está atualmente
 	 * @param switchState status do switch a ser procurado
-	 * @param switchesToIgnore lista de switches a ignorar, para os casos onde o switch já foi retornado e causou perda de radialidade
 	 * @return
 	 */
-	public SwitchDistance getClosestSwitch(Environment environment, Branch refSwitch, SwitchState switchState, List<SwitchDistance> switchesToIgnore) {
-		SwitchDistance switchDistance = null;
-
-		//busca uma lista dos switches mais próximos
-		List<SwitchDistance> closestSwitches = environment.getClosestSwitches(refSwitch, switchState);
+	public Branch getNextSwitch(Environment environment, Branch refSwitch, SwitchState switchState) {
+		//busca a lista das distâncias dos switches
+		List<SwitchDistance> switchesDistances = environment.getSwitchesDistances(refSwitch, switchState);
 		
-		if (switchesToIgnore != null) {
-			closestSwitches.removeAll(switchesToIgnore);
+		if (switchState == SwitchState.OPEN) {
+			List<SwitchDistance> swRemover = new ArrayList<>();
+			switchesDistances.forEach(switchDistance -> {
+				NetworkNode node1 = switchDistance.getTheSwitch().getNode1(); 
+				NetworkNode node2 = switchDistance.getTheSwitch().getNode2();
+				
+				if (node1.isLoad() && node2.isLoad()) {
+					Load load1 = (Load) node1;
+					Load load2 = (Load) node2;
+	
+					//caso esteja procurando por switches abertos para fechar,
+					//remove os switches que ligam dois loads onde ambos estão ligados a algum feeder, para evitar criar circuitos fechados
+					//TODO HEURÍSTICA e remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede 
+					if ( (load1.getFeeder() != null && load2.getFeeder() != null) || (load1.getFeeder() == null && load2.getFeeder() == null)) {
+						swRemover.add(switchDistance);
+					}
+				}
+			});
+			switchesDistances.removeAll(swRemover);
 		}
 		
-		if (!closestSwitches.isEmpty()) {
-			//quando está procurando um switch para abrir, verifica switches já visitados
-			List<SwitchDistance> visitedSwitches = null;
-			if (switchState == SwitchState.CLOSED) {
-				visitedSwitches = visitedSwitchesMap.get(refSwitch.getNumber());
-				if (visitedSwitches != null) {
-					//se para o switch de referência, já foi visitado todos os mais próximos, limpa a lista de visitados
-					if (visitedSwitches.containsAll(closestSwitches)) {
-						visitedSwitches.clear();
-					} else {
-						//senão, remove os já visitados para que visite os demais
-						closestSwitches.removeAll(visitedSwitches);
-					}
-				} else {
-					visitedSwitches = new ArrayList<>();
-					visitedSwitchesMap.put(refSwitch.getNumber(), visitedSwitches);
-				}
-			}
-
+		if (!switchesDistances.isEmpty()) {
+			//TODO escolher switch de acordo com tabela Q x distancia
+			//     se optarmos por permitir escolher o sw onde o agente já está para fechar/abrir,
+			//     o peso da distância terá que ser pequeno para evitar que o agente insista em se manter no mesmo sw
+			
 			//Verifica o menor valor de distância encontrado
-			Integer minDistance = closestSwitches.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
+			Integer minDistance = switchesDistances.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
 			
 			//filtra por todos os switches da lista com a menor distância
-			closestSwitches = closestSwitches.stream().filter(valor -> valor.getDistance() == minDistance).collect(Collectors.toList());
+			switchesDistances = switchesDistances.stream().filter(valor -> valor.getDistance() == minDistance).collect(Collectors.toList());
 			
 			//retorna um dos switches mais próximos aleatoriamente
-			switchDistance = closestSwitches.get(RANDOM.nextInt(closestSwitches.size()));
-			
-			//adiciona o switch na lista de visitados
-			if (switchState == SwitchState.CLOSED) {
-				visitedSwitches.add(switchDistance);
-			}
+			return switchesDistances.get(RANDOM.nextInt(switchesDistances.size())).getTheSwitch();
+		} else {
+			return refSwitch;
 		}
-
-		return switchDistance;
 	}
 	
 	public QValue getBestQValue(Integer state) {
