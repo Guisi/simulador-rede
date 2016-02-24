@@ -14,7 +14,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class Branch {
 
 	private Integer number;
-	private BranchId branchId;
+	private BranchKey branchKey;
 	private NetworkNode node1;
 	private NetworkNode node2;
 	private double maxCurrent;
@@ -37,7 +37,6 @@ public class Branch {
 		this.reactance = reactance;
 		this.switchState = switchState;
 		this.switchBranch = switchBranch;
-		this.branchId = new BranchId(node1.getNodeNumber(), node2.getNodeNumber());
 	}
 	
 	/**
@@ -81,20 +80,10 @@ public class Branch {
 	}
 	
 	/**
-	 * Retorna o load conectado por esta branch
-	 * ao load passado como parametro
-	 * @param networkNode
-	 * @return {@link NetworkNode}
-	 */
-	public NetworkNode getConnectedLoad(NetworkNode networkNode) {
-		return node1.equals(networkNode) ? node2 : node1;
-	}
-	
-	/**
 	 * Retorna os nodes que o branch conecta
 	 * @return
 	 */
-	public List<NetworkNode> getConnectedLoads() {
+	public List<NetworkNode> getConnectedNodes() {
 		return Arrays.asList(node1, node2);
 	}
 	
@@ -123,28 +112,20 @@ public class Branch {
 	}
 	
 	/**
-	 * Retorna o {@link NetworkNode} de uma das pontas da branch
+	 * Retorna o {@link NetworkNode} de uma das pontas da branch, de onde a corrente está vindo
 	 * @return {@link NetworkNode}
 	 */
-	public NetworkNode getNode1() {
-		return node1;
+	public NetworkNode getNodeFrom() {
+		return branchKey != null ? branchKey.getNodeFrom() : node1;
 	}
 	
-	public void setNode1(NetworkNode node1) {
-		this.node1 = node1;
-	}
-
 	/**
-	 * Retorna o {@link NetworkNode} de uma das pontas da branch
+	 * Retorna o {@link NetworkNode} de uma das pontas da branch, para onde a corrente está indo
 	 * @return {@link NetworkNode}
 	 */
-	public NetworkNode getNode2() {
-		return node2;
+	public NetworkNode getNodeTo() {
+		return branchKey != null ? branchKey.getNodeTo() : node2;
 	}
-	public void setNode2(NetworkNode node2) {
-		this.node2 = node2;
-	}
-	
 
 	/**
 	 * Retorna o {@link SwitchState} desta branch, aberto ou fechado
@@ -215,8 +196,12 @@ public class Branch {
 		this.instantCurrent = instantCurrent;
 	}
 
-	public BranchId getBranchId() {
-		return branchId;
+	public BranchKey getBranchKey() {
+		return branchKey;
+	}
+
+	public void setBranchKey(BranchKey branchKey) {
+		this.branchKey = branchKey;
 	}
 
 	/**

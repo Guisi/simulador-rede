@@ -138,6 +138,7 @@ public class FunctionsPaneController extends Controller {
 				
 				this.evaluateFunctionsExpressions(null);
 			} catch (IOException e) {
+				e.printStackTrace();
 				Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 				alert.showAndWait();
 			}

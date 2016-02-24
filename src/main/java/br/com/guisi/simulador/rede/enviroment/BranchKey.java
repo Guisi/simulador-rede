@@ -1,21 +1,21 @@
 package br.com.guisi.simulador.rede.enviroment;
 
-public class BranchId {
+public class BranchKey {
 	
-	private final Integer nodeFrom;
-	private final Integer nodeTo;
+	private final NetworkNode nodeFrom;
+	private final NetworkNode nodeTo;
 	
-	public BranchId(Integer nodeNumber1, Integer nodeNumber2) {
+	public BranchKey(NetworkNode nodeFrom, NetworkNode nodeTo) {
 		super();
-		this.nodeFrom = nodeNumber1;
-		this.nodeTo = nodeNumber2;
+		this.nodeFrom = nodeFrom;
+		this.nodeTo = nodeTo;
 	}
 	
-	public Integer getNodeFrom() {
+	public NetworkNode getNodeFrom() {
 		return nodeFrom;
 	}
 
-	public Integer getNodeTo() {
+	public NetworkNode getNodeTo() {
 		return nodeTo;
 	}
 
@@ -36,7 +36,7 @@ public class BranchId {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		BranchId other = (BranchId) obj;
+		BranchKey other = (BranchKey) obj;
 		if (nodeFrom == null) {
 			if (other.nodeFrom != null)
 				return false;

@@ -70,6 +70,7 @@ public class FunctionsController extends Controller {
 		try {
 			this.functions = FunctionsUtils.loadProperties();
 		} catch (IOException e) {
+			e.printStackTrace();
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 			alert.showAndWait();
 			SimuladorRede.closeScene(this);
@@ -139,6 +140,7 @@ public class FunctionsController extends Controller {
 		try {
 			FunctionsUtils.saveProperties(this.functions);
 		} catch (IOException e) {
+			e.printStackTrace();
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage());
 			alert.showAndWait();
 		}

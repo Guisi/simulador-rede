@@ -190,8 +190,8 @@ public class ElementsDetailsPaneController extends Controller {
 		Branch branch = getEnvironment().getBranch(selectedBranch);
 		
 		tvBranchDetails.getItems().clear();
-		tvBranchDetails.getItems().add(new PropertyRow("From:", branch.getNode1().getNodeNumber().toString()));
-		tvBranchDetails.getItems().add(new PropertyRow("To:", branch.getNode2().getNodeNumber().toString()));
+		tvBranchDetails.getItems().add(new PropertyRow("From:", branch.getNodeFrom().getNodeNumber().toString()));
+		tvBranchDetails.getItems().add(new PropertyRow("To:", branch.getNodeTo().getNodeNumber().toString()));
 		tvBranchDetails.getItems().add(new PropertyRow("Max Current A:", df.format(branch.getMaxCurrent())));
 		tvBranchDetails.getItems().add(new PropertyRow("Instant Current A:", df.format(branch.getInstantCurrent())));
 		tvBranchDetails.getItems().add(new PropertyRow("Resistance \u03A9:", df.format(branch.getResistance())));

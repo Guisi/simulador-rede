@@ -24,8 +24,8 @@ public class PowerFlow {
 		//zera os valores do power flow anterior
 		PowerFlow.resetPowerFlowValues(environment);
 		
-		//atualiza informações das conexões dos feeders e loads
-		EnvironmentUtils.updateFeedersConnections(environment);
+		//atualiza informações das conexões dos elementos da rede
+		EnvironmentUtils.updateEnvironmentConnections(environment);
 
 		//executa power flow
 		return executePowerFlow(environment);
@@ -58,10 +58,11 @@ public class PowerFlow {
 			return false;
 		}
 		
-		/*monta lista somente com os branches que estejam conectados a nodes ativos*/
+		//TODO verificar se precisa enviar branches desligados
+		/*monta lista somente com os branches que estejam conectados a nodes ligados a algum feeder (mesmo que o load esteja desligado) */
 		List<Branch> activeBranches = new ArrayList<>();
 		environment.getBranches().forEach((branch) -> {
-			if (activeNodes.contains(branch.getNode1()) && activeNodes.contains(branch.getNode2())) {
+			if (activeNodes.containsAll(branch.getConnectedNodes())) {
 				activeBranches.add(branch);
 			}
 		});
@@ -107,9 +108,9 @@ public class PowerFlow {
 					Integer nodeFrom = (int) mpcBranchRetLine[0];
 					Integer nodeTo = (int) mpcBranchRetLine[1];
 					
-					Branch branch = environment.getBranch(nodeFrom, nodeTo);
+					Branch branch = environment.getBranch(environment.getNetworkNode(nodeFrom), environment.getNetworkNode(nodeTo));
 					if (branch != null) {
-						double actualCurrent = (sAtual / (branch.getNode2().getCurrentVoltagePU() * Constants.TENSAO_BASE)) * Constants.POTENCIA_BASE;
+						double actualCurrent = (sAtual / (branch.getNodeTo().getCurrentVoltagePU() * Constants.TENSAO_BASE)) * Constants.POTENCIA_BASE;
 						branch.setInstantCurrent(actualCurrent);
 						
 						double lossMW = Math.abs(mpcBranchRetLine[13] + mpcBranchRetLine[15]);
@@ -288,10 +289,10 @@ public class PowerFlow {
 			Branch branch = branches.get(i);
 			
 			//branch De
-			branchFrom[i] = branch.getNode1().getNodeNumber();
+			branchFrom[i] = branch.getNodeFrom().getNodeNumber();
 			
 			//branch Para
-			branchTo[i] = branch.getNode2().getNodeNumber();
+			branchTo[i] = branch.getNodeTo().getNodeNumber();
 
 			//resistência em pu (ohms / impedancia)
 			resistenciaPu[i] = branch.getResistance() / zb;

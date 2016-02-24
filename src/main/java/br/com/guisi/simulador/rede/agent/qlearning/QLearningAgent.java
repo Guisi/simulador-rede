@@ -78,23 +78,20 @@ public class QLearningAgent extends Agent {
 		//faz as mudança de status do switch
 		SwitchState switchState = currentSwitch.isClosed() ? SwitchState.CLOSED : SwitchState.OPEN;
 		Branch nextSwitch = getNextSwitch(environment, currentSwitch, switchState);
+		nextSwitch.reverse();
+
+		//executa o fluxo de potência
+		PowerFlow.execute(environment);
+
+		//verifica loads a serem desativados caso existam restrições 
+		this.turnOffLoadsIfNecessary(environment);
 		
-		if (nextSwitch != null) {
-			nextSwitch.reverse();
-	
-			//executa o fluxo de potência
-			PowerFlow.execute(environment);
-	
-			//verifica loads a serem desativados caso existam restrições 
-			this.turnOffLoadsIfNecessary(environment);
-			
-			//atualiza o qValue do switch
-			updateQValue(currentSwitch);
-			
-			this.currentSwitch = nextSwitch;
-			
-			this.generateAgentStatus(environment, agentStepStatus);
-		}
+		//atualiza o qValue do switch
+		updateQValue(currentSwitch);
+		
+		this.currentSwitch = nextSwitch;
+		
+		this.generateAgentStatus(environment, agentStepStatus);
 	}
 	
 	/**
@@ -217,23 +214,26 @@ public class QLearningAgent extends Agent {
 	public Branch getNextSwitch(Environment environment, Branch refSwitch, SwitchState switchState) {
 		//busca a lista das distâncias dos switches
 		List<SwitchDistance> switchesDistances = environment.getSwitchesDistances(refSwitch, switchState);
-		
+
+		//caso esteja procurando por switches abertos para fechar
 		if (switchState == SwitchState.OPEN) {
 			List<SwitchDistance> swRemover = new ArrayList<>();
 			switchesDistances.forEach(switchDistance -> {
-				NetworkNode node1 = switchDistance.getTheSwitch().getNode1(); 
-				NetworkNode node2 = switchDistance.getTheSwitch().getNode2();
+				NetworkNode node1 = switchDistance.getTheSwitch().getNodeFrom(); 
+				NetworkNode node2 = switchDistance.getTheSwitch().getNodeTo();
 				
 				if (node1.isLoad() && node2.isLoad()) {
 					Load load1 = (Load) node1;
 					Load load2 = (Load) node2;
-	
-					//caso esteja procurando por switches abertos para fechar,
+					
 					//remove os switches que ligam dois loads onde ambos estão ligados a algum feeder, para evitar criar circuitos fechados
 					//TODO HEURÍSTICA e remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede 
 					if ( (load1.getFeeder() != null && load2.getFeeder() != null) || (load1.getFeeder() == null && load2.getFeeder() == null)) {
 						swRemover.add(switchDistance);
 					}
+				} else if ( (node1.isLoad() && ((Load)node1).getFeeder() != null && node2.isFeeder()) || (node2.isLoad() && ((Load)node2).getFeeder() != null && node1.isFeeder()) ) {
+					//remove também switches onde uma das pontas é um load que já está conectado a um feeder, e a outra ponta possui um feeder, para evitar circuitos fechados
+					swRemover.add(switchDistance);
 				}
 			});
 			switchesDistances.removeAll(swRemover);

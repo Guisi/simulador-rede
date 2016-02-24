@@ -18,8 +18,8 @@ public class MinLoadCurrentVoltagePUChart extends GenericLineChart {
 		super();
 		
         getYNumberAxis().setAutoRanging(false);
-        getYNumberAxis().setLowerBound(Constants.TENSAO_MIN_PU - 0.1);
-        getYNumberAxis().setUpperBound(Constants.TENSAO_MAX_PU + 0.1);
+        getYNumberAxis().setLowerBound(Constants.TENSAO_MIN_PU);
+        getYNumberAxis().setUpperBound(Constants.TENSAO_MAX_PU);
         getYNumberAxis().setTickUnit(0.01);
 		
 		getXAxis().setLabel("Iteraction");

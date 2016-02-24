@@ -109,6 +109,7 @@ public class MenuPaneController extends Controller {
 					try {
 						powerFlowSuccess = PowerFlow.execute(environment);
 					} catch (Exception e) {
+						e.printStackTrace();
 						Alert alert = new Alert(AlertType.ERROR);
 						alert.setContentText(e.getMessage());
 						alert.showAndWait();

@@ -56,6 +56,7 @@ public class ExpressionEvaluatorController extends Controller {
 			taEvalResult.setText(String.valueOf(result));
 		} catch (Exception e) {
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage());
+			e.printStackTrace();
 			alert.showAndWait();
 		}
 	}

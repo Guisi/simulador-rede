@@ -18,6 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import br.com.guisi.simulador.rede.constants.Status;
 import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.enviroment.BranchKey;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
@@ -203,6 +204,48 @@ public class EnvironmentUtils {
 	}
 	
 	/**
+	 * Atualiza informações das conexões entre os elementos da rede
+	 * @param environment
+	 */
+	public static void updateEnvironmentConnections(Environment environment) {
+		//zera valores consolidados do feeder
+		environment.getFeeders().forEach((feeder) -> {
+			feeder.getServedLoads().clear();
+		});
+		
+		environment.getBranchFromToMap().clear();
+		
+		//atualiza feeders dos loads, e nodes from/to dos branches
+		environment.getFeeders().forEach(feeder -> {
+			feeder.getBranches().forEach(branch -> {
+				updateEnvironmentConnectionsRecursive(environment, feeder, branch, feeder);
+			});
+		});
+	}
+	
+	private static void updateEnvironmentConnectionsRecursive(Environment environment, Feeder feeder, Branch branch, NetworkNode lastNetworkNode) {
+		branch.getConnectedNodes().forEach(networkNode -> {
+			if (!lastNetworkNode.equals(networkNode) && branch.isClosed()) {
+				
+				BranchKey branchKey = new BranchKey(lastNetworkNode, networkNode);
+				branch.setBranchKey(branchKey);
+				environment.getBranchFromToMap().put(branchKey, branch);
+				
+				if (networkNode.isLoad()) {
+					Load load = (Load) networkNode;
+					load.setFeeder(feeder);
+				}
+	
+				networkNode.getBranches().forEach(connectedBranch -> {
+					if (!connectedBranch.equals(branch)) {
+						updateEnvironmentConnectionsRecursive(environment, feeder, connectedBranch, networkNode);
+					}
+				});
+			}
+		});
+	}
+	
+	/**
 	 * Valida se existe algum ciclo fechado na rede
 	 * @param environment
 	 */
@@ -211,11 +254,15 @@ public class EnvironmentUtils {
 		
 		environment.getNetworkNodeMap().values().forEach((node) -> {
 			try {
-				validateRadialStateRecursive(node, node, null, new ArrayList<>());
+				node.getBranches().forEach(branch -> {
+					validateRadialStateRecursive(node, branch, node, new ArrayList<>());
+				});
 				
 				if (node.isFeeder()) {
 					Feeder feeder = (Feeder) node;
-					checkIfExistsConnectedFeeders(feeder, node, null);
+					feeder.getBranches().forEach(branch -> {
+						checkIfExistsConnectedFeedersRecursive(feeder, branch, feeder);
+					});
 				}
 			} catch (NonRadialNetworkException e) {
 				exceptions.add(e);
@@ -226,46 +273,30 @@ public class EnvironmentUtils {
 	}
 	
 	/**
-	 * Atualiza informações das conexões dos feeders e loads
-	 * @param environment
+	 * Navega recursivamente na rede validando ciclos fechados
+	 * @param observedNode
+	 * @param branch
+	 * @param lastNetworkNode
+	 * @param checkedNodes
 	 */
-	public static void updateFeedersConnections(Environment environment) {
-		//zera valores consolidados do feeder
-		environment.getFeeders().forEach((feeder) -> {
-			feeder.getServedLoads().clear();
-		});
-		
-		//depois, verifica se todos os loads estão conectados a algum feeder
-		environment.getLoads().forEach((load) -> {
-			Feeder feeder = getFeeder(load);
-			load.setFeeder(feeder);
-			if (feeder != null) {
-				feeder.getServedLoads().add(load);
-			}
-		});
-	}
-
-	/**
-	 * Navega recursivamente na rede validando ciclos fechados 
-	 * @param observedLoad
-	 * @param connectedLoad
-	 * @param lastConnectedLoad
-	 * @param checkedLoads
-	 * @throws IllegalStateException
-	 */
-	private static void validateRadialStateRecursive(NetworkNode observedLoad, NetworkNode connectedLoad, NetworkNode lastConnectedLoad, List<NetworkNode> checkedLoads) {
-		checkedLoads.add(connectedLoad);
-
-		List<NetworkNode> connectedNodes = connectedLoad.getConnectedNodes();
-		connectedNodes.remove(lastConnectedLoad);
-		
-		for (NetworkNode networkNode : connectedNodes) {
-			if (checkedLoads.contains(networkNode)) {
-				String msg = "Existe algum ciclo fechado no qual o " + (observedLoad.isFeeder() ? "feeder " : "load ") + observedLoad.getNodeNumber() + " está incluso.";
-				throw new NonRadialNetworkException(msg, observedLoad);
-			}
-			
-			validateRadialStateRecursive(observedLoad, networkNode, connectedLoad, checkedLoads);
+	private static void validateRadialStateRecursive(NetworkNode observedNode, Branch branch, NetworkNode lastNetworkNode, List<NetworkNode> checkedNodes) {
+		checkedNodes.add(lastNetworkNode);
+		if (branch.isClosed()) {
+			branch.getConnectedNodes().forEach(networkNode -> {
+				if (!lastNetworkNode.equals(networkNode)) {
+					
+					if (checkedNodes.contains(networkNode)) {
+						String msg = "Existe algum ciclo fechado no qual o " + (observedNode.isFeeder() ? "feeder " : "load ") + observedNode.getNodeNumber() + " está incluso.";
+						throw new NonRadialNetworkException(msg, observedNode);
+					}
+					
+					networkNode.getBranches().forEach(connectedBranch -> {
+						if (!connectedBranch.equals(branch)) {
+							validateRadialStateRecursive(observedNode, connectedBranch, networkNode, checkedNodes);
+						}
+					});
+				}
+			});
 		}
 	}
 	
@@ -273,113 +304,26 @@ public class EnvironmentUtils {
 	 * Verifica se existe algum feeder conectado a outro dentro da rede,
 	 * ou seja, nesse caso alguns loads estariam sendo alimentados por mais de um feeder
 	 * @param observedFeeder
-	 * @param connectedLoad
-	 * @param lastConnectedLoad
+	 * @param branch
+	 * @param lastNetworkNode
 	 * @throws IllegalStateException
 	 */
-	private static void checkIfExistsConnectedFeeders(Feeder observedFeeder, NetworkNode connectedLoad, NetworkNode lastConnectedLoad) throws IllegalStateException {
-		List<NetworkNode> connectedNodes = connectedLoad.getConnectedNodes();
-		connectedNodes.remove(lastConnectedLoad);
-
-		connectedNodes.forEach((node) -> {
-			if (node.isFeeder()) {
-				throw new NonRadialNetworkException("Os feeders " + observedFeeder.getNodeNumber() + " e " + node.getNodeNumber() + " estão conectados.", observedFeeder);
-			}
-			checkIfExistsConnectedFeeders(observedFeeder, node, connectedLoad);
-		});
-	}
-	
-	/**
-	 * Recupera o feeder do load
-	 * @param environment
-	 * @throws IllegalStateException
-	 */
-	public static Feeder getFeeder(NetworkNode networkNode) throws IllegalStateException {
-		return (Feeder) searchFeederRecursive(networkNode, null);
-	}
-	
-	/**
-	 * Procura pelo feeder do load recursivamente
-	 * @param connectedLoad
-	 * @param lastConnectedLoad
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	private static NetworkNode searchFeederRecursive(NetworkNode connectedLoad, NetworkNode lastConnectedLoad) {
-		List<NetworkNode> connectedNodes = connectedLoad.getConnectedNodes();
-		connectedNodes.remove(lastConnectedLoad);
-
-		for (NetworkNode networkNode : connectedNodes) {
-			if (networkNode.isFeeder()) {
-				return networkNode;
-			}
-
-			NetworkNode feeder = searchFeederRecursive(networkNode, connectedLoad);
-			if (feeder != null) {
-				return feeder;
-			}
+	private static void checkIfExistsConnectedFeedersRecursive(Feeder observedFeeder, Branch branch, NetworkNode lastNetworkNode) throws IllegalStateException {
+		if (branch.isClosed()) {
+			branch.getConnectedNodes().forEach(networkNode -> {
+				if (!lastNetworkNode.equals(networkNode)) {
+					if (networkNode.isFeeder()) {
+						throw new NonRadialNetworkException("Os feeders " + observedFeeder.getNodeNumber() + " e " + networkNode.getNodeNumber() + " estão conectados.", observedFeeder);
+					}
+					
+					networkNode.getBranches().forEach(connectedBranch -> {
+						if (!connectedBranch.equals(branch)) {
+							checkIfExistsConnectedFeedersRecursive(observedFeeder, connectedBranch, networkNode);
+						}
+					});
+				}
+			});
 		}
-		return null;
-	}
-	
-	/**
-	 * Retorna uma lista de loads onde o primeiro item é o load para o qual está sendo retornado a rota
-	 * e o último item é o feeder
-	 * @param networkNode
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	public static List<NetworkNode> getRouteToFeeder(NetworkNode networkNode) {
-		return searchRouteToFeederRecursive(networkNode, null);
-	}
-	
-	/**
-	 * Monta a rota até o feeder recursivamente
-	 * @param connectedLoad
-	 * @param lastConnectedLoad
-	 * @return
-	 * @throws IllegalStateException
-	 */
-	private static List<NetworkNode> searchRouteToFeederRecursive(NetworkNode connectedLoad, NetworkNode lastConnectedLoad) {
-		List<NetworkNode> route = new ArrayList<>();
-		route.add(connectedLoad);
-		
-		List<NetworkNode> connectedNodes = connectedLoad.getConnectedNodes();
-		connectedNodes.remove(lastConnectedLoad);
-
-		for (NetworkNode networkNode : connectedNodes) {
-			if (networkNode.isFeeder()) {
-				route.add(networkNode);
-				return route;
-			}
-
-			List<NetworkNode> childrenRoute = searchRouteToFeederRecursive(networkNode, connectedLoad);
-			if (childrenRoute != null) {
-				route.addAll(childrenRoute);
-				return route;
-			}
-		}
-
-		return null;
-	}
-	
-	/**
-	 * Retorna a lista de branches existentes entre no caminho entre o load e o seu feeder
-	 * @param networkNode
-	 * @return
-	 */
-	public static List<Branch> getBranchesToFeeder(NetworkNode networkNode) {
-		List<Branch> branches = new ArrayList<>();
-		List<NetworkNode> route = getRouteToFeeder(networkNode);
-		for (int i = 0; i < route.size(); i++) {
-			NetworkNode node = route.get(i);
-			
-			if (i < route.size() - 1) {
-				NetworkNode nextNode = route.get(i+1);
-				branches.add(node.getBranch(nextNode));
-			}
-		}
-		return branches;
 	}
 	
 	public static void isolateFaultSwitches(Environment environment) {
@@ -387,7 +331,7 @@ public class EnvironmentUtils {
 	}
 	
 	private static void isolateNextSwitchesRecursive(Branch branch, NetworkNode lastNetworkNode) {
-		branch.getConnectedLoads().forEach((networkNode) -> {
+		branch.getConnectedNodes().forEach((networkNode) -> {
 			if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
 				networkNode.getBranches().forEach((connectedBranch) -> {
 					if (!connectedBranch.equals(branch)) {
@@ -430,7 +374,7 @@ public class EnvironmentUtils {
 
 		distance++;
 		List<SwitchDistance> closestSwitches = new ArrayList<>();
-		for (NetworkNode networkNode : branch.getConnectedLoads()) {
+		for (NetworkNode networkNode : branch.getConnectedNodes()) {
 			
 			//se ainda não visitou este node
 			if (!visitedNetworkNodes.contains(networkNode)) {

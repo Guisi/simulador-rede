@@ -199,10 +199,10 @@ public class NetworkPane extends Pane {
 		getChildren().add(sp);
 		sp.toBack();
 
-		int x1 = branch.getNode2().getX() - 1;
-		int y1 = sizeY - branch.getNode2().getY();
-		int x2 = branch.getNode1().getX() - 1;
-		int y2 = sizeY - branch.getNode1().getY();
+		int x1 = branch.getNodeTo().getX() - 1;
+		int y1 = sizeY - branch.getNodeTo().getY();
+		int x2 = branch.getNodeFrom().getX() - 1;
+		int y2 = sizeY - branch.getNodeFrom().getY();
 
 		int startX = x1 * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX;
 		int startY = y1 * Constants.NETWORK_GRID_SIZE_PX + Constants.NETWORK_PANE_PADDING + Constants.LOAD_RADIUS_PX;

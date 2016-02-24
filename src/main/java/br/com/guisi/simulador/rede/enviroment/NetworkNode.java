@@ -1,8 +1,6 @@
 package br.com.guisi.simulador.rede.enviroment;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import br.com.guisi.simulador.rede.constants.Constants;
@@ -52,33 +50,6 @@ public abstract class NetworkNode {
 	 */
 	public boolean isLoad() {
 		return this instanceof Load;
-	}
-	
-	/**
-	 * Retorna a lista de nós conectados a este
-	 * @return {@link List<NetworkNode>}
-	 */
-	public List<NetworkNode> getConnectedNodes() {
-		List<NetworkNode> networkNodes = new ArrayList<>();
-		branches.forEach((branch) -> {
-			if (branch.isClosed()) {
-				networkNodes.add(branch.getConnectedLoad(this));
-			}
-		});
-		return networkNodes;
-	}
-	
-	/**
-	 * Retorna a branch que conecta este node ao node passado como parâmetro
-	 * @return {@link Branch}
-	 */
-	public Branch getBranch(NetworkNode node) {
-		for (Branch branch : branches) {
-			if (branch.isClosed() && branch.getConnectedLoad(this).equals(node)) {
-				return branch;
-			}
-		}
-		return null;
 	}
 	
 	/**
