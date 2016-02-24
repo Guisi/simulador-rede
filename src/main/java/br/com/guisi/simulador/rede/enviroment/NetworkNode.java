@@ -154,6 +154,10 @@ public abstract class NetworkNode {
 	public double getReactivePowerKVar() {
 		return reactivePowerKVar * 0.75; //TODO usar 100%
 	}
+	
+	public double getReactivePowerMVar() {
+		return getReactivePowerKVar() / 1000;
+	}
 
 	/**
 	 * Retorna o {@link Status} deste nó, on ou off

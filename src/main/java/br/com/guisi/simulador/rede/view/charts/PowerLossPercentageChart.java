@@ -66,13 +66,9 @@ public class PowerLossPercentageChart extends GenericLineChart {
 	}
 	
 	@Override
-	public void clearData() {
-		activePowerLossSeries.getData().clear();
-		reactivePowerLossSeries.getData().clear();
-	}
-
-	@Override
 	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
+		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
+		
 		//calcula percentual da perda de potência ativa
 		Double activePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOST, Double.class);
 		Double activePowerDemand = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_DEMAND, Double.class);

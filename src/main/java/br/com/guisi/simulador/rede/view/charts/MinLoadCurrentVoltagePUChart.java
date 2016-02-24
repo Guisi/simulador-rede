@@ -50,11 +50,6 @@ public class MinLoadCurrentVoltagePUChart extends GenericLineChart {
 	}
 	
 	@Override
-	public void clearData() {
-		minLoadCurrentVoltageSeries.getData().clear();
-	}
-
-	@Override
 	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
 		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
 		Double minVoltage = agentStepStatus.getInformation(AgentInformationType.MIN_LOAD_CURRENT_VOLTAGE_PU, Double.class);

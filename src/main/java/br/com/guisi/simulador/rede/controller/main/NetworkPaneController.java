@@ -71,7 +71,7 @@ public class NetworkPaneController extends Controller {
 		root.getChildren().clear();
 		root.setVisible(false);
 		zoomSlider.setValue(1);
-		stepUpdateReceived = 0;
+		this.stepUpdateReceived = 0;
 		
 		networkPane = new NetworkPane();
 		zoomingPane = new ZoomingPane(networkPane);

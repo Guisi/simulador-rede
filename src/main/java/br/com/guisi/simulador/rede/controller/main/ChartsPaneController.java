@@ -37,8 +37,6 @@ public class ChartsPaneController extends Controller {
 		this.listenToEvent(EventType.RESET_SCREEN,
 						   EventType.ENVIRONMENT_LOADED,
 						   EventType.AGENT_NOTIFICATION);
-	
-		this.createCharts();
 	}
 	
 	@Override
@@ -79,13 +77,12 @@ public class ChartsPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
-		lineCharts.forEach((chart) -> {
-			chart.clearData();
-		});
+		this.stepUpdateReceived = 0;
 	}
 	
 	private void processEnvironmentLoaded() {
 		root.setVisible(true);
+		this.createCharts();
 	}
 	
 	private void processAgentNotification(Object data) {

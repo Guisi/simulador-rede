@@ -154,8 +154,8 @@ public class ElementsDetailsPaneController extends Controller {
 		
 		tvLoadDetails.getItems().clear();
 		tvLoadDetails.getItems().add(new PropertyRow("Feeder:", load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : ""));
-		tvLoadDetails.getItems().add(new PropertyRow("Active Power kW:", df.format(load.getActivePowerKW())));
-		tvLoadDetails.getItems().add(new PropertyRow("Reactive Power kVar:", df.format(load.getReactivePowerKVar())));
+		tvLoadDetails.getItems().add(new PropertyRow("Active Power MW:", df.format(load.getActivePowerMW())));
+		tvLoadDetails.getItems().add(new PropertyRow("Reactive Power MVar:", df.format(load.getReactivePowerMVar())));
 		tvLoadDetails.getItems().add(new PropertyRow("Priority:", String.valueOf(load.getPriority())));
 		tvLoadDetails.getItems().add(new PropertyRow("Status:", load.isOn() ? "On" : "Off"));
 		tvLoadDetails.getItems().add(new PropertyRow("Current Voltage pu:", df.format(load.getCurrentVoltagePU())));
@@ -171,8 +171,8 @@ public class ElementsDetailsPaneController extends Controller {
 		Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
 		
 		tvFeederDetails.getItems().clear();
-		tvFeederDetails.getItems().add(new PropertyRow("Active Power kW:", df.format(feeder.getActivePowerKW())));
-		tvFeederDetails.getItems().add(new PropertyRow("Reactive Power kVar:", df.format(feeder.getReactivePowerKVar())));
+		tvFeederDetails.getItems().add(new PropertyRow("Active Power MW:", df.format(feeder.getActivePowerMW())));
+		tvFeederDetails.getItems().add(new PropertyRow("Reactive Power MVar:", df.format(feeder.getReactivePowerMVar())));
 		tvFeederDetails.getItems().add(new PropertyRow("Connected Loads:", String.valueOf(feeder.getServedLoads().size())));
 		tvFeederDetails.getItems().add(new PropertyRow("Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> load.isSupplied()).count())));
 		tvFeederDetails.getItems().add(new PropertyRow("Not Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> !load.isSupplied()).count())));

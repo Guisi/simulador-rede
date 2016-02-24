@@ -45,11 +45,6 @@ public class SuppliedLoadsPercentageChart extends GenericLineChart {
 	public String getChartTitle() {
 		return "% Loads Supplied x Priority";
 	}
-	
-	@Override
-	public void clearData() {
-		suppliedLoadsPercentageSeries.getData().clear();
-	}
 
 	@Override
 	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {

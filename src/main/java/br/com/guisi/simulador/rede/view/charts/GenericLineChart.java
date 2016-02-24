@@ -31,7 +31,5 @@ public abstract class GenericLineChart extends LineChart<Number, Number> {
 	
 	public abstract String getChartTitle();
 
-	public abstract void clearData();
-	
 	public abstract void processAgentStepStatus(AgentStepStatus agentStepStatus);
 }

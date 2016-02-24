@@ -28,8 +28,7 @@ public class PowerFlow {
 		EnvironmentUtils.updateFeedersConnections(environment);
 
 		//executa power flow
-		//TODO remover return executePowerFlow(environment);
-		return true;
+		return executePowerFlow(environment);
 	}
 	
 	public static void resetPowerFlowValues(Environment environment) {
@@ -97,10 +96,7 @@ public class PowerFlow {
 				for (double[] mpcBusRetLine : mpcBusRet) {
 					Integer nodeNumber = (int) mpcBusRetLine[0];
 					NetworkNode node = environment.getNetworkNode(nodeNumber);
-					
-					if (node.isOn()) {
-						node.setCurrentVoltagePU(mpcBusRetLine[7]); //tensão
-					}
+					node.setCurrentVoltagePU(mpcBusRetLine[7]); //tensão
 				}
 				
 				double[][] mpcBranchRet = processor.getNumericArray("mpc.branch").getRealArray2D();

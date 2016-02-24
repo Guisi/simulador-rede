@@ -3,7 +3,6 @@ package br.com.guisi.simulador.rede.view.charts;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
@@ -67,15 +66,8 @@ public class PowerLossChart extends GenericLineChart {
 	}
 	
 	@Override
-	public void clearData() {
-		activePowerLossSeries.getData().clear();
-		reactivePowerLossSeries.getData().clear();
-	}
-
-	@Override
 	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
-		NumberAxis xAxis = (NumberAxis) this.getXAxis();
-		xAxis.setUpperBound(agentStepStatus.getStep());
+		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
 		
 		//seta perda da potência ativa
 		Double activePowerLost = agentStepStatus.getInformation(AgentInformationType.ACTIVE_POWER_LOST, Double.class);
