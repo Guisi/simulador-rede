@@ -234,6 +234,7 @@ public class EnvironmentUtils {
 				if (networkNode.isLoad()) {
 					Load load = (Load) networkNode;
 					load.setFeeder(feeder);
+					feeder.getServedLoads().add(load);
 				}
 	
 				networkNode.getBranches().forEach(connectedBranch -> {
