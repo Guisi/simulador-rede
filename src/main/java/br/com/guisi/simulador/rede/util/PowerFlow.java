@@ -58,11 +58,10 @@ public class PowerFlow {
 			return false;
 		}
 		
-		//TODO verificar se precisa enviar branches desligados
 		/*monta lista somente com os branches que estejam conectados a nodes ligados a algum feeder (mesmo que o load esteja desligado) */
 		List<Branch> activeBranches = new ArrayList<>();
 		environment.getBranches().forEach((branch) -> {
-			if (activeNodes.containsAll(branch.getConnectedNodes())) {
+			if (branch.isClosed() && activeNodes.containsAll(branch.getConnectedNodes())) {
 				activeBranches.add(branch);
 			}
 		});
