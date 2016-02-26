@@ -1,10 +1,13 @@
 package br.com.guisi.simulador.rede.controller.main;
 
+import javax.inject.Inject;
+
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
 
@@ -21,6 +24,9 @@ public class SimuladorRedeController extends Controller {
 	private VBox networkBoxLeft;
 	@FXML
 	private VBox networkBoxRight;
+	
+	@Inject
+	private AgentControl agentControl;
 	
 	//private NetworkPaneController networkPaneController;
 	
@@ -121,6 +127,7 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	private void processResetScreen() {
+		this.agentControl.reset();
 		/*if (networkPaneController != null) {
 			networkPaneController.getStage().hide();
 		}*/

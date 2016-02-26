@@ -39,6 +39,8 @@ public class NetworkPane extends Pane {
 	private Integer selectedFeeder;
 	private Integer selectedBranch;
 	
+	private Integer agentPosition;
+	
 	/**
 	 * Guarda o load selecionado e atualiza estilo
 	 * @param selected
@@ -157,6 +159,25 @@ public class NetworkPane extends Pane {
 				rect.setStroke(Color.GRAY);
 			}
 		}
+	}
+	
+	public void changeAgentCirclePosition(Integer newBranchNumber) {
+		Circle agentCircle;
+
+		if (agentPosition == null) {
+			agentCircle = new Circle();
+			agentCircle.setRadius(Constants.AGENT_RADIUS_PX);
+			agentCircle.setFill(Color.LIGHTGREEN);
+			/*agentCircle.setStroke(Color.GREEN);
+			agentCircle.setStrokeWidth(2);*/
+		} else {
+			BranchStackPane branchPane = branchPaneMap.get(agentPosition);
+			agentCircle = branchPane.removeAgentCircle();
+		}
+		
+		BranchStackPane branchPane = branchPaneMap.get(newBranchNumber);
+		branchPane.addAgentCircle(agentCircle);
+		this.agentPosition = newBranchNumber;
 	}
 	
 	public NetworkNodeStackPane drawNetworkNode(NetworkNode networkNode, Environment environment) {

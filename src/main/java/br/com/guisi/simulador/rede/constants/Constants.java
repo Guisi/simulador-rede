@@ -22,6 +22,7 @@ public interface Constants {
 	String DECIMAL_FORMAT_2 = "##0.00";
 	String DECIMAL_FORMAT_3 = "##0.000";
 	String DECIMAL_FORMAT_5 = "##0.00000";
+	int AGENT_RADIUS_PX = 17;
 	
 	/** power flow */
 	//Tensão de referencia em pu (VRef) (Fausto usou 1.02, vamos usar 1.0)

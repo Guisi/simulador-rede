@@ -213,6 +213,8 @@ public class EnvironmentUtils {
 			feeder.getServedLoads().clear();
 		});
 		
+		environment.getLoads().forEach(load -> load.setFeeder(null));
+		
 		environment.getBranchFromToMap().clear();
 		
 		//atualiza feeders dos loads, e nodes from/to dos branches

@@ -6,7 +6,11 @@ import javafx.scene.Node;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+
+import javax.inject.Inject;
+
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
@@ -25,6 +29,9 @@ public class NetworkPaneController extends Controller {
 
 	public static final String FXML_FILE = "/fxml/main/NetworkPane.fxml";
 
+	@Inject
+	private AgentControl agentControl;
+	
 	@FXML
 	private VBox root;
 	
@@ -125,6 +132,12 @@ public class NetworkPaneController extends Controller {
 		//Desenha grid
 		networkPane.drawGrid(getEnvironment().getSizeX(), getEnvironment().getSizeY());
 		networkPane.setSnapToPixel(false);
+		
+		//Desenha a posição inicial do agent
+		Branch currentState = agentControl.getAgent().getCurrentState();
+		if (currentState != null) {
+			networkPane.changeAgentCirclePosition(currentState.getNumber());
+		}
 	}
 	
 	private void processLoadSelected(Object data) {
@@ -152,6 +165,7 @@ public class NetworkPaneController extends Controller {
 				if (switchOperation != null) {
 					Branch sw = environment.getBranch(switchOperation.getSwitchNumber());
 					networkPane.updateBranchDrawing(sw);
+					networkPane.changeAgentCirclePosition(sw.getNumber());
 
 					//atualiza status dos nós na tela
 					environment.getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
