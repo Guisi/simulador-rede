@@ -17,6 +17,7 @@ public class SuppliedLoadsPercentageChart extends GenericLineChart {
 	public SuppliedLoadsPercentageChart() {
 		super();
 		
+		getYNumberAxis().setAutoRanging(false);
 		getYNumberAxis().setLowerBound(0);
 		getYNumberAxis().setUpperBound(100);
 		getXAxis().setLabel("Iteraction");
@@ -61,6 +62,9 @@ public class SuppliedLoadsPercentageChart extends GenericLineChart {
 			suppliedLoadsPercentageSeries.getData().add(chartData);
 			minPercentage = minPercentage != null ? Math.min(minPercentage, value.doubleValue()) : value.doubleValue();
 			maxPercentage = maxPercentage != null ? Math.max(maxPercentage, value.doubleValue()) : value.doubleValue();
+			
+			getYNumberAxis().setLowerBound(minPercentage < 5 ? 0 : minPercentage - 5);
+	        getYNumberAxis().setUpperBound(maxPercentage > 95 ? 100 : maxPercentage + 5);
 		}
 		
 		this.updateSeriesName();

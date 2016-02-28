@@ -60,6 +60,9 @@ public class MinLoadCurrentVoltagePUChart extends GenericLineChart {
 			minLoadCurrentVoltageSeries.getData().add(chartData);
 			minValue = minValue != null ? Math.min(minValue, value.doubleValue()) : value.doubleValue();
 			maxValue = maxValue != null ? Math.max(maxValue, value.doubleValue()) : value.doubleValue();
+			
+			getYNumberAxis().setLowerBound(minValue - 0.05);
+	        getYNumberAxis().setUpperBound(maxValue + 0.05);
 		}
 
 		this.updateSeriesName();

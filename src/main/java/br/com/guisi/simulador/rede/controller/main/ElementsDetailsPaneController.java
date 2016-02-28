@@ -66,7 +66,8 @@ public class ElementsDetailsPaneController extends Controller {
 				EventType.ENVIRONMENT_LOADED,
 				EventType.LOAD_SELECTED,
 				EventType.FEEDER_SELECTED,
-				EventType.BRANCH_SELECTED);
+				EventType.BRANCH_SELECTED,
+				EventType.AGENT_RUNNING);
 		
 		// tabela de propriedades do load
 		this.initializeTable(tvLoadDetails);
@@ -86,6 +87,7 @@ public class ElementsDetailsPaneController extends Controller {
 			case LOAD_SELECTED: this.updateLoadInformationBox((Integer) data); break;
 			case FEEDER_SELECTED: this.updateFeederInformationBox((Integer) data); break;
 			case BRANCH_SELECTED: this.updateBranchInformationBox((Integer) data); break;
+			case AGENT_RUNNING: this.processAgentRunning(); break;
 			default: break;
 		}
 	}
@@ -142,6 +144,15 @@ public class ElementsDetailsPaneController extends Controller {
 		Collections.sort(cbLoadNumber.getItems());
 		Collections.sort(cbFeederNumber.getItems());
 		Collections.sort(cbBranchNumber.getItems());
+	}
+	
+	private void processAgentRunning() {
+		tvLoadDetails.getItems().clear();
+		tvFeederDetails.getItems().clear();
+		tvBranchDetails.getItems().clear();
+		cbLoadNumber.valueProperty().setValue(null);
+		cbFeederNumber.valueProperty().setValue(null);
+		cbBranchNumber.valueProperty().setValue(null);
 	}
 	
 	/**
