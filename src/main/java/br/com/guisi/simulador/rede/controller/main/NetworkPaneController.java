@@ -3,7 +3,6 @@ package br.com.guisi.simulador.rede.controller.main;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
@@ -35,9 +34,6 @@ public class NetworkPaneController extends Controller {
 	@FXML
 	private VBox root;
 	
-	@FXML
-	private Slider zoomSlider;
-	
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
 	
@@ -53,7 +49,11 @@ public class NetworkPaneController extends Controller {
 				EventType.AGENT_NOTIFICATION,
 				EventType.AGENT_STOPPED);
 		
-		this.resetScreen();
+		networkPane = new NetworkPane();
+		zoomingPane = new ZoomingPane(networkPane);
+		zoomingPane.getStyleClass().add("networkPane");
+		
+		root.getChildren().add(zoomingPane);
 	}
 	
 	@Override
@@ -75,18 +75,9 @@ public class NetworkPaneController extends Controller {
 	}
 	
 	private void resetScreen() {
-		root.getChildren().clear();
 		root.setVisible(false);
-		zoomSlider.setValue(1);
+		networkPane.reset();
 		this.stepUpdateReceived = 0;
-		
-		networkPane = new NetworkPane();
-		zoomingPane = new ZoomingPane(networkPane);
-		zoomingPane.getStyleClass().add("networkPane");
-		zoomingPane.zoomFactorProperty().bind(zoomSlider.valueProperty());
-		
-		root.getChildren().add(zoomSlider);
-		root.getChildren().add(zoomingPane);
 	}
 	
 	private void onEnvironmentLoaded() {
@@ -193,4 +184,7 @@ public class NetworkPaneController extends Controller {
 		return root;
 	}
 
+	public ZoomingPane getZoomingPane() {
+		return zoomingPane;
+	}
 }

@@ -11,22 +11,19 @@
 
 <VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="714.0" prefWidth="1200.0" style="-fx-background-color: #FFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.main.SimuladorRedeController">
    <children>
-      <ScrollPane fx:id="scrollPane" styleClass="scrollPane">
-         <content>
-            <HBox style="-fx-background-color: #FFF;">
-               <children>
-                  <VBox fx:id="networkBoxLeft">
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                  </VBox>
+      <SplitPane fx:id="splitPane" dividerPositions="0.5" styleClass="scrollPane">
+         <items>
+            <ScrollPane fx:id="scrollPaneLeft" hbarPolicy="NEVER" maxWidth="750.0" prefWidth="750.0" styleClass="scrollPane" SplitPane.resizableWithParent="false">
+               <content>
+                  <VBox fx:id="networkBoxLeft" />
+               </content>
+            </ScrollPane>
+            <ScrollPane fx:id="scrollPaneRight" styleClass="scrollPane">
+               <content>
                   <VBox fx:id="networkBoxRight" />
-               </children>
-               <padding>
-                  <Insets left="3.0" />
-               </padding>
-            </HBox>
-         </content>
-      </ScrollPane>
+               </content>
+            </ScrollPane>
+         </items>
+      </SplitPane>
    </children>
 </VBox>

@@ -38,7 +38,6 @@ public class NetworkPane extends Pane {
 	private Integer selectedLoad;
 	private Integer selectedFeeder;
 	private Integer selectedBranch;
-	
 	private Integer agentPosition;
 	
 	/**
@@ -372,6 +371,12 @@ public class NetworkPane extends Pane {
 	public Map<Integer, BranchStackPane> getBranchPaneMap() {
 		return branchPaneMap;
 	}
-	
-	
+
+	public void reset() {
+		getChildren().clear();
+		this.selectedBranch = null;
+		this.selectedFeeder = null;
+		this.selectedLoad = null;
+		this.agentPosition = null;
+	}
 }

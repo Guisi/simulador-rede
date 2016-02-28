@@ -1,11 +1,13 @@
 package br.com.guisi.simulador.rede.controller.main;
 
-import javax.inject.Inject;
-
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.VBox;
+
+import javax.inject.Inject;
+
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.controller.Controller;
@@ -18,8 +20,11 @@ public class SimuladorRedeController extends Controller {
 	@FXML
 	private VBox root;
 	@FXML
-	private ScrollPane scrollPane;
-	
+	private SplitPane splitPane;
+	@FXML
+	private ScrollPane scrollPaneRight;
+	@FXML
+	private ScrollPane scrollPaneLeft;
 	@FXML
 	private VBox networkBoxLeft;
 	@FXML
@@ -28,20 +33,19 @@ public class SimuladorRedeController extends Controller {
 	@Inject
 	private AgentControl agentControl;
 	
-	//private NetworkPaneController networkPaneController;
-	
 	@Override
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN, EventType.ENVIRONMENT_LOADED);
 		
-		scrollPane.prefWidthProperty().bind(SimuladorRede.getPrimaryStage().widthProperty());
-		scrollPane.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
+		scrollPaneRight.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
+		scrollPaneLeft.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
 		
 		//menu
 		root.getChildren().add(0, getController(MenuPaneController.class).getView());
 		
 		//controls
-		root.getChildren().add(1, getController(ControlsPaneController.class).getView());
+		ControlsPaneController controlsPaneController = getController(ControlsPaneController.class);
+		root.getChildren().add(1, controlsPaneController.getView());
 		
 		//Painel dos detalhes dos elementos da rede
 		networkBoxLeft.getChildren().add(getController(ElementsDetailsPaneController.class).getView());
@@ -56,8 +60,12 @@ public class SimuladorRedeController extends Controller {
 		networkBoxLeft.getChildren().add(getController(ChartsPaneController.class).getView());
 		
 		//NetworkPane
-		networkBoxRight.getChildren().add(getController(NetworkPaneController.class).getView());
+		NetworkPaneController networkPaneController = getController(NetworkPaneController.class);
+		networkBoxRight.getChildren().add(networkPaneController.getView());
 		//networkPaneController = (NetworkPaneController) SimuladorRede.showUtilityScene("Electric Network", NetworkPaneController.class, false);
+		
+		//bind do slider para o zoom do pane da rede
+		networkPaneController.getZoomingPane().zoomFactorProperty().bind(controlsPaneController.getZoomSlider().valueProperty());
 		
 		this.fireEvent(EventType.RESET_SCREEN);
 		
@@ -123,11 +131,14 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	private void processEnvironmentLoaded() {
+		this.splitPane.setVisible(true);
 		//networkPaneController.getStage().show();
 	}
 	
 	private void processResetScreen() {
+		this.splitPane.setVisible(false);
 		this.agentControl.reset();
+		
 		/*if (networkPaneController != null) {
 			networkPaneController.getStage().hide();
 		}*/
