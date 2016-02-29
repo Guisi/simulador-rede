@@ -8,12 +8,15 @@ import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 import br.com.guisi.simulador.rede.view.charts.MinLoadCurrentVoltagePUChart;
+import br.com.guisi.simulador.rede.view.charts.OutOfServicePowerPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.PowerLossChart;
 import br.com.guisi.simulador.rede.view.charts.PowerLossPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.SuppliedLoadsActivePowerPercentageChart;
@@ -37,10 +40,18 @@ public class ChartsPaneController extends Controller {
 		this.listenToEvent(EventType.RESET_SCREEN,
 						   EventType.ENVIRONMENT_LOADED,
 						   EventType.AGENT_NOTIFICATION);
+		
+		this.root.prefWidthProperty().bind(SimuladorRede.getPrimaryStage().widthProperty());
 	}
 	
 	@Override
 	public void initializeControllerData(Object... data) {
+	}
+	
+	@Override
+	public void setStage(Stage stage) {
+		super.setStage(stage);
+		this.tabPaneCharts.prefHeightProperty().bind(stage.heightProperty());
 	}
 	
 	@Override
@@ -65,9 +76,11 @@ public class ChartsPaneController extends Controller {
 		lineCharts.add(new SuppliedLoadsPercentageChart());
 		//supplied loads x priority
 		lineCharts.add(new SuppliedLoadsActivePowerPercentageChart());
+		//out-of-service loads power %
+		lineCharts.add(new OutOfServicePowerPercentageChart());
 		//min load current voltage PU
 		lineCharts.add(new MinLoadCurrentVoltagePUChart());
-
+		
 		lineCharts.forEach((chart) -> {
 			Tab tab = new Tab(chart.getChartTitle());
 			tab.setContent(chart);

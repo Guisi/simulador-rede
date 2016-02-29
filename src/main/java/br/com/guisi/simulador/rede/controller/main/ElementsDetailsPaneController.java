@@ -187,7 +187,7 @@ public class ElementsDetailsPaneController extends Controller {
 		tvFeederDetails.getItems().add(new PropertyRow("Connected Loads:", String.valueOf(feeder.getServedLoads().size())));
 		tvFeederDetails.getItems().add(new PropertyRow("Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> load.isSupplied()).count())));
 		tvFeederDetails.getItems().add(new PropertyRow("Not Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> !load.isSupplied()).count())));
-		tvFeederDetails.getItems().add(new PropertyRow("Used active power(MW):", df.format(feeder.getUsedActivePowerMW())));
+		tvFeederDetails.getItems().add(new PropertyRow("Used active power MW:", df.format(feeder.getUsedActivePowerMW())));
 		tvFeederDetails.getItems().add(new PropertyRow("Available Active Power:", df.format(feeder.getAvailableActivePowerMW())));
 		cbFeederNumber.valueProperty().set(selectedFeeder);
 	}

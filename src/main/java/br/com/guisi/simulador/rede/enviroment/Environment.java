@@ -247,19 +247,51 @@ public class Environment {
 	}
 	
 	/**
+	 * Retorna a soma da demanda de potência ativa de todos os loads atendidos da rede
+	 * @return
+	 */
+	public double getSuppliedActivePowerDemandMW() {
+		return loads.stream().filter((load) -> load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW()).sum();
+	}
+	
+	/**
+	 * Retorna a soma da demanda de potência ativa de todos os loads desligados da rede
+	 * @return
+	 */
+	public double getOutOfServiceActivePowerDemandMW() {
+		return loads.stream().filter((load) -> !load.isOn()).mapToDouble((load) -> load.getActivePowerMW()).sum();
+	}
+	
+	/**
 	 * Retorna a soma da demanda de potência ativa de todos os loads da rede
 	 * @return
 	 */
-	public double getActivePowerDemandMW() {
-		return loads.stream().filter((load) -> load.isOn()).mapToDouble((load) -> load.getActivePowerKW()).sum() / 1000;
+	public double getTotalActivePowerDemandMW() {
+		return loads.stream().mapToDouble((load) -> load.getActivePowerMW()).sum();
+	}
+	
+	/**
+	 * Retorna a soma da demanda de potência reativa de todos os loads atendidos da rede
+	 * @return
+	 */
+	public double getSuppliedReactivePowerDemandMVar() {
+		return loads.stream().filter((load) -> load.isSupplied()).mapToDouble((load) -> load.getReactivePowerMVar()).sum();
+	}
+	
+	/**
+	 * Retorna a soma da demanda de potência reativa de todos os loads desligados da rede
+	 * @return
+	 */
+	public double getOutOfServiceReactivePowerDemandMVar() {
+		return loads.stream().filter((load) -> !load.isOn()).mapToDouble((load) -> load.getReactivePowerMVar()).sum();
 	}
 	
 	/**
 	 * Retorna a soma da demanda de potência reativa de todos os loads da rede
 	 * @return
 	 */
-	public double getReactivePowerDemandMVar() {
-		return loads.stream().filter((load) -> load.isOn()).mapToDouble((load) -> load.getReactivePowerKVar()).sum() / 1000;
+	public double getTotalReactivePowerDemandMVar() {
+		return loads.stream().mapToDouble((load) -> load.getReactivePowerMVar()).sum();
 	}
 	
 	/**

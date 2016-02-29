@@ -21,7 +21,7 @@ public class SuppliedLoadsPercentageChart extends GenericLineChart {
 		getYNumberAxis().setLowerBound(0);
 		getYNumberAxis().setUpperBound(100);
 		getXAxis().setLabel("Iteraction");
-		getYAxis().setLabel("% Loads Supplied x Priority");
+		getYAxis().setLabel("% Supplied Loads x Priority");
 		
 		suppliedLoadsPercentageSeries = new XYChart.Series<>();
         getData().add(suppliedLoadsPercentageSeries);
@@ -30,7 +30,7 @@ public class SuppliedLoadsPercentageChart extends GenericLineChart {
 	}
 	
 	private void updateSeriesName() {
-		StringBuilder sb = new StringBuilder("% Loads Supplied x Priority");
+		StringBuilder sb = new StringBuilder("% Supplied Loads x Priority");
 		if (minPercentage != null) {
 			BigDecimal value = new BigDecimal(minPercentage).setScale(5, RoundingMode.HALF_UP);
 			sb.append("\nMin Value: ").append(value.toString()).append(" %");
@@ -44,7 +44,7 @@ public class SuppliedLoadsPercentageChart extends GenericLineChart {
 	
 	@Override
 	public String getChartTitle() {
-		return "% Loads Supplied x Priority";
+		return "% Supplied Loads x Priority";
 	}
 
 	@Override

@@ -7,9 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import br.com.guisi.simulador.rede.constants.FunctionType;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
 
 public class FunctionsUtils {
@@ -20,8 +23,9 @@ public class FunctionsUtils {
 	
 	private FunctionsUtils() {}
 	
-	public static List<FunctionItem> loadProperties() throws IOException {
-		List<FunctionItem> functions = new ArrayList<>();
+	public static Map<FunctionType, List<FunctionItem>> loadProperties() throws IOException {
+		Map<FunctionType, List<FunctionItem>> functionsMap = new LinkedHashMap<>();
+		
 		if (Files.exists(Paths.get(FUNCTIONS_PROPERTIES))) {
 			Properties prop = new OrderedProperties();
 			prop.load(new FileInputStream(FUNCTIONS_PROPERTIES));
@@ -36,12 +40,20 @@ public class FunctionsUtils {
 					String functionType = (String) prop.get(prefix + "TYPE");
 					String functionExpression = (String) prop.get(prefix + "EXPRESSION");
 					FunctionItem fi = new FunctionItem(i, functionName, functionType, functionExpression);
+					
+					FunctionType ft = FunctionType.getByDescription(functionType);
+					List<FunctionItem> functions = functionsMap.get(ft);
+					if (functions == null) {
+						functions = new ArrayList<>();
+						functionsMap.put(ft, functions);
+					}
 					functions.add(fi);
 				}
 			}
 		}
-		Collections.sort(functions);
-		return functions;
+		functionsMap.values().forEach(list -> Collections.sort(list));
+		
+		return functionsMap;
 	}
 	
 	public static void saveProperties(List<FunctionItem> functions) throws IOException {

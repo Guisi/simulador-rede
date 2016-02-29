@@ -1,7 +1,9 @@
 package br.com.guisi.simulador.rede.controller.main;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -19,6 +21,7 @@ import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
+import br.com.guisi.simulador.rede.functions.FunctionItemPair;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
 import br.com.guisi.simulador.rede.util.FunctionsUtils;
 
@@ -32,7 +35,7 @@ public class FunctionsPaneController extends Controller {
 	@FXML
 	private TabPane tabPaneFunctions;
 	
-	private List<FunctionItem> functions;
+	private Map<FunctionType, List<FunctionItem>> functions;
 
 	@Override
 	public void initializeController() {
@@ -82,7 +85,7 @@ public class FunctionsPaneController extends Controller {
 	private void createFunctionTables() {
 		tabPaneFunctions.getTabs().clear();
 		for (FunctionType type : FunctionType.values()) {
-			TableView<FunctionItem> tv = new TableView<FunctionItem>();
+			TableView<FunctionItemPair> tv = new TableView<FunctionItemPair>();
 			tv.widthProperty().addListener((source, oldWidth, newWidth) -> {
                 Pane header = (Pane) tv.lookup("TableHeaderRow");
                 if (header.isVisible()){
@@ -92,18 +95,29 @@ public class FunctionsPaneController extends Controller {
                     header.setVisible(false);
                 }
 			});
-			tv.setPrefHeight(170);
+			tv.setPrefHeight(200);
 			tv.setItems(FXCollections.observableArrayList());
 			
-			TableColumn<FunctionItem, String> tcFunctionName = new TableColumn<FunctionItem, String>();
-			tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getFunctionName());
+			TableColumn<FunctionItemPair, String> tcFunctionName = new TableColumn<FunctionItemPair, String>();
+			tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getFunctionItem1().getFunctionName());
 			tcFunctionName.setStyle("-fx-font-weight: bold; -fx-alignment: center-right;");
-			tcFunctionName.setPrefWidth(400);
+			tcFunctionName.setPrefWidth(260);
 			tv.getColumns().add(tcFunctionName);
 			
-			TableColumn<FunctionItem, String> tcFunctionResult = new TableColumn<FunctionItem, String>();
-			tcFunctionResult.setPrefWidth(350);
-			tcFunctionResult.setCellValueFactory(cellData -> cellData.getValue().getFunctionResult());
+			TableColumn<FunctionItemPair, String> tcFunctionResult = new TableColumn<FunctionItemPair, String>();
+			tcFunctionResult.setPrefWidth(115);
+			tcFunctionResult.setCellValueFactory(cellData -> cellData.getValue().getFunctionItem1().getFunctionResult());
+			tv.getColumns().add(tcFunctionResult);
+			
+			tcFunctionName = new TableColumn<FunctionItemPair, String>();
+			tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getFunctionItem2() != null ? cellData.getValue().getFunctionItem2().getFunctionName() : null);
+			tcFunctionName.setStyle("-fx-font-weight: bold; -fx-alignment: center-right;");
+			tcFunctionName.setPrefWidth(260);
+			tv.getColumns().add(tcFunctionName);
+			
+			tcFunctionResult = new TableColumn<FunctionItemPair, String>();
+			tcFunctionResult.setPrefWidth(115);
+			tcFunctionResult.setCellValueFactory(cellData -> cellData.getValue().getFunctionItem2() != null ? cellData.getValue().getFunctionItem2().getFunctionResult() : null);
 			tv.getColumns().add(tcFunctionResult);
 			
 			Tab tab = new Tab(type.getDescription());
@@ -116,17 +130,39 @@ public class FunctionsPaneController extends Controller {
 	 * Com base nas funções cadastradas, executa as respectivas expressôes
 	 * e inclui nas tabelas
 	 */
+	@SuppressWarnings("unchecked")
 	private void updateFunctionsTables() {
 		if (getEnvironment() != null) {
 			try {
 				for (Tab tab: tabPaneFunctions.getTabs()) {
-					@SuppressWarnings("unchecked")
 					TableView<FunctionItem> tv = (TableView<FunctionItem>) tab.getContent();
 					tv.getItems().clear();
 				}
 				
 				functions = FunctionsUtils.loadProperties();
-				for (FunctionItem functionItem : functions) {
+				
+				functions.forEach( (key, value) -> {
+					TableView<FunctionItemPair> tv = (TableView<FunctionItemPair>) tabPaneFunctions
+						.getTabs().get(key.ordinal()).getContent();
+					
+					for (Iterator<FunctionItem> iterator = value.iterator(); iterator.hasNext();) {
+						FunctionItem functionItem = (FunctionItem) iterator.next();
+						functionItem.getFunctionName().set(functionItem.getFunctionName().get() + ":");
+	
+						FunctionItemPair functionItemPair = new FunctionItemPair();
+						functionItemPair.setFunctionItem1(functionItem);
+						
+						if (iterator.hasNext()) {
+							functionItem = (FunctionItem) iterator.next();
+							functionItem.getFunctionName().set(functionItem.getFunctionName().get() + ":");
+							functionItemPair.setFunctionItem2(functionItem);
+						}
+						
+						tv.getItems().add(functionItemPair);
+					}
+				});
+				
+				/*for (FunctionItem functionItem : functions) {
 					FunctionType ft = FunctionType.getByDescription(functionItem.getFunctionType().get());
 					functionItem.getFunctionName().set(functionItem.getFunctionName().get() + ":");
 
@@ -134,7 +170,7 @@ public class FunctionsPaneController extends Controller {
 					TableView<FunctionItem> tv = (TableView<FunctionItem>) tabPaneFunctions
 						.getTabs().get(ft.ordinal()).getContent();
 					tv.getItems().add(functionItem);
-				}
+				}*/
 				
 				this.evaluateFunctionsExpressions(null);
 			} catch (IOException e) {
@@ -152,24 +188,22 @@ public class FunctionsPaneController extends Controller {
 		EvaluationObject evaluationObject = new EvaluationObject();
 		evaluationObject.setEnvironment(getEnvironment());
 		
-		for (FunctionItem functionItem : functions) {
-			
-			//se passou nome de função, executa apenas ela
-			if (functionName != null && !functionName.equals(functionItem.getFunctionName().getValue())) {
-				continue;
-			}
-			
-			String expression = functionItem.getFunctionExpression();
-			
-			String functionResult;
-			try {
-				Object result = EvaluatorUtils.evaluateExpression(evaluationObject, expression);
-				functionResult = String.valueOf(result);
-			} catch (Exception e) {
-				functionResult = "Error in expression evaluation!";
-			}
-			functionItem.getFunctionResult().set(functionResult);
-		}
+		functions.forEach( (key, value) -> {
+			value.forEach(functionItem -> {
+				if (functionName == null || functionName.equals(functionItem.getFunctionName().getValue())) {
+					String expression = functionItem.getFunctionExpression();
+					
+					String functionResult;
+					try {
+						Object result = EvaluatorUtils.evaluateExpression(evaluationObject, expression);
+						functionResult = String.valueOf(result);
+					} catch (Exception e) {
+						functionResult = "Error in expression evaluation!";
+					}
+					functionItem.getFunctionResult().set(functionResult);
+				}
+			});
+		});
 	}
 	
 	private void processPowerflowCompleted() {

@@ -76,14 +76,14 @@ public class SimuladorRede extends Application {
 	}
 	
 	public static Controller showModalScene(String title, Class<?> controllerClass, boolean visible, Object... data) {
-    	return showScene(title, controllerClass, true, visible, data);
+    	return showScene(title, controllerClass, true, visible, false, data);
     }
 	
-	public static Controller showUtilityScene(String title, Class<?> controllerClass, boolean visible, Object... data) {
-    	return showScene(title, controllerClass, false, visible, data);
+	public static Controller showUtilityScene(String title, Class<?> controllerClass, boolean visible, boolean maximized, Object... data) {
+    	return showScene(title, controllerClass, false, visible, maximized, data);
     }
 	
-	public static Controller showScene(String title, Class<?> controllerClass, boolean modal, boolean visible, Object... data) {
+	public static Controller showScene(String title, Class<?> controllerClass, boolean modal, boolean visible, boolean maximized, Object... data) {
 		Controller controller = (Controller) ctx.getBean(controllerClass);
 		Stage stage = controller.getStage();
 
@@ -93,6 +93,7 @@ public class SimuladorRede extends Application {
 	    	stage.initOwner(primaryStage);
 	    	stage.setTitle(title);
 	    	stage.setOnCloseRequest((event) -> SimuladorRede.closeScene(controller));
+	    	stage.setMaximized(maximized);
 	    	
 	    	Pane myPane = (Pane) controller.getView();
 	    	if(stage.getScene() == null) {

@@ -4,17 +4,21 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.main.MenuPaneController">
    <children>
       <MenuBar fx:id="menuBar">
          <menus>
-            <Menu mnemonicParsing="false" text="Environment">
+            <Menu fx:id="menuEnvironment" mnemonicParsing="false" text="Environment">
                <items>
                   <MenuItem mnemonicParsing="false" onAction="#openNetworkFile" text="Import from CSV File" />
                </items>
             </Menu>
-            <Menu mnemonicParsing="false" text="Options">
+            <Menu fx:id="menuView" mnemonicParsing="false" text="View">
+              <items>
+                <MenuItem fx:id="miCharts" mnemonicParsing="false" onAction="#showChartsWindow" text="Charts" />
+              </items>
+            </Menu>
+            <Menu fx:id="menuOptions" mnemonicParsing="false" text="Options">
                <items>
                   <MenuItem mnemonicParsing="false" onAction="#showPriorityModal" text="Priority Values" />
                   <MenuItem mnemonicParsing="false" onAction="#showFunctionsWindow" text="Functions" />

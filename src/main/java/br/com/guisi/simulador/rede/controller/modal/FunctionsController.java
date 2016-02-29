@@ -1,7 +1,9 @@
 package br.com.guisi.simulador.rede.controller.modal;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javafx.collections.FXCollections;
@@ -15,6 +17,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.constants.FunctionType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
@@ -68,7 +71,10 @@ public class FunctionsController extends Controller {
 		});
 		
 		try {
-			this.functions = FunctionsUtils.loadProperties();
+			this.functions = new ArrayList<>();
+			Map<FunctionType, List<FunctionItem>> functionsMap = FunctionsUtils.loadProperties();
+			functionsMap.forEach( (key, value) -> functions.addAll(value));
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 			Alert alert = new Alert(AlertType.ERROR, e.getMessage());

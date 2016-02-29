@@ -168,9 +168,13 @@ public class QLearningAgent extends Agent {
 		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOST, environment.getActivePowerLostMW());
 		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOST, environment.getReactivePowerLostMVar());
 		
-		//seta demanda
-		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_DEMAND, environment.getActivePowerDemandMW());
-		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_DEMAND, environment.getReactivePowerDemandMVar());
+		//seta demanda atendida
+		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_SUPPLIED, environment.getSuppliedActivePowerDemandMW());
+		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_SUPPLIED, environment.getSuppliedReactivePowerDemandMVar());
+		
+		//seta demanda desligada
+		agentStepStatus.putInformation(AgentInformationType.OUT_OF_SERVICE_ACTIVE_POWER, environment.getOutOfServiceActivePowerDemandMW());
+		agentStepStatus.putInformation(AgentInformationType.OUT_OF_SERVICE_REACTIVE_POWER, environment.getOutOfServiceReactivePowerDemandMVar());
 		
 		//seta soma das prioridades dos loads atendidos e não atendidos
 		agentStepStatus.putInformation(AgentInformationType.SUPPLIED_LOADS_VS_PRIORITY, environment.getSuppliedLoadsVsPriority());

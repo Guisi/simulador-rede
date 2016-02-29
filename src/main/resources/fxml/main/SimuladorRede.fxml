@@ -13,7 +13,7 @@
    <children>
       <SplitPane fx:id="splitPane" dividerPositions="0.5" styleClass="scrollPane">
          <items>
-            <ScrollPane fx:id="scrollPaneLeft" hbarPolicy="NEVER" maxWidth="750.0" prefWidth="750.0" styleClass="scrollPane" SplitPane.resizableWithParent="false">
+            <ScrollPane fx:id="scrollPaneLeft" hbarPolicy="NEVER" maxWidth="755.0" prefWidth="755.0" styleClass="scrollPane" SplitPane.resizableWithParent="false">
                <content>
                   <VBox fx:id="networkBoxLeft" />
                </content>

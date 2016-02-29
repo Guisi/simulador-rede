@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.VBox;
@@ -33,6 +34,14 @@ public class MenuPaneController extends Controller {
 	private MenuBar menuBar;
 	@FXML
 	private MenuItem miExpressionEvaluator;
+	@FXML
+	private MenuItem miCharts;
+	@FXML
+	private Menu menuEnvironment;
+	@FXML
+	private Menu menuView;
+	@FXML
+	private Menu menuOptions;
 	
 	private File xlsFile;
 	
@@ -145,23 +154,30 @@ public class MenuPaneController extends Controller {
 	}
 	
 	public void showExpressionEvaluatorWindow() {
-		SimuladorRede.showUtilityScene("Expression Evaluator", ExpressionEvaluatorController.class, true);
+		SimuladorRede.showUtilityScene("Expression Evaluator", ExpressionEvaluatorController.class, true, false);
 	}
 	
 	public void showFunctionsWindow() {
 		SimuladorRede.showModalScene("Functions", FunctionsController.class, true);
 	}
+	
+	public void showChartsWindow() {
+		SimuladorRede.showUtilityScene("Charts", ChartsPaneController.class, true, true);
+	}
 
 	private void resetScreen() {
 		miExpressionEvaluator.setDisable(true);
+		miCharts.setDisable(true);
 	}
 	
 	private void onEnvironmentLoaded() {
 		miExpressionEvaluator.setDisable(false);
+		miCharts.setDisable(false);		
 	}
 	
 	private void enableDisableScreen(boolean disable) {
-		menuBar.setDisable(disable);
+		menuEnvironment.setDisable(disable);
+		menuOptions.setDisable(disable);
 	}
 	
 	@Override

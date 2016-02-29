@@ -43,10 +43,10 @@
                         <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Execution Type:" />
                         <ComboBox fx:id="cbTaskExecutionType" />
                         <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Current Switch:" />
-                        <Label fx:id="lblCurrentSwitch" />
+                        <Label fx:id="lblCurrentSwitch" prefWidth="120.0" />
                         <Slider fx:id="zoomSlider" blockIncrement="0.1" max="2.0" maxWidth="-Infinity" min="0.1" minWidth="-Infinity" prefWidth="150.0" value="1.0">
                            <HBox.margin>
-                              <Insets left="70.0" />
+                              <Insets left="20.0" />
                            </HBox.margin>
                         </Slider>
                      </children>
