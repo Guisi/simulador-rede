@@ -72,8 +72,8 @@ public class Environment {
 		return getRandomSwitch(null);
 	}
 	
-	public Branch getRandomSwitch(SwitchState switchState) {
-		List<Branch> lst = switchState == null ? switches : switches.stream().filter((sw) -> sw.getSwitchState() == switchState).collect(Collectors.toList());
+	public Branch getRandomSwitch(SwitchStatus switchStatus) {
+		List<Branch> lst = switchStatus == null ? switches : switches.stream().filter((sw) -> sw.getSwitchState() == switchStatus).collect(Collectors.toList());
 		return lst.isEmpty() ? null : lst.get(RANDOM.nextInt(lst.size()));
 	}
 	
@@ -143,11 +143,11 @@ public class Environment {
 	
 	/**
 	 * Retorna o switch mais próximo com o estado passado
-	 * @param switchState
+	 * @param switchStatus
 	 * @return
 	 */
-	public List<SwitchDistance> getSwitchesDistances(Branch currentSwitch, SwitchState switchState) {
-		return EnvironmentUtils.getSwitchesDistances(currentSwitch, switchState);
+	public List<SwitchDistance> getSwitchesDistances(Branch currentSwitch, SwitchStatus switchStatus) {
+		return EnvironmentUtils.getSwitchesDistances(currentSwitch, switchStatus);
 	}
 	
 	/**
@@ -255,6 +255,14 @@ public class Environment {
 	}
 	
 	/**
+	 * Retorna a soma da demanda de potência ativa de todos os loads não atendidos da rede
+	 * @return
+	 */
+	public double getNotSuppliedActivePowerDemandMW() {
+		return loads.stream().filter((load) -> load.isOn() && !load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW()).sum();
+	}
+	
+	/**
 	 * Retorna a soma da demanda de potência ativa de todos os loads desligados da rede
 	 * @return
 	 */
@@ -276,6 +284,14 @@ public class Environment {
 	 */
 	public double getSuppliedReactivePowerDemandMVar() {
 		return loads.stream().filter((load) -> load.isSupplied()).mapToDouble((load) -> load.getReactivePowerMVar()).sum();
+	}
+	
+	/**
+	 * Retorna a soma da demanda de potência reativa de todos os loads não atendidos da rede
+	 * @return
+	 */
+	public double getNotSuppliedReactivePowerDemandMVar() {
+		return loads.stream().filter((load) -> load.isOn() && !load.isSupplied()).mapToDouble((load) -> load.getReactivePowerMVar()).sum();
 	}
 	
 	/**

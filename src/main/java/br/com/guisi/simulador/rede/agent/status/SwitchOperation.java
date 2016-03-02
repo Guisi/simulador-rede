@@ -1,24 +1,24 @@
 package br.com.guisi.simulador.rede.agent.status;
 
-import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 
 public class SwitchOperation {
 
 	private final Integer switchNumber;
-	private final SwitchState switchState;
+	private final SwitchStatus switchStatus;
 	
-	public SwitchOperation(Integer switchNumber, SwitchState switchState) {
+	public SwitchOperation(Integer switchNumber, SwitchStatus switchStatus) {
 		super();
 		this.switchNumber = switchNumber;
-		this.switchState = switchState;
+		this.switchStatus = switchStatus;
 	}
 
 	public Integer getSwitchNumber() {
 		return switchNumber;
 	}
 	
-	public SwitchState getSwitchState() {
-		return switchState;
+	public SwitchStatus getSwitchState() {
+		return switchStatus;
 	}
 	
 }

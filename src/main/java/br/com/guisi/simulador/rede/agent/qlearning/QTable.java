@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import br.com.guisi.simulador.rede.enviroment.SwitchState;
 
-public class QTable extends HashMap<QKey, QValue> {
+public class QTable extends HashMap<AgentState, AgentActionMap> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -18,17 +17,18 @@ public class QTable extends HashMap<QKey, QValue> {
 	 * @param qKey
 	 * @return
 	 */
-	public QValue getQValue(QKey qKey) {
-		QValue qValue = get(qKey);
+	public QValue getQValue(AgentState state, AgentAction action) {
+		AgentActionMap actionMap = get(state);
+		if (actionMap == null) {
+			actionMap = new AgentActionMap();
+			put(state, actionMap);
+		}
+		QValue qValue = actionMap.get(action);
 		if (qValue == null) {
-			qValue = new QValue(qKey);
-			put(qKey, qValue);
+			qValue = new QValue(state, action);
+			actionMap.put(action, qValue);
 		}
 		return qValue;
-	}
-	
-	public QValue getQValue(Integer state, SwitchState action) {
-		return getQValue(new QKey(state, action));
 	}
 	
 	/**
@@ -36,11 +36,11 @@ public class QTable extends HashMap<QKey, QValue> {
 	 * @param state
 	 * @return
 	 */
-	public List<QValue> getQValues(Integer state) {
-		List<QValue> qValues = new ArrayList<>();
-		for (SwitchState action : SwitchState.OPERATIONAL_SWITCHES) {
-			QValue qValue = getQValue(new QKey(state, action));
-			qValues.add(qValue);
+	public List<QValue> getQValues(AgentState state) {
+		List<QValue> qValues = null;
+		AgentActionMap actionMap = get(state);
+		if (actionMap != null) {
+			qValues = new ArrayList<>(actionMap.values());
 		}
 		return qValues;
 	}
@@ -50,18 +50,23 @@ public class QTable extends HashMap<QKey, QValue> {
 	 * @param state
 	 * @return
 	 */
-	public synchronized QValue getBestQValue(Integer state) {
+	public synchronized QValue getBestQValue(AgentState state) {
+		QValue bestQ = null;
+
 		//Recupera valores para o estado
 		List<QValue> qValues = getQValues(state);
+		if (qValues != null && !qValues.isEmpty()) {
+			//Verifica o maior valor de recompensa
+			double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
+			
+			//filtra por todas as acoes cuja recompensa seja igual a maior
+			qValues = qValues.stream().filter(valor -> valor.getReward() == max).collect(Collectors.toList());
+			
+			//retorna uma das melhores acoes aleatoriamente
+			bestQ = qValues.get(new Random(System.currentTimeMillis()).nextInt(qValues.size()));
+		}
 		
-		//Verifica o maior valor de recompensa
-		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
-		
-		//filtra por todas as acoes cuja recompensa seja igual a maior
-		qValues = qValues.stream().filter(valor -> valor.getReward() == max).collect(Collectors.toList());
-		
-		//retorna uma das melhores acoes aleatoriamente
-		return qValues.get(new Random(System.currentTimeMillis()).nextInt(qValues.size()));
+		return bestQ;
 	}
 	
 	/**
@@ -69,23 +74,7 @@ public class QTable extends HashMap<QKey, QValue> {
 	 * @param state
 	 * @return
 	 */
-	public SwitchState getBestAction(Integer state) {
-		return this.getBestQValue(state).getQKey().getAction();
-	}
-	
-	/**
-	 * Retorna o maior valor da maior recompensa existente na tabela
-	 * @return
-	 */
-	public double getGreaterReward() {
-		return values().stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
-	}
-	
-	/**
-	 * Retorna o menor valor da maior recompensa existente na tabela
-	 * @return
-	 */
-	public double getLowerReward() {
-		return values().stream().min(Comparator.comparing(value -> value.getReward())).get().getReward();
+	public AgentAction getBestAction(AgentState state) {
+		return this.getBestQValue(state).getAction();
 	}
 }

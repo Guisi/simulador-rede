@@ -21,21 +21,21 @@ public class Branch {
 	private double resistance;
 	private double reactance;
 	private boolean switchBranch;
-	private SwitchState switchState;
+	private SwitchStatus switchStatus;
 	
 	private double instantCurrent;
 	private double activeLossMW;
 	private double reactiveLossMVar;
 	
 	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, 
-			double reactance, SwitchState switchState, boolean switchBranch, boolean fault) {
+			double reactance, SwitchStatus switchStatus, boolean switchBranch, boolean fault) {
 		this.number = number;
 		this.node1 = node1;
 		this.node2 = node2;
 		this.maxCurrent = maxCurrent;
 		this.resistance = resistance;
 		this.reactance = reactance;
-		this.switchState = switchState;
+		this.switchStatus = switchStatus;
 		this.switchBranch = switchBranch;
 	}
 	
@@ -44,7 +44,7 @@ public class Branch {
 	 * @return boolean
 	 */
 	public boolean isClosed() {
-		return SwitchState.CLOSED.equals(switchState);
+		return SwitchStatus.CLOSED.equals(switchStatus);
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class Branch {
 	 * @return
 	 */
 	public boolean isOpen() {
-		return SwitchState.OPEN.equals(switchState);
+		return SwitchStatus.OPEN.equals(switchStatus);
 	}
 	
 	/**
@@ -60,7 +60,7 @@ public class Branch {
 	 * @return
 	 */
 	public boolean hasFault() {
-		return SwitchState.FAULT.equals(switchState);
+		return SwitchStatus.FAULT.equals(switchStatus);
 	}
 	
 	/**
@@ -68,7 +68,7 @@ public class Branch {
 	 * @return
 	 */
 	public boolean isIsolated() {
-		return SwitchState.ISOLATED.equals(switchState);
+		return SwitchStatus.ISOLATED.equals(switchStatus);
 	}
 	
 	/**
@@ -128,11 +128,11 @@ public class Branch {
 	}
 
 	/**
-	 * Retorna o {@link SwitchState} desta branch, aberto ou fechado
+	 * Retorna o {@link SwitchStatus} desta branch, aberto ou fechado
 	 * @return
 	 */
-	public SwitchState getSwitchState() {
-		return switchState;
+	public SwitchStatus getSwitchState() {
+		return switchStatus;
 	}
 
 	/**
@@ -140,13 +140,13 @@ public class Branch {
 	 * e incrementa o switchOperation
 	 */
 	public void reverse() {
-		if (switchState == SwitchState.OPEN || switchState == SwitchState.CLOSED) {
-			switchState = switchState == SwitchState.OPEN ? SwitchState.CLOSED : SwitchState.OPEN;
+		if (switchStatus == SwitchStatus.OPEN || switchStatus == SwitchStatus.CLOSED) {
+			switchStatus = switchStatus == SwitchStatus.OPEN ? SwitchStatus.CLOSED : SwitchStatus.OPEN;
 		}
 	}
 	
 	public void isolateSwitch() {
-		switchState = SwitchState.ISOLATED;
+		switchStatus = SwitchStatus.ISOLATED;
 	}
 
 	/**

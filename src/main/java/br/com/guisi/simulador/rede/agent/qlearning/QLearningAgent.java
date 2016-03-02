@@ -27,7 +27,7 @@ import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
-import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
 @Named
@@ -76,8 +76,8 @@ public class QLearningAgent extends Agent {
 		turnedOffLoads.clear();
 		
 		//faz as mudança de status do switch
-		SwitchState switchState = currentSwitch.isClosed() ? SwitchState.CLOSED : SwitchState.OPEN;
-		Branch nextSwitch = getNextSwitch(environment, currentSwitch, switchState);
+		SwitchStatus switchStatus = currentSwitch.isClosed() ? SwitchStatus.CLOSED : SwitchStatus.OPEN;
+		Branch nextSwitch = getNextSwitch(environment, currentSwitch, switchStatus);
 		nextSwitch.reverse();
 
 		//executa o fluxo de potência
@@ -169,12 +169,16 @@ public class QLearningAgent extends Agent {
 		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOST, environment.getReactivePowerLostMVar());
 		
 		//seta demanda atendida
-		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_SUPPLIED, environment.getSuppliedActivePowerDemandMW());
-		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_SUPPLIED, environment.getSuppliedReactivePowerDemandMVar());
+		agentStepStatus.putInformation(AgentInformationType.SUPPLIED_LOADS_ACTIVE_POWER, environment.getSuppliedActivePowerDemandMW());
+		agentStepStatus.putInformation(AgentInformationType.SUPPLIED_LOADS_REACTIVE_POWER, environment.getSuppliedReactivePowerDemandMVar());
+		
+		//seta demanda não atendida
+		agentStepStatus.putInformation(AgentInformationType.NOT_SUPPLIED_LOADS_ACTIVE_POWER, environment.getNotSuppliedActivePowerDemandMW());
+		agentStepStatus.putInformation(AgentInformationType.NOT_SUPPLIED_LOADS_REACTIVE_POWER, environment.getNotSuppliedReactivePowerDemandMVar());
 		
 		//seta demanda desligada
-		agentStepStatus.putInformation(AgentInformationType.OUT_OF_SERVICE_ACTIVE_POWER, environment.getOutOfServiceActivePowerDemandMW());
-		agentStepStatus.putInformation(AgentInformationType.OUT_OF_SERVICE_REACTIVE_POWER, environment.getOutOfServiceReactivePowerDemandMVar());
+		agentStepStatus.putInformation(AgentInformationType.OUT_OF_SERVICE_LOADS_ACTIVE_POWER, environment.getOutOfServiceActivePowerDemandMW());
+		agentStepStatus.putInformation(AgentInformationType.OUT_OF_SERVICE_LOADS_REACTIVE_POWER, environment.getOutOfServiceReactivePowerDemandMVar());
 		
 		//seta soma das prioridades dos loads atendidos e não atendidos
 		agentStepStatus.putInformation(AgentInformationType.SUPPLIED_LOADS_VS_PRIORITY, environment.getSuppliedLoadsVsPriority());
@@ -212,15 +216,15 @@ public class QLearningAgent extends Agent {
 	 * Busca o próximo switch com base na recompensa da tabela Q e distância
 	 * @param environment
 	 * @param refSwitch switch onde o agente está atualmente
-	 * @param switchState status do switch a ser procurado
+	 * @param switchStatus status do switch a ser procurado
 	 * @return
 	 */
-	public Branch getNextSwitch(Environment environment, Branch refSwitch, SwitchState switchState) {
+	public Branch getNextSwitch(Environment environment, Branch refSwitch, SwitchStatus switchStatus) {
 		//busca a lista das distâncias dos switches
-		List<SwitchDistance> switchesDistances = environment.getSwitchesDistances(refSwitch, switchState);
+		List<SwitchDistance> switchesDistances = environment.getSwitchesDistances(refSwitch, switchStatus);
 
 		//caso esteja procurando por switches abertos para fechar
-		if (switchState == SwitchState.OPEN) {
+		if (switchStatus == SwitchStatus.OPEN) {
 			List<SwitchDistance> swRemover = new ArrayList<>();
 			switchesDistances.forEach(switchDistance -> {
 				NetworkNode node1 = switchDistance.getTheSwitch().getNodeFrom(); 
@@ -231,7 +235,7 @@ public class QLearningAgent extends Agent {
 					Load load2 = (Load) node2;
 					
 					//remove os switches que ligam dois loads onde ambos estão ligados a algum feeder, para evitar criar circuitos fechados
-					//TODO HEURÍSTICA e remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede 
+					//e remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede 
 					if ( (load1.getFeeder() != null && load2.getFeeder() != null) || (load1.getFeeder() == null && load2.getFeeder() == null)) {
 						swRemover.add(switchDistance);
 					}
@@ -259,22 +263,6 @@ public class QLearningAgent extends Agent {
 		} else {
 			return refSwitch;
 		}
-	}
-	
-	public QValue getBestQValue(Integer state) {
-		return qTable.getBestQValue(state);
-	}
-	
-	public double getGreaterReward() {
-		return qTable.getGreaterReward();
-	}
-	
-	public double getLowerReward() {
-		return qTable.getLowerReward();
-	}
-	
-	public List<QValue> getQValues(Integer state) {
-		return qTable.getQValues(state);
 	}
 	
 	@Override

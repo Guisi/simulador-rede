@@ -1,5 +1,7 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 
 /**
  * Classe representando o valor de recompensa para um estado/ação do agente
@@ -9,15 +11,14 @@ package br.com.guisi.simulador.rede.agent.qlearning;
  */
 public class QValue {
 
-	private final QKey qKey;
+	private final AgentState state;
+	private final AgentAction action;
 	private double reward;
 	
-	public QValue(QKey qKey) {
-		this.qKey = qKey;
-	}
-
-	public QKey getQKey() {
-		return qKey;
+	public QValue(AgentState state, AgentAction action) {
+		super();
+		this.state = state;
+		this.action = action;
 	}
 
 	public double getReward() {
@@ -28,11 +29,20 @@ public class QValue {
 		this.reward = reward;
 	}
 
+	public AgentState getState() {
+		return state;
+	}
+
+	public AgentAction getAction() {
+		return action;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((qKey == null) ? 0 : qKey.hashCode());
+		result = prime * result + ((action == null) ? 0 : action.hashCode());
+		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		return result;
 	}
 
@@ -45,17 +55,21 @@ public class QValue {
 		if (getClass() != obj.getClass())
 			return false;
 		QValue other = (QValue) obj;
-		if (qKey == null) {
-			if (other.qKey != null)
+		if (action == null) {
+			if (other.action != null)
 				return false;
-		} else if (!qKey.equals(other.qKey))
+		} else if (!action.equals(other.action))
+			return false;
+		if (state == null) {
+			if (other.state != null)
+				return false;
+		} else if (!state.equals(other.state))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "QValue [qKey=" + qKey + ", reward=" + reward + "]";
+		return ToStringBuilder.reflectionToString(this);
 	}
-	
 }

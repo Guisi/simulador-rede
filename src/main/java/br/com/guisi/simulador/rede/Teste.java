@@ -7,17 +7,17 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import br.com.guisi.simulador.rede.enviroment.Environment;
-import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		SwitchState switchState = SwitchState.OPEN;
+		SwitchStatus switchStatus = SwitchStatus.OPEN;
 		String load1 = "";
 		String load2 = "";
 		
-		boolean b = (switchState == SwitchState.CLOSED) && (load1 != null) == (load2 != null);
+		boolean b = (switchStatus == SwitchStatus.CLOSED) && (load1 != null) == (load2 != null);
 		
 		System.out.println(b);
 	}

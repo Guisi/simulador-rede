@@ -24,7 +24,7 @@ import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
-import br.com.guisi.simulador.rede.enviroment.SwitchState;
+import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 
 
@@ -119,10 +119,10 @@ public class EnvironmentUtils {
 				
 				boolean fault = getIntegerCellValue(line.getCell(col++)) == 1;
 				
-				SwitchState switchState = fault ? SwitchState.FAULT
-						: branchStatus == 0 ? SwitchState.OPEN : SwitchState.CLOSED;
+				SwitchStatus switchStatus = fault ? SwitchStatus.FAULT
+						: branchStatus == 0 ? SwitchStatus.OPEN : SwitchStatus.CLOSED;
 				
-				Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, switchState, switchBranch, fault);
+				Branch branch = new Branch(branchNum, node1, node2, maxCurrent, resistance, reactance, switchStatus, switchBranch, fault);
 				branchMap.put(branchNum, branch);
 				
 				//adiciona a branch nos dois loads os quais ela conecta
@@ -352,14 +352,14 @@ public class EnvironmentUtils {
 	/**
 	 * Monta uma lista com as distâncias entre o switch passado como parâmetro e os demais switches com o estado passado
 	 * @param branch
-	 * @param switchState
+	 * @param switchStatus
 	 * @return
 	 */
-	public static List<SwitchDistance> getSwitchesDistances(Branch branch, SwitchState switchState) {
+	public static List<SwitchDistance> getSwitchesDistances(Branch branch, SwitchStatus switchStatus) {
 		List<Branch> visitedBranches = new ArrayList<>();
 		visitedBranches.add(branch);
 		
-		List<SwitchDistance> switchesDistances = getSwitchesDistancesRecursive(branch, 0, visitedBranches, new ArrayList<NetworkNode>(), switchState);
+		List<SwitchDistance> switchesDistances = getSwitchesDistancesRecursive(branch, 0, visitedBranches, new ArrayList<NetworkNode>(), switchStatus);
 		Collections.sort(switchesDistances);
 		return switchesDistances;
 	}
@@ -369,11 +369,11 @@ public class EnvironmentUtils {
 	 * @param distance
 	 * @param visitedBranches
 	 * @param visitedNetworkNodes
-	 * @param switchState
+	 * @param switchStatus
 	 * @return
 	 */
 	private static List<SwitchDistance> getSwitchesDistancesRecursive(Branch branch, int distance, 
-			List<Branch> visitedBranches, List<NetworkNode> visitedNetworkNodes, SwitchState switchState) {
+			List<Branch> visitedBranches, List<NetworkNode> visitedNetworkNodes, SwitchStatus switchStatus) {
 
 		distance++;
 		List<SwitchDistance> closestSwitches = new ArrayList<>();
@@ -391,13 +391,13 @@ public class EnvironmentUtils {
 						visitedBranches.add(connectedBranch);
 
 						//se encontrou o switch conforme o estado, adiciona na lista
-						if (connectedBranch.isSwitchBranch() && connectedBranch.getSwitchState() == switchState) {
+						if (connectedBranch.isSwitchBranch() && connectedBranch.getSwitchState() == switchStatus) {
 							closestSwitches.add(new SwitchDistance(distance, connectedBranch));
 						}
 						
 						//continua navegação até que chega ao final do ramo da rede
 						List<SwitchDistance> lst = getSwitchesDistancesRecursive(connectedBranch, distance, 
-								new ArrayList<Branch>(visitedBranches), new ArrayList<NetworkNode>(visitedNetworkNodes), switchState);
+								new ArrayList<Branch>(visitedBranches), new ArrayList<NetworkNode>(visitedNetworkNodes), switchStatus);
 						
 						//para cada sw retornado, verifica se já não existe um switch distance com distância menor
 						for (SwitchDistance switchDistance : lst) {
@@ -429,7 +429,7 @@ public class EnvironmentUtils {
 			Branch branch = environment.getBranch(15);
 			
 			long ini = System.currentTimeMillis();
-			List<SwitchDistance> switchesDistances = getSwitchesDistances(branch, SwitchState.OPEN);
+			List<SwitchDistance> switchesDistances = getSwitchesDistances(branch, SwitchStatus.OPEN);
 			long fim = System.currentTimeMillis();
 			System.out.println("Tempo: " + (fim-ini));
 			

@@ -16,7 +16,7 @@ import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 import br.com.guisi.simulador.rede.view.charts.MinLoadCurrentVoltagePUChart;
-import br.com.guisi.simulador.rede.view.charts.OutOfServicePowerPercentageChart;
+import br.com.guisi.simulador.rede.view.charts.LoadsPowerPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.PowerLossChart;
 import br.com.guisi.simulador.rede.view.charts.PowerLossPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.SuppliedLoadsActivePowerPercentageChart;
@@ -77,7 +77,7 @@ public class ChartsPaneController extends Controller {
 		//supplied loads x priority
 		lineCharts.add(new SuppliedLoadsActivePowerPercentageChart());
 		//out-of-service loads power %
-		lineCharts.add(new OutOfServicePowerPercentageChart());
+		lineCharts.add(new LoadsPowerPercentageChart());
 		//min load current voltage PU
 		lineCharts.add(new MinLoadCurrentVoltagePUChart());
 		

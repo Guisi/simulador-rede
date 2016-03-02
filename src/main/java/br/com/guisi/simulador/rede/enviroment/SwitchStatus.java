@@ -5,17 +5,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public enum SwitchState {
+public enum SwitchStatus {
 
 	OPEN("Open"), CLOSED("Closed"), ISOLATED("Isolated"), FAULT("Fault");
 	
 	private static final Random RANDOM = new Random(System.currentTimeMillis());
-	public static final List<SwitchState> OPERATIONAL_SWITCHES = Collections.unmodifiableList(Arrays.asList(OPEN, CLOSED));
+	public static final List<SwitchStatus> OPERATIONAL_SWITCHES = Collections.unmodifiableList(Arrays.asList(OPEN, CLOSED));
 	private static final int SIZE = OPERATIONAL_SWITCHES.size();
 	
 	private final String description;
 	
-	private SwitchState(String description) {
+	private SwitchStatus(String description) {
 		this.description = description;
 	}
 	
@@ -23,7 +23,7 @@ public enum SwitchState {
 		return description;
 	}
 
-	public static SwitchState getRandomAction() {
+	public static SwitchStatus getRandomAction() {
 		return OPERATIONAL_SWITCHES.get(RANDOM.nextInt(SIZE));
 	}
 }
