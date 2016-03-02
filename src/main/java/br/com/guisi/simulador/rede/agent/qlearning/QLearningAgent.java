@@ -87,7 +87,7 @@ public class QLearningAgent extends Agent {
 		this.turnOffLoadsIfNecessary(environment);
 		
 		//atualiza o qValue do switch
-		updateQValue(currentSwitch);
+		updateQValue(currentSwitch, nextSwitch);
 		
 		this.currentSwitch = nextSwitch;
 		
@@ -192,10 +192,13 @@ public class QLearningAgent extends Agent {
 		agentStepStatus.putInformation(AgentInformationType.MIN_LOAD_CURRENT_VOLTAGE_PU, environment.getMinLoadCurrentVoltagePU());			
 	}
 	
-	private void updateQValue(Branch sw) {
+	private void updateQValue(Branch currentSwitch, Branch nextSwitch) {
 		//recupera em sua QTable o valor de recompensa para o estado/ação que estava antes
-		QValue qValue = qTable.getQValue(sw.getNumber(), sw.getSwitchState());
-        double q = qValue.getReward();
+		AgentState state = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchState());
+		AgentAction action = new AgentAction(nextSwitch.getNumber(), nextSwitch.getSwitchState());
+		QValue qValue = qTable.getQValue(state, action);
+        
+		double q = qValue.getReward();
         
         //recupera em sua QTable o melhor valor para o estado para o qual se moveu
         //TODO ver o que vai ser esse nextState 
