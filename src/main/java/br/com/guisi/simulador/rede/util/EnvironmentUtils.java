@@ -361,6 +361,7 @@ public class EnvironmentUtils {
 		
 		List<SwitchDistance> switchesDistances = getSwitchesDistancesRecursive(branch, 0, visitedBranches, new ArrayList<NetworkNode>(), switchStatus);
 		Collections.sort(switchesDistances);
+		
 		return switchesDistances;
 	}
 

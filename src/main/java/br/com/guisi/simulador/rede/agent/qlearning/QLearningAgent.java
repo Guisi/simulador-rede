@@ -201,15 +201,15 @@ public class QLearningAgent extends Agent {
 		double q = qValue.getReward();
         
         //recupera em sua QTable o melhor valor para o estado para o qual se moveu
-        //TODO ver o que vai ser esse nextState 
-        //double nextStateQ = qTable.getBestQValue(nextState).getReward();
+		//TODO limitar o best value da função do Q-Learning somente com os valores das possíveis ações deste nextSwitch neste momento 
+		QValue bestNextQValue = qTable.getBestQValue(new AgentState(nextSwitch.getNumber(), nextSwitch.getSwitchState()));
+        double nextStateQ = bestNextQValue != null ? bestNextQValue.getReward() : 0;
         
         //recupera a recompensa retornada pelo ambiente por ter realizado a ação
         double r = 0;//TODO actionResult.getReward();
 
         //Algoritmo Q-Learning -> calcula o novo valor para o estado/ação que estava antes
-        //TODO double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * nextStateQ) - q);
-        double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * q) - q);
+        double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * nextStateQ) - q);
         
         //atualiza sua QTable com o valor calculado pelo algoritmo
         qValue.setReward(value);
@@ -225,6 +225,12 @@ public class QLearningAgent extends Agent {
 	public Branch getNextSwitch(Environment environment, Branch refSwitch, SwitchStatus switchStatus) {
 		//busca a lista das distâncias dos switches
 		List<SwitchDistance> switchesDistances = environment.getSwitchesDistances(refSwitch, switchStatus);
+		
+		if (refSwitch.isClosed() || refSwitch.isOpen()) {
+			Integer distance = switchesDistances.isEmpty() ? 0 : switchesDistances.get(0).getDistance();
+			SwitchDistance switchDistance = new SwitchDistance(distance, refSwitch);
+			switchesDistances.add(switchDistance);
+		}
 
 		//caso esteja procurando por switches abertos para fechar
 		if (switchStatus == SwitchStatus.OPEN) {
@@ -248,6 +254,18 @@ public class QLearningAgent extends Agent {
 				}
 			});
 			switchesDistances.removeAll(swRemover);
+			
+			if (switchesDistances.size() <= 1) {
+				Integer minDistance = swRemover.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
+				
+				//filtra por todos os switches da lista com a menor distância
+				List<SwitchDistance> switchesMin = swRemover.stream().filter(valor -> valor.getDistance() == minDistance).collect(Collectors.toList());
+				
+				//retorna um dos switches mais próximos aleatoriamente
+				Branch sw = switchesMin.get(RANDOM.nextInt(switchesMin.size())).getTheSwitch();
+
+				switchesDistances = environment.getSwitchesDistances(sw, SwitchStatus.CLOSED);
+			}
 		}
 		
 		if (!switchesDistances.isEmpty()) {
@@ -275,12 +293,13 @@ public class QLearningAgent extends Agent {
 	
 	@Override
 	public List<LearningProperty> getLearningProperties(Integer state) {
-		List<QValue> qValues = this.getQValues(state);
+		//TODO
+		//List<QValue> qValues = this.getQValues(state);
 		List<LearningProperty> learningProperties = new ArrayList<>();
-		for (QValue qValue : qValues) {
+		/*for (QValue qValue : qValues) {
 			LearningProperty row = new LearningProperty("Q(s, " + qValue.getQKey().getAction().getDescription() + "):", String.valueOf(qValue.getReward()));
 			learningProperties.add(row);
-		}
+		}*/
 		return learningProperties;
 	}
 }
