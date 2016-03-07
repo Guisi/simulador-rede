@@ -148,6 +148,13 @@ public class Branch {
 	public void isolateSwitch() {
 		switchStatus = SwitchStatus.ISOLATED;
 	}
+	
+	public SwitchStatus getReverseStatus() {
+		if (switchStatus == SwitchStatus.OPEN || switchStatus == SwitchStatus.CLOSED) {
+			return switchStatus == SwitchStatus.OPEN ? SwitchStatus.CLOSED : SwitchStatus.OPEN;
+		}
+		return switchStatus;
+	}
 
 	/**
 	 * Retorna a resistencia do branch

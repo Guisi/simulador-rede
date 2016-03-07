@@ -1,5 +1,7 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -247,11 +249,33 @@ public class Environment {
 	}
 	
 	/**
+	 * Retorna o percentual de perda de potência ativa com base na potência ativa em uso 
+	 * @return
+	 */
+	public double getActivePowerLostPercentage() {
+		double activePowerLost = getActivePowerLostMW();
+		double suppliedActivePower = getSuppliedActivePowerDemandMW();
+		BigDecimal value = suppliedActivePower > 0 ? new BigDecimal(activePowerLost / suppliedActivePower * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+		return value.doubleValue();
+	}
+	
+	/**
 	 * Retorna a soma da demanda de potência ativa de todos os loads atendidos da rede
 	 * @return
 	 */
 	public double getSuppliedActivePowerDemandMW() {
 		return loads.stream().filter((load) -> load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW()).sum();
+	}
+
+	/**
+	 * Retorna o percentual de potência atendida em relação ao total de demanda da rede
+	 * @return
+	 */
+	public double getSuppliedActivePowerPercentage() {
+		double suppliedActivePower = getSuppliedActivePowerDemandMW();
+		Double totalActivePowerDemand = getTotalActivePowerDemandMW();
+		BigDecimal value = totalActivePowerDemand.doubleValue() > 0 ? new BigDecimal(suppliedActivePower / totalActivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+		return value.doubleValue();
 	}
 	
 	/**

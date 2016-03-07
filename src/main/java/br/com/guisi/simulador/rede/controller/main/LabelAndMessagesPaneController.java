@@ -3,6 +3,7 @@ package br.com.guisi.simulador.rede.controller.main;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import javafx.collections.FXCollections;
@@ -274,12 +275,18 @@ public class LabelAndMessagesPaneController extends Controller {
 		Branch branch = SimuladorRede.getEnvironment().getBranch((Integer) data);
 		
 		if (branch.isSwitchBranch() && !branch.hasFault() && !branch.isIsolated()) {
-			PropertyRow row = new PropertyRow("S: ", "Switch " + branch.getNumber());
-			tvAgentLearning.getItems().add(row);
-			
 			List<LearningProperty> learningProperties = agentControl.getAgent().getLearningProperties(branch.getNumber());
+			
+			Collections.sort(learningProperties, (LearningProperty o1, LearningProperty o2) -> {
+				if (!o1.getValue().equals(o2.getValue())) {
+					return o2.getValue().compareTo(o1.getValue());
+				} else {
+					return o1.getProperty().compareTo(o2.getProperty());
+				}
+			});
+			
 			for (LearningProperty learningProperty : learningProperties) {
-				row = new PropertyRow(learningProperty.getProperty(), learningProperty.getValue());
+				PropertyRow row = new PropertyRow(learningProperty.getProperty(), learningProperty.getValue());
 				tvAgentLearning.getItems().add(row);
 			}
 		}

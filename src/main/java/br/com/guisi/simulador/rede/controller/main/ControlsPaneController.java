@@ -150,7 +150,7 @@ public class ControlsPaneController extends Controller {
 		timeline.stop();
 		tfStoppingCriteria.setText(Constants.STOPPING_CRITERIA_STEP_NUMBER);
 		stepUpdateReceived = 0;
-		zoomSlider.setValue(1);
+		zoomSlider.setValue(0.7);
 	}
 	
 	private void processEnvironmentLoaded() {

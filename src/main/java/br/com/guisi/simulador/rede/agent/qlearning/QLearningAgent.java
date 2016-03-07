@@ -1,5 +1,7 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,6 +41,8 @@ public class QLearningAgent extends Agent {
 	private QTable qTable;
 	private Branch currentSwitch;
 	private Set<Load> turnedOffLoads;
+	
+	private double initialConfigRate;
 
 	@PostConstruct
 	public void init() {
@@ -57,6 +61,19 @@ public class QLearningAgent extends Agent {
 		if (this.currentSwitch == null) {
 			this.currentSwitch = environment.getRandomSwitch();
 		}
+		
+		this.initialConfigRate = getConfigRate(environment);
+		
+		System.out.println(initialConfigRate);
+	}
+	
+	private double getConfigRate(Environment environment) {
+		/*double activePowerLossPercentage = environment.getActivePowerLostPercentage();
+        double suppliedActivePowerPercentage = environment.getSuppliedActivePowerPercentage();
+		return (100 - activePowerLossPercentage) * suppliedActivePowerPercentage;*/
+		
+		double suppliedActivePowerPercentage = environment.getSuppliedActivePowerPercentage();
+		return suppliedActivePowerPercentage;
 	}
 	
 	/**
@@ -68,16 +85,27 @@ public class QLearningAgent extends Agent {
 	protected void runNextEpisode(AgentStepStatus agentStepStatus) {
 		Environment environment = SimuladorRede.getEnvironment();
 		
-		//Se randomico menor que E-greedy, escolhe melhor acao
-		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
-		
 		//reativa loads desativados no episódio anterior
 		turnedOffLoads.forEach(load -> load.turnOn());
 		turnedOffLoads.clear();
 		
-		//faz as mudança de status do switch
+		//escolhe o próximo switch com base no aprendizado
 		SwitchStatus switchStatus = currentSwitch.isClosed() ? SwitchStatus.CLOSED : SwitchStatus.OPEN;
-		Branch nextSwitch = getNextSwitch(environment, currentSwitch, switchStatus);
+		List<SwitchDistance> switchesDistances = this.getSwitchesDistances(environment, currentSwitch, switchStatus);
+		
+		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchState());
+		
+		//Se randomico menor que E-greedy, escolhe melhor acao
+		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
+		
+		AgentAction action = null;
+		if (randomAction) {
+			action = qTable.getRandomAction(currentState, switchesDistances);
+		} else {
+			action = qTable.getBestAction(currentState, switchesDistances);
+		}
+
+		Branch nextSwitch = environment.getBranch(action.getSwitchNumber());
 		nextSwitch.reverse();
 
 		//executa o fluxo de potência
@@ -87,7 +115,7 @@ public class QLearningAgent extends Agent {
 		this.turnOffLoadsIfNecessary(environment);
 		
 		//atualiza o qValue do switch
-		updateQValue(currentSwitch, nextSwitch);
+		this.updateQValue(environment, currentState, action);
 		
 		this.currentSwitch = nextSwitch;
 		
@@ -189,25 +217,35 @@ public class QLearningAgent extends Agent {
 		agentStepStatus.putInformation(AgentInformationType.NOT_SUPPLIED_LOADS_ACTIVE_POWER_VS_PRIORITY, environment.getNotSuppliedLoadsActivePowerMWVsPriority());
 		
 		//min load current voltage pu
-		agentStepStatus.putInformation(AgentInformationType.MIN_LOAD_CURRENT_VOLTAGE_PU, environment.getMinLoadCurrentVoltagePU());			
+		agentStepStatus.putInformation(AgentInformationType.MIN_LOAD_CURRENT_VOLTAGE_PU, environment.getMinLoadCurrentVoltagePU());
+		
+		 //nota da configuração da rede
+        double configRate = getConfigRate(environment);
+        agentStepStatus.putInformation(AgentInformationType.ENVIRONMENT_CONFIGURATION_RATE, (configRate - initialConfigRate) / initialConfigRate);
 	}
 	
-	private void updateQValue(Branch currentSwitch, Branch nextSwitch) {
+	private void updateQValue(Environment environment, AgentState state, AgentAction action) {
 		//recupera em sua QTable o valor de recompensa para o estado/ação que estava antes
-		AgentState state = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchState());
-		AgentAction action = new AgentAction(nextSwitch.getNumber(), nextSwitch.getSwitchState());
 		QValue qValue = qTable.getQValue(state, action);
         
 		double q = qValue.getReward();
         
-        //recupera em sua QTable o melhor valor para o estado para o qual se moveu
-		//TODO limitar o best value da função do Q-Learning somente com os valores das possíveis ações deste nextSwitch neste momento 
-		QValue bestNextQValue = qTable.getBestQValue(new AgentState(nextSwitch.getNumber(), nextSwitch.getSwitchState()));
+        //recupera os possíveis candidatos para a próxima iteração
+		Branch nextSwitch = environment.getBranch(action.getSwitchNumber());
+		List<SwitchDistance> switchesDistances = this.getSwitchesDistances(environment, nextSwitch, action.getSwitchStatus());
+
+		//recupera em sua QTable o melhor valor para o estado para o qual se moveu
+		AgentState nextState = new AgentState(action.getSwitchNumber(), action.getSwitchStatus());
+		QValue bestNextQValue = qTable.getBestQValue(nextState, switchesDistances);
         double nextStateQ = bestNextQValue != null ? bestNextQValue.getReward() : 0;
         
         //recupera a recompensa retornada pelo ambiente por ter realizado a ação
-        double r = 0;//TODO actionResult.getReward();
-
+        double configRate = getConfigRate(environment);
+        
+        System.out.println(configRate);
+        
+        double r = (configRate - initialConfigRate) / initialConfigRate;
+        
         //Algoritmo Q-Learning -> calcula o novo valor para o estado/ação que estava antes
         double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * nextStateQ) - q);
         
@@ -216,22 +254,16 @@ public class QLearningAgent extends Agent {
 	}
 	
 	/**
-	 * Busca o próximo switch com base na recompensa da tabela Q e distância
+	 * Busca uma lista com as distâncias dos switches candidatos
 	 * @param environment
 	 * @param refSwitch switch onde o agente está atualmente
 	 * @param switchStatus status do switch a ser procurado
 	 * @return
 	 */
-	public Branch getNextSwitch(Environment environment, Branch refSwitch, SwitchStatus switchStatus) {
+	public List<SwitchDistance> getSwitchesDistances(Environment environment, Branch refSwitch, SwitchStatus switchStatus) {
 		//busca a lista das distâncias dos switches
 		List<SwitchDistance> switchesDistances = environment.getSwitchesDistances(refSwitch, switchStatus);
 		
-		if (refSwitch.isClosed() || refSwitch.isOpen()) {
-			Integer distance = switchesDistances.isEmpty() ? 0 : switchesDistances.get(0).getDistance();
-			SwitchDistance switchDistance = new SwitchDistance(distance, refSwitch);
-			switchesDistances.add(switchDistance);
-		}
-
 		//caso esteja procurando por switches abertos para fechar
 		if (switchStatus == SwitchStatus.OPEN) {
 			List<SwitchDistance> swRemover = new ArrayList<>();
@@ -255,6 +287,15 @@ public class QLearningAgent extends Agent {
 			});
 			switchesDistances.removeAll(swRemover);
 			
+			//adiciona o próprio switch como opção, caso não seja uma falta
+			if (refSwitch.isClosed() || refSwitch.isOpen()) {
+				Integer distance = switchesDistances.isEmpty() ? 0 : switchesDistances.get(0).getDistance();
+				SwitchDistance switchDistance = new SwitchDistance(distance, refSwitch);
+				switchesDistances.add(0, switchDistance);
+			}
+			
+			//Se não existe nenhum switch aberto candidato ou somente o próprio switch onde o agente está,
+			//irá retornar uma lista de switches fechados candidatos usando como referência um dos switches abertos que não podiam ser fechados
 			if (switchesDistances.size() <= 1) {
 				Integer minDistance = swRemover.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
 				
@@ -267,23 +308,8 @@ public class QLearningAgent extends Agent {
 				switchesDistances = environment.getSwitchesDistances(sw, SwitchStatus.CLOSED);
 			}
 		}
-		
-		if (!switchesDistances.isEmpty()) {
-			//TODO escolher switch de acordo com tabela Q x distancia
-			//     se optarmos por permitir escolher o sw onde o agente já está para fechar/abrir,
-			//     o peso da distância terá que ser pequeno para evitar que o agente insista em se manter no mesmo sw
-			
-			//Verifica o menor valor de distância encontrado
-			Integer minDistance = switchesDistances.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
-			
-			//filtra por todos os switches da lista com a menor distância
-			switchesDistances = switchesDistances.stream().filter(valor -> valor.getDistance() == minDistance).collect(Collectors.toList());
-			
-			//retorna um dos switches mais próximos aleatoriamente
-			return switchesDistances.get(RANDOM.nextInt(switchesDistances.size())).getTheSwitch();
-		} else {
-			return refSwitch;
-		}
+
+		return switchesDistances;
 	}
 	
 	@Override
@@ -292,14 +318,29 @@ public class QLearningAgent extends Agent {
 	}
 	
 	@Override
-	public List<LearningProperty> getLearningProperties(Integer state) {
-		//TODO
-		//List<QValue> qValues = this.getQValues(state);
+	public List<LearningProperty> getLearningProperties(Integer switchNumber) {
 		List<LearningProperty> learningProperties = new ArrayList<>();
-		/*for (QValue qValue : qValues) {
-			LearningProperty row = new LearningProperty("Q(s, " + qValue.getQKey().getAction().getDescription() + "):", String.valueOf(qValue.getReward()));
+
+		List<QValue> qValues = new ArrayList<>();
+		List<QValue> qValuesOpen = qTable.getQValues(new AgentState(switchNumber, SwitchStatus.OPEN));
+		if (qValuesOpen != null) {
+			qValues.addAll(qValuesOpen);
+		}
+
+		List<QValue> qValuesClosed = qTable.getQValues(new AgentState(switchNumber, SwitchStatus.CLOSED));
+		if (qValuesClosed != null) {
+			qValues.addAll(qValuesClosed);
+		}
+		
+		for (QValue qValue : qValues) {
+			String state = String.format("%02d", qValue.getState().getSwitchNumber()) + "/" + qValue.getState().getSwitchStatus().getDescription();
+			String action = String.format("%02d", qValue.getAction().getSwitchNumber()) + "/" + qValue.getAction().getSwitchStatus().getPastTenseDescription();
+			
+			BigDecimal value = new BigDecimal(qValue.getReward()).setScale(10, RoundingMode.HALF_UP);
+			LearningProperty row = new LearningProperty("Q(" + state + ", " + action + "):", value.toPlainString());
 			learningProperties.add(row);
-		}*/
+		}
+
 		return learningProperties;
 	}
 }

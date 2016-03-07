@@ -386,9 +386,8 @@ public class EnvironmentUtils {
 				
 				for (Branch connectedBranch : networkNode.getBranches()) {
 
-					//se é o branch de referência, pode navegar pelos branches isolados
-					//verifica também se ainda não visitou este branch
-					if ( (branch.hasFault() || !connectedBranch.isIsolated()) && !visitedBranches.contains(connectedBranch)) {
+					//verifica se ainda não visitou este branch
+					if (!visitedBranches.contains(connectedBranch)) {
 						visitedBranches.add(connectedBranch);
 
 						//se encontrou o switch conforme o estado, adiciona na lista

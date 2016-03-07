@@ -13,6 +13,8 @@ public class SuppliedLoadsActivePowerPercentageChart extends GenericLineChart {
 	
 	private Double minPercentage;
 	private Double maxPercentage;
+	private Double average;
+	private double cumulativePercentage;
 	
 	public SuppliedLoadsActivePowerPercentageChart() {
 		super();
@@ -26,6 +28,8 @@ public class SuppliedLoadsActivePowerPercentageChart extends GenericLineChart {
 		suppliedLoadsPercentageSeries = new XYChart.Series<>();
         getData().add(suppliedLoadsPercentageSeries);
         
+        this.cumulativePercentage = 0d;
+        
         this.updateSeriesName();
 	}
 	
@@ -38,6 +42,10 @@ public class SuppliedLoadsActivePowerPercentageChart extends GenericLineChart {
 		if (maxPercentage != null) {
 			BigDecimal value = new BigDecimal(maxPercentage).setScale(5, RoundingMode.HALF_UP);
 			sb.append("\nMax Value: ").append(value.toString()).append(" %");
+		}
+		if (average != null) {
+			BigDecimal value = new BigDecimal(average).setScale(5, RoundingMode.HALF_UP);
+			sb.append("\nAverage: ").append(value.toString()).append(" %");
 		}
 		suppliedLoadsPercentageSeries.setName(sb.toString());
 	}
@@ -62,6 +70,9 @@ public class SuppliedLoadsActivePowerPercentageChart extends GenericLineChart {
 			suppliedLoadsPercentageSeries.getData().add(chartData);
 			minPercentage = minPercentage != null ? Math.min(minPercentage, value.doubleValue()) : value.doubleValue();
 			maxPercentage = maxPercentage != null ? Math.max(maxPercentage, value.doubleValue()) : value.doubleValue();
+			
+			cumulativePercentage += value.doubleValue();
+			average = cumulativePercentage / (double)agentStepStatus.getStep();
 			
 			getYNumberAxis().setLowerBound(minPercentage < 5 ? 0 : minPercentage - 5);
 	        getYNumberAxis().setUpperBound(maxPercentage > 95 ? 100 : maxPercentage + 5);
