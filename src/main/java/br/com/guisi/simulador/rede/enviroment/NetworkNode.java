@@ -1,5 +1,6 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,7 +12,9 @@ import br.com.guisi.simulador.rede.constants.Status;
  * 
  * @author douglas.guisi
  */
-public abstract class NetworkNode {
+public abstract class NetworkNode implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	protected Integer nodeNumber;
 	protected Integer x;

@@ -20,6 +20,7 @@ import br.com.guisi.simulador.rede.view.charts.LoadsPowerPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.MinLoadCurrentVoltagePUChart;
 import br.com.guisi.simulador.rede.view.charts.PowerLossChart;
 import br.com.guisi.simulador.rede.view.charts.PowerLossPercentageChart;
+import br.com.guisi.simulador.rede.view.charts.RequiredSwitchOperationsChart;
 import br.com.guisi.simulador.rede.view.charts.SuppliedLoadsActivePowerPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.SuppliedLoadsPercentageChart;
 
@@ -83,6 +84,8 @@ public class ChartsPaneController extends Controller {
 		lineCharts.add(new MinLoadCurrentVoltagePUChart());
 		//environment configuration rate
 		lineCharts.add(new EnvironmentConfigurationRateChart());
+		//required switch operations
+		lineCharts.add(new RequiredSwitchOperationsChart());
 		
 		lineCharts.forEach((chart) -> {
 			Tab tab = new Tab(chart.getChartTitle());

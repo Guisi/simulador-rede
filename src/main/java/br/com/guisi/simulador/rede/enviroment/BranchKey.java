@@ -1,7 +1,11 @@
 package br.com.guisi.simulador.rede.enviroment;
 
-public class BranchKey {
+import java.io.Serializable;
+
+public class BranchKey implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private final NetworkNode nodeFrom;
 	private final NetworkNode nodeTo;
 	

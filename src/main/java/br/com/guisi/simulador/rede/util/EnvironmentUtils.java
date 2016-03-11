@@ -419,6 +419,17 @@ public class EnvironmentUtils {
 		return closestSwitches;
 	}
 	
+	public static int countDifferentSwitchStates(Environment environment1, Environment environment2) {
+		int count = 0;
+		for (Branch branch : environment1.getBranches()) {
+			Branch otherBranch = environment2.getBranch(branch.getNumber());
+			if (!branch.getSwitchState().equals(otherBranch.getSwitchState())) {
+				count++;
+			}
+		};
+		return count;
+	}
+	
 	public static void main(String[] args) {
 		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		Environment environment = null;

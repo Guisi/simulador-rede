@@ -30,6 +30,7 @@ import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
+import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
 @Named
@@ -222,6 +223,9 @@ public class QLearningAgent extends Agent {
 		 //nota da configuração da rede
         double configRate = getConfigRate(environment);
         agentStepStatus.putInformation(AgentInformationType.ENVIRONMENT_CONFIGURATION_RATE, (configRate - initialConfigRate) / initialConfigRate);
+        
+        int differentSwitchStatesCount = EnvironmentUtils.countDifferentSwitchStates(environment, SimuladorRede.getInitialEnvironment());
+        agentStepStatus.putInformation(AgentInformationType.REQUIRED_SWITCH_OPERATIONS, differentSwitchStatesCount);
 	}
 	
 	private void updateQValue(Environment environment, AgentState state, AgentAction action) {

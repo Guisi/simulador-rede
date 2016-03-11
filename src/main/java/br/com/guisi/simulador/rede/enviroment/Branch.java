@@ -1,5 +1,6 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,7 +12,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * 
  * @author douglas.guisi
  */
-public class Branch {
+public class Branch implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private Integer number;
 	private BranchKey branchKey;

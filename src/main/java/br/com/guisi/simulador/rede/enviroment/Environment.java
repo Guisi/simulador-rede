@@ -1,5 +1,6 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -18,7 +19,9 @@ import br.com.guisi.simulador.rede.util.PriorityUtils;
  * 
  * @author douglas.guisi
  */
-public class Environment {
+public class Environment implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private final int sizeX;
 	private final int sizeY;

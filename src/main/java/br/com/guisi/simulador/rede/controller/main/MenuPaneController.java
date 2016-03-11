@@ -113,6 +113,7 @@ public class MenuPaneController extends Controller {
 				if (exceptions.isEmpty()) {
 					//isola as faltas
 					EnvironmentUtils.isolateFaultSwitches(environment);
+					EnvironmentUtils.isolateFaultSwitches(SimuladorRede.getInitialEnvironment());
 					
 					//executa o fluxo de potência
 					try {

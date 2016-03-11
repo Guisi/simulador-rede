@@ -11,6 +11,8 @@ import br.com.guisi.simulador.rede.constants.Status;
  */
 public class Load extends NetworkNode {
 
+	private static final long serialVersionUID = 1L;
+
 	private Feeder feeder;
 	private int priority;
 	

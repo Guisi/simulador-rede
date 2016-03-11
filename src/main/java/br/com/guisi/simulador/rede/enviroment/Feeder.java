@@ -12,6 +12,8 @@ import br.com.guisi.simulador.rede.constants.Status;
  */
 public class Feeder extends NetworkNode {
 
+	private static final long serialVersionUID = 1L;
+
 	private String feederColor;
 	private String loadColor;
 	private Set<Load> servedLoads;
