@@ -221,8 +221,10 @@ public class QLearningAgent extends Agent {
 		agentStepStatus.putInformation(AgentInformationType.MIN_LOAD_CURRENT_VOLTAGE_PU, environment.getMinLoadCurrentVoltagePU());
 		
 		 //nota da configuração da rede
-        double configRate = getConfigRate(environment);
-        agentStepStatus.putInformation(AgentInformationType.ENVIRONMENT_CONFIGURATION_RATE, (configRate - initialConfigRate) / initialConfigRate);
+		if (currentSwitch.isClosed()) {
+	        double configRate = getConfigRate(environment);
+	        agentStepStatus.putInformation(AgentInformationType.ENVIRONMENT_CONFIGURATION_RATE, (configRate - initialConfigRate) / initialConfigRate);
+		}
         
         int differentSwitchStatesCount = EnvironmentUtils.countDifferentSwitchStates(environment, SimuladorRede.getInitialEnvironment());
         agentStepStatus.putInformation(AgentInformationType.REQUIRED_SWITCH_OPERATIONS, differentSwitchStatesCount);
@@ -268,49 +270,51 @@ public class QLearningAgent extends Agent {
 		//busca a lista das distâncias dos switches
 		List<SwitchDistance> switchesDistances = environment.getSwitchesDistances(refSwitch, switchStatus);
 		
-		//caso esteja procurando por switches abertos para fechar
-		if (switchStatus == SwitchStatus.OPEN) {
-			List<SwitchDistance> swRemover = new ArrayList<>();
-			switchesDistances.forEach(switchDistance -> {
-				NetworkNode node1 = switchDistance.getTheSwitch().getNodeFrom(); 
-				NetworkNode node2 = switchDistance.getTheSwitch().getNodeTo();
+		List<SwitchDistance> swRemover = new ArrayList<>();
+		switchesDistances.forEach(switchDistance -> {
+			NetworkNode node1 = switchDistance.getTheSwitch().getNodeFrom(); 
+			NetworkNode node2 = switchDistance.getTheSwitch().getNodeTo();
+			
+			if (node1.isLoad() && node2.isLoad()) {
+				Load load1 = (Load) node1;
+				Load load2 = (Load) node2;
 				
-				if (node1.isLoad() && node2.isLoad()) {
-					Load load1 = (Load) node1;
-					Load load2 = (Load) node2;
-					
-					//remove os switches que ligam dois loads onde ambos estão ligados a algum feeder, para evitar criar circuitos fechados
-					//e remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede 
-					if ( (load1.getFeeder() != null && load2.getFeeder() != null) || (load1.getFeeder() == null && load2.getFeeder() == null)) {
-						swRemover.add(switchDistance);
-					}
-				} else if ( (node1.isLoad() && ((Load)node1).getFeeder() != null && node2.isFeeder()) || (node2.isLoad() && ((Load)node2).getFeeder() != null && node1.isFeeder()) ) {
-					//remove também switches onde uma das pontas é um load que já está conectado a um feeder, e a outra ponta possui um feeder, para evitar circuitos fechados
+				//remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede
+				if (load1.getFeeder() == null && load2.getFeeder() == null) {
+					swRemover.add(switchDistance);	
+				
+				} else if (switchStatus == SwitchStatus.OPEN && load1.getFeeder() != null && load2.getFeeder() != null) {
+					//caso esteja procurando sw para fechar, remove os switches que ligam dois loads onde ambos estão ligados a algum feeder, para evitar criar circuitos fechados
 					swRemover.add(switchDistance);
 				}
-			});
-			switchesDistances.removeAll(swRemover);
-			
-			//adiciona o próprio switch como opção, caso não seja uma falta
-			if (refSwitch.isClosed() || refSwitch.isOpen()) {
-				Integer distance = switchesDistances.isEmpty() ? 0 : switchesDistances.get(0).getDistance();
-				SwitchDistance switchDistance = new SwitchDistance(distance, refSwitch);
-				switchesDistances.add(0, switchDistance);
+				
+			} else if (switchStatus == SwitchStatus.OPEN && ((node1.isLoad() && ((Load)node1).getFeeder() != null && node2.isFeeder()) 
+																|| (node2.isLoad() && ((Load)node2).getFeeder() != null && node1.isFeeder())) ) {
+				//remove também switches onde uma das pontas é um load que já está conectado a um feeder, e a outra ponta possui um feeder, para evitar circuitos fechados
+				swRemover.add(switchDistance);
 			}
+		});
+		switchesDistances.removeAll(swRemover);
 			
-			//Se não existe nenhum switch aberto candidato ou somente o próprio switch onde o agente está,
-			//irá retornar uma lista de switches fechados candidatos usando como referência um dos switches abertos que não podiam ser fechados
-			if (switchesDistances.size() <= 1) {
-				Integer minDistance = swRemover.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
-				
-				//filtra por todos os switches da lista com a menor distância
-				List<SwitchDistance> switchesMin = swRemover.stream().filter(valor -> valor.getDistance() == minDistance).collect(Collectors.toList());
-				
-				//retorna um dos switches mais próximos aleatoriamente
-				Branch sw = switchesMin.get(RANDOM.nextInt(switchesMin.size())).getTheSwitch();
+		//adiciona o próprio switch como opção, caso não seja uma falta
+		if (refSwitch.isClosed() || refSwitch.isOpen()) {
+			Integer distance = switchesDistances.isEmpty() ? 0 : switchesDistances.get(0).getDistance();
+			SwitchDistance switchDistance = new SwitchDistance(distance, refSwitch);
+			switchesDistances.add(0, switchDistance);
+		}
+			
+		//Se não existe nenhum switch aberto candidato ou somente o próprio switch onde o agente está,
+		//irá retornar uma lista de switches fechados candidatos usando como referência um dos switches abertos que não podiam ser fechados
+		if (switchStatus == SwitchStatus.OPEN && switchesDistances.size() <= 1) {
+			Integer minDistance = swRemover.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
+			
+			//filtra por todos os switches da lista com a menor distância
+			List<SwitchDistance> switchesMin = swRemover.stream().filter(valor -> valor.getDistance() == minDistance).collect(Collectors.toList());
+			
+			//retorna um dos switches mais próximos aleatoriamente
+			Branch sw = switchesMin.get(RANDOM.nextInt(switchesMin.size())).getTheSwitch();
 
-				switchesDistances = environment.getSwitchesDistances(sw, SwitchStatus.CLOSED);
-			}
+			switchesDistances = environment.getSwitchesDistances(sw, SwitchStatus.CLOSED);
 		}
 
 		return switchesDistances;
