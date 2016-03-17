@@ -155,11 +155,11 @@ public class LoadsPowerPercentageChart extends GenericLineChart {
 			maxSuppliedActivePower = maxSuppliedActivePower != null ? Math.max(maxSuppliedActivePower, value.doubleValue()) : value.doubleValue();
 		}
 
-		Double suppliedReactivePower = agentStepStatus.getInformation(AgentInformationType.NOT_SUPPLIED_LOADS_REACTIVE_POWER, Double.class);
+		Double suppliedReactivePower = agentStepStatus.getInformation(AgentInformationType.SUPPLIED_LOADS_REACTIVE_POWER, Double.class);
 		if (suppliedReactivePower != null && totalReactivePowerDemand != null) {
 			BigDecimal value = totalReactivePowerDemand.doubleValue() > 0 ? new BigDecimal(suppliedReactivePower / totalReactivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
 			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
-			notSuppliedReactivePowerSeries.getData().add(chartData);
+			suppliedReactivePowerSeries.getData().add(chartData);
 			minSuppliedReactivePower = minSuppliedReactivePower != null ? Math.min(minSuppliedReactivePower, value.doubleValue()) : value.doubleValue();
 			maxSuppliedReactivePower = maxSuppliedReactivePower != null ? Math.max(maxSuppliedReactivePower, value.doubleValue()) : value.doubleValue();
 		}
