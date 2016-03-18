@@ -49,12 +49,12 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	}
 	
 	/**
-	 * Retorna o melhor valor de recompensa para o estado passado
-	 * @param state
+	 * Retorna uma lista de {@link QValueEvaluator} contendo os valores para as transições passadas
+	 * @param state Estado onde o agente se encontra
+	 * @param switchesDistances Distâncias para transições possíveis
 	 * @return
 	 */
-	public synchronized QValue getBestQValue(AgentState state, List<SwitchDistance> switchesDistances) {
-		//Senão, recupera o melhor valor utilizando a distância na formação do R
+	private List<QValueEvaluator> getQValues(AgentState state, List<SwitchDistance> switchesDistances) {
 		List<QValueEvaluator> qValues = new ArrayList<>();
 		for (SwitchDistance switchDistance : switchesDistances) {
 			Branch nextSwitch = switchDistance.getTheSwitch();
@@ -65,6 +65,16 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 			evaluator.setDistance(switchDistance.getDistance());
 			qValues.add(evaluator);
 		}
+		return qValues;
+	}
+	
+	/**
+	 * Retorna o melhor valor de recompensa para o estado passado
+	 * @param state
+	 * @return
+	 */
+	public synchronized QValue getBestQValue(AgentState state, List<SwitchDistance> switchesDistances) {
+		List<QValueEvaluator> qValues = this.getQValues(state, switchesDistances);
 
 		//Verifica o maior valor de recompensa
 		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
@@ -94,6 +104,10 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @return
 	 */
 	public AgentAction getRandomAction(AgentState state, List<SwitchDistance> switchesDistances) {
+		List<QValueEvaluator> qValues = this.getQValues(state, switchesDistances);
+		
+		//qValues.stream().min(comparator)
+		
 		//TODO fazer aleatoridade proporcional ao valor do Q
 		SwitchDistance switchDistance = switchesDistances.get(new Random(System.currentTimeMillis()).nextInt(switchesDistances.size()));
 		
