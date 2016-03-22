@@ -4,6 +4,7 @@ public class QValueEvaluator {
 
 	private QValue qValue;
 	private Integer distance;
+	private double rewardAdjustment;
 
 	public QValue getQValue() {
 		return qValue;
@@ -17,8 +18,14 @@ public class QValueEvaluator {
 	public void setDistance(Integer distance) {
 		this.distance = distance;
 	}
-	
+	public double getRewardAdjustment() {
+		return rewardAdjustment;
+	}
+	public void setRewardAdjustment(double rewardAdjustment) {
+		this.rewardAdjustment = rewardAdjustment;
+	}
+
 	public double getReward() {
-		return qValue.getReward(); //TODO verificar peso da distância
+		return qValue.getReward() + rewardAdjustment; //TODO verificar peso da distância
 	}
 }

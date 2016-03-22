@@ -90,15 +90,16 @@ public class QLearningAgent extends Agent {
 		turnedOffLoads.forEach(load -> load.turnOn());
 		turnedOffLoads.clear();
 		
-		//escolhe o próximo switch com base no aprendizado
+		//se o switch atual está fechado, vai procurar switch fechado para abrir, senão irá procurar switch aberto para fechar
 		SwitchStatus switchStatus = currentSwitch.isClosed() ? SwitchStatus.CLOSED : SwitchStatus.OPEN;
-		List<SwitchDistance> switchesDistances = this.getSwitchesDistances(environment, currentSwitch, switchStatus);
 		
-		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchState());
+		//Retorna uma lista com os switches candidatos com respectivas distâncias a partir do switch atual, conforme status de switch procurado
+		List<SwitchDistance> switchesDistances = this.getSwitchesDistances(environment, currentSwitch, switchStatus);
 		
 		//Se randomico menor que E-greedy, escolhe melhor acao
 		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
 		
+		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchState());
 		AgentAction action = null;
 		if (randomAction) {
 			action = qTable.getRandomAction(currentState, switchesDistances);

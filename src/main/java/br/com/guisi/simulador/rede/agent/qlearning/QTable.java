@@ -103,14 +103,28 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param switchesDistances
 	 * @return
 	 */
-	public AgentAction getRandomAction(AgentState state, List<SwitchDistance> switchesDistances) {
-		List<QValueEvaluator> qValues = this.getQValues(state, switchesDistances);
+	public AgentAction getRandomAction(AgentState state, List<SwitchDistance> switchesDistances, boolean proportional) {
+		//se é randômico proporcional
+		if (proportional) {
+			List<QValueEvaluator> qValues = this.getQValues(state, switchesDistances);
+			
+			boolean hasNegativeQ = qValues.stream().anyMatch(value -> value.getReward() < 0);
+			
+			//se possui valor Q negativo, faz ajuste para que todos fiquem positivos
+			if (hasNegativeQ) {
+				double minQ = qValues.stream().min(Comparator.comparing(qValue -> qValue.getReward())).get().getReward();
+				
+				double average = qValues.stream().mapToDouble(value -> value.getReward()).average().getAsDouble();
+				
+				double adjustment = Math.abs(minQ) + Math.abs(average);
+				
+				qValues.forEach(qValue -> qValue.setRewardAdjustment(adjustment));
+			}
+		} else {
+			//se não, escolhe um dos candidatos aleatoriamente
+			SwitchDistance switchDistance = switchesDistances.get(new Random(System.currentTimeMillis()).nextInt(switchesDistances.size()));
 		
-		//qValues.stream().min(comparator)
-		
-		//TODO fazer aleatoridade proporcional ao valor do Q
-		SwitchDistance switchDistance = switchesDistances.get(new Random(System.currentTimeMillis()).nextInt(switchesDistances.size()));
-		
-		return new AgentAction(switchDistance.getTheSwitch().getNumber(), switchDistance.getTheSwitch().getReverseStatus());
+			return new AgentAction(switchDistance.getTheSwitch().getNumber(), switchDistance.getTheSwitch().getReverseStatus());
+		}
 	}
 }
