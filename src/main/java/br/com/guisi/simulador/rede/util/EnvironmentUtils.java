@@ -220,32 +220,39 @@ public class EnvironmentUtils {
 		//atualiza feeders dos loads, e nodes from/to dos branches
 		environment.getFeeders().forEach(feeder -> {
 			feeder.getBranches().forEach(branch -> {
-				updateEnvironmentConnectionsRecursive(environment, feeder, branch, feeder);
+				updateEnvironmentConnectionsRecursive(environment, feeder, branch, feeder, 0);
 			});
 		});
 	}
 	
-	private static void updateEnvironmentConnectionsRecursive(Environment environment, Feeder feeder, Branch branch, NetworkNode lastNetworkNode) {
-		branch.getConnectedNodes().forEach(networkNode -> {
-			if (!lastNetworkNode.equals(networkNode) && branch.isClosed()) {
-				
-				BranchKey branchKey = new BranchKey(lastNetworkNode, networkNode);
-				branch.setBranchKey(branchKey);
-				environment.getBranchFromToMap().put(branchKey, branch);
-				
-				if (networkNode.isLoad()) {
-					Load load = (Load) networkNode;
-					load.setFeeder(feeder);
-					feeder.getServedLoads().add(load);
-				}
-	
-				networkNode.getBranches().forEach(connectedBranch -> {
-					if (!connectedBranch.equals(branch)) {
-						updateEnvironmentConnectionsRecursive(environment, feeder, connectedBranch, networkNode);
-					}
-				});
+	private static void updateEnvironmentConnectionsRecursive(Environment environment, Feeder feeder, Branch branch, NetworkNode lastNetworkNode, int switchIndex) {
+		if (branch.isClosed()) {
+			
+			if (branch.isSwitchBranch()) {
+				branch.setSwitchIndex(++switchIndex);
 			}
-		});
+			
+			for (NetworkNode networkNode : branch.getConnectedNodes()) {
+				if (!lastNetworkNode.equals(networkNode)) {
+					
+					BranchKey branchKey = new BranchKey(lastNetworkNode, networkNode);
+					branch.setBranchKey(branchKey);
+					environment.getBranchFromToMap().put(branchKey, branch);
+					
+					if (networkNode.isLoad()) {
+						Load load = (Load) networkNode;
+						load.setFeeder(feeder);
+						feeder.getServedLoads().add(load);
+					}
+		
+					for (Branch connectedBranch : networkNode.getBranches()) {
+						if (!connectedBranch.equals(branch)) {
+							updateEnvironmentConnectionsRecursive(environment, feeder, connectedBranch, networkNode, switchIndex);
+						}
+					};
+				}
+			};
+		}
 	}
 	
 	/**
@@ -431,22 +438,26 @@ public class EnvironmentUtils {
 	}
 	
 	public static void main(String[] args) {
-		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
+		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {
 			environment = EnvironmentUtils.getEnvironmentFromFile(f);
 			
-			Branch branch = environment.getBranch(15);
+			EnvironmentUtils.updateEnvironmentConnections(environment);
 			
-			long ini = System.currentTimeMillis();
+			Branch branch = environment.getBranch(18);
+			
+			System.out.println(branch.getSwitchIndex());
+			
+			/*long ini = System.currentTimeMillis();
 			List<SwitchDistance> switchesDistances = getSwitchesDistances(branch, SwitchStatus.OPEN);
 			long fim = System.currentTimeMillis();
 			System.out.println("Tempo: " + (fim-ini));
 			
 			for (SwitchDistance switchDistance : switchesDistances) {
 				System.out.println("Switch: " + switchDistance.getTheSwitch().getNumber() + " - Distance: " + switchDistance.getDistance());
-			}
+			}*/
 			
 			//EnvironmentUtils.validateEnvironment(environment);
 		} catch (Exception e) {

@@ -54,7 +54,7 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param switchesDistances Distâncias para transições possíveis
 	 * @return
 	 */
-	private List<QValueEvaluator> getQValues(AgentState state, List<SwitchDistance> switchesDistances) {
+	private List<QValueEvaluator> getQValuesEvaluators(AgentState state, List<SwitchDistance> switchesDistances) {
 		List<QValueEvaluator> qValues = new ArrayList<>();
 		for (SwitchDistance switchDistance : switchesDistances) {
 			Branch nextSwitch = switchDistance.getTheSwitch();
@@ -69,12 +69,48 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	}
 	
 	/**
+	 * Retorna uma lista de {@link QValue} contendo os valores da tabela Q para as transições passadas
+	 * @param state Estado onde o agente se encontra
+	 * @param switchesDistances Distâncias para transições possíveis
+	 * @return
+	 */
+	private List<QValue> getQValues(AgentState state, List<SwitchDistance> switchesDistances) {
+		List<QValue> qValues = new ArrayList<>();
+		for (SwitchDistance switchDistance : switchesDistances) {
+			Branch nextSwitch = switchDistance.getTheSwitch();
+			AgentAction action = new AgentAction(nextSwitch.getNumber(), nextSwitch.getReverseStatus());
+			qValues.add(getQValue(state, action));
+		}
+		return qValues;
+	}
+	
+	/**
 	 * Retorna o melhor valor de recompensa para o estado passado
 	 * @param state
 	 * @return
 	 */
 	public synchronized QValue getBestQValue(AgentState state, List<SwitchDistance> switchesDistances) {
-		List<QValueEvaluator> qValues = this.getQValues(state, switchesDistances);
+		List<QValue> qValues = this.getQValues(state, switchesDistances);
+
+		//Verifica o maior valor de recompensa
+		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
+		
+		//filtra por todas as acoes cuja recompensa seja igual a maior
+		qValues = qValues.stream().filter(valor -> valor.getReward() == max).collect(Collectors.toList());
+		
+		//retorna uma das melhores acoes aleatoriamente
+		QValue qValue = qValues.get(new Random(System.currentTimeMillis()).nextInt(qValues.size()));
+		
+		return qValue;
+	}
+	
+	/**
+	 * Retorna a acao com melhor recompensa para o estado passado
+	 * @param state
+	 * @return
+	 */
+	public AgentAction getBestAction(AgentState state, List<SwitchDistance> switchesDistances) {
+		List<QValueEvaluator> qValues = this.getQValuesEvaluators(state, switchesDistances);
 
 		//Verifica o maior valor de recompensa
 		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
@@ -85,16 +121,7 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 		//retorna uma das melhores acoes aleatoriamente
 		QValueEvaluator evaluator = qValues.get(new Random(System.currentTimeMillis()).nextInt(qValues.size()));
 		
-		return evaluator.getQValue();
-	}
-	
-	/**
-	 * Retorna a acao com melhor recompensa para o estado passado
-	 * @param state
-	 * @return
-	 */
-	public AgentAction getBestAction(AgentState state, List<SwitchDistance> switchesDistances) {
-		return this.getBestQValue(state, switchesDistances).getAction();
+		return evaluator.getQValue().getAction();
 	}
 	
 	/**
@@ -104,9 +131,11 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @return
 	 */
 	public AgentAction getRandomAction(AgentState state, List<SwitchDistance> switchesDistances, boolean proportional) {
+		AgentAction action = null;
+		
 		//se é randômico proporcional
 		if (proportional) {
-			List<QValueEvaluator> qValues = this.getQValues(state, switchesDistances);
+			List<QValueEvaluator> qValues = this.getQValuesEvaluators(state, switchesDistances);
 			
 			boolean hasNegativeQ = qValues.stream().anyMatch(value -> value.getReward() < 0);
 			
@@ -120,11 +149,30 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 				
 				qValues.forEach(qValue -> qValue.setRewardAdjustment(adjustment));
 			}
-		} else {
-			//se não, escolhe um dos candidatos aleatoriamente
-			SwitchDistance switchDistance = switchesDistances.get(new Random(System.currentTimeMillis()).nextInt(switchesDistances.size()));
+			
+			double random = Math.random();
+			double sumQ = 0;
+			double totalQ = qValues.stream().mapToDouble(value -> value.getReward()).sum();
+			
+			if (totalQ > 0) {
+				for (QValueEvaluator qValueEvaluator : qValues) {
+					double percentage = qValueEvaluator.getReward() / totalQ;
+					sumQ += percentage;
+					
+					if (sumQ >= random) {
+						action = qValueEvaluator.getQValue().getAction();
+						break;
+					}
+				}
+			}			
+		} 
 		
-			return new AgentAction(switchDistance.getTheSwitch().getNumber(), switchDistance.getTheSwitch().getReverseStatus());
+		if (action == null) {
+			//se não escolheu um no randomico proporcional, escolhe um dos candidatos aleatoriamente
+			SwitchDistance switchDistance = switchesDistances.get(new Random(System.currentTimeMillis()).nextInt(switchesDistances.size()));
+			action = new AgentAction(switchDistance.getTheSwitch().getNumber(), switchDistance.getTheSwitch().getReverseStatus());
 		}
+		
+		return action;
 	}
 }

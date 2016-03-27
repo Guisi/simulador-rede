@@ -102,7 +102,7 @@ public class QLearningAgent extends Agent {
 		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchState());
 		AgentAction action = null;
 		if (randomAction) {
-			action = qTable.getRandomAction(currentState, switchesDistances);
+			action = qTable.getRandomAction(currentState, switchesDistances, true); //TODO criar campo na tela para passar opção de randomico proporcional
 		} else {
 			action = qTable.getBestAction(currentState, switchesDistances);
 		}
@@ -249,8 +249,6 @@ public class QLearningAgent extends Agent {
         //recupera a recompensa retornada pelo ambiente por ter realizado a ação
         double configRate = getConfigRate(environment);
         
-        System.out.println(configRate);
-        
         double r = (configRate - initialConfigRate) / initialConfigRate;
         
         //Algoritmo Q-Learning -> calcula o novo valor para o estado/ação que estava antes
@@ -273,26 +271,35 @@ public class QLearningAgent extends Agent {
 		
 		List<SwitchDistance> swRemover = new ArrayList<>();
 		switchesDistances.forEach(switchDistance -> {
-			NetworkNode node1 = switchDistance.getTheSwitch().getNodeFrom(); 
-			NetworkNode node2 = switchDistance.getTheSwitch().getNodeTo();
 			
-			if (node1.isLoad() && node2.isLoad()) {
-				Load load1 = (Load) node1;
-				Load load2 = (Load) node2;
-				
-				//remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede
-				if (load1.getFeeder() == null && load2.getFeeder() == null) {
-					swRemover.add(switchDistance);	
-				
-				} else if (switchStatus == SwitchStatus.OPEN && load1.getFeeder() != null && load2.getFeeder() != null) {
-					//caso esteja procurando sw para fechar, remove os switches que ligam dois loads onde ambos estão ligados a algum feeder, para evitar criar circuitos fechados
-					swRemover.add(switchDistance);
-				}
-				
-			} else if (switchStatus == SwitchStatus.OPEN && ((node1.isLoad() && ((Load)node1).getFeeder() != null && node2.isFeeder()) 
-																|| (node2.isLoad() && ((Load)node2).getFeeder() != null && node1.isFeeder())) ) {
-				//remove também switches onde uma das pontas é um load que já está conectado a um feeder, e a outra ponta possui um feeder, para evitar circuitos fechados
+			//HEURISTICA - não pode abrir o switch mais próximo ao feeder
+			if (switchDistance.getTheSwitch().getSwitchIndex() == 1) {
 				swRemover.add(switchDistance);
+
+			} else {
+				NetworkNode node1 = switchDistance.getTheSwitch().getNodeFrom(); 
+				NetworkNode node2 = switchDistance.getTheSwitch().getNodeTo();
+				
+				if (node1.isLoad() && node2.isLoad()) {
+					Load load1 = (Load) node1;
+					Load load2 = (Load) node2;
+					
+					//HEURISTICA - remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede
+					if (load1.getFeeder() == null && load2.getFeeder() == null) {
+						swRemover.add(switchDistance);	
+					
+					} else if (switchStatus == SwitchStatus.OPEN && load1.getFeeder() != null && load2.getFeeder() != null) {
+						//caso esteja procurando sw para fechar, remove os switches que ligam dois loads onde ambos estão ligados a algum feeder, para evitar criar circuitos fechados
+						swRemover.add(switchDistance);
+					}
+					
+				} else {
+					if (switchStatus == SwitchStatus.OPEN && 
+							((node1.isLoad() && ((Load)node1).getFeeder() != null && node2.isFeeder()) || (node2.isLoad() && ((Load)node2).getFeeder() != null && node1.isFeeder())) ) {
+						//remove também switches onde uma das pontas é um load que já está conectado a um feeder, e a outra ponta possui um feeder, para evitar circuitos fechados
+						swRemover.add(switchDistance);
+					}
+				}
 			}
 		});
 		switchesDistances.removeAll(swRemover);
@@ -315,7 +322,7 @@ public class QLearningAgent extends Agent {
 			//retorna um dos switches mais próximos aleatoriamente
 			Branch sw = switchesMin.get(RANDOM.nextInt(switchesMin.size())).getTheSwitch();
 
-			switchesDistances = environment.getSwitchesDistances(sw, SwitchStatus.CLOSED);
+			switchesDistances = getSwitchesDistances(environment, sw, SwitchStatus.CLOSED);
 		}
 
 		return switchesDistances;

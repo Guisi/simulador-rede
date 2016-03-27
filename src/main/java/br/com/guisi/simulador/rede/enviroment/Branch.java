@@ -25,6 +25,7 @@ public class Branch implements Serializable {
 	private double reactance;
 	private boolean switchBranch;
 	private SwitchStatus switchStatus;
+	private int switchIndex;
 	
 	private double instantCurrent;
 	private double activeLossMW;
@@ -236,6 +237,14 @@ public class Branch implements Serializable {
 
 	public void setReactiveLossMVar(double reactiveLossMVar) {
 		this.reactiveLossMVar = reactiveLossMVar;
+	}
+
+	public int getSwitchIndex() {
+		return switchIndex;
+	}
+
+	public void setSwitchIndex(int switchIndex) {
+		this.switchIndex = switchIndex;
 	}
 
 	@Override
