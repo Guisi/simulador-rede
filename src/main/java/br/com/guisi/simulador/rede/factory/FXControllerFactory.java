@@ -8,11 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import br.com.guisi.simulador.rede.controller.main.ChartsPaneController;
 import br.com.guisi.simulador.rede.controller.main.ControlsPaneController;
 import br.com.guisi.simulador.rede.controller.main.ElementsDetailsPaneController;
+import br.com.guisi.simulador.rede.controller.main.EnvironmentChartsPaneController;
 import br.com.guisi.simulador.rede.controller.main.FunctionsPaneController;
 import br.com.guisi.simulador.rede.controller.main.LabelAndMessagesPaneController;
+import br.com.guisi.simulador.rede.controller.main.LearningChartsPaneController;
 import br.com.guisi.simulador.rede.controller.main.MenuPaneController;
 import br.com.guisi.simulador.rede.controller.main.NetworkPaneController;
 import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
@@ -92,13 +93,19 @@ public class FXControllerFactory{
 	@Bean
 	@Lazy
 	public NetworkPaneController networkPaneController(){
-		return (NetworkPaneController) loadController(NetworkPaneController.FXML_FILE);
+		return new NetworkPaneController();
 	}
 	
 	@Bean
 	@Lazy
-	public ChartsPaneController chartsPaneController(){
-		return (ChartsPaneController) loadController(ChartsPaneController.FXML_FILE);
+	public EnvironmentChartsPaneController environmentChartsPaneController() {
+		return (EnvironmentChartsPaneController) loadController(EnvironmentChartsPaneController.FXML_FILE);
+	}
+	
+	@Bean
+	@Lazy
+	public LearningChartsPaneController learningChartsPaneController() {
+		return (LearningChartsPaneController) loadController(LearningChartsPaneController.FXML_FILE);
 	}
 	
 	/**

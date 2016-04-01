@@ -1,8 +1,9 @@
-package br.com.guisi.simulador.rede.view.charts;
+package br.com.guisi.simulador.rede.view.charts.environment;
 
 import javafx.scene.chart.XYChart;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
 public class RequiredSwitchOperationsChart extends GenericLineChart {
 

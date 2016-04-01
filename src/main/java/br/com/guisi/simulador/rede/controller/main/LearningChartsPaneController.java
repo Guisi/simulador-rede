@@ -14,20 +14,12 @@ import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
-import br.com.guisi.simulador.rede.view.charts.EnvironmentConfigurationRateChart;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
-import br.com.guisi.simulador.rede.view.charts.LoadsPowerPercentageChart;
-import br.com.guisi.simulador.rede.view.charts.MinLoadCurrentVoltagePUChart;
-import br.com.guisi.simulador.rede.view.charts.PolicyChangeChart;
-import br.com.guisi.simulador.rede.view.charts.PowerLossChart;
-import br.com.guisi.simulador.rede.view.charts.PowerLossPercentageChart;
-import br.com.guisi.simulador.rede.view.charts.RequiredSwitchOperationsChart;
-import br.com.guisi.simulador.rede.view.charts.SuppliedLoadsActivePowerPercentageChart;
-import br.com.guisi.simulador.rede.view.charts.SuppliedLoadsPercentageChart;
+import br.com.guisi.simulador.rede.view.charts.learning.PolicyChangeChart;
 
-public class ChartsPaneController extends Controller {
+public class LearningChartsPaneController extends Controller {
 
-	public static final String FXML_FILE = "/fxml/main/ChartsPane.fxml";
+	public static final String FXML_FILE = "/fxml/main/LearningChartsPane.fxml";
 
 	@FXML
 	private VBox root;
@@ -71,22 +63,6 @@ public class ChartsPaneController extends Controller {
 		tabPaneCharts.getTabs().clear();
 		lineCharts = new ArrayList<>();
 		
-		//total power lost %
-		lineCharts.add(new PowerLossPercentageChart());
-		//total power lost MW/MVar
-		lineCharts.add(new PowerLossChart());
-		//% supplied loads x priority
-		lineCharts.add(new SuppliedLoadsPercentageChart());
-		//supplied loads x priority
-		lineCharts.add(new SuppliedLoadsActivePowerPercentageChart());
-		//out-of-service loads power %
-		lineCharts.add(new LoadsPowerPercentageChart());
-		//min load current voltage PU
-		lineCharts.add(new MinLoadCurrentVoltagePUChart());
-		//environment configuration rate
-		lineCharts.add(new EnvironmentConfigurationRateChart());
-		//required switch operations
-		lineCharts.add(new RequiredSwitchOperationsChart());
 		//policy change
 		lineCharts.add(new PolicyChangeChart());
 		

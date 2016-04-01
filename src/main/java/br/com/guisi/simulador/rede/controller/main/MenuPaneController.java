@@ -35,7 +35,9 @@ public class MenuPaneController extends Controller {
 	@FXML
 	private MenuItem miExpressionEvaluator;
 	@FXML
-	private MenuItem miCharts;
+	private MenuItem miEnvironmentCharts;
+	@FXML
+	private MenuItem miLearningCharts;
 	@FXML
 	private Menu menuEnvironment;
 	@FXML
@@ -162,18 +164,24 @@ public class MenuPaneController extends Controller {
 		SimuladorRede.showModalScene("Functions", FunctionsController.class, true);
 	}
 	
-	public void showChartsWindow() {
-		SimuladorRede.showUtilityScene("Charts", ChartsPaneController.class, true, true);
+	public void showEnvironmentChartsWindow() {
+		SimuladorRede.showUtilityScene("Environment Charts", EnvironmentChartsPaneController.class, true, true);
+	}
+	
+	public void showLearningChartsWindow() {
+		SimuladorRede.showUtilityScene("Learning Charts", LearningChartsPaneController.class, true, true);
 	}
 
 	private void resetScreen() {
 		miExpressionEvaluator.setDisable(true);
-		miCharts.setDisable(true);
+		miEnvironmentCharts.setDisable(true);
+		miLearningCharts.setDisable(true);
 	}
 	
 	private void onEnvironmentLoaded() {
 		miExpressionEvaluator.setDisable(false);
-		miCharts.setDisable(false);		
+		miEnvironmentCharts.setDisable(false);
+		miLearningCharts.setDisable(false);
 	}
 	
 	private void enableDisableScreen(boolean disable) {

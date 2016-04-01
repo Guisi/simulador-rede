@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.view.charts;
+package br.com.guisi.simulador.rede.view.charts.environment;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import javafx.scene.chart.XYChart;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
 public class PowerLossChart extends GenericLineChart {
 

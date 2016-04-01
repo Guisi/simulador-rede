@@ -66,16 +66,18 @@ public class SimuladorRedeController extends Controller {
 		networkBoxLeft.getChildren().add(getController(FunctionsPaneController.class).getView());
 		
 		//Painel dos gráficos
-		//networkBoxLeft.getChildren().add(getController(ChartsPaneController.class).getView());
-		getController(ChartsPaneController.class);
+		getController(EnvironmentChartsPaneController.class);
 		
-		//NetworkPane
+		getController(LearningChartsPaneController.class);
+		
+		/*//NetworkPane
 		NetworkPaneController networkPaneController = getController(NetworkPaneController.class);
-		networkBoxRight.getChildren().add(networkPaneController.getView());
+		networkBoxRight.getChildren().add(networkPaneController.getView());*/
+		
 		//networkPaneController = (NetworkPaneController) SimuladorRede.showUtilityScene("Electric Network", NetworkPaneController.class, false);
 		
 		//bind do slider para o zoom do pane da rede
-		networkPaneController.getZoomingPane().zoomFactorProperty().bind(controlsPaneController.getZoomSlider().valueProperty());
+		//networkPaneController.getZoomingPane().zoomFactorProperty().bind(controlsPaneController.getZoomSlider().valueProperty());
 		
 		this.fireEvent(EventType.RESET_SCREEN);
 		

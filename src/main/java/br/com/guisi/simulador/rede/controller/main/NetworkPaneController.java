@@ -1,7 +1,6 @@
 package br.com.guisi.simulador.rede.controller.main;
 
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
@@ -26,18 +25,18 @@ import br.com.guisi.simulador.rede.view.custom.ZoomingPane;
 
 public class NetworkPaneController extends Controller {
 
-	public static final String FXML_FILE = "/fxml/main/NetworkPane.fxml";
-
 	@Inject
 	private AgentControl agentControl;
 	
-	@FXML
 	private VBox root;
-	
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
 	
 	private int stepUpdateReceived;
+	
+	public NetworkPaneController() {
+		root = new VBox();
+	}
 	
 	@Override
 	public void initializeController() {
