@@ -2,6 +2,7 @@ package br.com.guisi.simulador.rede.view.charts;
 
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 
 public abstract class GenericLineChart extends LineChart<Number, Number> {
@@ -16,7 +17,7 @@ public abstract class GenericLineChart extends LineChart<Number, Number> {
         this.getStyleClass().add("thick-chart");
         
         getXNumberAxis().setAutoRanging(false);
-        getXNumberAxis().setLowerBound(1);
+        getXNumberAxis().setLowerBound(0);
         getXNumberAxis().setTickUnit(1);
         getXNumberAxis().setUpperBound(1);
 	}
@@ -31,5 +32,7 @@ public abstract class GenericLineChart extends LineChart<Number, Number> {
 	
 	public abstract String getChartTitle();
 
-	public abstract void processAgentStepStatus(AgentStepStatus agentStepStatus);
+	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {}
+	
+	public void processAgentStatus(AgentStatus agentStatus) {}
 }

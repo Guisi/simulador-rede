@@ -44,6 +44,7 @@ public class QLearningAgent extends Agent {
 	private Set<Load> turnedOffLoads;
 	
 	private double initialConfigRate;
+	private boolean changedPolicy;
 
 	@PostConstruct
 	public void init() {
@@ -100,13 +101,17 @@ public class QLearningAgent extends Agent {
 		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
 		
 		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchState());
+		
+		//guarda melhor ação antes de atualiza tabela Q para verificar se mudou política
+		AgentAction previousBestAction = qTable.getBestAction(currentState, switchesDistances);
+
 		AgentAction action = null;
 		if (randomAction) {
 			action = qTable.getRandomAction(currentState, switchesDistances, true); //TODO criar campo na tela para passar opção de randomico proporcional
 		} else {
-			action = qTable.getBestAction(currentState, switchesDistances);
+			action = previousBestAction;
 		}
-
+		
 		Branch nextSwitch = environment.getBranch(action.getSwitchNumber());
 		nextSwitch.reverse();
 
@@ -118,6 +123,10 @@ public class QLearningAgent extends Agent {
 		
 		//atualiza o qValue do switch
 		this.updateQValue(environment, currentState, action);
+		
+		//verifica se mudou política
+		AgentAction newBestAction = qTable.getBestAction(currentState, switchesDistances);
+		this.changedPolicy = !previousBestAction.equals(newBestAction);
 		
 		this.currentSwitch = nextSwitch;
 		
@@ -224,11 +233,15 @@ public class QLearningAgent extends Agent {
 		 //nota da configuração da rede
 		if (currentSwitch.isClosed()) {
 	        double configRate = getConfigRate(environment);
-	        agentStepStatus.putInformation(AgentInformationType.ENVIRONMENT_CONFIGURATION_RATE, (configRate - initialConfigRate) / initialConfigRate);
+	        agentStepStatus.putInformation(AgentInformationType.ENVIRONMENT_CONFIGURATION_RATE, (initialConfigRate > 0) ? (configRate - initialConfigRate) / initialConfigRate : 0);
 		}
         
+		//número de switches diferentes da rede inicial
         int differentSwitchStatesCount = EnvironmentUtils.countDifferentSwitchStates(environment, SimuladorRede.getInitialEnvironment());
         agentStepStatus.putInformation(AgentInformationType.REQUIRED_SWITCH_OPERATIONS, differentSwitchStatesCount);
+        
+        //trocou política
+        agentStepStatus.putInformation(AgentInformationType.CHANGED_POLICY, this.changedPolicy);
 	}
 	
 	private void updateQValue(Environment environment, AgentState state, AgentAction action) {
@@ -249,7 +262,7 @@ public class QLearningAgent extends Agent {
         //recupera a recompensa retornada pelo ambiente por ter realizado a ação
         double configRate = getConfigRate(environment);
         
-        double r = (configRate - initialConfigRate) / initialConfigRate;
+        double r = initialConfigRate > 0 ? (configRate - initialConfigRate) / initialConfigRate : 0;
         
         //Algoritmo Q-Learning -> calcula o novo valor para o estado/ação que estava antes
         double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * nextStateQ) - q);

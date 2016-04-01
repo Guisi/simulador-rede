@@ -18,6 +18,7 @@ import br.com.guisi.simulador.rede.view.charts.EnvironmentConfigurationRateChart
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 import br.com.guisi.simulador.rede.view.charts.LoadsPowerPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.MinLoadCurrentVoltagePUChart;
+import br.com.guisi.simulador.rede.view.charts.PolicyChangeChart;
 import br.com.guisi.simulador.rede.view.charts.PowerLossChart;
 import br.com.guisi.simulador.rede.view.charts.PowerLossPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.RequiredSwitchOperationsChart;
@@ -86,6 +87,8 @@ public class ChartsPaneController extends Controller {
 		lineCharts.add(new EnvironmentConfigurationRateChart());
 		//required switch operations
 		lineCharts.add(new RequiredSwitchOperationsChart());
+		//policy change
+		lineCharts.add(new PolicyChangeChart());
 		
 		lineCharts.forEach((chart) -> {
 			Tab tab = new Tab(chart.getChartTitle());
@@ -106,7 +109,14 @@ public class ChartsPaneController extends Controller {
 	
 	private void processAgentNotification(Object data) {
 		AgentStatus agentStatus = (AgentStatus) data;
+		
 		if (agentStatus != null) {
+			//para os casos onde o chart processa o AgentStatus a sua forma
+			lineCharts.forEach((chart) -> {
+				chart.processAgentStatus(agentStatus);
+			});
+			
+			//para os casos onde o chart espera somente o step atual
 			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 				
