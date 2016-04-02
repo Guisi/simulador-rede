@@ -27,7 +27,7 @@ public abstract class Agent {
 	
 	public final void run(TaskExecutionType taskExecutionType, StoppingCriteria stoppingCriteria) {
 		this.stopRequest = false;
-		boolean isEnvironmentValid = SimuladorRede.getEnvironment().isValidForReconfiguration();
+		boolean isEnvironmentValid = SimuladorRede.getInteractionEnvironment().isValidForReconfiguration();
 
 		while (!stopRequest && isEnvironmentValid && !stoppingCriteria.wasReached(step)) {
 			synchronized (this) {
@@ -50,7 +50,7 @@ public abstract class Agent {
 					default: break;
 				}
 				
-				isEnvironmentValid = SimuladorRede.getEnvironment().isValidForReconfiguration();
+				isEnvironmentValid = SimuladorRede.getInteractionEnvironment().isValidForReconfiguration();
 			}
 		}
 		

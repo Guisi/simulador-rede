@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
@@ -46,7 +47,7 @@ public class ExpressionEvaluatorController extends Controller {
 	
 	@Override
 	public void initializeControllerData(Object... data) {
-		evaluationObject.setEnvironment(getEnvironment());
+		evaluationObject.setEnvironment(SimuladorRede.getInteractionEnvironment());
 	}
 	
 	public void evaluateExpression() {

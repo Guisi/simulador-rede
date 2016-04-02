@@ -141,7 +141,7 @@ public class LoadsPowerPercentageChart extends GenericLineChart {
 	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
 		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
 		
-		Environment environment = SimuladorRede.getEnvironment();
+		Environment environment = SimuladorRede.getInteractionEnvironment();
 		
 		Double totalActivePowerDemand = environment.getTotalActivePowerDemandMW();
 		Double totalReactivePowerDemand = environment.getTotalReactivePowerDemandMVar();

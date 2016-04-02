@@ -106,43 +106,44 @@ public class MenuPaneController extends Controller {
 			Environment environment = EnvironmentUtils.getEnvironmentFromFile(xlsFile);
 			SimuladorRede.setEnvironment(environment);
 			
-			if (environment != null) {
-				boolean powerFlowSuccess = false;
+			boolean powerFlowSuccess = false;
+			
+			//primeiro valida se rede está radial
+			List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
+			
+			if (exceptions.isEmpty()) {
+				//isola as faltas
+				EnvironmentUtils.isolateFaultSwitches(SimuladorRede.getInitialEnvironment());
+				EnvironmentUtils.isolateFaultSwitches(SimuladorRede.getInteractionEnvironment());
+				EnvironmentUtils.isolateFaultSwitches(SimuladorRede.getLearningEnvironment());
 				
-				//primeiro valida se rede está radial
-				List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
-				
-				if (exceptions.isEmpty()) {
-					//isola as faltas
-					EnvironmentUtils.isolateFaultSwitches(environment);
-					EnvironmentUtils.isolateFaultSwitches(SimuladorRede.getInitialEnvironment());
-					
-					//executa o fluxo de potência
-					try {
-						powerFlowSuccess = PowerFlow.execute(environment);
-					} catch (Exception e) {
-						e.printStackTrace();
-						Alert alert = new Alert(AlertType.ERROR);
-						alert.setContentText(e.getMessage());
-						alert.showAndWait();
-					}
-				} else {
+				//executa o fluxo de potência
+				try {
+					powerFlowSuccess = PowerFlow.execute(SimuladorRede.getInitialEnvironment());
+					powerFlowSuccess = PowerFlow.execute(SimuladorRede.getInteractionEnvironment());
+					powerFlowSuccess = PowerFlow.execute(SimuladorRede.getLearningEnvironment());
+				} catch (Exception e) {
+					e.printStackTrace();
 					Alert alert = new Alert(AlertType.ERROR);
-					StringBuilder sb = new StringBuilder();
-					exceptions.forEach(ex -> sb.append(ex.getMessage()).append("\n")); 
-					alert.setContentText(sb.toString());
+					alert.setContentText(e.getMessage());
 					alert.showAndWait();
 				}
-				
-				this.fireEvent(EventType.ENVIRONMENT_LOADED);
+			} else {
+				Alert alert = new Alert(AlertType.ERROR);
+				StringBuilder sb = new StringBuilder();
+				exceptions.forEach(ex -> sb.append(ex.getMessage()).append("\n")); 
+				alert.setContentText(sb.toString());
+				alert.showAndWait();
+			}
+			
+			this.fireEvent(EventType.ENVIRONMENT_LOADED);
 
-				if (powerFlowSuccess) {
-					this.fireEvent(EventType.POWER_FLOW_COMPLETED);
-				} else {
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setContentText("Newton's method power flow did not converge");
-					alert.showAndWait();
-				}
+			if (powerFlowSuccess) {
+				this.fireEvent(EventType.POWER_FLOW_COMPLETED);
+			} else {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setContentText("Newton's method power flow did not converge");
+				alert.showAndWait();
 			}
 		} catch (Exception e) {
 			Alert alert = new Alert(AlertType.ERROR);

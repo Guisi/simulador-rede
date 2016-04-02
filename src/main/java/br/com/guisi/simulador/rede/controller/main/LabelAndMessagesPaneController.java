@@ -30,6 +30,7 @@ import br.com.guisi.simulador.rede.agent.status.LearningProperty;
 import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.tableview.BrokenConstraintRow;
 import br.com.guisi.simulador.rede.view.tableview.PropertyRow;
@@ -187,10 +188,11 @@ public class LabelAndMessagesPaneController extends Controller {
 	 * Verifica as restrições quebradas e cria as mensagens
 	 */
 	private void updateWarningsBrokenConstraints() {
-		if (getEnvironment() != null) {
+		Environment environment = SimuladorRede.getInteractionEnvironment();
+		if (environment != null) {
 			tvBrokenConstraints.getItems().clear();
 			
-			getEnvironment().getLoads().forEach((load) -> {
+			environment.getLoads().forEach((load) -> {
 				String msg = null;
 				if (load.isOn()) {
 					if (load.getFeeder() == null) {
@@ -208,7 +210,7 @@ public class LabelAndMessagesPaneController extends Controller {
 				}
 			});
 			
-			getEnvironment().getFeeders().forEach((feeder) -> {
+			environment.getFeeders().forEach((feeder) -> {
 				if (feeder.isOn() && feeder.isPowerOverflow()) {
 					BrokenConstraintRow constraint = new BrokenConstraintRow();
 					constraint.getMessage().setValue("Feeder " + feeder.getNodeNumber() 
@@ -217,7 +219,7 @@ public class LabelAndMessagesPaneController extends Controller {
 				}
 			});
 			
-			getEnvironment().getBranches().forEach((branch) -> {
+			environment.getBranches().forEach((branch) -> {
 				if (branch.isClosed() && branch.isMaxCurrentOverflow()) {
 					BrokenConstraintRow constraint = new BrokenConstraintRow();
 					constraint.getMessage().setValue("Branch " + branch.getNumber() 
@@ -272,7 +274,7 @@ public class LabelAndMessagesPaneController extends Controller {
 	private void processBranchSelected(Object data) {
 		tvAgentLearning.getItems().clear();
 		
-		Branch branch = SimuladorRede.getEnvironment().getBranch((Integer) data);
+		Branch branch = SimuladorRede.getInteractionEnvironment().getBranch((Integer) data);
 		
 		if (branch.isSwitchBranch() && !branch.hasFault() && !branch.isIsolated()) {
 			List<LearningProperty> learningProperties = agentControl.getAgent().getLearningProperties(branch.getNumber());

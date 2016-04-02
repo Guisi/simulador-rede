@@ -135,7 +135,7 @@ public class Branch implements Serializable {
 	 * Retorna o {@link SwitchStatus} desta branch, aberto ou fechado
 	 * @return
 	 */
-	public SwitchStatus getSwitchState() {
+	public SwitchStatus getSwitchStatus() {
 		return switchStatus;
 	}
 

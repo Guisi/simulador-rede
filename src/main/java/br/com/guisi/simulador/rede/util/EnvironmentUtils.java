@@ -398,7 +398,7 @@ public class EnvironmentUtils {
 						visitedBranches.add(connectedBranch);
 
 						//se encontrou o switch conforme o estado, adiciona na lista
-						if (connectedBranch.isSwitchBranch() && connectedBranch.getSwitchState() == switchStatus) {
+						if (connectedBranch.isSwitchBranch() && connectedBranch.getSwitchStatus() == switchStatus) {
 							closestSwitches.add(new SwitchDistance(distance, connectedBranch));
 						}
 						
@@ -430,7 +430,7 @@ public class EnvironmentUtils {
 		int count = 0;
 		for (Branch branch : environment1.getBranches()) {
 			Branch otherBranch = environment2.getBranch(branch.getNumber());
-			if (!branch.getSwitchState().equals(otherBranch.getSwitchState())) {
+			if (!branch.getSwitchStatus().equals(otherBranch.getSwitchStatus())) {
 				count++;
 			}
 		};

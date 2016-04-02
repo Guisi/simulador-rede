@@ -45,6 +45,8 @@ public class QLearningAgent extends Agent {
 	
 	private double initialConfigRate;
 	private boolean changedPolicy;
+	private boolean isSameState;
+	
 
 	@PostConstruct
 	public void init() {
@@ -55,8 +57,9 @@ public class QLearningAgent extends Agent {
 	public void reset() {
 		this.qTable = new QTable();
 		this.turnedOffLoads = new LinkedHashSet<>();
+		this.isSameState = false;
 		
-		Environment environment = SimuladorRede.getEnvironment();
+		Environment environment = SimuladorRede.getInteractionEnvironment();
 		//verifica se existe alguma falta
 		this.currentSwitch = environment.getRandomFault();
 		//se não existe, inicia por um switch aberto aleatório
@@ -85,7 +88,7 @@ public class QLearningAgent extends Agent {
 	 */
 	@Override
 	protected void runNextEpisode(AgentStepStatus agentStepStatus) {
-		Environment environment = SimuladorRede.getEnvironment();
+		Environment environment = SimuladorRede.getInteractionEnvironment();
 		
 		//reativa loads desativados no episódio anterior
 		turnedOffLoads.forEach(load -> load.turnOn());
@@ -95,19 +98,19 @@ public class QLearningAgent extends Agent {
 		SwitchStatus switchStatus = currentSwitch.isClosed() ? SwitchStatus.CLOSED : SwitchStatus.OPEN;
 		
 		//Retorna uma lista com os switches candidatos com respectivas distâncias a partir do switch atual, conforme status de switch procurado
-		List<SwitchDistance> switchesDistances = this.getSwitchesDistances(environment, currentSwitch, switchStatus);
+		List<CandidateSwitch> candidateSwitches = this.getCandidateSwitches(environment, currentSwitch, switchStatus);
 		
 		//Se randomico menor que E-greedy, escolhe melhor acao
 		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
 		
-		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchState());
+		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchStatus());
 		
 		//guarda melhor ação antes de atualiza tabela Q para verificar se mudou política
-		AgentAction previousBestAction = qTable.getBestAction(currentState, switchesDistances);
+		AgentAction previousBestAction = qTable.getBestAction(currentState, candidateSwitches);
 
 		AgentAction action = null;
 		if (randomAction) {
-			action = qTable.getRandomAction(currentState, switchesDistances, true); //TODO criar campo na tela para passar opção de randomico proporcional
+			action = qTable.getRandomAction(currentState, candidateSwitches, true); //TODO criar campo na tela para passar opção de randomico proporcional
 		} else {
 			action = previousBestAction;
 		}
@@ -125,8 +128,11 @@ public class QLearningAgent extends Agent {
 		this.updateQValue(environment, currentState, action);
 		
 		//verifica se mudou política
-		AgentAction newBestAction = qTable.getBestAction(currentState, switchesDistances);
+		AgentAction newBestAction = qTable.getBestAction(currentState, candidateSwitches);
 		this.changedPolicy = !previousBestAction.equals(newBestAction);
+		
+		//HEURÍSTICA - se o agente permaneceu no mesmo switch, na próxima iteração deverá ir para um switch diferente
+		this.isSameState = this.currentSwitch.equals(nextSwitch);
 		
 		this.currentSwitch = nextSwitch;
 		
@@ -201,7 +207,7 @@ public class QLearningAgent extends Agent {
 	
 	private void generateAgentStatus(Environment environment, AgentStepStatus agentStepStatus) {
 		//atualiza status com o switch alterado
-		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATION, new SwitchOperation(currentSwitch.getNumber(), currentSwitch.getSwitchState()));
+		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATION, new SwitchOperation(currentSwitch.getNumber(), currentSwitch.getSwitchStatus()));
 		
 		//seta total de perdas
 		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOST, environment.getActivePowerLostMW());
@@ -242,6 +248,9 @@ public class QLearningAgent extends Agent {
         
         //trocou política
         agentStepStatus.putInformation(AgentInformationType.CHANGED_POLICY, this.changedPolicy);
+        
+        //média dos valores Q
+        agentStepStatus.putInformation(AgentInformationType.QVALUES_AVERAGE, qTable.getQValuesAverage());
 	}
 	
 	private void updateQValue(Environment environment, AgentState state, AgentAction action) {
@@ -252,11 +261,11 @@ public class QLearningAgent extends Agent {
         
         //recupera os possíveis candidatos para a próxima iteração
 		Branch nextSwitch = environment.getBranch(action.getSwitchNumber());
-		List<SwitchDistance> switchesDistances = this.getSwitchesDistances(environment, nextSwitch, action.getSwitchStatus());
+		List<CandidateSwitch> candidateSwitches = this.getCandidateSwitches(environment, nextSwitch, action.getSwitchStatus());
 
 		//recupera em sua QTable o melhor valor para o estado para o qual se moveu
 		AgentState nextState = new AgentState(action.getSwitchNumber(), action.getSwitchStatus());
-		QValue bestNextQValue = qTable.getBestQValue(nextState, switchesDistances);
+		QValue bestNextQValue = qTable.getBestQValue(nextState, candidateSwitches);
         double nextStateQ = bestNextQValue != null ? bestNextQValue.getReward() : 0;
         
         //recupera a recompensa retornada pelo ambiente por ter realizado a ação
@@ -272,23 +281,24 @@ public class QLearningAgent extends Agent {
 	}
 	
 	/**
-	 * Busca uma lista com as distâncias dos switches candidatos
+	 * Busca uma lista com os switches candidatos
 	 * @param environment
 	 * @param refSwitch switch onde o agente está atualmente
 	 * @param switchStatus status do switch a ser procurado
 	 * @return
 	 */
-	public List<SwitchDistance> getSwitchesDistances(Environment environment, Branch refSwitch, SwitchStatus switchStatus) {
+	public List<CandidateSwitch> getCandidateSwitches(Environment environment, Branch refSwitch, SwitchStatus switchStatus) {
 		//busca a lista das distâncias dos switches
 		List<SwitchDistance> switchesDistances = environment.getSwitchesDistances(refSwitch, switchStatus);
 		
-		List<SwitchDistance> swRemover = new ArrayList<>();
-		switchesDistances.forEach(switchDistance -> {
+		List<CandidateSwitch> candidateSwitches = new ArrayList<>();
+		
+		for (SwitchDistance switchDistance : switchesDistances) {
+			boolean ignore = false;
 			
 			//HEURISTICA - não pode abrir o switch mais próximo ao feeder
 			if (switchDistance.getTheSwitch().getSwitchIndex() == 1) {
-				swRemover.add(switchDistance);
-
+				ignore = true;
 			} else {
 				NetworkNode node1 = switchDistance.getTheSwitch().getNodeFrom(); 
 				NetworkNode node2 = switchDistance.getTheSwitch().getNodeTo();
@@ -297,48 +307,51 @@ public class QLearningAgent extends Agent {
 					Load load1 = (Load) node1;
 					Load load2 = (Load) node2;
 					
-					//HEURISTICA - remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede
+					//HEURISTICA - em regiões de ilha não são feitas operações de switch
+					//remove os switches que ligam dois loads que não estejam ligados a nenhum feeder, pois sabe-se que não irão gerar uma melhoria na rede
 					if (load1.getFeeder() == null && load2.getFeeder() == null) {
-						swRemover.add(switchDistance);	
-					
+						ignore = true;	
 					} else if (switchStatus == SwitchStatus.OPEN && load1.getFeeder() != null && load2.getFeeder() != null) {
 						//caso esteja procurando sw para fechar, remove os switches que ligam dois loads onde ambos estão ligados a algum feeder, para evitar criar circuitos fechados
-						swRemover.add(switchDistance);
+						ignore = true;
 					}
 					
 				} else {
 					if (switchStatus == SwitchStatus.OPEN && 
 							((node1.isLoad() && ((Load)node1).getFeeder() != null && node2.isFeeder()) || (node2.isLoad() && ((Load)node2).getFeeder() != null && node1.isFeeder())) ) {
 						//remove também switches onde uma das pontas é um load que já está conectado a um feeder, e a outra ponta possui um feeder, para evitar circuitos fechados
-						swRemover.add(switchDistance);
+						ignore = true;
 					}
 				}
 			}
-		});
-		switchesDistances.removeAll(swRemover);
+			
+			if (!ignore) {
+				candidateSwitches.add(new CandidateSwitch(switchDistance.getDistance(), 
+						switchDistance.getTheSwitch().getNumber(), switchDistance.getTheSwitch().getReverseStatus()));
+			}
+		};
 			
 		//adiciona o próprio switch como opção, caso não seja uma falta
-		if (refSwitch.isClosed() || refSwitch.isOpen()) {
+		if (!this.isSameState && refSwitch.isClosed() || refSwitch.isOpen()) {
 			Integer distance = switchesDistances.isEmpty() ? 0 : switchesDistances.get(0).getDistance();
-			SwitchDistance switchDistance = new SwitchDistance(distance, refSwitch);
-			switchesDistances.add(0, switchDistance);
+			candidateSwitches.add(0, new CandidateSwitch(distance, refSwitch.getNumber(), refSwitch.getReverseStatus()));
 		}
 			
 		//Se não existe nenhum switch aberto candidato ou somente o próprio switch onde o agente está,
 		//irá retornar uma lista de switches fechados candidatos usando como referência um dos switches abertos que não podiam ser fechados
-		if (switchStatus == SwitchStatus.OPEN && switchesDistances.size() <= 1) {
-			Integer minDistance = swRemover.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
+		if (switchStatus == SwitchStatus.OPEN && candidateSwitches.size() <= 1) {
+			Integer minDistance = switchesDistances.stream().min(Comparator.comparing(value -> value.getDistance())).get().getDistance();
 			
 			//filtra por todos os switches da lista com a menor distância
-			List<SwitchDistance> switchesMin = swRemover.stream().filter(valor -> valor.getDistance() == minDistance).collect(Collectors.toList());
+			List<SwitchDistance> switchesMin = switchesDistances.stream().filter(valor -> valor.getDistance() == minDistance).collect(Collectors.toList());
 			
 			//retorna um dos switches mais próximos aleatoriamente
 			Branch sw = switchesMin.get(RANDOM.nextInt(switchesMin.size())).getTheSwitch();
 
-			switchesDistances = getSwitchesDistances(environment, sw, SwitchStatus.CLOSED);
+			candidateSwitches = getCandidateSwitches(environment, sw, SwitchStatus.CLOSED);
 		}
 
-		return switchesDistances;
+		return candidateSwitches;
 	}
 	
 	@Override

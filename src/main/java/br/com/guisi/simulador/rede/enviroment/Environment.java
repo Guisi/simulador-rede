@@ -78,7 +78,7 @@ public class Environment implements Serializable {
 	}
 	
 	public Branch getRandomSwitch(SwitchStatus switchStatus) {
-		List<Branch> lst = switchStatus == null ? switches : switches.stream().filter((sw) -> sw.getSwitchState() == switchStatus).collect(Collectors.toList());
+		List<Branch> lst = switchStatus == null ? switches : switches.stream().filter((sw) -> sw.getSwitchStatus() == switchStatus).collect(Collectors.toList());
 		return lst.isEmpty() ? null : lst.get(RANDOM.nextInt(lst.size()));
 	}
 	

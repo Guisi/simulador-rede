@@ -2,12 +2,15 @@ package br.com.guisi.simulador.rede.controller.main;
 
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
-import br.com.guisi.simulador.rede.SimuladorRede;
+import org.springframework.context.annotation.Scope;
+
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
@@ -16,13 +19,14 @@ import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
-import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.custom.BranchStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkPane;
 import br.com.guisi.simulador.rede.view.custom.ZoomingPane;
 
+@Named
+@Scope("prototype")
 public class NetworkPaneController extends Controller {
 
 	@Inject
@@ -31,6 +35,7 @@ public class NetworkPaneController extends Controller {
 	private VBox root;
 	private ZoomingPane zoomingPane;
 	private NetworkPane networkPane;
+	private Slider zoomSlider;
 	
 	private int stepUpdateReceived;
 	
@@ -51,6 +56,18 @@ public class NetworkPaneController extends Controller {
 		networkPane = new NetworkPane();
 		zoomingPane = new ZoomingPane(networkPane);
 		zoomingPane.getStyleClass().add("networkPane");
+		
+		zoomSlider = new Slider();
+		zoomSlider.setBlockIncrement(0.1);
+		zoomSlider.setMin(0.1);
+		zoomSlider.setMax(2);
+		zoomSlider.setMinWidth(150);
+		zoomSlider.setMaxWidth(150);
+		zoomSlider.setPrefWidth(150);
+		root.getChildren().add(zoomSlider);
+		
+		//bind do slider para o zoom do pane da rede
+		zoomingPane.zoomFactorProperty().bind(zoomSlider.valueProperty());
 		
 		root.getChildren().add(zoomingPane);
 	}
@@ -77,6 +94,7 @@ public class NetworkPaneController extends Controller {
 		root.setVisible(false);
 		networkPane.reset();
 		this.stepUpdateReceived = 0;
+		zoomSlider.setValue(0.7);
 	}
 	
 	private void onEnvironmentLoaded() {
@@ -146,19 +164,17 @@ public class NetworkPaneController extends Controller {
 		AgentStatus agentStatus = (AgentStatus) data;
 		
 		if (agentStatus != null) {
-			Environment environment = SimuladorRede.getEnvironment();
-			
 			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 				
 				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
 				if (switchOperation != null) {
-					Branch sw = environment.getBranch(switchOperation.getSwitchNumber());
+					Branch sw = getEnvironment().getBranch(switchOperation.getSwitchNumber());
 					networkPane.updateBranchDrawing(sw);
 					networkPane.changeAgentCirclePosition(sw.getNumber());
 
 					//atualiza status dos nós na tela
-					environment.getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
+					getEnvironment().getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
 				}
 			}
 			
@@ -167,23 +183,17 @@ public class NetworkPaneController extends Controller {
 	}
 	
 	private void processAgentStop() {
-		Environment environment = SimuladorRede.getEnvironment();
-		
-		environment.getSwitches().forEach((sw) -> networkPane.updateBranchDrawing(sw));
+		getEnvironment().getSwitches().forEach((sw) -> networkPane.updateBranchDrawing(sw));
 
 		//atualiza status dos loads na tela
-		environment.getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
+		getEnvironment().getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
 		
 		//atualiza status dos feeders na tela
-		environment.getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
+		getEnvironment().getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
 	}
 	
 	@Override
 	public Node getView() {
 		return root;
-	}
-
-	public ZoomingPane getZoomingPane() {
-		return zoomingPane;
 	}
 }

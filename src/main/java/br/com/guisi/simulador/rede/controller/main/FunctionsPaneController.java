@@ -16,6 +16,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.FunctionType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -132,7 +133,7 @@ public class FunctionsPaneController extends Controller {
 	 */
 	@SuppressWarnings("unchecked")
 	private void updateFunctionsTables() {
-		if (getEnvironment() != null) {
+		if (SimuladorRede.getInteractionEnvironment() != null) {
 			try {
 				for (Tab tab: tabPaneFunctions.getTabs()) {
 					TableView<FunctionItem> tv = (TableView<FunctionItem>) tab.getContent();
@@ -186,7 +187,7 @@ public class FunctionsPaneController extends Controller {
 	 */
 	private void evaluateFunctionsExpressions(String functionName) {
 		EvaluationObject evaluationObject = new EvaluationObject();
-		evaluationObject.setEnvironment(getEnvironment());
+		evaluationObject.setEnvironment(SimuladorRede.getInteractionEnvironment());
 		
 		functions.forEach( (key, value) -> {
 			value.forEach(functionItem -> {

@@ -1,5 +1,7 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 public class QValueEvaluator {
 
 	private QValue qValue;
@@ -26,6 +28,12 @@ public class QValueEvaluator {
 	}
 
 	public double getReward() {
-		return qValue.getReward() + rewardAdjustment; //TODO verificar peso da distância
+		return (qValue.getReward() + rewardAdjustment); //TODO verificar peso da distância
 	}
+	
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
+	
 }

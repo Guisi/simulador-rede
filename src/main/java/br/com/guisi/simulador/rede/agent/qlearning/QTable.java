@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import br.com.guisi.simulador.rede.enviroment.Branch;
-import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
-
 
 public class QTable extends HashMap<AgentState, AgentActionMap> {
 
@@ -51,18 +48,17 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	/**
 	 * Retorna uma lista de {@link QValueEvaluator} contendo os valores para as transições passadas
 	 * @param state Estado onde o agente se encontra
-	 * @param switchesDistances Distâncias para transições possíveis
+	 * @param candidateSwitches Transições possíveis
 	 * @return
 	 */
-	private List<QValueEvaluator> getQValuesEvaluators(AgentState state, List<SwitchDistance> switchesDistances) {
+	private List<QValueEvaluator> getQValuesEvaluators(AgentState state, List<CandidateSwitch> candidateSwitches) {
 		List<QValueEvaluator> qValues = new ArrayList<>();
-		for (SwitchDistance switchDistance : switchesDistances) {
-			Branch nextSwitch = switchDistance.getTheSwitch();
-			AgentAction action = new AgentAction(nextSwitch.getNumber(), nextSwitch.getReverseStatus());
+		for (CandidateSwitch candidateSwitch : candidateSwitches) {
+			AgentAction action = new AgentAction(candidateSwitch.getSwitchNumber(), candidateSwitch.getSwitchStatus());
 			
 			QValueEvaluator evaluator = new QValueEvaluator();
 			evaluator.setQValue(getQValue(state, action));
-			evaluator.setDistance(switchDistance.getDistance());
+			evaluator.setDistance(candidateSwitch.getDistance());
 			qValues.add(evaluator);
 		}
 		return qValues;
@@ -71,14 +67,13 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	/**
 	 * Retorna uma lista de {@link QValue} contendo os valores da tabela Q para as transições passadas
 	 * @param state Estado onde o agente se encontra
-	 * @param switchesDistances Distâncias para transições possíveis
+	 * @param candidateSwitches Transições possíveis
 	 * @return
 	 */
-	private List<QValue> getQValues(AgentState state, List<SwitchDistance> switchesDistances) {
+	private List<QValue> getQValues(AgentState state, List<CandidateSwitch> candidateSwitches) {
 		List<QValue> qValues = new ArrayList<>();
-		for (SwitchDistance switchDistance : switchesDistances) {
-			Branch nextSwitch = switchDistance.getTheSwitch();
-			AgentAction action = new AgentAction(nextSwitch.getNumber(), nextSwitch.getReverseStatus());
+		for (CandidateSwitch candidateSwitch : candidateSwitches) {
+			AgentAction action = new AgentAction(candidateSwitch.getSwitchNumber(), candidateSwitch.getSwitchStatus());
 			qValues.add(getQValue(state, action));
 		}
 		return qValues;
@@ -89,8 +84,8 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param state
 	 * @return
 	 */
-	public synchronized QValue getBestQValue(AgentState state, List<SwitchDistance> switchesDistances) {
-		List<QValue> qValues = this.getQValues(state, switchesDistances);
+	public synchronized QValue getBestQValue(AgentState state, List<CandidateSwitch> candidateSwitches) {
+		List<QValue> qValues = this.getQValues(state, candidateSwitches);
 
 		//Verifica o maior valor de recompensa
 		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
@@ -109,8 +104,8 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param state
 	 * @return
 	 */
-	public AgentAction getBestAction(AgentState state, List<SwitchDistance> switchesDistances) {
-		List<QValueEvaluator> qValues = this.getQValuesEvaluators(state, switchesDistances);
+	public AgentAction getBestAction(AgentState state, List<CandidateSwitch> candidateSwitches) {
+		List<QValueEvaluator> qValues = this.getQValuesEvaluators(state, candidateSwitches);
 
 		//Verifica o maior valor de recompensa
 		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
@@ -127,15 +122,15 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	/**
 	 * Retorna uma ação aleatória
 	 * @param state
-	 * @param switchesDistances
+	 * @param candidateSwitches Transições possíveis
 	 * @return
 	 */
-	public AgentAction getRandomAction(AgentState state, List<SwitchDistance> switchesDistances, boolean proportional) {
+	public AgentAction getRandomAction(AgentState state, List<CandidateSwitch> candidateSwitches, boolean proportional) {
 		AgentAction action = null;
 		
 		//se é randômico proporcional
 		if (proportional) {
-			List<QValueEvaluator> qValues = this.getQValuesEvaluators(state, switchesDistances);
+			List<QValueEvaluator> qValues = this.getQValuesEvaluators(state, candidateSwitches);
 			
 			boolean hasNegativeQ = qValues.stream().anyMatch(value -> value.getReward() < 0);
 			
@@ -152,9 +147,17 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 			
 			double random = Math.random();
 			double sumQ = 0;
-			double totalQ = qValues.stream().mapToDouble(value -> value.getReward()).sum();
 			
-			if (totalQ > 0) {
+			boolean noValue = qValues.stream().allMatch(value -> value.getReward() == 0);
+			if (!noValue) {
+				//Se existe uma melhor ação específica, remove dos candidados para que agente explore demais opções
+				double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
+				List<QValueEvaluator> lst = qValues.stream().filter(valor -> valor.getReward() == max).collect(Collectors.toList());
+				if (lst.size() == 1) {
+					qValues.removeAll(lst);
+				}
+				
+				double totalQ = qValues.stream().mapToDouble(value -> value.getReward()).sum();
 				for (QValueEvaluator qValueEvaluator : qValues) {
 					double percentage = qValueEvaluator.getReward() / totalQ;
 					sumQ += percentage;
@@ -169,10 +172,22 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 		
 		if (action == null) {
 			//se não escolheu um no randomico proporcional, escolhe um dos candidatos aleatoriamente
-			SwitchDistance switchDistance = switchesDistances.get(new Random(System.currentTimeMillis()).nextInt(switchesDistances.size()));
-			action = new AgentAction(switchDistance.getTheSwitch().getNumber(), switchDistance.getTheSwitch().getReverseStatus());
+			CandidateSwitch candidateSwitch = candidateSwitches.get(new Random(System.currentTimeMillis()).nextInt(candidateSwitches.size()));
+			action = new AgentAction(candidateSwitch.getSwitchNumber(), candidateSwitch.getSwitchStatus());
 		}
 		
 		return action;
+	}
+	
+	/**
+	 * Retorna a média dos valores da tabela Q
+	 * @return
+	 */
+	public double getQValuesAverage() {
+		return values().stream().mapToDouble(map -> map.values().stream().mapToDouble(qValue -> qValue.getReward()).average().getAsDouble()).average().getAsDouble();
+	}
+	
+	public void getBestSwitchStatus(AgentState agentState) {
+		
 	}
 }

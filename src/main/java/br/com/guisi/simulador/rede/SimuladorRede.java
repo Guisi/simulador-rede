@@ -34,7 +34,8 @@ public class SimuladorRede extends Application {
 	private static Map<PreferenceKey, String> preferences;
 
 	private static Environment initialEnvironment;
-	private static Environment environment;
+	private static Environment interactionEnvironment;
+	private static Environment learningEnvironment;
 
 	public static void main(String args[]) {
 		launch(args);
@@ -140,17 +141,22 @@ public class SimuladorRede extends Application {
 		return preferences;
 	}
 
-	public static Environment getEnvironment() {
-		return environment;
+	public static Environment getInteractionEnvironment() {
+		return interactionEnvironment;
 	}
 	
 	public static Environment getInitialEnvironment() {
 		return initialEnvironment;
 	}
 
+	public static Environment getLearningEnvironment() {
+		return learningEnvironment;
+	}
+
 	public static void setEnvironment(Environment environment) {
-		SimuladorRede.environment = environment;
+		SimuladorRede.interactionEnvironment = environment;
 		SimuladorRede.initialEnvironment = SerializationUtils.clone(environment);
+		SimuladorRede.learningEnvironment = SerializationUtils.clone(environment); 
 	}
 
 	public static AbstractApplicationContext getCtx() {

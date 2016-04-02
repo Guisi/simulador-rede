@@ -34,7 +34,7 @@ public class AgentControlImpl implements AgentControl {
 	
 	@Override
 	public void run(TaskExecutionType taskExecutionType, StoppingCriteria stoppingCriteria) {
-		if (SimuladorRede.getEnvironment().isValidForReconfiguration()) {
+		if (SimuladorRede.getInteractionEnvironment().isValidForReconfiguration()) {
 			agentTask = new AgentTask(getAgent(), taskExecutionType, stoppingCriteria);
 			
 			agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {

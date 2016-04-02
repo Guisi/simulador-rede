@@ -17,7 +17,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -71,8 +70,6 @@ public class ControlsPaneController extends Controller {
 	private TextField tfStoppingCriteria;
 	@FXML
 	private Label lblCurrentSwitch;
-	@FXML
-	private Slider zoomSlider;
 	
 	private LocalTime localTime;
 	private Timeline timeline;
@@ -150,7 +147,6 @@ public class ControlsPaneController extends Controller {
 		timeline.stop();
 		tfStoppingCriteria.setText(Constants.STOPPING_CRITERIA_STEP_NUMBER);
 		stepUpdateReceived = 0;
-		zoomSlider.setValue(0.7);
 	}
 	
 	private void processEnvironmentLoaded() {
@@ -158,7 +154,7 @@ public class ControlsPaneController extends Controller {
 		
 		Branch currentState = agentControl.getAgent().getCurrentState();
 		if (currentState != null) {
-			lblCurrentSwitch.setText(currentState.getNumber().toString() + " (" + currentState.getSwitchState().getDescription() + ")");
+			lblCurrentSwitch.setText(currentState.getNumber().toString() + " (" + currentState.getSwitchStatus().getDescription() + ")");
 		}
 	}
 	
@@ -226,9 +222,5 @@ public class ControlsPaneController extends Controller {
 	@Override
 	public Node getView() {
 		return root;
-	}
-
-	public Slider getZoomSlider() {
-		return zoomSlider;
 	}
 }

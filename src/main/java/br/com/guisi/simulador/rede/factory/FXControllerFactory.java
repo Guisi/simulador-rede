@@ -15,7 +15,6 @@ import br.com.guisi.simulador.rede.controller.main.FunctionsPaneController;
 import br.com.guisi.simulador.rede.controller.main.LabelAndMessagesPaneController;
 import br.com.guisi.simulador.rede.controller.main.LearningChartsPaneController;
 import br.com.guisi.simulador.rede.controller.main.MenuPaneController;
-import br.com.guisi.simulador.rede.controller.main.NetworkPaneController;
 import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
 import br.com.guisi.simulador.rede.controller.modal.ExpressionEvaluatorController;
 import br.com.guisi.simulador.rede.controller.modal.FunctionEditController;
@@ -88,12 +87,6 @@ public class FXControllerFactory{
 	@Lazy
 	public ControlsPaneController controlsPaneController(){
 		return (ControlsPaneController) loadController(ControlsPaneController.FXML_FILE);
-	}
-	
-	@Bean
-	@Lazy
-	public NetworkPaneController networkPaneController(){
-		return new NetworkPaneController();
 	}
 	
 	@Bean

@@ -16,6 +16,7 @@ import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 import br.com.guisi.simulador.rede.view.charts.learning.PolicyChangeChart;
+import br.com.guisi.simulador.rede.view.charts.learning.QValuesAverageChart;
 
 public class LearningChartsPaneController extends Controller {
 
@@ -65,6 +66,8 @@ public class LearningChartsPaneController extends Controller {
 		
 		//policy change
 		lineCharts.add(new PolicyChangeChart());
+		//q-values average
+		lineCharts.add(new QValuesAverageChart());
 		
 		lineCharts.forEach((chart) -> {
 			Tab tab = new Tab(chart.getChartTitle());

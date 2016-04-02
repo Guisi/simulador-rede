@@ -52,10 +52,6 @@ public abstract class Controller implements EventListener {
 		return controller;
 	}
 	
-	public Environment getEnvironment() {
-		return SimuladorRede.getEnvironment();
-	}
-	
 	/**
 	 * Registra este controller para escutar um determinada evento
 	 * @param eventType
@@ -80,5 +76,9 @@ public abstract class Controller implements EventListener {
 	public void fireEvent(EventType eventType){
 		eventBus.fire(eventType, null);
 	}
-	
+
+	public Environment getEnvironment() {
+		return SimuladorRede.getInteractionEnvironment();
+	}
+
 }

@@ -14,6 +14,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -138,9 +139,9 @@ public class ElementsDetailsPaneController extends Controller {
 	private void onEnvironmentLoaded() {
 		root.setVisible(true);
 
-		getEnvironment().getLoads().forEach(load -> cbLoadNumber.getItems().add(load.getNodeNumber()));
-		getEnvironment().getFeeders().forEach(feeder -> cbFeederNumber.getItems().add(feeder.getNodeNumber()));
-		getEnvironment().getBranches().forEach(branch -> cbBranchNumber.getItems().add(branch.getNumber()));
+		SimuladorRede.getInteractionEnvironment().getLoads().forEach(load -> cbLoadNumber.getItems().add(load.getNodeNumber()));
+		SimuladorRede.getInteractionEnvironment().getFeeders().forEach(feeder -> cbFeederNumber.getItems().add(feeder.getNodeNumber()));
+		SimuladorRede.getInteractionEnvironment().getBranches().forEach(branch -> cbBranchNumber.getItems().add(branch.getNumber()));
 		Collections.sort(cbLoadNumber.getItems());
 		Collections.sort(cbFeederNumber.getItems());
 		Collections.sort(cbBranchNumber.getItems());
@@ -161,7 +162,7 @@ public class ElementsDetailsPaneController extends Controller {
 	 */
 	private void updateLoadInformationBox(Integer selectedLoad) {
 		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
-		Load load = getEnvironment().getLoad(selectedLoad);
+		Load load = SimuladorRede.getInteractionEnvironment().getLoad(selectedLoad);
 		
 		tvLoadDetails.getItems().clear();
 		tvLoadDetails.getItems().add(new PropertyRow("Feeder:", load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : ""));
@@ -179,7 +180,7 @@ public class ElementsDetailsPaneController extends Controller {
 	 */
 	private void updateFeederInformationBox(Integer selectedFeeder) {
 		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
-		Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
+		Feeder feeder = SimuladorRede.getInteractionEnvironment().getFeeder(selectedFeeder);
 		
 		tvFeederDetails.getItems().clear();
 		tvFeederDetails.getItems().add(new PropertyRow("Active Power MW:", df.format(feeder.getActivePowerMW())));
@@ -201,7 +202,7 @@ public class ElementsDetailsPaneController extends Controller {
 	 */
 	private void updateBranchInformationBox(Integer selectedBranch) {
 		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
-		Branch branch = getEnvironment().getBranch(selectedBranch);
+		Branch branch = SimuladorRede.getInteractionEnvironment().getBranch(selectedBranch);
 		
 		tvBranchDetails.getItems().clear();
 		tvBranchDetails.getItems().add(new PropertyRow("From:", branch.getNodeFrom().getNodeNumber().toString()));
@@ -210,7 +211,7 @@ public class ElementsDetailsPaneController extends Controller {
 		tvBranchDetails.getItems().add(new PropertyRow("Instant Current A:", df.format(branch.getInstantCurrent())));
 		tvBranchDetails.getItems().add(new PropertyRow("Resistance \u03A9:", df.format(branch.getResistance())));
 		tvBranchDetails.getItems().add(new PropertyRow("Reactance \u03A9:", df.format(branch.getReactance())));
-		tvBranchDetails.getItems().add(new PropertyRow("Status:", branch.getSwitchState().getDescription()));
+		tvBranchDetails.getItems().add(new PropertyRow("Status:", branch.getSwitchStatus().getDescription()));
 		tvBranchDetails.getItems().add(new PropertyRow("Active Loss MW:", df.format(branch.getActiveLossMW())));
 		tvBranchDetails.getItems().add(new PropertyRow("Reactive Loss MVar:", df.format(branch.getReactiveLossMVar())));
 		cbBranchNumber.valueProperty().set(selectedBranch);
