@@ -19,6 +19,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
@@ -56,7 +57,7 @@ public class LabelAndMessagesPaneController extends Controller {
 	
 	private int stepUpdateReceived;
 	
-	@Override
+	@PostConstruct
 	public void initializeController() {
 		this.initializeTables();
 		

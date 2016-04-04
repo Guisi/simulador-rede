@@ -6,13 +6,13 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.VBox;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
 import org.springframework.context.annotation.Scope;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.controller.Controller;
-import br.com.guisi.simulador.rede.events.EventType;
 
 @Named
 @Scope("prototype")
@@ -25,10 +25,8 @@ public class EnvironmentController extends Controller {
 	private VBox networkBoxLeft;
 	private VBox networkBoxRight;
 	
-	@Override
+	@PostConstruct
 	public void initializeController() {
-		this.listenToEvent(EventType.RESET_SCREEN, EventType.ENVIRONMENT_LOADED);
-		
 		root = new VBox();
 		splitPane = new SplitPane();
 		splitPane.setDividerPositions(0.5);
@@ -56,27 +54,12 @@ public class EnvironmentController extends Controller {
 		scrollPaneLeft.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
 		
 		//NetworkPane
-		NetworkPaneController networkPaneController = getController(NetworkPaneController.class);
+		NetworkPaneController networkPaneController = getController(NetworkPaneController.class, getStage());
 		networkBoxRight.getChildren().add(networkPaneController.getView());
 	}
 	
 	@Override
 	public void initializeControllerData(Object... data) {
-	}
-	
-	@Override
-	public void onEvent(EventType eventType, Object data) {
-		switch (eventType) {
-			case ENVIRONMENT_LOADED: processEnvironmentLoaded(); break;
-			case RESET_SCREEN: processResetScreen(); break; 
-			default: break;
-		}
-	}
-	
-	private void processEnvironmentLoaded() {
-	}
-	
-	private void processResetScreen() {
 	}
 	
 	@Override

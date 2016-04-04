@@ -6,6 +6,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -38,8 +39,8 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 	
 	private int stepProcessed;
 	
-	@Override
-	public void initializeController() {
+	@PostConstruct
+	protected void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
 				EventType.ENVIRONMENT_LOADED,
 				EventType.LOAD_SELECTED,

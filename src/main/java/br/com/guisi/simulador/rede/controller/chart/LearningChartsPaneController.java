@@ -9,6 +9,9 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import javax.annotation.PostConstruct;
+
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.controller.Controller;
@@ -30,7 +33,7 @@ public class LearningChartsPaneController extends Controller {
 	private List<GenericLineChart> lineCharts;
 	private int stepUpdateReceived;
 	
-	@Override
+	@PostConstruct
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
 						   EventType.ENVIRONMENT_LOADED,
@@ -42,8 +45,7 @@ public class LearningChartsPaneController extends Controller {
 	}
 	
 	@Override
-	public void setStage(Stage stage) {
-		super.setStage(stage);
+	protected void onSetStage(Stage stage) {
 		this.tabPaneCharts.prefHeightProperty().bind(stage.heightProperty());
 	}
 	
@@ -108,5 +110,4 @@ public class LearningChartsPaneController extends Controller {
 	public Node getView() {
 		return root;
 	}
-
 }

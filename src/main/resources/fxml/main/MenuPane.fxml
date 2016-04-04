@@ -15,6 +15,7 @@
             </Menu>
             <Menu fx:id="menuView" mnemonicParsing="false" text="View">
               <items>
+                  <MenuItem fx:id="miInteractionEnvironment" mnemonicParsing="false" onAction="#showInteractionEnvironmentController" text="Interaction Environment" />
                 <MenuItem fx:id="miEnvironmentCharts" mnemonicParsing="false" onAction="#showEnvironmentChartsWindow" text="Environment Charts" />
                   <MenuItem fx:id="miLearningCharts" mnemonicParsing="false" onAction="#showLearningChartsWindow" text="Learning Charts" />
               </items>

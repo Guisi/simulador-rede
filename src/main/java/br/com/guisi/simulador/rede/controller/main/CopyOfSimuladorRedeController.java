@@ -11,6 +11,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.VBox;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
@@ -45,7 +46,7 @@ public class CopyOfSimuladorRedeController extends Controller {
 	@Inject
 	private AgentControl agentControl;
 	
-	@Override
+	@PostConstruct
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN, EventType.ENVIRONMENT_LOADED);
 		

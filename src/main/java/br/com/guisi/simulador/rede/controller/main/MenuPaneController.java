@@ -12,6 +12,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+
+import javax.annotation.PostConstruct;
+
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneController;
@@ -42,6 +45,8 @@ public class MenuPaneController extends Controller {
 	@FXML
 	private MenuItem miLearningCharts;
 	@FXML
+	private MenuItem miInteractionEnvironment;
+	@FXML
 	private Menu menuEnvironment;
 	@FXML
 	private Menu menuView;
@@ -50,7 +55,9 @@ public class MenuPaneController extends Controller {
 	
 	private File xlsFile;
 	
-	@Override
+	private EnvironmentController interactionEnvironmentController;
+	
+	@PostConstruct
 	public void initializeController() {
 		menuBar.prefWidthProperty().bind(SimuladorRede.getPrimaryStage().widthProperty());
 		
@@ -61,9 +68,9 @@ public class MenuPaneController extends Controller {
 				EventType.RELOAD_ENVIRONMENT);
 		
 		//inicializa controlers para que escutem os eventos 
-		getController(EnvironmentChartsPaneController.class);
-		getController(LearningChartsPaneController.class);
-		getController(EnvironmentController.class);
+		getController(EnvironmentChartsPaneController.class, null);
+		getController(LearningChartsPaneController.class, null);
+		interactionEnvironmentController = getController(EnvironmentController.class, null);
 	}
 	
 	@Override
@@ -180,17 +187,23 @@ public class MenuPaneController extends Controller {
 	public void showLearningChartsWindow() {
 		SimuladorRede.showUtilityScene("Learning Charts", LearningChartsPaneController.class, true, false);
 	}
+	
+	public void showInteractionEnvironmentController() {
+		SimuladorRede.showUtilityScene("Interaction Environment Controller", interactionEnvironmentController, true, false);
+	}
 
 	private void resetScreen() {
 		miExpressionEvaluator.setDisable(true);
 		miEnvironmentCharts.setDisable(true);
 		miLearningCharts.setDisable(true);
+		miInteractionEnvironment.setDisable(true);
 	}
 	
 	private void onEnvironmentLoaded() {
 		miExpressionEvaluator.setDisable(false);
 		miEnvironmentCharts.setDisable(false);
 		miLearningCharts.setDisable(false);
+		miInteractionEnvironment.setDisable(false);
 	}
 	
 	private void enableDisableScreen(boolean disable) {

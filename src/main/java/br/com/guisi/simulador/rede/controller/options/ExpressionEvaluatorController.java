@@ -1,5 +1,7 @@
 package br.com.guisi.simulador.rede.controller.options;
 
+import javax.annotation.PostConstruct;
+
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -18,7 +20,7 @@ import br.com.guisi.simulador.rede.util.richtext.JavaKeywords;
 
 public class ExpressionEvaluatorController extends Controller {
 
-	public static final String FXML_FILE = "/fxml/modal/ExpressionEvaluator.fxml";
+	public static final String FXML_FILE = "/fxml/options/ExpressionEvaluator.fxml";
 	
 	@FXML
 	private VBox root;
@@ -31,7 +33,7 @@ public class ExpressionEvaluatorController extends Controller {
 	
 	private EvaluationObject evaluationObject;
 	
-	@Override
+	@PostConstruct
 	public void initializeController() {
 		evaluationObject = new EvaluationObject();
 		

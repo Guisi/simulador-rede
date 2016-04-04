@@ -3,6 +3,8 @@ package br.com.guisi.simulador.rede.controller.main;
 import java.text.DecimalFormat;
 import java.util.Collections;
 
+import javax.annotation.PostConstruct;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -60,8 +62,7 @@ public class ElementsDetailsPaneController extends Controller {
 	@FXML
 	private Button btnNextBranch;
 	
-
-	@Override
+	@PostConstruct
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
 				EventType.ENVIRONMENT_LOADED,

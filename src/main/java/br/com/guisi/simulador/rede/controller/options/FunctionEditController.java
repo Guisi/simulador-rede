@@ -1,5 +1,7 @@
 package br.com.guisi.simulador.rede.controller.options;
 
+import javax.annotation.PostConstruct;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -22,7 +24,7 @@ import br.com.guisi.simulador.rede.util.richtext.JavaKeywords;
 
 public class FunctionEditController extends Controller {
 	
-	public static final String FXML_FILE = "/fxml/modal/FunctionEdit.fxml";
+	public static final String FXML_FILE = "/fxml/options/FunctionEdit.fxml";
 	
 	@FXML
 	private VBox root;
@@ -37,7 +39,7 @@ public class FunctionEditController extends Controller {
 	
 	private FunctionItem functionItem;
 	
-	@Override
+	@PostConstruct
 	public void initializeController() {
 		cbFunctionType.setItems(FXCollections.observableArrayList());
 		for (FunctionType functionType : FunctionType.values()) {

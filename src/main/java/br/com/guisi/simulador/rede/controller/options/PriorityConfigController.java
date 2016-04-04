@@ -20,7 +20,7 @@ import br.com.guisi.simulador.rede.util.PreferencesUtils;
 
 public class PriorityConfigController extends Controller {
 	
-	public static final String FXML_FILE = "/fxml/modal/PriorityConfig.fxml";
+	public static final String FXML_FILE = "/fxml/options/PriorityConfig.fxml";
 
 	@FXML
 	private VBox root;
@@ -33,10 +33,6 @@ public class PriorityConfigController extends Controller {
 	private TextField tfPriority3;
 	@FXML
 	private TextField tfPriority4;
-	
-	@Override
-	public void initializeController() {
-	}
 	
 	@Override
 	public void initializeControllerData(Object... data) {

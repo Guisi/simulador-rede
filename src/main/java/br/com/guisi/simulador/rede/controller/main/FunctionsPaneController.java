@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -38,7 +40,7 @@ public class FunctionsPaneController extends Controller {
 	
 	private Map<FunctionType, List<FunctionItem>> functions;
 
-	@Override
+	@PostConstruct
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
 				EventType.ENVIRONMENT_LOADED,

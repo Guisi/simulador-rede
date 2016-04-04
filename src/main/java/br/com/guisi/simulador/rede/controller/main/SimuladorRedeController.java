@@ -9,6 +9,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
@@ -30,15 +31,15 @@ public class SimuladorRedeController extends Controller {
 	@Inject
 	private AgentControl agentControl;
 	
-	@Override
+	@PostConstruct
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN, EventType.ENVIRONMENT_LOADED);
 		
 		//menu
-		root.getChildren().add(0, getController(MenuPaneController.class).getView());
+		root.getChildren().add(0, getController(MenuPaneController.class, getStage()).getView());
 		
 		//controls
-		root.getChildren().add(1, getController(ControlsPaneController.class).getView());
+		root.getChildren().add(1, getController(ControlsPaneController.class, getStage()).getView());
 		
 		this.fireEvent(EventType.RESET_SCREEN);
 		

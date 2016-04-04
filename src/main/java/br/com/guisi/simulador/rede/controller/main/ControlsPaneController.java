@@ -23,6 +23,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -76,7 +77,7 @@ public class ControlsPaneController extends Controller {
 	
 	private int stepUpdateReceived;
 	
-	@Override
+	@PostConstruct
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
 				EventType.ENVIRONMENT_LOADED,

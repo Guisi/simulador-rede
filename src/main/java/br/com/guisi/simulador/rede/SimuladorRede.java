@@ -73,21 +73,31 @@ public class SimuladorRede extends Application {
 				e.printStackTrace();
 			}
 		});
+		
+		controller.setStage(primaryStage);
 
-		controller.initializeController();
 		primaryStage.show();
 	}
 
 	public static Controller showModalScene(String title, Class<?> controllerClass, boolean visible, Object... data) {
-		return showScene(title, controllerClass, true, visible, false, data);
+		Controller controller = (Controller) ctx.getBean(controllerClass);
+		return showModalScene(title, controller, true, visible, false, data);
+	}
+	
+	public static Controller showModalScene(String title, Controller controller, boolean visible, Object... data) {
+		return showScene(title, controller, true, visible, false, data);
 	}
 
 	public static Controller showUtilityScene(String title, Class<?> controllerClass, boolean visible, boolean maximized, Object... data) {
-		return showScene(title, controllerClass, false, visible, maximized, data);
-	}
-
-	public static Controller showScene(String title, Class<?> controllerClass, boolean modal, boolean visible, boolean maximized, Object... data) {
 		Controller controller = (Controller) ctx.getBean(controllerClass);
+		return showUtilityScene(title, controller, false, visible, maximized, data);
+	}
+	
+	public static Controller showUtilityScene(String title, Controller controller, boolean visible, boolean maximized, Object... data) {
+		return showScene(title, controller, false, visible, maximized, data);
+	}
+	
+	public static Controller showScene(String title, Controller controller, boolean modal, boolean visible, boolean maximized, Object... data) {
 		Stage stage = controller.getStage();
 
 		if (stage == null) {
@@ -108,10 +118,11 @@ public class SimuladorRede extends Application {
 			} else {
 				stage.getScene().setRoot(myPane);
 			}
-			controller.setStage(stage);
-			controller.initializeController();
 		}
-		controller.initializeControllerData(data);
+		
+		if (data != null) {
+			controller.initializeControllerData(data);
+		}
 		stage.centerOnScreen();
 
 		if (!stage.isShowing()) {
