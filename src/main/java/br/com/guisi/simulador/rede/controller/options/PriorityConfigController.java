@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.controller.modal;
+package br.com.guisi.simulador.rede.controller.options;
 
 import java.util.Map;
 import java.util.prefs.BackingStoreException;

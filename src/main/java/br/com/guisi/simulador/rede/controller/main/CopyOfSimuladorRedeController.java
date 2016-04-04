@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.VBox;
 
 import javax.inject.Inject;
@@ -14,18 +16,31 @@ import javax.inject.Inject;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneController;
+import br.com.guisi.simulador.rede.controller.chart.LearningChartsPaneController;
+import br.com.guisi.simulador.rede.controller.environment.NetworkPaneController;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
-public class SimuladorRedeController extends Controller {
+public class CopyOfSimuladorRedeController extends Controller {
 
 	public static final String FXML_FILE = "/fxml/main/SimuladorRede.fxml";
 
 	@FXML
 	private VBox root;
+	@FXML
+	private SplitPane splitPane;
+	@FXML
+	private ScrollPane scrollPaneRight;
+	@FXML
+	private ScrollPane scrollPaneLeft;
+	@FXML
+	private VBox networkBoxLeft;
+	@FXML
+	private VBox networkBoxRight;
 	
 	@Inject
 	private AgentControl agentControl;
@@ -34,11 +49,32 @@ public class SimuladorRedeController extends Controller {
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN, EventType.ENVIRONMENT_LOADED);
 		
+		scrollPaneRight.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
+		scrollPaneLeft.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
+		
 		//menu
 		root.getChildren().add(0, getController(MenuPaneController.class).getView());
 		
 		//controls
 		root.getChildren().add(1, getController(ControlsPaneController.class).getView());
+		
+		//Painel dos detalhes dos elementos da rede
+		networkBoxLeft.getChildren().add(getController(ElementsDetailsPaneController.class).getView());
+		
+		//Painel de labels e messages
+		networkBoxLeft.getChildren().add(getController(LabelAndMessagesPaneController.class).getView());
+		
+		//Painel das funções
+		networkBoxLeft.getChildren().add(getController(FunctionsPaneController.class).getView());
+		
+		//Painel dos gráficos
+		getController(EnvironmentChartsPaneController.class);
+		
+		getController(LearningChartsPaneController.class);
+		
+		//NetworkPane
+		NetworkPaneController networkPaneController = getController(NetworkPaneController.class);
+		networkBoxRight.getChildren().add(networkPaneController.getView());
 		
 		this.fireEvent(EventType.RESET_SCREEN);
 		
@@ -60,10 +96,16 @@ public class SimuladorRedeController extends Controller {
 	}
 	
 	private void processEnvironmentLoaded() {
+		this.splitPane.setVisible(true);
 	}
 	
 	private void processResetScreen() {
+		this.splitPane.setVisible(false);
 		this.agentControl.reset();
+		
+		/*if (networkPaneController != null) {
+			networkPaneController.getStage().hide();
+		}*/
 	}
 	
 	@Override

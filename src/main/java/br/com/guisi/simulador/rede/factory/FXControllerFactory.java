@@ -8,18 +8,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneController;
+import br.com.guisi.simulador.rede.controller.chart.LearningChartsPaneController;
 import br.com.guisi.simulador.rede.controller.main.ControlsPaneController;
 import br.com.guisi.simulador.rede.controller.main.ElementsDetailsPaneController;
-import br.com.guisi.simulador.rede.controller.main.EnvironmentChartsPaneController;
 import br.com.guisi.simulador.rede.controller.main.FunctionsPaneController;
 import br.com.guisi.simulador.rede.controller.main.LabelAndMessagesPaneController;
-import br.com.guisi.simulador.rede.controller.main.LearningChartsPaneController;
 import br.com.guisi.simulador.rede.controller.main.MenuPaneController;
 import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
-import br.com.guisi.simulador.rede.controller.modal.ExpressionEvaluatorController;
-import br.com.guisi.simulador.rede.controller.modal.FunctionEditController;
-import br.com.guisi.simulador.rede.controller.modal.FunctionsController;
-import br.com.guisi.simulador.rede.controller.modal.PriorityConfigController;
+import br.com.guisi.simulador.rede.controller.options.ExpressionEvaluatorController;
+import br.com.guisi.simulador.rede.controller.options.FunctionEditController;
+import br.com.guisi.simulador.rede.controller.options.FunctionsController;
+import br.com.guisi.simulador.rede.controller.options.PriorityConfigController;
 
 /**
  * Factory responsavel por registrar os controllers no contexto do Spring

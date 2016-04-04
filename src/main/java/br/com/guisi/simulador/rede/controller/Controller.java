@@ -6,7 +6,6 @@ import javafx.stage.Stage;
 import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventBus;
 import br.com.guisi.simulador.rede.events.EventListener;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -76,9 +75,4 @@ public abstract class Controller implements EventListener {
 	public void fireEvent(EventType eventType){
 		eventBus.fire(eventType, null);
 	}
-
-	public Environment getEnvironment() {
-		return SimuladorRede.getInteractionEnvironment();
-	}
-
 }

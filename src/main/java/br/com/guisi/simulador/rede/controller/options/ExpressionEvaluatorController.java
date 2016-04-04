@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.controller.modal;
+package br.com.guisi.simulador.rede.controller.options;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;

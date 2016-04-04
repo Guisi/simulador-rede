@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.controller.main;
+package br.com.guisi.simulador.rede.controller.chart;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.controller.Controller;
@@ -42,8 +41,6 @@ public class EnvironmentChartsPaneController extends Controller {
 		this.listenToEvent(EventType.RESET_SCREEN,
 						   EventType.ENVIRONMENT_LOADED,
 						   EventType.AGENT_NOTIFICATION);
-		
-		this.root.prefWidthProperty().bind(SimuladorRede.getPrimaryStage().widthProperty());
 	}
 	
 	@Override

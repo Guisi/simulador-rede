@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.controller.main;
+package br.com.guisi.simulador.rede.controller.environment;
 
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -17,7 +17,6 @@ import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
-import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.custom.BranchStackPane;
@@ -27,7 +26,7 @@ import br.com.guisi.simulador.rede.view.custom.ZoomingPane;
 
 @Named
 @Scope("prototype")
-public class NetworkPaneController extends Controller {
+public class NetworkPaneController extends AbstractEnvironmentPaneController {
 
 	@Inject
 	private AgentControl agentControl;
@@ -37,11 +36,7 @@ public class NetworkPaneController extends Controller {
 	private NetworkPane networkPane;
 	private Slider zoomSlider;
 	
-	private int stepUpdateReceived;
-	
-	public NetworkPaneController() {
-		root = new VBox();
-	}
+	private int stepProcessed;
 	
 	@Override
 	public void initializeController() {
@@ -52,6 +47,8 @@ public class NetworkPaneController extends Controller {
 				EventType.BRANCH_SELECTED,
 				EventType.AGENT_NOTIFICATION,
 				EventType.AGENT_STOPPED);
+		
+		root = new VBox();
 		
 		networkPane = new NetworkPane();
 		zoomingPane = new ZoomingPane(networkPane);
@@ -93,7 +90,7 @@ public class NetworkPaneController extends Controller {
 	private void resetScreen() {
 		root.setVisible(false);
 		networkPane.reset();
-		this.stepUpdateReceived = 0;
+		this.stepProcessed = 0;
 		zoomSlider.setValue(0.7);
 	}
 	
@@ -164,7 +161,7 @@ public class NetworkPaneController extends Controller {
 		AgentStatus agentStatus = (AgentStatus) data;
 		
 		if (agentStatus != null) {
-			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
+			for (int i = stepProcessed; i < agentStatus.getStepStatus().size(); i++) {
 				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 				
 				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
@@ -178,7 +175,7 @@ public class NetworkPaneController extends Controller {
 				}
 			}
 			
-			stepUpdateReceived = agentStatus.getStepStatus().size();
+			stepProcessed = agentStatus.getStepStatus().size();
 		}
 	}
 	

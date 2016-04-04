@@ -14,9 +14,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.controller.Controller;
-import br.com.guisi.simulador.rede.controller.modal.ExpressionEvaluatorController;
-import br.com.guisi.simulador.rede.controller.modal.FunctionsController;
-import br.com.guisi.simulador.rede.controller.modal.PriorityConfigController;
+import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneController;
+import br.com.guisi.simulador.rede.controller.chart.LearningChartsPaneController;
+import br.com.guisi.simulador.rede.controller.environment.EnvironmentController;
+import br.com.guisi.simulador.rede.controller.options.ExpressionEvaluatorController;
+import br.com.guisi.simulador.rede.controller.options.FunctionsController;
+import br.com.guisi.simulador.rede.controller.options.PriorityConfigController;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
@@ -56,6 +59,11 @@ public class MenuPaneController extends Controller {
 				EventType.AGENT_STOPPED,
 				EventType.RESET_SCREEN,
 				EventType.RELOAD_ENVIRONMENT);
+		
+		//inicializa controlers para que escutem os eventos 
+		getController(EnvironmentChartsPaneController.class);
+		getController(LearningChartsPaneController.class);
+		getController(EnvironmentController.class);
 	}
 	
 	@Override
@@ -166,11 +174,11 @@ public class MenuPaneController extends Controller {
 	}
 	
 	public void showEnvironmentChartsWindow() {
-		SimuladorRede.showUtilityScene("Environment Charts", EnvironmentChartsPaneController.class, true, true);
+		SimuladorRede.showUtilityScene("Environment Charts", EnvironmentChartsPaneController.class, true, false);
 	}
 	
 	public void showLearningChartsWindow() {
-		SimuladorRede.showUtilityScene("Learning Charts", LearningChartsPaneController.class, true, true);
+		SimuladorRede.showUtilityScene("Learning Charts", LearningChartsPaneController.class, true, false);
 	}
 
 	private void resetScreen() {

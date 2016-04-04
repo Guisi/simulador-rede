@@ -9,21 +9,4 @@
 <?import javafx.scene.layout.*?>
 <?import br.com.guisi.simulador.rede.view.*?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="714.0" prefWidth="1200.0" style="-fx-background-color: #FFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.main.SimuladorRedeController">
-   <children>
-      <SplitPane fx:id="splitPane" dividerPositions="0.5" styleClass="scrollPane">
-         <items>
-            <ScrollPane fx:id="scrollPaneLeft" hbarPolicy="NEVER" maxWidth="755.0" prefWidth="755.0" styleClass="scrollPane" SplitPane.resizableWithParent="false">
-               <content>
-                  <VBox fx:id="networkBoxLeft" />
-               </content>
-            </ScrollPane>
-            <ScrollPane fx:id="scrollPaneRight" styleClass="scrollPane">
-               <content>
-                  <VBox fx:id="networkBoxRight" />
-               </content>
-            </ScrollPane>
-         </items>
-      </SplitPane>
-   </children>
-</VBox>
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="714.0" prefWidth="1200.0" style="-fx-background-color: #FFF;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.main.SimuladorRedeController" />
