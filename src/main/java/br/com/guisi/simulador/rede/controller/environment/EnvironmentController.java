@@ -5,6 +5,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
@@ -24,6 +25,8 @@ public class EnvironmentController extends Controller {
 	private ScrollPane scrollPaneLeft;
 	private VBox networkBoxLeft;
 	private VBox networkBoxRight;
+	
+	private NetworkPaneController networkPaneController;
 	
 	@PostConstruct
 	public void initializeController() {
@@ -54,12 +57,17 @@ public class EnvironmentController extends Controller {
 		scrollPaneLeft.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
 		
 		//NetworkPane
-		NetworkPaneController networkPaneController = getController(NetworkPaneController.class, getStage());
+		networkPaneController = getController(NetworkPaneController.class);
 		networkBoxRight.getChildren().add(networkPaneController.getView());
 	}
 	
 	@Override
 	public void initializeControllerData(Object... data) {
+	}
+	
+	@Override
+	protected void onSetStage(Stage stage) {
+		networkPaneController.setStage(stage);
 	}
 	
 	@Override

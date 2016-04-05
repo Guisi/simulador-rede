@@ -34,6 +34,11 @@ public abstract class Controller implements EventListener {
 	public void onEvent(EventType eventType, Object data) {
 	}
 	
+	public <T extends Controller> T getController(Class<T> controllerClass) {
+		T controller = SimuladorRede.getCtx().getBean(controllerClass);
+		return controller;
+	}
+	
 	public <T extends Controller> T getController(Class<T> controllerClass, Stage stage) {
 		T controller = SimuladorRede.getCtx().getBean(controllerClass);
 		controller.setStage(stage);

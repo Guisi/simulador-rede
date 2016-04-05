@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="195.0" prefWidth="280.0" style="-fx-border-color: #CECECE;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.options.PriorityConfigController">
+   <children>
+      <VBox>
+         <children>
+            <GridPane hgap="10.0">
+               <children>
+                  <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Priority 1:" />
+                  <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Priority 2:" GridPane.rowIndex="1" />
+                  <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Priority 3:" GridPane.rowIndex="2" />
+                  <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Priority 4:" GridPane.rowIndex="3" />
+                  <TextField fx:id="tfPriority1" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" GridPane.columnIndex="1" />
+                  <TextField fx:id="tfPriority2" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="tfPriority3" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <TextField fx:id="tfPriority4" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+               </children>
+               <columnConstraints>
+                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="214.0" minWidth="10.0" prefWidth="130.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="318.0" minWidth="10.0" prefWidth="168.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+            </GridPane>
+            <HBox nodeOrientation="RIGHT_TO_LEFT" spacing="10.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#cancel" text="Cancel" />
+                  <Button mnemonicParsing="false" onAction="#save" text="Save" />
+               </children>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>

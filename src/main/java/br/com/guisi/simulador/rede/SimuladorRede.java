@@ -81,7 +81,7 @@ public class SimuladorRede extends Application {
 
 	public static Controller showModalScene(String title, Class<?> controllerClass, boolean visible, Object... data) {
 		Controller controller = (Controller) ctx.getBean(controllerClass);
-		return showModalScene(title, controller, true, visible, false, data);
+		return showModalScene(title, controller, visible, data);
 	}
 	
 	public static Controller showModalScene(String title, Controller controller, boolean visible, Object... data) {
@@ -90,7 +90,7 @@ public class SimuladorRede extends Application {
 
 	public static Controller showUtilityScene(String title, Class<?> controllerClass, boolean visible, boolean maximized, Object... data) {
 		Controller controller = (Controller) ctx.getBean(controllerClass);
-		return showUtilityScene(title, controller, false, visible, maximized, data);
+		return showUtilityScene(title, controller, visible, maximized, data);
 	}
 	
 	public static Controller showUtilityScene(String title, Controller controller, boolean visible, boolean maximized, Object... data) {
@@ -118,6 +118,7 @@ public class SimuladorRede extends Application {
 			} else {
 				stage.getScene().setRoot(myPane);
 			}
+			controller.setStage(stage);
 		}
 		
 		if (data != null) {

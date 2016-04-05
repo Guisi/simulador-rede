@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" alignment="TOP_RIGHT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" spacing="5.0" style="-fx-border-color: #CECECE;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.options.FunctionsController">
+   <children>
+      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+         <children>
+            <Button contentDisplay="CENTER" mnemonicParsing="false" onAction="#newFunction" styleClass="btnPlus" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
+            <Button contentDisplay="CENTER" mnemonicParsing="false" onAction="#removeFunction" styleClass="btnRemove" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
+         </children>
+      </HBox>
+      <TableView fx:id="tvFunctions" prefHeight="725.0" prefWidth="778.0">
+        <columns>
+          <TableColumn fx:id="tcFunctionName" minWidth="300.0" prefWidth="500.0" text="Function Name" />
+          <TableColumn fx:id="tcFunctionType" minWidth="100.0" prefWidth="200.0" text="Function Type" />
+        </columns>
+      </TableView>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

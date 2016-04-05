@@ -47,12 +47,26 @@ public class FunctionsController extends Controller {
 	
 	@PostConstruct
 	public void initializeController() {
-		this.initializeTable();
 		this.listenToEvent(EventType.FUNCTION_UPDATE);
+		this.initializeTable();
 	}
 	
 	@Override
 	public void initializeControllerData(Object... data) {
+		try {
+			this.functions = new ArrayList<>();
+			Map<FunctionType, List<FunctionItem>> functionsMap = FunctionsUtils.loadProperties();
+			functionsMap.forEach( (key, value) -> functions.addAll(value));
+			
+			tvFunctions.setItems(FXCollections.observableArrayList());
+			tvFunctions.getItems().addAll(functions);
+		} catch (IOException e) {
+			e.printStackTrace();
+			Alert alert = new Alert(AlertType.ERROR, e.getMessage());
+			alert.showAndWait();
+			SimuladorRede.closeScene(this);
+			return;
+		}
 	}
 	
 	@Override
@@ -74,24 +88,8 @@ public class FunctionsController extends Controller {
 		    return row ;
 		});
 		
-		try {
-			this.functions = new ArrayList<>();
-			Map<FunctionType, List<FunctionItem>> functionsMap = FunctionsUtils.loadProperties();
-			functionsMap.forEach( (key, value) -> functions.addAll(value));
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-			Alert alert = new Alert(AlertType.ERROR, e.getMessage());
-			alert.showAndWait();
-			SimuladorRede.closeScene(this);
-			return;
-		}
-		
 		tcFunctionName.setCellValueFactory(cellData -> cellData.getValue().getFunctionName());
 		tcFunctionType.setCellValueFactory(cellData -> cellData.getValue().getFunctionType());
-		
-		tvFunctions.setItems(FXCollections.observableArrayList());
-		tvFunctions.getItems().addAll(functions);
 	}
 	
 	@Override

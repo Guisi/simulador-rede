@@ -54,7 +54,7 @@ public class CopyOfSimuladorRedeController extends Controller {
 		scrollPaneLeft.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
 		
 		//menu
-		root.getChildren().add(0, getController(MenuPaneController.class).getView());
+		/*root.getChildren().add(0, getController(MenuPaneController.class).getView());
 		
 		//controls
 		root.getChildren().add(1, getController(ControlsPaneController.class).getView());
@@ -77,7 +77,7 @@ public class CopyOfSimuladorRedeController extends Controller {
 		NetworkPaneController networkPaneController = getController(NetworkPaneController.class);
 		networkBoxRight.getChildren().add(networkPaneController.getView());
 		
-		this.fireEvent(EventType.RESET_SCREEN);
+		this.fireEvent(EventType.RESET_SCREEN);*/
 		
 		/*File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
 		this.loadEnvironmentFromFile(f);*/

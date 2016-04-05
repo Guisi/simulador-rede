@@ -68,9 +68,9 @@ public class MenuPaneController extends Controller {
 				EventType.RELOAD_ENVIRONMENT);
 		
 		//inicializa controlers para que escutem os eventos 
-		getController(EnvironmentChartsPaneController.class, null);
-		getController(LearningChartsPaneController.class, null);
-		interactionEnvironmentController = getController(EnvironmentController.class, null);
+		getController(EnvironmentChartsPaneController.class);
+		getController(LearningChartsPaneController.class);
+		interactionEnvironmentController = getController(EnvironmentController.class);
 	}
 	
 	@Override

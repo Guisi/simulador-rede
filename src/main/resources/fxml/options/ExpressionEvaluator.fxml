@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" style="-fx-border-color: #CECECE;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.options.ExpressionEvaluatorController">
+   <children>
+      <VBox fx:id="vBoxInternal" alignment="TOP_CENTER" spacing="10.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#evaluateExpression" text="Evaluate" />
+            <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Result:" />
+            <TextArea fx:id="taEvalResult" editable="false" minHeight="-Infinity" prefHeight="150.0" />
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>
