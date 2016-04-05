@@ -18,6 +18,7 @@ import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.custom.BranchStackPane;
@@ -39,6 +40,10 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 	
 	private int stepProcessed;
 	
+	public NetworkPaneController(EnvironmentKeyType environmentKeyType) {
+		super(environmentKeyType);
+	}
+	
 	@PostConstruct
 	protected void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
@@ -51,7 +56,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 		
 		root = new VBox();
 		
-		networkPane = new NetworkPane();
+		networkPane = new NetworkPane(getEnvironmentKeyType());
 		zoomingPane = new ZoomingPane(networkPane);
 		zoomingPane.getStyleClass().add("networkPane");
 		

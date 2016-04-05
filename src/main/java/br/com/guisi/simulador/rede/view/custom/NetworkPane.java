@@ -24,6 +24,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.Constants;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
@@ -32,6 +33,8 @@ import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 
 public class NetworkPane extends Pane {
 
+	private EnvironmentKeyType environmentKeyType;
+	
 	private Map<Integer, NetworkNodeStackPane> networkNodePaneMap = new HashMap<Integer, NetworkNodeStackPane>();
 	private Map<Integer, BranchStackPane> branchPaneMap = new HashMap<Integer, BranchStackPane>();
 	
@@ -39,6 +42,13 @@ public class NetworkPane extends Pane {
 	private Integer selectedFeeder;
 	private Integer selectedBranch;
 	private Integer agentPosition;
+	
+	public NetworkPane(EnvironmentKeyType environmentKeyType) {
+	}
+	
+	private Environment getEnvironment() {
+		return SimuladorRede.getEnvironment(environmentKeyType);
+	}
 	
 	/**
 	 * Guarda o load selecionado e atualiza estilo
@@ -48,9 +58,9 @@ public class NetworkPane extends Pane {
 		Integer lastSelectedLoad = selectedLoad;
 		selectedLoad = selected;
 		if (lastSelectedLoad != null) {
-			this.updateLoadDrawing(SimuladorRede.getInteractionEnvironment().getLoad(lastSelectedLoad));
+			this.updateLoadDrawing(getEnvironment().getLoad(lastSelectedLoad));
 		}
-		this.updateLoadDrawing(SimuladorRede.getInteractionEnvironment().getLoad(selectedLoad));
+		this.updateLoadDrawing(getEnvironment().getLoad(selectedLoad));
 	}
 	
 	/**
@@ -86,9 +96,9 @@ public class NetworkPane extends Pane {
 		Integer lastSelectedFeeder = selectedFeeder;
 		selectedFeeder = selected;
 		if (lastSelectedFeeder != null) {
-			this.updateFeederDrawing(SimuladorRede.getInteractionEnvironment().getFeeder(lastSelectedFeeder));
+			this.updateFeederDrawing(getEnvironment().getFeeder(lastSelectedFeeder));
 		}
-		this.updateFeederDrawing(SimuladorRede.getInteractionEnvironment().getFeeder(selectedFeeder));
+		this.updateFeederDrawing(getEnvironment().getFeeder(selectedFeeder));
 	}
 	
 	/**
@@ -119,9 +129,9 @@ public class NetworkPane extends Pane {
 		Integer lastSelectedBranch = selectedBranch;
 		selectedBranch = selected;
 		if (lastSelectedBranch != null) {
-			this.updateBranchDrawing(SimuladorRede.getInteractionEnvironment().getBranch(lastSelectedBranch));
+			this.updateBranchDrawing(getEnvironment().getBranch(lastSelectedBranch));
 		}
-		this.updateBranchDrawing(SimuladorRede.getInteractionEnvironment().getBranch(selectedBranch));
+		this.updateBranchDrawing(getEnvironment().getBranch(selectedBranch));
 	}
 	
 	/**
@@ -379,4 +389,5 @@ public class NetworkPane extends Pane {
 		this.selectedLoad = null;
 		this.agentPosition = null;
 	}
+
 }

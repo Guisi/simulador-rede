@@ -13,11 +13,11 @@ import javax.inject.Named;
 import org.springframework.context.annotation.Scope;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 
 @Named
 @Scope("prototype")
-public class EnvironmentController extends Controller {
+public class EnvironmentController extends AbstractEnvironmentPaneController {
 
 	private VBox root;
 	private SplitPane splitPane;
@@ -27,6 +27,10 @@ public class EnvironmentController extends Controller {
 	private VBox networkBoxRight;
 	
 	private NetworkPaneController networkPaneController;
+	
+	public EnvironmentController(EnvironmentKeyType environmentKeyType) {
+		super(environmentKeyType);
+	}
 	
 	@PostConstruct
 	public void initializeController() {
@@ -57,7 +61,7 @@ public class EnvironmentController extends Controller {
 		scrollPaneLeft.prefHeightProperty().bind(SimuladorRede.getPrimaryStage().heightProperty());
 		
 		//NetworkPane
-		networkPaneController = getController(NetworkPaneController.class);
+		networkPaneController = getController(NetworkPaneController.class, getEnvironmentKeyType());
 		networkBoxRight.getChildren().add(networkPaneController.getView());
 	}
 	

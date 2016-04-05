@@ -1,7 +1,5 @@
 package br.com.guisi.simulador.rede.controller.options;
 
-import javax.annotation.PostConstruct;
-
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -9,10 +7,13 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 
+import javax.annotation.PostConstruct;
+
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
@@ -49,7 +50,8 @@ public class ExpressionEvaluatorController extends Controller {
 	
 	@Override
 	public void initializeControllerData(Object... data) {
-		evaluationObject.setEnvironment(SimuladorRede.getInteractionEnvironment());
+		//TODO fazer com que o ambiente possa ser selecionado
+		evaluationObject.setEnvironment(SimuladorRede.getEnvironment(EnvironmentKeyType.INTERACTION_ENVIRONMENT));
 	}
 	
 	public void evaluateExpression() {

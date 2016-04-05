@@ -1,7 +1,6 @@
 package br.com.guisi.simulador.rede;
 
 import java.io.File;
-import java.util.Random;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -13,7 +12,7 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(new Random(System.currentTimeMillis()).nextInt(1));
+		
 	}
 	
 	public static void teste() throws Exception {

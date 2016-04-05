@@ -22,6 +22,14 @@ public abstract class Controller implements EventListener {
 	
 	private Stage stage;
 	
+	public Controller() {
+	}
+	
+	public Controller(Stage stage) {
+		super();
+		this.stage = stage;
+	}
+
 	/**
 	 * Retorna a o elemento raiz da view
 	 * @return
@@ -34,14 +42,8 @@ public abstract class Controller implements EventListener {
 	public void onEvent(EventType eventType, Object data) {
 	}
 	
-	public <T extends Controller> T getController(Class<T> controllerClass) {
-		T controller = SimuladorRede.getCtx().getBean(controllerClass);
-		return controller;
-	}
-	
-	public <T extends Controller> T getController(Class<T> controllerClass, Stage stage) {
-		T controller = SimuladorRede.getCtx().getBean(controllerClass);
-		controller.setStage(stage);
+	public <T extends Controller> T getController(Class<T> controllerClass, Object... params) {
+		T controller = SimuladorRede.getCtx().getBean(controllerClass, params);
 		return controller;
 	}
 	
@@ -70,16 +72,14 @@ public abstract class Controller implements EventListener {
 		eventBus.fire(eventType, null);
 	}
 
-	protected void onSetStage(Stage stage) {
-	}
-	
 	public Stage getStage() {
 		return stage;
 	}
 
 	public void setStage(Stage stage) {
 		this.stage = stage;
-		onSetStage(stage);
 	}
 	
+	protected void onSetStage(Stage stage) {
+	}
 }

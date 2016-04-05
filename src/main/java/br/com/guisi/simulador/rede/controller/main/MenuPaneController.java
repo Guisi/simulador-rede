@@ -16,6 +16,7 @@ import javafx.stage.FileChooser;
 import javax.annotation.PostConstruct;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneController;
 import br.com.guisi.simulador.rede.controller.chart.LearningChartsPaneController;
@@ -70,7 +71,8 @@ public class MenuPaneController extends Controller {
 		//inicializa controlers para que escutem os eventos 
 		getController(EnvironmentChartsPaneController.class);
 		getController(LearningChartsPaneController.class);
-		interactionEnvironmentController = getController(EnvironmentController.class);
+		
+		interactionEnvironmentController = getController(EnvironmentController.class, EnvironmentKeyType.INTERACTION_ENVIRONMENT);
 	}
 	
 	@Override
@@ -119,7 +121,6 @@ public class MenuPaneController extends Controller {
 	private void loadEnvironmentFromFile(File xlsFile) {
 		try {
 			Environment environment = EnvironmentUtils.getEnvironmentFromFile(xlsFile);
-			SimuladorRede.setEnvironment(environment);
 			
 			boolean powerFlowSuccess = false;
 			
@@ -128,15 +129,11 @@ public class MenuPaneController extends Controller {
 			
 			if (exceptions.isEmpty()) {
 				//isola as faltas
-				EnvironmentUtils.isolateFaultSwitches(SimuladorRede.getInitialEnvironment());
-				EnvironmentUtils.isolateFaultSwitches(SimuladorRede.getInteractionEnvironment());
-				EnvironmentUtils.isolateFaultSwitches(SimuladorRede.getLearningEnvironment());
+				EnvironmentUtils.isolateFaultSwitches(environment);
 				
 				//executa o fluxo de potência
 				try {
-					powerFlowSuccess = PowerFlow.execute(SimuladorRede.getInitialEnvironment());
-					powerFlowSuccess = PowerFlow.execute(SimuladorRede.getInteractionEnvironment());
-					powerFlowSuccess = PowerFlow.execute(SimuladorRede.getLearningEnvironment());
+					powerFlowSuccess = PowerFlow.execute(environment);
 				} catch (Exception e) {
 					e.printStackTrace();
 					Alert alert = new Alert(AlertType.ERROR);
@@ -150,6 +147,8 @@ public class MenuPaneController extends Controller {
 				alert.setContentText(sb.toString());
 				alert.showAndWait();
 			}
+			
+			SimuladorRede.setEnvironment(environment);
 			
 			this.fireEvent(EventType.ENVIRONMENT_LOADED);
 

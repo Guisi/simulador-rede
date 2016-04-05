@@ -3,6 +3,7 @@ package br.com.guisi.simulador.rede.factory;
 import java.io.IOException;
 
 import javafx.fxml.FXMLLoader;
+import javafx.stage.Stage;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +32,7 @@ public class FXControllerFactory{
 
 	@Bean
 	@Lazy
-	public SimuladorRedeController simuladorRedeController(){
+	public SimuladorRedeController simuladorRedeController(Stage stage) {
 		return (SimuladorRedeController) loadController(SimuladorRedeController.FXML_FILE);
 	}
 	
@@ -79,13 +80,13 @@ public class FXControllerFactory{
 	
 	@Bean
 	@Lazy
-	public MenuPaneController menuPaneController(){
+	public MenuPaneController menuPaneController(Stage stage){
 		return (MenuPaneController) loadController(MenuPaneController.FXML_FILE);
 	}
 	
 	@Bean
 	@Lazy
-	public ControlsPaneController controlsPaneController(){
+	public ControlsPaneController controlsPaneController(Stage stage){
 		return (ControlsPaneController) loadController(ControlsPaneController.FXML_FILE);
 	}
 	

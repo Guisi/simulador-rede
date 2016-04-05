@@ -1,5 +1,6 @@
 package br.com.guisi.simulador.rede;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javafx.application.Application;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.PreferenceKey;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
@@ -32,11 +34,9 @@ public class SimuladorRede extends Application {
 
 	private static Stage primaryStage;
 	private static Map<PreferenceKey, String> preferences;
-
-	private static Environment initialEnvironment;
-	private static Environment interactionEnvironment;
-	private static Environment learningEnvironment;
-
+	
+	private static Map<EnvironmentKeyType, Environment> environmentMap;
+	
 	public static void main(String args[]) {
 		launch(args);
 	}
@@ -57,7 +57,7 @@ public class SimuladorRede extends Application {
 
 		preferences = PreferencesUtils.loadPreferences();
 
-		Controller controller = ctx.getBean(SimuladorRedeController.class);
+		Controller controller = ctx.getBean(SimuladorRedeController.class, primaryStage);
 
 		Scene scene = new Scene((Parent) controller.getView());
 		primaryStage.setScene(scene);
@@ -74,8 +74,6 @@ public class SimuladorRede extends Application {
 			}
 		});
 		
-		controller.setStage(primaryStage);
-
 		primaryStage.show();
 	}
 
@@ -153,22 +151,15 @@ public class SimuladorRede extends Application {
 		return preferences;
 	}
 
-	public static Environment getInteractionEnvironment() {
-		return interactionEnvironment;
+	public static Environment getEnvironment(EnvironmentKeyType environmentKeyType) {
+		return environmentMap.get(environmentKeyType);
 	}
 	
-	public static Environment getInitialEnvironment() {
-		return initialEnvironment;
-	}
-
-	public static Environment getLearningEnvironment() {
-		return learningEnvironment;
-	}
-
 	public static void setEnvironment(Environment environment) {
-		SimuladorRede.interactionEnvironment = environment;
-		SimuladorRede.initialEnvironment = SerializationUtils.clone(environment);
-		SimuladorRede.learningEnvironment = SerializationUtils.clone(environment); 
+		environmentMap = new HashMap<>();
+		for (EnvironmentKeyType type : EnvironmentKeyType.values()) {
+			environmentMap.put(type, SerializationUtils.clone(environment));
+		}
 	}
 
 	public static AbstractApplicationContext getCtx() {

@@ -16,7 +16,6 @@ import javax.inject.Named;
 
 import org.springframework.context.annotation.Scope;
 
-import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
@@ -59,7 +58,8 @@ public class QLearningAgent extends Agent {
 		this.turnedOffLoads = new LinkedHashSet<>();
 		this.isSameState = false;
 		
-		Environment environment = SimuladorRede.getInteractionEnvironment();
+		Environment environment = getInteractionEnvironment();
+
 		//verifica se existe alguma falta
 		this.currentSwitch = environment.getRandomFault();
 		//se não existe, inicia por um switch aberto aleatório
@@ -88,7 +88,7 @@ public class QLearningAgent extends Agent {
 	 */
 	@Override
 	protected void runNextEpisode(AgentStepStatus agentStepStatus) {
-		Environment environment = SimuladorRede.getInteractionEnvironment();
+		Environment environment = getInteractionEnvironment();
 		
 		//reativa loads desativados no episódio anterior
 		turnedOffLoads.forEach(load -> load.turnOn());
@@ -243,7 +243,7 @@ public class QLearningAgent extends Agent {
 		}
         
 		//número de switches diferentes da rede inicial
-        int differentSwitchStatesCount = EnvironmentUtils.countDifferentSwitchStates(environment, SimuladorRede.getInitialEnvironment());
+        int differentSwitchStatesCount = EnvironmentUtils.countDifferentSwitchStates(environment, getInitialEnvironment());
         agentStepStatus.putInformation(AgentInformationType.REQUIRED_SWITCH_OPERATIONS, differentSwitchStatesCount);
         
         //trocou política

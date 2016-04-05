@@ -1,6 +1,8 @@
 package br.com.guisi.simulador.rede.enviroment;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import br.com.guisi.simulador.rede.constants.Status;
@@ -16,13 +18,13 @@ public class Feeder extends NetworkNode {
 
 	private String feederColor;
 	private String loadColor;
-	private Set<Load> servedLoads;
+	private List<Load> servedLoads;
 	
 	public Feeder(Integer nodeNumber, Integer x, Integer y, double activePower, double reactivePower, String feederColor, String loadColor, Status status) {
 		super(nodeNumber, x, y, activePower, reactivePower, status);
 		this.feederColor = feederColor;
 		this.loadColor = loadColor;
-		this.servedLoads = new HashSet<>();
+		this.servedLoads = new ArrayList<>();
 	}
 	
 	public String getFeederColor() {
@@ -57,7 +59,7 @@ public class Feeder extends NetworkNode {
 	 * Retorna a lista dos loads conectados a este feeder
 	 * @return
 	 */
-	public Set<Load> getServedLoads() {
+	public List<Load> getServedLoads() {
 		return servedLoads;
 	}
 

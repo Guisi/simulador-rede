@@ -11,8 +11,10 @@ import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.LearningProperty;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventBus;
 import br.com.guisi.simulador.rede.events.EventType;
 
@@ -27,7 +29,7 @@ public abstract class Agent {
 	
 	public final void run(TaskExecutionType taskExecutionType, StoppingCriteria stoppingCriteria) {
 		this.stopRequest = false;
-		boolean isEnvironmentValid = SimuladorRede.getInteractionEnvironment().isValidForReconfiguration();
+		boolean isEnvironmentValid = getInteractionEnvironment().isValidForReconfiguration();
 
 		while (!stopRequest && isEnvironmentValid && !stoppingCriteria.wasReached(step)) {
 			synchronized (this) {
@@ -50,7 +52,7 @@ public abstract class Agent {
 					default: break;
 				}
 				
-				isEnvironmentValid = SimuladorRede.getInteractionEnvironment().isValidForReconfiguration();
+				isEnvironmentValid = getInteractionEnvironment().isValidForReconfiguration();
 			}
 		}
 		
@@ -77,4 +79,12 @@ public abstract class Agent {
 	public abstract List<LearningProperty> getLearningProperties(Integer state);
 	
 	public abstract Branch getCurrentState();
+	
+	public Environment getInteractionEnvironment() {
+		return SimuladorRede.getEnvironment(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
+	}
+	
+	public Environment getInitialEnvironment() {
+		return SimuladorRede.getEnvironment(EnvironmentKeyType.INITIAL_ENVIRONMENT);
+	}
 }

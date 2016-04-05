@@ -8,6 +8,7 @@ import javafx.scene.chart.XYChart;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
@@ -141,7 +142,8 @@ public class LoadsPowerPercentageChart extends GenericLineChart {
 	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
 		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
 		
-		Environment environment = SimuladorRede.getInteractionEnvironment();
+		//TODO fazer com que o ambiente possa ser parametrizado
+		Environment environment = SimuladorRede.getEnvironment(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
 		
 		Double totalActivePowerDemand = environment.getTotalActivePowerDemandMW();
 		Double totalReactivePowerDemand = environment.getTotalReactivePowerDemandMVar();

@@ -22,14 +22,13 @@ import javafx.stage.FileChooser;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.LearningProperty;
 import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
-import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.controller.environment.AbstractEnvironmentPaneController;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -37,7 +36,7 @@ import br.com.guisi.simulador.rede.view.tableview.BrokenConstraintRow;
 import br.com.guisi.simulador.rede.view.tableview.PropertyRow;
 import br.com.guisi.simulador.rede.view.tableview.SwitchOperationRow;
 
-public class LabelAndMessagesPaneController extends Controller {
+public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneController {
 
 	public static final String FXML_FILE = "/fxml/main/LabelAndMessagesPane.fxml";
 
@@ -189,7 +188,7 @@ public class LabelAndMessagesPaneController extends Controller {
 	 * Verifica as restrições quebradas e cria as mensagens
 	 */
 	private void updateWarningsBrokenConstraints() {
-		Environment environment = SimuladorRede.getInteractionEnvironment();
+		Environment environment = getEnvironment();
 		if (environment != null) {
 			tvBrokenConstraints.getItems().clear();
 			
@@ -275,7 +274,7 @@ public class LabelAndMessagesPaneController extends Controller {
 	private void processBranchSelected(Object data) {
 		tvAgentLearning.getItems().clear();
 		
-		Branch branch = SimuladorRede.getInteractionEnvironment().getBranch((Integer) data);
+		Branch branch = getEnvironment().getBranch((Integer) data);
 		
 		if (branch.isSwitchBranch() && !branch.hasFault() && !branch.isIsolated()) {
 			List<LearningProperty> learningProperties = agentControl.getAgent().getLearningProperties(branch.getNumber());

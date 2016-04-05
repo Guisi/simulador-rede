@@ -5,8 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -18,9 +16,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import br.com.guisi.simulador.rede.SimuladorRede;
+
+import javax.annotation.PostConstruct;
+
 import br.com.guisi.simulador.rede.constants.FunctionType;
-import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.controller.environment.AbstractEnvironmentPaneController;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
@@ -28,7 +28,7 @@ import br.com.guisi.simulador.rede.functions.FunctionItemPair;
 import br.com.guisi.simulador.rede.util.EvaluatorUtils;
 import br.com.guisi.simulador.rede.util.FunctionsUtils;
 
-public class FunctionsPaneController extends Controller {
+public class FunctionsPaneController extends AbstractEnvironmentPaneController {
 
 	public static final String FXML_FILE = "/fxml/main/FunctionsPane.fxml";
 
@@ -135,7 +135,7 @@ public class FunctionsPaneController extends Controller {
 	 */
 	@SuppressWarnings("unchecked")
 	private void updateFunctionsTables() {
-		if (SimuladorRede.getInteractionEnvironment() != null) {
+		if (getEnvironment() != null) {
 			try {
 				for (Tab tab: tabPaneFunctions.getTabs()) {
 					TableView<FunctionItem> tv = (TableView<FunctionItem>) tab.getContent();
@@ -189,7 +189,7 @@ public class FunctionsPaneController extends Controller {
 	 */
 	private void evaluateFunctionsExpressions(String functionName) {
 		EvaluationObject evaluationObject = new EvaluationObject();
-		evaluationObject.setEnvironment(SimuladorRede.getInteractionEnvironment());
+		evaluationObject.setEnvironment(getEnvironment());
 		
 		functions.forEach( (key, value) -> {
 			value.forEach(functionItem -> {

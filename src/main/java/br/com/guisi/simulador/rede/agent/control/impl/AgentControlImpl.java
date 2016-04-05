@@ -15,7 +15,9 @@ import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.qlearning.QLearningAgent;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
+import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventBus;
 import br.com.guisi.simulador.rede.events.EventType;
 
@@ -34,7 +36,7 @@ public class AgentControlImpl implements AgentControl {
 	
 	@Override
 	public void run(TaskExecutionType taskExecutionType, StoppingCriteria stoppingCriteria) {
-		if (SimuladorRede.getInteractionEnvironment().isValidForReconfiguration()) {
+		if (getInteractionEnvironment().isValidForReconfiguration()) {
 			agentTask = new AgentTask(getAgent(), taskExecutionType, stoppingCriteria);
 			
 			agentTask.stateProperty().addListener((observableValue, oldState, newState) -> {
@@ -82,5 +84,9 @@ public class AgentControlImpl implements AgentControl {
 			agent = context.getBean(QLearningAgent.class);
 		}
 		return agent;
+	}
+	
+	public Environment getInteractionEnvironment() {
+		return SimuladorRede.getEnvironment(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
 	}
 }
