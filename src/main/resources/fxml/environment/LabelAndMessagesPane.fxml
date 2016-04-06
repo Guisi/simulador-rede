@@ -5,21 +5,12 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.main.LabelAndMessagesPaneController">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.guisi.simulador.rede.controller.environment.LabelAndMessagesPaneController">
    <children>
       <TitledPane expanded="false" text="General Information">
          <content>
             <TabPane prefHeight="170.0" prefWidth="750.0" tabClosingPolicy="UNAVAILABLE">
                <tabs>
-                  <Tab text="General Information">
-                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="170.0" prefWidth="750.0">
-                           <children>
-                              <TableView fx:id="tvGeneralInformation" prefHeight="140.0" prefWidth="750.0" />
-                           </children>
-                        </AnchorPane>
-                     </content>
-                  </Tab>
                   <Tab text="Labels">
                      <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="750.0">

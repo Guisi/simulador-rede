@@ -29,6 +29,7 @@ public class EnvironmentController extends AbstractEnvironmentPaneController {
 	private NetworkPaneController networkPaneController;
 	private ElementsDetailsPaneController elementsDetailsPaneController;
 	private FunctionsPaneController functionsPaneController;
+	private LabelAndMessagesPaneController labelAndMessagesPaneController;
 	
 	public EnvironmentController(EnvironmentKeyType environmentKeyType) {
 		super(environmentKeyType);
@@ -73,6 +74,10 @@ public class EnvironmentController extends AbstractEnvironmentPaneController {
 		//Functions
 		functionsPaneController = getController(FunctionsPaneController.class, getEnvironmentKeyType());
 		networkBoxLeft.getChildren().add(functionsPaneController.getView());
+		
+		//Labels and messages
+		labelAndMessagesPaneController = getController(LabelAndMessagesPaneController.class, getEnvironmentKeyType());
+		networkBoxLeft.getChildren().add(labelAndMessagesPaneController.getView());
 	}
 	
 	@Override
@@ -84,6 +89,7 @@ public class EnvironmentController extends AbstractEnvironmentPaneController {
 		networkPaneController.setStage(stage);
 		elementsDetailsPaneController.setStage(stage);
 		functionsPaneController.setStage(stage);
+		labelAndMessagesPaneController.setStage(stage);
 		splitPane.prefHeightProperty().bind(stage.getScene().heightProperty());
 		stage.setHeight(800);
 	}

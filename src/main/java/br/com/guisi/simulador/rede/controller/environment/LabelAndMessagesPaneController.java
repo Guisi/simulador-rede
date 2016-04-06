@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.controller.main;
+package br.com.guisi.simulador.rede.controller.environment;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -28,7 +28,6 @@ import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
 import br.com.guisi.simulador.rede.agent.status.LearningProperty;
 import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
-import br.com.guisi.simulador.rede.controller.environment.AbstractEnvironmentPaneController;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -38,7 +37,7 @@ import br.com.guisi.simulador.rede.view.tableview.SwitchOperationRow;
 
 public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneController {
 
-	public static final String FXML_FILE = "/fxml/main/LabelAndMessagesPane.fxml";
+	public static final String FXML_FILE = "/fxml/environment/LabelAndMessagesPane.fxml";
 
 	@FXML
 	private VBox root;
@@ -48,8 +47,6 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 	private TableView<SwitchOperationRow> tvSwitchesOperations;
 	@FXML
 	private TableView<PropertyRow> tvAgentLearning;
-	@FXML
-	private TableView<PropertyRow> tvGeneralInformation;
 	
 	@Inject
 	private AgentControl agentControl;
@@ -158,30 +155,6 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 		tcPropertyValue.setStyle("-fx-alignment: center-left;");
 		tcPropertyValue.setPrefWidth(395);
 		tvAgentLearning.getColumns().add(tcPropertyValue);
-		
-		// tabela de informações gerais
-		tvGeneralInformation.widthProperty().addListener((source, oldWidth, newWidth) -> {
-			Pane header = (Pane) tvGeneralInformation.lookup("TableHeaderRow");
-			if (header.isVisible()) {
-				header.setMaxHeight(0);
-				header.setMinHeight(0);
-				header.setPrefHeight(0);
-				header.setVisible(false);
-			}
-		});
-		
-		tvGeneralInformation.setItems(FXCollections.observableArrayList());
-		tcPropertyName = new TableColumn<PropertyRow, String>();
-		tcPropertyName.setCellValueFactory(cellData -> cellData.getValue().getPropertyName());
-		tcPropertyName.setStyle("-fx-alignment: center-right; -fx-font-weight: bold;");
-		tcPropertyName.setPrefWidth(395);
-		tvGeneralInformation.getColumns().add(tcPropertyName);
-		
-		tcPropertyValue = new TableColumn<PropertyRow, String>();
-		tcPropertyValue.setCellValueFactory(cellData -> cellData.getValue().getPropertyValue());
-		tcPropertyValue.setStyle("-fx-alignment: center-left;");
-		tcPropertyValue.setPrefWidth(395);
-		tvGeneralInformation.getColumns().add(tcPropertyValue);
 	}
 	
 	/**

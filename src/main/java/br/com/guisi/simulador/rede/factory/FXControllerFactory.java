@@ -15,8 +15,8 @@ import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneControl
 import br.com.guisi.simulador.rede.controller.chart.LearningChartsPaneController;
 import br.com.guisi.simulador.rede.controller.environment.ElementsDetailsPaneController;
 import br.com.guisi.simulador.rede.controller.environment.FunctionsPaneController;
+import br.com.guisi.simulador.rede.controller.environment.LabelAndMessagesPaneController;
 import br.com.guisi.simulador.rede.controller.main.ControlsPaneController;
-import br.com.guisi.simulador.rede.controller.main.LabelAndMessagesPaneController;
 import br.com.guisi.simulador.rede.controller.main.MenuPaneController;
 import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
 import br.com.guisi.simulador.rede.controller.options.ExpressionEvaluatorController;
@@ -64,8 +64,11 @@ public class FXControllerFactory{
 	
 	@Bean
 	@Lazy
-	public LabelAndMessagesPaneController labelAndMessagesPaneController(){
-		return (LabelAndMessagesPaneController) loadController(LabelAndMessagesPaneController.FXML_FILE);
+	@Scope("prototype")
+	public LabelAndMessagesPaneController labelAndMessagesPaneController(EnvironmentKeyType environmentKeyType) {
+		LabelAndMessagesPaneController controller = (LabelAndMessagesPaneController) loadController(LabelAndMessagesPaneController.FXML_FILE);
+		controller.setEnvironmentKeyType(environmentKeyType);
+		return controller;
 	}
 	
 	@Bean
