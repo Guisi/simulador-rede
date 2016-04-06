@@ -20,6 +20,7 @@ import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.events.EnvironmentEventData;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.custom.BranchStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkNodeStackPane;
@@ -123,7 +124,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 			NetworkNodeStackPane loadStack = networkPane.drawNetworkNode(node, getEnvironment());
 			loadStack.setOnMouseClicked((event) -> {
 				Integer nodeNumber = ((NetworkNodeStackPane)event.getSource()).getNetworkNodeNumber();
-				this.fireEvent(node.isLoad() ? EventType.LOAD_SELECTED : EventType.FEEDER_SELECTED, nodeNumber);
+				this.fireEvent(node.isLoad() ? EventType.LOAD_SELECTED : EventType.FEEDER_SELECTED, new EnvironmentEventData(getEnvironmentKeyType(), nodeNumber));
 			});
 			 
 		});
@@ -135,7 +136,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 				while (!(node instanceof BranchStackPane)) {
 					node = node.getParent();
 				}
-				this.fireEvent(EventType.BRANCH_SELECTED, ((BranchStackPane) node).getBranchNum());
+				this.fireEvent(EventType.BRANCH_SELECTED, new EnvironmentEventData(getEnvironmentKeyType(), ((BranchStackPane) node).getBranchNum()));
 			};
 			networkPane.drawBranch(branch, getEnvironment().getSizeX(), getEnvironment().getSizeY(), mouseClicked);
 		}
@@ -152,15 +153,24 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 	}
 	
 	private void processLoadSelected(Object data) {
-		networkPane.selectLoad((Integer) data);
+		EnvironmentEventData eventData = (EnvironmentEventData) data;
+		if (eventData.getEnvironmentKeyType().equals(getEnvironmentKeyType())) {
+			networkPane.selectLoad((Integer) eventData.getData());
+		}
 	}
 	
 	private void processFeederSelected(Object data) {
-		networkPane.selectFeeder((Integer) data);
+		EnvironmentEventData eventData = (EnvironmentEventData) data;
+		if (eventData.getEnvironmentKeyType().equals(getEnvironmentKeyType())) {
+			networkPane.selectFeeder((Integer) eventData.getData());
+		}
 	}
 	
 	private void processBranchSelected(Object data) {
-		networkPane.selectBranch((Integer) data);
+		EnvironmentEventData eventData = (EnvironmentEventData) data;
+		if (eventData.getEnvironmentKeyType().equals(getEnvironmentKeyType())) {
+			networkPane.selectBranch((Integer) eventData.getData());
+		}
 	}
 	
 	private void processAgentNotification(Object data) {

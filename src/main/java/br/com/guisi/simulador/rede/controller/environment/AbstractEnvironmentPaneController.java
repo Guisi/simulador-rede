@@ -30,5 +30,9 @@ public abstract class AbstractEnvironmentPaneController extends Controller {
 	public EnvironmentKeyType getEnvironmentKeyType() {
 		return environmentKeyType;
 	}
+
+	public void setEnvironmentKeyType(EnvironmentKeyType environmentKeyType) {
+		this.environmentKeyType = environmentKeyType;
+	}
 	
 }

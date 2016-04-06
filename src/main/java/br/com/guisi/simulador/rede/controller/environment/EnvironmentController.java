@@ -27,6 +27,8 @@ public class EnvironmentController extends AbstractEnvironmentPaneController {
 	private VBox networkBoxRight;
 	
 	private NetworkPaneController networkPaneController;
+	private ElementsDetailsPaneController elementsDetailsPaneController;
+	private FunctionsPaneController functionsPaneController;
 	
 	public EnvironmentController(EnvironmentKeyType environmentKeyType) {
 		super(environmentKeyType);
@@ -63,6 +65,14 @@ public class EnvironmentController extends AbstractEnvironmentPaneController {
 		//NetworkPane
 		networkPaneController = getController(NetworkPaneController.class, getEnvironmentKeyType());
 		networkBoxRight.getChildren().add(networkPaneController.getView());
+		
+		//Elements Details
+		elementsDetailsPaneController = getController(ElementsDetailsPaneController.class, getEnvironmentKeyType());
+		networkBoxLeft.getChildren().add(elementsDetailsPaneController.getView());
+		
+		//Functions
+		functionsPaneController = getController(FunctionsPaneController.class, getEnvironmentKeyType());
+		networkBoxLeft.getChildren().add(functionsPaneController.getView());
 	}
 	
 	@Override
@@ -72,6 +82,10 @@ public class EnvironmentController extends AbstractEnvironmentPaneController {
 	@Override
 	protected void onSetStage(Stage stage) {
 		networkPaneController.setStage(stage);
+		elementsDetailsPaneController.setStage(stage);
+		functionsPaneController.setStage(stage);
+		splitPane.prefHeightProperty().bind(stage.getScene().heightProperty());
+		stage.setHeight(800);
 	}
 	
 	@Override

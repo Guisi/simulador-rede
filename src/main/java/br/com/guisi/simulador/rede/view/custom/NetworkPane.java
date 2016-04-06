@@ -44,6 +44,7 @@ public class NetworkPane extends Pane {
 	private Integer agentPosition;
 	
 	public NetworkPane(EnvironmentKeyType environmentKeyType) {
+		this.environmentKeyType = environmentKeyType;
 	}
 	
 	private Environment getEnvironment() {

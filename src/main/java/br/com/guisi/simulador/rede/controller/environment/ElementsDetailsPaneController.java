@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.controller.main;
+package br.com.guisi.simulador.rede.controller.environment;
 
 import java.text.DecimalFormat;
 import java.util.Collections;
@@ -18,16 +18,16 @@ import javafx.scene.layout.VBox;
 import javax.annotation.PostConstruct;
 
 import br.com.guisi.simulador.rede.constants.Constants;
-import br.com.guisi.simulador.rede.controller.environment.AbstractEnvironmentPaneController;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
+import br.com.guisi.simulador.rede.events.EnvironmentEventData;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.tableview.PropertyRow;
 
 public class ElementsDetailsPaneController extends AbstractEnvironmentPaneController {
 
-	public static final String FXML_FILE = "/fxml/main/ElementsDetailsPane.fxml";
+	public static final String FXML_FILE = "/fxml/environment/ElementsDetailsPane.fxml";
 
 	@FXML
 	private VBox root;
@@ -86,9 +86,9 @@ public class ElementsDetailsPaneController extends AbstractEnvironmentPaneContro
 		switch (eventType) {
 			case RESET_SCREEN: this.resetScreen(); break;
 			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
-			case LOAD_SELECTED: this.updateLoadInformationBox((Integer) data); break;
-			case FEEDER_SELECTED: this.updateFeederInformationBox((Integer) data); break;
-			case BRANCH_SELECTED: this.updateBranchInformationBox((Integer) data); break;
+			case LOAD_SELECTED: this.updateLoadInformationBox((EnvironmentEventData) data); break;
+			case FEEDER_SELECTED: this.updateFeederInformationBox((EnvironmentEventData) data); break;
+			case BRANCH_SELECTED: this.updateBranchInformationBox((EnvironmentEventData) data); break;
 			case AGENT_RUNNING: this.processAgentRunning(); break;
 			default: break;
 		}
@@ -161,61 +161,70 @@ public class ElementsDetailsPaneController extends AbstractEnvironmentPaneContro
 	 * Exibe na tela as informações do Load selecionado
 	 * @param networkNodeStackPane
 	 */
-	private void updateLoadInformationBox(Integer selectedLoad) {
-		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
-		Load load = getEnvironment().getLoad(selectedLoad);
-		
-		tvLoadDetails.getItems().clear();
-		tvLoadDetails.getItems().add(new PropertyRow("Feeder:", load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : ""));
-		tvLoadDetails.getItems().add(new PropertyRow("Active Power MW:", df.format(load.getActivePowerMW())));
-		tvLoadDetails.getItems().add(new PropertyRow("Reactive Power MVar:", df.format(load.getReactivePowerMVar())));
-		tvLoadDetails.getItems().add(new PropertyRow("Priority:", String.valueOf(load.getPriority())));
-		tvLoadDetails.getItems().add(new PropertyRow("Status:", load.isOn() ? "On" : "Off"));
-		tvLoadDetails.getItems().add(new PropertyRow("Current Voltage pu:", df.format(load.getCurrentVoltagePU())));
-		cbLoadNumber.valueProperty().setValue(selectedLoad);
+	private void updateLoadInformationBox(EnvironmentEventData eventData) {
+		if (eventData.getEnvironmentKeyType().equals(getEnvironmentKeyType())) {
+			Integer selectedLoad = (Integer) eventData.getData();
+			DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
+			Load load = getEnvironment().getLoad(selectedLoad);
+			
+			tvLoadDetails.getItems().clear();
+			tvLoadDetails.getItems().add(new PropertyRow("Feeder:", load.getFeeder() != null ? load.getFeeder().getNodeNumber().toString() : ""));
+			tvLoadDetails.getItems().add(new PropertyRow("Active Power MW:", df.format(load.getActivePowerMW())));
+			tvLoadDetails.getItems().add(new PropertyRow("Reactive Power MVar:", df.format(load.getReactivePowerMVar())));
+			tvLoadDetails.getItems().add(new PropertyRow("Priority:", String.valueOf(load.getPriority())));
+			tvLoadDetails.getItems().add(new PropertyRow("Status:", load.isOn() ? "On" : "Off"));
+			tvLoadDetails.getItems().add(new PropertyRow("Current Voltage pu:", df.format(load.getCurrentVoltagePU())));
+			cbLoadNumber.valueProperty().setValue(selectedLoad);
+		}
 	}
 	
 	/**
 	 * Exibe na tela as informações do Feeder selecionado
 	 * @param networkNodeStackPane
 	 */
-	private void updateFeederInformationBox(Integer selectedFeeder) {
-		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
-		Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
-		
-		tvFeederDetails.getItems().clear();
-		tvFeederDetails.getItems().add(new PropertyRow("Active Power MW:", df.format(feeder.getActivePowerMW())));
-		tvFeederDetails.getItems().add(new PropertyRow("Reactive Power MVar:", df.format(feeder.getReactivePowerMVar())));
-		tvFeederDetails.getItems().add(new PropertyRow("Connected Loads:", String.valueOf(feeder.getServedLoads().size())));
-		tvFeederDetails.getItems().add(new PropertyRow("Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> load.isSupplied()).count())));
-		tvFeederDetails.getItems().add(new PropertyRow("Not Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> !load.isSupplied()).count())));
-		tvFeederDetails.getItems().add(new PropertyRow("Used active power MW:", df.format(feeder.getUsedActivePowerMW())));
-		tvFeederDetails.getItems().add(new PropertyRow("Available Active Power:", df.format(feeder.getAvailableActivePowerMW())));
-		
-		tvFeederDetails.getItems().add(new PropertyRow("Current Voltage pu:", df.format(feeder.getCurrentVoltagePU())));
-		
-		cbFeederNumber.valueProperty().set(selectedFeeder);
+	private void updateFeederInformationBox(EnvironmentEventData eventData) {
+		if (eventData.getEnvironmentKeyType().equals(getEnvironmentKeyType())) {
+			Integer selectedFeeder = (Integer) eventData.getData();
+			DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
+			Feeder feeder = getEnvironment().getFeeder(selectedFeeder);
+			
+			tvFeederDetails.getItems().clear();
+			tvFeederDetails.getItems().add(new PropertyRow("Active Power MW:", df.format(feeder.getActivePowerMW())));
+			tvFeederDetails.getItems().add(new PropertyRow("Reactive Power MVar:", df.format(feeder.getReactivePowerMVar())));
+			tvFeederDetails.getItems().add(new PropertyRow("Connected Loads:", String.valueOf(feeder.getServedLoads().size())));
+			tvFeederDetails.getItems().add(new PropertyRow("Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> load.isSupplied()).count())));
+			tvFeederDetails.getItems().add(new PropertyRow("Not Supplied Loads:", String.valueOf(feeder.getServedLoads().stream().filter(load -> !load.isSupplied()).count())));
+			tvFeederDetails.getItems().add(new PropertyRow("Used active power MW:", df.format(feeder.getUsedActivePowerMW())));
+			tvFeederDetails.getItems().add(new PropertyRow("Available Active Power:", df.format(feeder.getAvailableActivePowerMW())));
+			
+			tvFeederDetails.getItems().add(new PropertyRow("Current Voltage pu:", df.format(feeder.getCurrentVoltagePU())));
+			
+			cbFeederNumber.valueProperty().set(selectedFeeder);
+		}
 	}
 	
 	/**
 	 * Exibe na tela as informações do Branch selecionado
 	 * @param branchNode
 	 */
-	private void updateBranchInformationBox(Integer selectedBranch) {
-		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
-		Branch branch = getEnvironment().getBranch(selectedBranch);
-		
-		tvBranchDetails.getItems().clear();
-		tvBranchDetails.getItems().add(new PropertyRow("From:", branch.getNodeFrom().getNodeNumber().toString()));
-		tvBranchDetails.getItems().add(new PropertyRow("To:", branch.getNodeTo().getNodeNumber().toString()));
-		tvBranchDetails.getItems().add(new PropertyRow("Max Current A:", df.format(branch.getMaxCurrent())));
-		tvBranchDetails.getItems().add(new PropertyRow("Instant Current A:", df.format(branch.getInstantCurrent())));
-		tvBranchDetails.getItems().add(new PropertyRow("Resistance \u03A9:", df.format(branch.getResistance())));
-		tvBranchDetails.getItems().add(new PropertyRow("Reactance \u03A9:", df.format(branch.getReactance())));
-		tvBranchDetails.getItems().add(new PropertyRow("Status:", branch.getSwitchStatus().getDescription()));
-		tvBranchDetails.getItems().add(new PropertyRow("Active Loss MW:", df.format(branch.getActiveLossMW())));
-		tvBranchDetails.getItems().add(new PropertyRow("Reactive Loss MVar:", df.format(branch.getReactiveLossMVar())));
-		cbBranchNumber.valueProperty().set(selectedBranch);
+	private void updateBranchInformationBox(EnvironmentEventData eventData) {
+		if (eventData.getEnvironmentKeyType().equals(getEnvironmentKeyType())) {
+			Integer selectedBranch = (Integer) eventData.getData();
+			DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_5);
+			Branch branch = getEnvironment().getBranch(selectedBranch);
+			
+			tvBranchDetails.getItems().clear();
+			tvBranchDetails.getItems().add(new PropertyRow("From:", branch.getNodeFrom().getNodeNumber().toString()));
+			tvBranchDetails.getItems().add(new PropertyRow("To:", branch.getNodeTo().getNodeNumber().toString()));
+			tvBranchDetails.getItems().add(new PropertyRow("Max Current A:", df.format(branch.getMaxCurrent())));
+			tvBranchDetails.getItems().add(new PropertyRow("Instant Current A:", df.format(branch.getInstantCurrent())));
+			tvBranchDetails.getItems().add(new PropertyRow("Resistance \u03A9:", df.format(branch.getResistance())));
+			tvBranchDetails.getItems().add(new PropertyRow("Reactance \u03A9:", df.format(branch.getReactance())));
+			tvBranchDetails.getItems().add(new PropertyRow("Status:", branch.getSwitchStatus().getDescription()));
+			tvBranchDetails.getItems().add(new PropertyRow("Active Loss MW:", df.format(branch.getActiveLossMW())));
+			tvBranchDetails.getItems().add(new PropertyRow("Reactive Loss MVar:", df.format(branch.getReactiveLossMVar())));
+			cbBranchNumber.valueProperty().set(selectedBranch);
+		}
 	}
 	
 	/**
@@ -238,7 +247,7 @@ public class ElementsDetailsPaneController extends AbstractEnvironmentPaneContro
 	public void changeCbLoadNumber() {
 		Integer selected = cbLoadNumber.valueProperty().get();
 		if (selected != null) {
-			this.fireEvent(EventType.LOAD_SELECTED, selected);
+			this.fireEvent(EventType.LOAD_SELECTED, new EnvironmentEventData(getEnvironmentKeyType(), selected));
 		}
 	}
 	
@@ -262,7 +271,7 @@ public class ElementsDetailsPaneController extends AbstractEnvironmentPaneContro
 	public void changeCbFeederNumber() {
 		Integer selected = cbFeederNumber.valueProperty().get();
 		if (selected != null) {
-			this.fireEvent(EventType.FEEDER_SELECTED, selected);
+			this.fireEvent(EventType.FEEDER_SELECTED, new EnvironmentEventData(getEnvironmentKeyType(), selected));
 		}
 	}
 	
@@ -286,7 +295,7 @@ public class ElementsDetailsPaneController extends AbstractEnvironmentPaneContro
 	public void changeCbBranchNumber() {
 		Integer selected = cbBranchNumber.valueProperty().get();
 		if (selected != null) {
-			this.fireEvent(EventType.BRANCH_SELECTED, selected);
+			this.fireEvent(EventType.BRANCH_SELECTED, new EnvironmentEventData(getEnvironmentKeyType(), selected));
 		}
 	}
 	

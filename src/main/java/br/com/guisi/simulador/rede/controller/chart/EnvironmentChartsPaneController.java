@@ -52,7 +52,7 @@ public class EnvironmentChartsPaneController extends Controller {
 	
 	@Override
 	protected void onSetStage(Stage stage) {
-		this.tabPaneCharts.prefHeightProperty().bind(stage.heightProperty());		
+		this.tabPaneCharts.prefHeightProperty().bind(stage.heightProperty());
 	}
 	
 	@Override

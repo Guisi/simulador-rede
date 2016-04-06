@@ -78,6 +78,7 @@ public abstract class Controller implements EventListener {
 
 	public void setStage(Stage stage) {
 		this.stage = stage;
+		onSetStage(stage);
 	}
 	
 	protected void onSetStage(Stage stage) {

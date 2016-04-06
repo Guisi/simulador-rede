@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.controller.main;
+package br.com.guisi.simulador.rede.controller.environment;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -20,7 +20,6 @@ import javafx.scene.layout.VBox;
 import javax.annotation.PostConstruct;
 
 import br.com.guisi.simulador.rede.constants.FunctionType;
-import br.com.guisi.simulador.rede.controller.environment.AbstractEnvironmentPaneController;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.functions.EvaluationObject;
 import br.com.guisi.simulador.rede.functions.FunctionItem;
@@ -30,7 +29,7 @@ import br.com.guisi.simulador.rede.util.FunctionsUtils;
 
 public class FunctionsPaneController extends AbstractEnvironmentPaneController {
 
-	public static final String FXML_FILE = "/fxml/main/FunctionsPane.fxml";
+	public static final String FXML_FILE = "/fxml/environment/FunctionsPane.fxml";
 
 	@FXML
 	private VBox root;
@@ -45,8 +44,7 @@ public class FunctionsPaneController extends AbstractEnvironmentPaneController {
 		this.listenToEvent(EventType.RESET_SCREEN,
 				EventType.ENVIRONMENT_LOADED,
 				EventType.FUNCTIONS_UPDATED,
-				EventType.POWER_FLOW_COMPLETED,
-				EventType.AGENT_NOTIFICATION);
+				EventType.POWER_FLOW_COMPLETED);
 		
 		for (Tab tab: tabPaneFunctions.getTabs()) {
 			@SuppressWarnings("unchecked")
@@ -68,7 +66,6 @@ public class FunctionsPaneController extends AbstractEnvironmentPaneController {
 			case ENVIRONMENT_LOADED: this.onEnvironmentLoaded(); break;
 			case FUNCTIONS_UPDATED: this.updateFunctionsTables(); break;
 			case POWER_FLOW_COMPLETED: this.processPowerflowCompleted(); break;
-			case AGENT_NOTIFICATION : this.processAgentNotification(); break;
 			default: break;
 		}
 	}
@@ -210,10 +207,6 @@ public class FunctionsPaneController extends AbstractEnvironmentPaneController {
 	}
 	
 	private void processPowerflowCompleted() {
-		this.evaluateFunctionsExpressions(null);
-	}
-	
-	private void processAgentNotification() {
 		this.evaluateFunctionsExpressions(null);
 	}
 	

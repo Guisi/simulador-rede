@@ -8,12 +8,14 @@ import javafx.stage.Stage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneController;
 import br.com.guisi.simulador.rede.controller.chart.LearningChartsPaneController;
+import br.com.guisi.simulador.rede.controller.environment.ElementsDetailsPaneController;
+import br.com.guisi.simulador.rede.controller.environment.FunctionsPaneController;
 import br.com.guisi.simulador.rede.controller.main.ControlsPaneController;
-import br.com.guisi.simulador.rede.controller.main.ElementsDetailsPaneController;
-import br.com.guisi.simulador.rede.controller.main.FunctionsPaneController;
 import br.com.guisi.simulador.rede.controller.main.LabelAndMessagesPaneController;
 import br.com.guisi.simulador.rede.controller.main.MenuPaneController;
 import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
@@ -68,14 +70,20 @@ public class FXControllerFactory{
 	
 	@Bean
 	@Lazy
-	public FunctionsPaneController functionsPaneController(){
-		return (FunctionsPaneController) loadController(FunctionsPaneController.FXML_FILE);
+	@Scope("prototype")
+	public FunctionsPaneController functionsPaneController(EnvironmentKeyType environmentKeyType) {
+		FunctionsPaneController controller = (FunctionsPaneController) loadController(FunctionsPaneController.FXML_FILE);
+		controller.setEnvironmentKeyType(environmentKeyType);
+		return controller;
 	}
 	
 	@Bean
 	@Lazy
-	public ElementsDetailsPaneController elementsDetailsPaneController(){
-		return (ElementsDetailsPaneController) loadController(ElementsDetailsPaneController.FXML_FILE);
+	@Scope("prototype")
+	public ElementsDetailsPaneController elementsDetailsPaneController(EnvironmentKeyType environmentKeyType) {
+		ElementsDetailsPaneController controller = (ElementsDetailsPaneController) loadController(ElementsDetailsPaneController.FXML_FILE);
+		controller.setEnvironmentKeyType(environmentKeyType);
+		return controller;
 	}
 	
 	@Bean

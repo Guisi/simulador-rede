@@ -48,6 +48,8 @@ public class MenuPaneController extends Controller {
 	@FXML
 	private MenuItem miInteractionEnvironment;
 	@FXML
+	private MenuItem miLearningEnvironment;
+	@FXML
 	private Menu menuEnvironment;
 	@FXML
 	private Menu menuView;
@@ -57,6 +59,7 @@ public class MenuPaneController extends Controller {
 	private File xlsFile;
 	
 	private EnvironmentController interactionEnvironmentController;
+	private EnvironmentController learningEnvironmentController;
 	
 	@PostConstruct
 	public void initializeController() {
@@ -73,6 +76,7 @@ public class MenuPaneController extends Controller {
 		getController(LearningChartsPaneController.class);
 		
 		interactionEnvironmentController = getController(EnvironmentController.class, EnvironmentKeyType.INTERACTION_ENVIRONMENT);
+		learningEnvironmentController = getController(EnvironmentController.class, EnvironmentKeyType.LEARNING_ENVIRONMENT);
 	}
 	
 	@Override
@@ -190,12 +194,17 @@ public class MenuPaneController extends Controller {
 	public void showInteractionEnvironmentController() {
 		SimuladorRede.showUtilityScene("Interaction Environment Controller", interactionEnvironmentController, true, false);
 	}
+	
+	public void showLearningEnvironmentController() {
+		SimuladorRede.showUtilityScene("Learning Environment Controller", learningEnvironmentController, true, false);
+	}
 
 	private void resetScreen() {
 		miExpressionEvaluator.setDisable(true);
 		miEnvironmentCharts.setDisable(true);
 		miLearningCharts.setDisable(true);
 		miInteractionEnvironment.setDisable(true);
+		miLearningEnvironment.setDisable(true);
 	}
 	
 	private void onEnvironmentLoaded() {
@@ -203,6 +212,7 @@ public class MenuPaneController extends Controller {
 		miEnvironmentCharts.setDisable(false);
 		miLearningCharts.setDisable(false);
 		miInteractionEnvironment.setDisable(false);
+		miLearningEnvironment.setDisable(false);
 	}
 	
 	private void enableDisableScreen(boolean disable) {
