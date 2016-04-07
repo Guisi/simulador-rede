@@ -176,23 +176,21 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 	private void processAgentNotification(Object data) {
 		AgentStatus agentStatus = (AgentStatus) data;
 		
-		if (agentStatus != null) {
-			for (int i = stepProcessed; i < agentStatus.getStepStatus().size(); i++) {
-				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
-				
-				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
-				if (switchOperation != null) {
-					Branch sw = getEnvironment().getBranch(switchOperation.getSwitchNumber());
-					networkPane.updateBranchDrawing(sw);
-					networkPane.changeAgentCirclePosition(sw.getNumber());
-
-					//atualiza status dos nós na tela
-					getEnvironment().getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
-				}
-			}
+		for (int i = stepProcessed; i < agentStatus.getStepStatus().size(); i++) {
+			AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
 			
-			stepProcessed = agentStatus.getStepStatus().size();
+			SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
+			if (switchOperation != null) {
+				Branch sw = getEnvironment().getBranch(switchOperation.getSwitchNumber());
+				networkPane.updateBranchDrawing(sw);
+				networkPane.changeAgentCirclePosition(sw.getNumber());
+
+				//atualiza status dos nós na tela
+				getEnvironment().getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
+			}
 		}
+		
+		stepProcessed = agentStatus.getStepStatus().size();
 	}
 	
 	private void processAgentStop() {

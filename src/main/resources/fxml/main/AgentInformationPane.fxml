@@ -29,7 +29,17 @@
                     <content>
                       <AnchorPane>
                            <children>
-                              <TableView fx:id="tvAgentLearning" prefHeight="325.0" />
+                              <VBox>
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                       <children>
+                                          <Label text="Switch:" />
+                                          <ComboBox fx:id="cbSelectedSwitch" onAction="#changeCbSelectedSwitch" />
+                                       </children>
+                                    </HBox>
+                                    <TableView fx:id="tvAgentLearning" prefHeight="325.0" />
+                                 </children>
+                              </VBox>
                            </children>
                         </AnchorPane>
                     </content>

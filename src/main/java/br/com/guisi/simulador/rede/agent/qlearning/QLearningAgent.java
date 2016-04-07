@@ -68,8 +68,6 @@ public class QLearningAgent extends Agent {
 		}
 		
 		this.initialConfigRate = getConfigRate(environment);
-		
-		System.out.println(initialConfigRate);
 	}
 	
 	private double getConfigRate(Environment environment) {
