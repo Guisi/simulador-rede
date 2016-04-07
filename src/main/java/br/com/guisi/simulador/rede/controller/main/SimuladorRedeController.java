@@ -8,9 +8,13 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.springframework.context.annotation.Lazy;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
@@ -21,9 +25,9 @@ import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 
+@Named
+@Lazy
 public class SimuladorRedeController extends Controller {
-
-	public static final String FXML_FILE = "/fxml/main/SimuladorRede.fxml";
 
 	@FXML
 	private VBox root;
@@ -31,15 +35,36 @@ public class SimuladorRedeController extends Controller {
 	@Inject
 	private AgentControl agentControl;
 	
+	private MenuPaneController menuPaneController;
+	private ControlsPaneController controlsPaneController;
+	private AgentInformationPaneController agentInformationPaneController;
+	
+	public SimuladorRedeController(Stage stage) {
+		super(stage);
+	}
+	
 	@PostConstruct
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN, EventType.ENVIRONMENT_LOADED);
 		
+		root = new VBox();
+		root.setPrefWidth(1200);
+		root.setPrefHeight(715);
+		
 		//menu
-		root.getChildren().add(0, getController(MenuPaneController.class, getStage()).getView());
+		menuPaneController = getController(MenuPaneController.class, getStage());
+		menuPaneController.setStage(getStage());
+		root.getChildren().add(menuPaneController.getView());
 		
 		//controls
-		root.getChildren().add(1, getController(ControlsPaneController.class, getStage()).getView());
+		controlsPaneController = getController(ControlsPaneController.class, getStage());
+		controlsPaneController.setStage(getStage());
+		root.getChildren().add(controlsPaneController.getView());
+		
+		//agent information
+		agentInformationPaneController = getController(AgentInformationPaneController.class, getStage());
+		agentInformationPaneController.setStage(getStage());
+		root.getChildren().add(agentInformationPaneController.getView());
 		
 		this.fireEvent(EventType.RESET_SCREEN);
 		

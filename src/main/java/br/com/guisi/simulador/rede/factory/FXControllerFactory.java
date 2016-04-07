@@ -16,9 +16,9 @@ import br.com.guisi.simulador.rede.controller.chart.LearningChartsPaneController
 import br.com.guisi.simulador.rede.controller.environment.ElementsDetailsPaneController;
 import br.com.guisi.simulador.rede.controller.environment.FunctionsPaneController;
 import br.com.guisi.simulador.rede.controller.environment.LabelAndMessagesPaneController;
+import br.com.guisi.simulador.rede.controller.main.AgentInformationPaneController;
 import br.com.guisi.simulador.rede.controller.main.ControlsPaneController;
 import br.com.guisi.simulador.rede.controller.main.MenuPaneController;
-import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
 import br.com.guisi.simulador.rede.controller.options.ExpressionEvaluatorController;
 import br.com.guisi.simulador.rede.controller.options.FunctionEditController;
 import br.com.guisi.simulador.rede.controller.options.FunctionsController;
@@ -32,12 +32,6 @@ import br.com.guisi.simulador.rede.controller.options.PriorityConfigController;
 @Configuration
 public class FXControllerFactory{
 
-	@Bean
-	@Lazy
-	public SimuladorRedeController simuladorRedeController(Stage stage) {
-		return (SimuladorRedeController) loadController(SimuladorRedeController.FXML_FILE);
-	}
-	
 	@Bean
 	@Lazy
 	public ExpressionEvaluatorController expressionEvaluatorController(){
@@ -92,13 +86,17 @@ public class FXControllerFactory{
 	@Bean
 	@Lazy
 	public MenuPaneController menuPaneController(Stage stage){
-		return (MenuPaneController) loadController(MenuPaneController.FXML_FILE);
+		MenuPaneController controller = (MenuPaneController) loadController(MenuPaneController.FXML_FILE);
+		controller.setStage(stage);
+		return controller;
 	}
 	
 	@Bean
 	@Lazy
 	public ControlsPaneController controlsPaneController(Stage stage){
-		return (ControlsPaneController) loadController(ControlsPaneController.FXML_FILE);
+		ControlsPaneController controller = (ControlsPaneController) loadController(ControlsPaneController.FXML_FILE);
+		controller.setStage(stage);
+		return controller;
 	}
 	
 	@Bean
@@ -111,6 +109,14 @@ public class FXControllerFactory{
 	@Lazy
 	public LearningChartsPaneController learningChartsPaneController() {
 		return (LearningChartsPaneController) loadController(LearningChartsPaneController.FXML_FILE);
+	}
+	
+	@Bean
+	@Lazy
+	public AgentInformationPaneController agentInformationPaneController(Stage stage) {
+		AgentInformationPaneController controller = (AgentInformationPaneController) loadController(AgentInformationPaneController.FXML_FILE);
+		controller.setStage(stage);
+		return controller;
 	}
 	
 	/**
