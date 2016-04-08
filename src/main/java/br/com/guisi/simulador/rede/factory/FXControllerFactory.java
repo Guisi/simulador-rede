@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
-import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneController;
 import br.com.guisi.simulador.rede.controller.chart.LearningChartsPaneController;
 import br.com.guisi.simulador.rede.controller.environment.ElementsDetailsPaneController;
 import br.com.guisi.simulador.rede.controller.environment.FunctionsPaneController;
@@ -97,12 +96,6 @@ public class FXControllerFactory{
 		ControlsPaneController controller = (ControlsPaneController) loadController(ControlsPaneController.FXML_FILE);
 		controller.setStage(stage);
 		return controller;
-	}
-	
-	@Bean
-	@Lazy
-	public EnvironmentChartsPaneController environmentChartsPaneController() {
-		return (EnvironmentChartsPaneController) loadController(EnvironmentChartsPaneController.FXML_FILE);
 	}
 	
 	@Bean

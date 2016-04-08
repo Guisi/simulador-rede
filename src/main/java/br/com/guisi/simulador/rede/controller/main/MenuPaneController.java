@@ -42,7 +42,7 @@ public class MenuPaneController extends Controller {
 	@FXML
 	private MenuItem miExpressionEvaluator;
 	@FXML
-	private MenuItem miEnvironmentCharts;
+	private MenuItem miInteractionEnvironmentCharts;
 	@FXML
 	private MenuItem miLearningCharts;
 	@FXML
@@ -59,6 +59,7 @@ public class MenuPaneController extends Controller {
 	private File xlsFile;
 	
 	private EnvironmentController interactionEnvironmentController;
+	private EnvironmentChartsPaneController interactionEnvironmentChartsPaneController;
 	private EnvironmentController learningEnvironmentController;
 	
 	@PostConstruct
@@ -72,10 +73,9 @@ public class MenuPaneController extends Controller {
 				EventType.RELOAD_ENVIRONMENT);
 		
 		//inicializa controlers para que escutem os eventos 
-		getController(EnvironmentChartsPaneController.class);
-		getController(LearningChartsPaneController.class);
-		
 		interactionEnvironmentController = getController(EnvironmentController.class, EnvironmentKeyType.INTERACTION_ENVIRONMENT);
+		interactionEnvironmentChartsPaneController = getController(EnvironmentChartsPaneController.class, EnvironmentKeyType.INTERACTION_ENVIRONMENT);
+		
 		learningEnvironmentController = getController(EnvironmentController.class, EnvironmentKeyType.LEARNING_ENVIRONMENT);
 	}
 	
@@ -183,25 +183,25 @@ public class MenuPaneController extends Controller {
 		SimuladorRede.showModalScene("Functions", FunctionsController.class, true);
 	}
 	
-	public void showEnvironmentChartsWindow() {
-		SimuladorRede.showUtilityScene("Environment Charts", EnvironmentChartsPaneController.class, true, false);
-	}
-	
 	public void showLearningChartsWindow() {
 		SimuladorRede.showUtilityScene("Learning Charts", LearningChartsPaneController.class, true, false);
 	}
 	
 	public void showInteractionEnvironmentController() {
-		SimuladorRede.showUtilityScene("Interaction Environment Controller", interactionEnvironmentController, true, false);
+		SimuladorRede.showUtilityScene("Interaction Environment", interactionEnvironmentController, true, false);
+	}
+	
+	public void showInteractionEnvironmentChartsWindow() {
+		SimuladorRede.showUtilityScene("Interaction Environment Charts", interactionEnvironmentChartsPaneController, true, false);
 	}
 	
 	public void showLearningEnvironmentController() {
-		SimuladorRede.showUtilityScene("Learning Environment Controller", learningEnvironmentController, true, false);
+		SimuladorRede.showUtilityScene("Learning Environment", learningEnvironmentController, true, false);
 	}
 
 	private void resetScreen() {
 		miExpressionEvaluator.setDisable(true);
-		miEnvironmentCharts.setDisable(true);
+		miInteractionEnvironmentCharts.setDisable(true);
 		miLearningCharts.setDisable(true);
 		miInteractionEnvironment.setDisable(true);
 		miLearningEnvironment.setDisable(true);
@@ -209,7 +209,7 @@ public class MenuPaneController extends Controller {
 	
 	private void onEnvironmentLoaded() {
 		miExpressionEvaluator.setDisable(false);
-		miEnvironmentCharts.setDisable(false);
+		miInteractionEnvironmentCharts.setDisable(false);
 		miLearningCharts.setDisable(false);
 		miInteractionEnvironment.setDisable(false);
 		miLearningEnvironment.setDisable(false);

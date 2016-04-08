@@ -3,7 +3,6 @@ package br.com.guisi.simulador.rede.controller.chart;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -11,10 +10,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Named;
+
+import org.springframework.context.annotation.Scope;
 
 import br.com.guisi.simulador.rede.agent.status.AgentStatus;
 import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
-import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
+import br.com.guisi.simulador.rede.controller.environment.AbstractEnvironmentPaneController;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 import br.com.guisi.simulador.rede.view.charts.environment.EnvironmentConfigurationRateChart;
@@ -26,24 +29,29 @@ import br.com.guisi.simulador.rede.view.charts.environment.RequiredSwitchOperati
 import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsActivePowerPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsPercentageChart;
 
-public class EnvironmentChartsPaneController extends Controller {
+@Named
+@Scope("prototype")
+public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneController {
 
-	public static final String FXML_FILE = "/fxml/main/EnvironmentChartsPane.fxml";
-
-	@FXML
 	private VBox root;
-	
-	@FXML
 	private TabPane tabPaneCharts;
 	
 	private List<GenericLineChart> lineCharts;
 	private int stepUpdateReceived;
+	
+	public EnvironmentChartsPaneController(EnvironmentKeyType environmentKeyType) {
+		super(environmentKeyType);
+	}
 	
 	@PostConstruct
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
 						   EventType.ENVIRONMENT_LOADED,
 						   EventType.AGENT_NOTIFICATION);
+		
+		root = new VBox();
+		tabPaneCharts = new TabPane();
+		root.getChildren().add(tabPaneCharts);
 	}
 	
 	@Override
