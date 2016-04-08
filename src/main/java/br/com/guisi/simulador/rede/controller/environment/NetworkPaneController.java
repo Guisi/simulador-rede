@@ -13,10 +13,10 @@ import javax.inject.Named;
 import org.springframework.context.annotation.Scope;
 
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStatus;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
-import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
+import br.com.guisi.simulador.rede.agent.data.AgentData;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
+import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -174,12 +174,12 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 	}
 	
 	private void processAgentNotification(Object data) {
-		AgentStatus agentStatus = (AgentStatus) data;
+		AgentData agentData = (AgentData) data;
 		
-		for (int i = stepProcessed; i < agentStatus.getStepStatus().size(); i++) {
-			AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
+		for (int i = stepProcessed; i < agentData.getAgentStepData().size(); i++) {
+			AgentStepData agentStepStatus = agentData.getAgentStepData().get(i);
 			
-			SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
+			SwitchOperation switchOperation = agentStepStatus.getData(AgentDataType.SWITCH_OPERATION, SwitchOperation.class);
 			if (switchOperation != null) {
 				Branch sw = getEnvironment().getBranch(switchOperation.getSwitchNumber());
 				networkPane.updateBranchDrawing(sw);
@@ -190,7 +190,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 			}
 		}
 		
-		stepProcessed = agentStatus.getStepStatus().size();
+		stepProcessed = agentData.getAgentStepData().size();
 	}
 	
 	private void processAgentStop() {

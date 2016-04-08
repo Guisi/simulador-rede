@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import javafx.scene.chart.XYChart;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
@@ -51,13 +51,13 @@ public class MinLoadCurrentVoltagePUChart extends GenericLineChart {
 	}
 	
 	@Override
-	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
-		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
-		Double minVoltage = agentStepStatus.getInformation(AgentInformationType.MIN_LOAD_CURRENT_VOLTAGE_PU, Double.class);
+	public void processAgentStepData(AgentStepData agentStepData) {
+		getXNumberAxis().setUpperBound(agentStepData.getStep());
+		Double minVoltage = agentStepData.getData(AgentDataType.MIN_LOAD_CURRENT_VOLTAGE_PU, Double.class);
 		
 		if (minVoltage != null && minVoltage > 0) {
 			BigDecimal value = new BigDecimal(minVoltage).setScale(5, RoundingMode.HALF_UP);
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), value.doubleValue());
 			minLoadCurrentVoltageSeries.getData().add(chartData);
 			minValue = minValue != null ? Math.min(minValue, value.doubleValue()) : value.doubleValue();
 			maxValue = maxValue != null ? Math.max(maxValue, value.doubleValue()) : value.doubleValue();

@@ -1,8 +1,8 @@
 package br.com.guisi.simulador.rede.view.charts.environment;
 
 import javafx.scene.chart.XYChart;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
 public class RequiredSwitchOperationsChart extends GenericLineChart {
@@ -42,13 +42,13 @@ public class RequiredSwitchOperationsChart extends GenericLineChart {
 	}
 
 	@Override
-	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
-		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
+	public void processAgentStepData(AgentStepData agentStepData) {
+		getXNumberAxis().setUpperBound(agentStepData.getStep());
 		
-		Integer requiredSwitchOperations = agentStepStatus.getInformation(AgentInformationType.REQUIRED_SWITCH_OPERATIONS, Integer.class);
+		Integer requiredSwitchOperations = agentStepData.getData(AgentDataType.REQUIRED_SWITCH_OPERATIONS, Integer.class);
 		
 		if (requiredSwitchOperations != null) {
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), requiredSwitchOperations);
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), requiredSwitchOperations);
 			requiredSwitchOperationsSeries.getData().add(chartData);
 			minValue = minValue != null ? Math.min(minValue, requiredSwitchOperations) : requiredSwitchOperations;
 			maxValue = maxValue != null ? Math.max(maxValue, requiredSwitchOperations) : requiredSwitchOperations;

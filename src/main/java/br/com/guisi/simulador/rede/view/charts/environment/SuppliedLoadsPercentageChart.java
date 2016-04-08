@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import javafx.scene.chart.XYChart;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
 public class SuppliedLoadsPercentageChart extends GenericLineChart {
@@ -57,23 +57,23 @@ public class SuppliedLoadsPercentageChart extends GenericLineChart {
 	}
 
 	@Override
-	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
-		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
+	public void processAgentStepData(AgentStepData agentStepData) {
+		getXNumberAxis().setUpperBound(agentStepData.getStep());
 		
 		//calcula percentual de loads atendidos considerando a prioridade
-		Double suppliedLoads = agentStepStatus.getInformation(AgentInformationType.SUPPLIED_LOADS_VS_PRIORITY, Double.class);
-		Double notSuppliedLoads = agentStepStatus.getInformation(AgentInformationType.NOT_SUPPLIED_LOADS_VS_PRIORITY, Double.class);
+		Double suppliedLoads = agentStepData.getData(AgentDataType.SUPPLIED_LOADS_VS_PRIORITY, Double.class);
+		Double notSuppliedLoads = agentStepData.getData(AgentDataType.NOT_SUPPLIED_LOADS_VS_PRIORITY, Double.class);
 		
 		if (suppliedLoads != null && notSuppliedLoads != null) {
 			Double total = suppliedLoads + notSuppliedLoads;
 			BigDecimal value = total > 0 ? new BigDecimal(suppliedLoads / total * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), value.doubleValue());
 			suppliedLoadsPercentageSeries.getData().add(chartData);
 			minPercentage = minPercentage != null ? Math.min(minPercentage, value.doubleValue()) : value.doubleValue();
 			maxPercentage = maxPercentage != null ? Math.max(maxPercentage, value.doubleValue()) : value.doubleValue();
 			
 			cumulativePercentage += value.doubleValue();
-			average = cumulativePercentage / (double)agentStepStatus.getStep();
+			average = cumulativePercentage / (double)agentStepData.getStep();
 			
 			getYNumberAxis().setLowerBound(minPercentage < 5 ? 0 : minPercentage - 5);
 	        getYNumberAxis().setUpperBound(maxPercentage > 95 ? 100 : maxPercentage + 5);

@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import javafx.scene.chart.XYChart;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
 public class EnvironmentConfigurationRateChart extends GenericLineChart {
@@ -55,20 +55,20 @@ public class EnvironmentConfigurationRateChart extends GenericLineChart {
 	}
 
 	@Override
-	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
-		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
+	public void processAgentStepData(AgentStepData agentStepData) {
+		getXNumberAxis().setUpperBound(agentStepData.getStep());
 		
-		Double environmentConfigurationRate = agentStepStatus.getInformation(AgentInformationType.ENVIRONMENT_CONFIGURATION_RATE, Double.class);
+		Double environmentConfigurationRate = agentStepData.getData(AgentDataType.ENVIRONMENT_CONFIGURATION_RATE, Double.class);
 		
 		if (environmentConfigurationRate != null) {
 			BigDecimal value = new BigDecimal(environmentConfigurationRate).setScale(5, RoundingMode.HALF_UP);
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), value.doubleValue());
 			environmentConfigurationRateSeries.getData().add(chartData);
 			minValue = minValue != null ? Math.min(minValue, value.doubleValue()) : value.doubleValue();
 			maxValue = maxValue != null ? Math.max(maxValue, value.doubleValue()) : value.doubleValue();
 			
 			cumulative += value.doubleValue();
-			average = cumulative / (double)agentStepStatus.getStep();
+			average = cumulative / (double)agentStepData.getStep();
 			
 			/*getYNumberAxis().setLowerBound(minValue < 5 ? 0 : minValue - 5);
 	        getYNumberAxis().setUpperBound(maxValue > 95 ? 100 : maxValue + 5);*/

@@ -14,8 +14,8 @@ import javax.inject.Named;
 
 import org.springframework.context.annotation.Scope;
 
-import br.com.guisi.simulador.rede.agent.status.AgentStatus;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.data.AgentData;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.controller.environment.AbstractEnvironmentPaneController;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -37,7 +37,7 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 	private TabPane tabPaneCharts;
 	
 	private List<GenericLineChart> lineCharts;
-	private int stepUpdateReceived;
+	private int stepProcessed;
 	
 	public EnvironmentChartsPaneController(EnvironmentKeyType environmentKeyType) {
 		super(environmentKeyType);
@@ -86,7 +86,7 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 		//supplied loads x priority
 		lineCharts.add(new SuppliedLoadsActivePowerPercentageChart());
 		//out-of-service loads power %
-		lineCharts.add(new LoadsPowerPercentageChart());
+		lineCharts.add(new LoadsPowerPercentageChart(getEnvironmentKeyType()));
 		//min load current voltage PU
 		lineCharts.add(new MinLoadCurrentVoltagePUChart());
 		//environment configuration rate
@@ -103,7 +103,7 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 	
 	private void resetScreen() {
 		root.setVisible(false);
-		this.stepUpdateReceived = 0;
+		this.stepProcessed = 0;
 	}
 	
 	private void processEnvironmentLoaded() {
@@ -112,23 +112,24 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 	}
 	
 	private void processAgentNotification(Object data) {
-		AgentStatus agentStatus = (AgentStatus) data;
+		AgentData agentData = (AgentData) data;
 		
-		if (agentStatus != null) {
+		if (agentData != null) {
 			//para os casos onde o chart processa o AgentStatus a sua forma
 			lineCharts.forEach((chart) -> {
-				chart.processAgentStatus(agentStatus);
+				chart.processAgentData(agentData);
 			});
 			
 			//para os casos onde o chart espera somente o step atual
-			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
-				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
+			List<AgentStepData> environmentStepData = agentData.getEnvironmentStepData(getEnvironmentKeyType());
+			for (int i = stepProcessed; i < environmentStepData.size(); i++) {
+				AgentStepData agentStepData = environmentStepData.get(i);
 				
 				lineCharts.forEach((chart) -> {
-					chart.processAgentStepStatus(agentStepStatus);
+					chart.processAgentStepData(agentStepData);
 				});
 			}
-			stepUpdateReceived = agentStatus.getStepStatus().size();
+			stepProcessed = environmentStepData.size();
 		}
 	}
 	

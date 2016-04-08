@@ -25,11 +25,11 @@ import javax.inject.Inject;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStatus;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
-import br.com.guisi.simulador.rede.agent.status.LearningProperty;
-import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
+import br.com.guisi.simulador.rede.agent.data.AgentData;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
+import br.com.guisi.simulador.rede.agent.data.LearningProperty;
+import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -54,7 +54,7 @@ public class AgentInformationPaneController extends Controller {
 	@Inject
 	private AgentControl agentControl;
 	
-	private int stepUpdateReceived;
+	private int stepProcessed;
 	
 	@PostConstruct
 	public void initializeController() {
@@ -83,7 +83,7 @@ public class AgentInformationPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
-		this.stepUpdateReceived = 0;
+		this.stepProcessed = 0;
 		tvSwitchesOperations.getItems().clear();
 		tvAgentLearning.getItems().clear();
 		
@@ -105,20 +105,20 @@ public class AgentInformationPaneController extends Controller {
 	}
 
 	private void processAgentNotification(Object data) {
-		AgentStatus agentStatus = (AgentStatus) data;
+		AgentData agentData = (AgentData) data;
 		
-		if (agentStatus != null) {
-			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
-				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
+		if (agentData != null) {
+			for (int i = stepProcessed; i < agentData.getAgentStepData().size(); i++) {
+				AgentStepData agentStepStatus = agentData.getAgentStepData().get(i);
 				
-				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
+				SwitchOperation switchOperation = agentStepStatus.getData(AgentDataType.SWITCH_OPERATION, SwitchOperation.class);
 				if (switchOperation != null) {
 					SwitchOperationRow row = new SwitchOperationRow();
 					row.getMessage().setValue(new StringBuilder().append("Switch ").append(switchOperation.getSwitchNumber()).append(" ").append(switchOperation.getSwitchState().getDescription()).toString());
 					tvSwitchesOperations.getItems().add(row);
 				}
 			}
-			stepUpdateReceived = agentStatus.getStepStatus().size();
+			stepProcessed = agentData.getAgentStepData().size();
 		}
 	}
 	

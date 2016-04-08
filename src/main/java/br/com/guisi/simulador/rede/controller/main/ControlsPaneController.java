@@ -31,10 +31,10 @@ import org.apache.commons.lang3.StringUtils;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.control.impl.StepNumberStoppingCriteria;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStatus;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
-import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
+import br.com.guisi.simulador.rede.agent.data.AgentData;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
+import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.controller.Controller;
@@ -74,8 +74,6 @@ public class ControlsPaneController extends Controller {
 	
 	private LocalTime localTime;
 	private Timeline timeline;
-	
-	private int stepUpdateReceived;
 	
 	@PostConstruct
 	public void initializeController() {
@@ -147,7 +145,6 @@ public class ControlsPaneController extends Controller {
 		lblTimer.setText(localTime.toString());
 		timeline.stop();
 		tfStoppingCriteria.setText(Constants.STOPPING_CRITERIA_STEP_NUMBER);
-		stepUpdateReceived = 0;
 	}
 	
 	private void processEnvironmentLoaded() {
@@ -160,20 +157,16 @@ public class ControlsPaneController extends Controller {
 	}
 	
 	private void processAgentNotification(Object data) {
-		AgentStatus agentStatus = (AgentStatus) data;
+		AgentData agentData = (AgentData) data;
 		
-		if (agentStatus != null) {
-			lblSteps.setText(String.valueOf(agentStatus.getSteps()));
+		if (agentData != null) {
+			lblSteps.setText(String.valueOf(agentData.getSteps()));
 			
-			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
-				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
-				
-				SwitchOperation switchOperation = agentStepStatus.getInformation(AgentInformationType.SWITCH_OPERATION, SwitchOperation.class);
-				if (switchOperation != null) {
-					lblCurrentSwitch.setText(switchOperation.getSwitchNumber() + " (" + switchOperation.getSwitchState().getDescription() + ")");					
-				}
+			AgentStepData agentStepStatus = agentData.getAgentStepData().get(agentData.getAgentStepData().size()-1);
+			SwitchOperation switchOperation = agentStepStatus.getData(AgentDataType.SWITCH_OPERATION, SwitchOperation.class);
+			if (switchOperation != null) {
+				lblCurrentSwitch.setText(switchOperation.getSwitchNumber() + " (" + switchOperation.getSwitchState().getDescription() + ")");					
 			}
-			stepUpdateReceived = agentStatus.getStepStatus().size();
 		}
 	}
 	

@@ -16,12 +16,14 @@ import javax.inject.Named;
 
 import org.springframework.context.annotation.Scope;
 
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
-import br.com.guisi.simulador.rede.agent.status.LearningProperty;
-import br.com.guisi.simulador.rede.agent.status.SwitchOperation;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
+import br.com.guisi.simulador.rede.agent.data.LearningProperty;
+import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
@@ -81,11 +83,9 @@ public class QLearningAgent extends Agent {
 	
 	/**
 	 * Realiza uma interação no ambiente
-	 * @param agentStepStatus
-	 * @return {@link Integer} estado para o qual o agente se moveu
 	 */
 	@Override
-	protected void runNextEpisode(AgentStepStatus agentStepStatus) {
+	protected void runNextEpisode() {
 		Environment environment = getInteractionEnvironment();
 		
 		//reativa loads desativados no episódio anterior
@@ -134,7 +134,12 @@ public class QLearningAgent extends Agent {
 		
 		this.currentSwitch = nextSwitch;
 		
-		this.generateAgentStatus(environment, agentStepStatus);
+		//gera os dados do agente
+		this.generateAgentData();
+		
+		//gera os dados dos ambientes
+		this.generateEnvironmentData(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
+		this.generateEnvironmentData(EnvironmentKeyType.LEARNING_ENVIRONMENT);
 	}
 	
 	/**
@@ -203,52 +208,62 @@ public class QLearningAgent extends Agent {
 		return feeder.getServedLoads().stream().filter((load) -> load.isOn()).collect(Collectors.toList());
 	}
 	
-	private void generateAgentStatus(Environment environment, AgentStepStatus agentStepStatus) {
+	private void generateAgentData() {
+		AgentStepData agentStepData = new AgentStepData(getStep());
+		getAgentData().getAgentStepData().add(agentStepData);
+		
 		//atualiza status com o switch alterado
-		agentStepStatus.putInformation(AgentInformationType.SWITCH_OPERATION, new SwitchOperation(currentSwitch.getNumber(), currentSwitch.getSwitchStatus()));
+		agentStepData.putData(AgentDataType.SWITCH_OPERATION, new SwitchOperation(currentSwitch.getNumber(), currentSwitch.getSwitchStatus()));
+		
+		 //trocou política
+		agentStepData.putData(AgentDataType.CHANGED_POLICY, this.changedPolicy);
+        
+        //média dos valores Q
+		agentStepData.putData(AgentDataType.QVALUES_AVERAGE, qTable.getQValuesAverage());
+	}
+	
+	private void generateEnvironmentData(EnvironmentKeyType environmentKeyType) {
+		Environment environment = SimuladorRede.getEnvironment(environmentKeyType);
+		
+		AgentStepData agentStepData = new AgentStepData(getStep());
+		getAgentData().getEnvironmentStepData(environmentKeyType).add(agentStepData);
 		
 		//seta total de perdas
-		agentStepStatus.putInformation(AgentInformationType.ACTIVE_POWER_LOST, environment.getActivePowerLostMW());
-		agentStepStatus.putInformation(AgentInformationType.REACTIVE_POWER_LOST, environment.getReactivePowerLostMVar());
+		agentStepData.putData(AgentDataType.ACTIVE_POWER_LOST, environment.getActivePowerLostMW());
+		agentStepData.putData(AgentDataType.REACTIVE_POWER_LOST, environment.getReactivePowerLostMVar());
 		
 		//seta demanda atendida
-		agentStepStatus.putInformation(AgentInformationType.SUPPLIED_LOADS_ACTIVE_POWER, environment.getSuppliedActivePowerDemandMW());
-		agentStepStatus.putInformation(AgentInformationType.SUPPLIED_LOADS_REACTIVE_POWER, environment.getSuppliedReactivePowerDemandMVar());
+		agentStepData.putData(AgentDataType.SUPPLIED_LOADS_ACTIVE_POWER, environment.getSuppliedActivePowerDemandMW());
+		agentStepData.putData(AgentDataType.SUPPLIED_LOADS_REACTIVE_POWER, environment.getSuppliedReactivePowerDemandMVar());
 		
 		//seta demanda não atendida
-		agentStepStatus.putInformation(AgentInformationType.NOT_SUPPLIED_LOADS_ACTIVE_POWER, environment.getNotSuppliedActivePowerDemandMW());
-		agentStepStatus.putInformation(AgentInformationType.NOT_SUPPLIED_LOADS_REACTIVE_POWER, environment.getNotSuppliedReactivePowerDemandMVar());
+		agentStepData.putData(AgentDataType.NOT_SUPPLIED_LOADS_ACTIVE_POWER, environment.getNotSuppliedActivePowerDemandMW());
+		agentStepData.putData(AgentDataType.NOT_SUPPLIED_LOADS_REACTIVE_POWER, environment.getNotSuppliedReactivePowerDemandMVar());
 		
 		//seta demanda desligada
-		agentStepStatus.putInformation(AgentInformationType.OUT_OF_SERVICE_LOADS_ACTIVE_POWER, environment.getOutOfServiceActivePowerDemandMW());
-		agentStepStatus.putInformation(AgentInformationType.OUT_OF_SERVICE_LOADS_REACTIVE_POWER, environment.getOutOfServiceReactivePowerDemandMVar());
+		agentStepData.putData(AgentDataType.OUT_OF_SERVICE_LOADS_ACTIVE_POWER, environment.getOutOfServiceActivePowerDemandMW());
+		agentStepData.putData(AgentDataType.OUT_OF_SERVICE_LOADS_REACTIVE_POWER, environment.getOutOfServiceReactivePowerDemandMVar());
 		
 		//seta soma das prioridades dos loads atendidos e não atendidos
-		agentStepStatus.putInformation(AgentInformationType.SUPPLIED_LOADS_VS_PRIORITY, environment.getSuppliedLoadsVsPriority());
-		agentStepStatus.putInformation(AgentInformationType.NOT_SUPPLIED_LOADS_VS_PRIORITY, environment.getNotSuppliedLoadsVsPriority());
+		agentStepData.putData(AgentDataType.SUPPLIED_LOADS_VS_PRIORITY, environment.getSuppliedLoadsVsPriority());
+		agentStepData.putData(AgentDataType.NOT_SUPPLIED_LOADS_VS_PRIORITY, environment.getNotSuppliedLoadsVsPriority());
 		
 		//seta soma das prioridades dos loads atendidos e não atendidos x potência ativa MW
-		agentStepStatus.putInformation(AgentInformationType.SUPPLIED_LOADS_ACTIVE_POWER_VS_PRIORITY, environment.getSuppliedLoadsActivePowerMWVsPriority());
-		agentStepStatus.putInformation(AgentInformationType.NOT_SUPPLIED_LOADS_ACTIVE_POWER_VS_PRIORITY, environment.getNotSuppliedLoadsActivePowerMWVsPriority());
+		agentStepData.putData(AgentDataType.SUPPLIED_LOADS_ACTIVE_POWER_VS_PRIORITY, environment.getSuppliedLoadsActivePowerMWVsPriority());
+		agentStepData.putData(AgentDataType.NOT_SUPPLIED_LOADS_ACTIVE_POWER_VS_PRIORITY, environment.getNotSuppliedLoadsActivePowerMWVsPriority());
 		
 		//min load current voltage pu
-		agentStepStatus.putInformation(AgentInformationType.MIN_LOAD_CURRENT_VOLTAGE_PU, environment.getMinLoadCurrentVoltagePU());
+		agentStepData.putData(AgentDataType.MIN_LOAD_CURRENT_VOLTAGE_PU, environment.getMinLoadCurrentVoltagePU());
 		
 		 //nota da configuração da rede
 		if (currentSwitch.isClosed()) {
 	        double configRate = getConfigRate(environment);
-	        agentStepStatus.putInformation(AgentInformationType.ENVIRONMENT_CONFIGURATION_RATE, (initialConfigRate > 0) ? (configRate - initialConfigRate) / initialConfigRate : 0);
+	        agentStepData.putData(AgentDataType.ENVIRONMENT_CONFIGURATION_RATE, (initialConfigRate > 0) ? (configRate - initialConfigRate) / initialConfigRate : 0);
 		}
         
 		//número de switches diferentes da rede inicial
         int differentSwitchStatesCount = EnvironmentUtils.countDifferentSwitchStates(environment, getInitialEnvironment());
-        agentStepStatus.putInformation(AgentInformationType.REQUIRED_SWITCH_OPERATIONS, differentSwitchStatesCount);
-        
-        //trocou política
-        agentStepStatus.putInformation(AgentInformationType.CHANGED_POLICY, this.changedPolicy);
-        
-        //média dos valores Q
-        agentStepStatus.putInformation(AgentInformationType.QVALUES_AVERAGE, qTable.getQValuesAverage());
+        agentStepData.putData(AgentDataType.REQUIRED_SWITCH_OPERATIONS, differentSwitchStatesCount);
 	}
 	
 	private void updateQValue(Environment environment, AgentState state, AgentAction action) {

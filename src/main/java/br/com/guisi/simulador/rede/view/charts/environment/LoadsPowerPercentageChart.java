@@ -6,8 +6,8 @@ import java.math.RoundingMode;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
@@ -36,8 +36,12 @@ public class LoadsPowerPercentageChart extends GenericLineChart {
 	private Double minOutOfServiceReactivePower;
 	private Double maxOutOfServiceReactivePower;
 	
-	public LoadsPowerPercentageChart() {
+	private EnvironmentKeyType environmentKeyType;
+	
+	public LoadsPowerPercentageChart(EnvironmentKeyType environmentKeyType) {
 		super();
+		
+		this.environmentKeyType = environmentKeyType;
 		
 		NumberAxis yAxis = (NumberAxis) this.getYAxis();
         yAxis.setUpperBound(0.1);
@@ -139,67 +143,66 @@ public class LoadsPowerPercentageChart extends GenericLineChart {
 	}
 	
 	@Override
-	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
-		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
+	public void processAgentStepData(AgentStepData agentStepData) {
+		getXNumberAxis().setUpperBound(agentStepData.getStep());
 		
-		//TODO fazer com que o ambiente possa ser parametrizado
-		Environment environment = SimuladorRede.getEnvironment(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
+		Environment environment = SimuladorRede.getEnvironment(environmentKeyType);
 		
 		Double totalActivePowerDemand = environment.getTotalActivePowerDemandMW();
 		Double totalReactivePowerDemand = environment.getTotalReactivePowerDemandMVar();
 
 		//Supplied
-		Double suppliedActivePower = agentStepStatus.getInformation(AgentInformationType.SUPPLIED_LOADS_ACTIVE_POWER, Double.class);
+		Double suppliedActivePower = agentStepData.getData(AgentDataType.SUPPLIED_LOADS_ACTIVE_POWER, Double.class);
 		if (suppliedActivePower != null && totalActivePowerDemand != null) {
 			BigDecimal value = totalActivePowerDemand.doubleValue() > 0 ? new BigDecimal(suppliedActivePower / totalActivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), value.doubleValue());
 			suppliedActivePowerSeries.getData().add(chartData);
 			minSuppliedActivePower = minSuppliedActivePower != null ? Math.min(minSuppliedActivePower, value.doubleValue()) : value.doubleValue();
 			maxSuppliedActivePower = maxSuppliedActivePower != null ? Math.max(maxSuppliedActivePower, value.doubleValue()) : value.doubleValue();
 		}
 
-		Double suppliedReactivePower = agentStepStatus.getInformation(AgentInformationType.SUPPLIED_LOADS_REACTIVE_POWER, Double.class);
+		Double suppliedReactivePower = agentStepData.getData(AgentDataType.SUPPLIED_LOADS_REACTIVE_POWER, Double.class);
 		if (suppliedReactivePower != null && totalReactivePowerDemand != null) {
 			BigDecimal value = totalReactivePowerDemand.doubleValue() > 0 ? new BigDecimal(suppliedReactivePower / totalReactivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), value.doubleValue());
 			suppliedReactivePowerSeries.getData().add(chartData);
 			minSuppliedReactivePower = minSuppliedReactivePower != null ? Math.min(minSuppliedReactivePower, value.doubleValue()) : value.doubleValue();
 			maxSuppliedReactivePower = maxSuppliedReactivePower != null ? Math.max(maxSuppliedReactivePower, value.doubleValue()) : value.doubleValue();
 		}
 		
 		//Not Supplied
-		Double notSuppliedActivePower = agentStepStatus.getInformation(AgentInformationType.NOT_SUPPLIED_LOADS_ACTIVE_POWER, Double.class);
+		Double notSuppliedActivePower = agentStepData.getData(AgentDataType.NOT_SUPPLIED_LOADS_ACTIVE_POWER, Double.class);
 		if (notSuppliedActivePower != null && totalActivePowerDemand != null) {
 			BigDecimal value = totalActivePowerDemand.doubleValue() > 0 ? new BigDecimal(notSuppliedActivePower / totalActivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), value.doubleValue());
 			notSuppliedActivePowerSeries.getData().add(chartData);
 			minNotSuppliedActivePower = minNotSuppliedActivePower != null ? Math.min(minNotSuppliedActivePower, value.doubleValue()) : value.doubleValue();
 			maxNotSuppliedActivePower = maxNotSuppliedActivePower != null ? Math.max(maxNotSuppliedActivePower, value.doubleValue()) : value.doubleValue();
 		}
 
-		Double notSuppliedReactivePower = agentStepStatus.getInformation(AgentInformationType.NOT_SUPPLIED_LOADS_REACTIVE_POWER, Double.class);
+		Double notSuppliedReactivePower = agentStepData.getData(AgentDataType.NOT_SUPPLIED_LOADS_REACTIVE_POWER, Double.class);
 		if (notSuppliedReactivePower != null && totalReactivePowerDemand != null) {
 			BigDecimal value = totalReactivePowerDemand.doubleValue() > 0 ? new BigDecimal(notSuppliedReactivePower / totalReactivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), value.doubleValue());
 			notSuppliedReactivePowerSeries.getData().add(chartData);
 			minNotSuppliedReactivePower = minNotSuppliedReactivePower != null ? Math.min(minNotSuppliedReactivePower, value.doubleValue()) : value.doubleValue();
 			maxNotSuppliedReactivePower = maxNotSuppliedReactivePower != null ? Math.max(maxNotSuppliedReactivePower, value.doubleValue()) : value.doubleValue();
 		}
 		
 		//Out of Service
-		Double outOfServiceActivePower = agentStepStatus.getInformation(AgentInformationType.OUT_OF_SERVICE_LOADS_ACTIVE_POWER, Double.class);
+		Double outOfServiceActivePower = agentStepData.getData(AgentDataType.OUT_OF_SERVICE_LOADS_ACTIVE_POWER, Double.class);
 		if (outOfServiceActivePower != null && totalActivePowerDemand != null) {
 			BigDecimal value = totalActivePowerDemand.doubleValue() > 0 ? new BigDecimal(outOfServiceActivePower / totalActivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), value.doubleValue());
 			outOfServiceActivePowerSeries.getData().add(chartData);
 			minOutOfServiceActivePower = minOutOfServiceActivePower != null ? Math.min(minOutOfServiceActivePower, value.doubleValue()) : value.doubleValue();
 			maxOutOfServiceActivePower = maxOutOfServiceActivePower != null ? Math.max(maxOutOfServiceActivePower, value.doubleValue()) : value.doubleValue();
 		}
 
-		Double outOfServiceReactivePower = agentStepStatus.getInformation(AgentInformationType.OUT_OF_SERVICE_LOADS_REACTIVE_POWER, Double.class);
+		Double outOfServiceReactivePower = agentStepData.getData(AgentDataType.OUT_OF_SERVICE_LOADS_REACTIVE_POWER, Double.class);
 		if (outOfServiceReactivePower != null && totalReactivePowerDemand != null) {
 			BigDecimal value = totalReactivePowerDemand.doubleValue() > 0 ? new BigDecimal(outOfServiceReactivePower / totalReactivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-			Data<Number, Number> chartData = new XYChart.Data<>(agentStepStatus.getStep(), value.doubleValue());
+			Data<Number, Number> chartData = new XYChart.Data<>(agentStepData.getStep(), value.doubleValue());
 			outOfServiceReactivePowerSeries.getData().add(chartData);
 			minOutOfServiceReactivePower = minOutOfServiceReactivePower != null ? Math.min(minOutOfServiceReactivePower, value.doubleValue()) : value.doubleValue();
 			maxOutOfServiceReactivePower = maxOutOfServiceReactivePower != null ? Math.max(maxOutOfServiceReactivePower, value.doubleValue()) : value.doubleValue();

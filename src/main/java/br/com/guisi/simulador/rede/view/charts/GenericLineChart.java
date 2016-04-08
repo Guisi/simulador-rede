@@ -2,8 +2,8 @@ package br.com.guisi.simulador.rede.view.charts;
 
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import br.com.guisi.simulador.rede.agent.status.AgentStatus;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.data.AgentData;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 
 public abstract class GenericLineChart extends LineChart<Number, Number> {
 	
@@ -32,7 +32,7 @@ public abstract class GenericLineChart extends LineChart<Number, Number> {
 	
 	public abstract String getChartTitle();
 
-	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {}
+	public void processAgentStepData(AgentStepData agentStepData) {}
 	
-	public void processAgentStatus(AgentStatus agentStatus) {}
+	public void processAgentData(AgentData agentStatus) {}
 }

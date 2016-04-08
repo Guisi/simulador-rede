@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import javafx.scene.chart.XYChart;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
 public class QValuesAverageChart extends GenericLineChart {
@@ -47,10 +47,10 @@ public class QValuesAverageChart extends GenericLineChart {
 	}
 
 	@Override
-	public void processAgentStepStatus(AgentStepStatus agentStepStatus) {
+	public void processAgentStepData(AgentStepData agentStepStatus) {
 		getXNumberAxis().setUpperBound(agentStepStatus.getStep());
 		
-		Double qValuesAverage = agentStepStatus.getInformation(AgentInformationType.QVALUES_AVERAGE, Double.class);
+		Double qValuesAverage = agentStepStatus.getData(AgentDataType.QVALUES_AVERAGE, Double.class);
 		
 		if (qValuesAverage != null) {
 			BigDecimal value = new BigDecimal(qValuesAverage).setScale(5, RoundingMode.HALF_UP);

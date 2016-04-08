@@ -3,7 +3,6 @@ package br.com.guisi.simulador.rede.controller.chart;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -11,33 +10,37 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Named;
 
-import br.com.guisi.simulador.rede.agent.status.AgentStatus;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import org.springframework.context.annotation.Scope;
+
+import br.com.guisi.simulador.rede.agent.data.AgentData;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 import br.com.guisi.simulador.rede.view.charts.learning.PolicyChangeChart;
 import br.com.guisi.simulador.rede.view.charts.learning.QValuesAverageChart;
 
+@Named
+@Scope("prototype")
 public class LearningChartsPaneController extends Controller {
 
-	public static final String FXML_FILE = "/fxml/main/LearningChartsPane.fxml";
-
-	@FXML
 	private VBox root;
-	
-	@FXML
 	private TabPane tabPaneCharts;
 	
 	private List<GenericLineChart> lineCharts;
-	private int stepUpdateReceived;
+	private int stepProcessed;
 	
 	@PostConstruct
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
 						   EventType.ENVIRONMENT_LOADED,
 						   EventType.AGENT_NOTIFICATION);
+		
+		root = new VBox();
+		tabPaneCharts = new TabPane();
+		root.getChildren().add(tabPaneCharts);
 	}
 	
 	@Override
@@ -77,7 +80,7 @@ public class LearningChartsPaneController extends Controller {
 	
 	private void resetScreen() {
 		root.setVisible(false);
-		this.stepUpdateReceived = 0;
+		this.stepProcessed = 0;
 	}
 	
 	private void processEnvironmentLoaded() {
@@ -86,23 +89,23 @@ public class LearningChartsPaneController extends Controller {
 	}
 	
 	private void processAgentNotification(Object data) {
-		AgentStatus agentStatus = (AgentStatus) data;
+		AgentData agentData = (AgentData) data;
 		
-		if (agentStatus != null) {
+		if (agentData != null) {
 			//para os casos onde o chart processa o AgentStatus a sua forma
 			lineCharts.forEach((chart) -> {
-				chart.processAgentStatus(agentStatus);
+				chart.processAgentData(agentData);
 			});
 			
 			//para os casos onde o chart espera somente o step atual
-			for (int i = stepUpdateReceived; i < agentStatus.getStepStatus().size(); i++) {
-				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(i);
+			for (int i = stepProcessed; i < agentData.getAgentStepData().size(); i++) {
+				AgentStepData agentStepStatus = agentData.getAgentStepData().get(i);
 				
 				lineCharts.forEach((chart) -> {
-					chart.processAgentStepStatus(agentStepStatus);
+					chart.processAgentStepData(agentStepStatus);
 				});
 			}
-			stepUpdateReceived = agentStatus.getStepStatus().size();
+			stepProcessed = agentData.getAgentStepData().size();
 		}
 	}
 	

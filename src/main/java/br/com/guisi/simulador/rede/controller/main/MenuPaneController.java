@@ -42,13 +42,17 @@ public class MenuPaneController extends Controller {
 	@FXML
 	private MenuItem miExpressionEvaluator;
 	@FXML
-	private MenuItem miInteractionEnvironmentCharts;
-	@FXML
 	private MenuItem miLearningCharts;
+	@FXML
+	private MenuItem miInitialEnvironment;
 	@FXML
 	private MenuItem miInteractionEnvironment;
 	@FXML
+	private MenuItem miInteractionEnvironmentCharts;
+	@FXML
 	private MenuItem miLearningEnvironment;
+	@FXML
+	private MenuItem miLearningEnvironmentCharts;
 	@FXML
 	private Menu menuEnvironment;
 	@FXML
@@ -58,9 +62,12 @@ public class MenuPaneController extends Controller {
 	
 	private File xlsFile;
 	
+	private EnvironmentController initialEnvironmentController;
 	private EnvironmentController interactionEnvironmentController;
 	private EnvironmentChartsPaneController interactionEnvironmentChartsPaneController;
 	private EnvironmentController learningEnvironmentController;
+	private EnvironmentChartsPaneController learningEnvironmentChartsPaneController;
+	private LearningChartsPaneController learningChartsPaneController;
 	
 	@PostConstruct
 	public void initializeController() {
@@ -72,11 +79,16 @@ public class MenuPaneController extends Controller {
 				EventType.RESET_SCREEN,
 				EventType.RELOAD_ENVIRONMENT);
 		
-		//inicializa controlers para que escutem os eventos 
+		//inicializa controlers para que escutem os eventos
+		initialEnvironmentController = getController(EnvironmentController.class, EnvironmentKeyType.INITIAL_ENVIRONMENT);
+		
 		interactionEnvironmentController = getController(EnvironmentController.class, EnvironmentKeyType.INTERACTION_ENVIRONMENT);
 		interactionEnvironmentChartsPaneController = getController(EnvironmentChartsPaneController.class, EnvironmentKeyType.INTERACTION_ENVIRONMENT);
 		
 		learningEnvironmentController = getController(EnvironmentController.class, EnvironmentKeyType.LEARNING_ENVIRONMENT);
+		learningEnvironmentChartsPaneController = getController(EnvironmentChartsPaneController.class, EnvironmentKeyType.LEARNING_ENVIRONMENT);
+		
+		learningChartsPaneController = getController(LearningChartsPaneController.class);
 	}
 	
 	@Override
@@ -184,7 +196,11 @@ public class MenuPaneController extends Controller {
 	}
 	
 	public void showLearningChartsWindow() {
-		SimuladorRede.showUtilityScene("Learning Charts", LearningChartsPaneController.class, true, false);
+		SimuladorRede.showUtilityScene("Learning Charts", learningChartsPaneController, true, false);
+	}
+	
+	public void showInitialEnvironmentController() {
+		SimuladorRede.showUtilityScene("Initial Environment", initialEnvironmentController, true, false);
 	}
 	
 	public void showInteractionEnvironmentController() {
@@ -198,21 +214,29 @@ public class MenuPaneController extends Controller {
 	public void showLearningEnvironmentController() {
 		SimuladorRede.showUtilityScene("Learning Environment", learningEnvironmentController, true, false);
 	}
+	
+	public void showLearningEnvironmentChartsWindow() {
+		SimuladorRede.showUtilityScene("Learning Environment Charts", learningEnvironmentChartsPaneController, true, false);
+	}
 
 	private void resetScreen() {
 		miExpressionEvaluator.setDisable(true);
-		miInteractionEnvironmentCharts.setDisable(true);
 		miLearningCharts.setDisable(true);
+		miInitialEnvironment.setDisable(true);
 		miInteractionEnvironment.setDisable(true);
+		miInteractionEnvironmentCharts.setDisable(true);
 		miLearningEnvironment.setDisable(true);
+		miLearningEnvironmentCharts.setDisable(true);
 	}
 	
 	private void onEnvironmentLoaded() {
 		miExpressionEvaluator.setDisable(false);
 		miInteractionEnvironmentCharts.setDisable(false);
 		miLearningCharts.setDisable(false);
+		miInitialEnvironment.setDisable(false);
 		miInteractionEnvironment.setDisable(false);
 		miLearningEnvironment.setDisable(false);
+		miLearningEnvironmentCharts.setDisable(false);
 	}
 	
 	private void enableDisableScreen(boolean disable) {

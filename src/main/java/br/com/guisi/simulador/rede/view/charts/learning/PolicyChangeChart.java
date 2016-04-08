@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import javafx.scene.chart.XYChart;
-import br.com.guisi.simulador.rede.agent.status.AgentInformationType;
-import br.com.guisi.simulador.rede.agent.status.AgentStatus;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
+import br.com.guisi.simulador.rede.agent.data.AgentData;
+import br.com.guisi.simulador.rede.agent.data.AgentDataType;
+import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
 public class PolicyChangeChart extends GenericLineChart {
@@ -62,16 +62,16 @@ public class PolicyChangeChart extends GenericLineChart {
 	}
 	
 	@Override
-	public void processAgentStatus(AgentStatus agentStatus) {
-		int steps = agentStatus.getStepStatus().size();
+	public void processAgentData(AgentData agentData) {
+		int steps = agentData.getAgentStepData().size();
 		
 		while ( (steps - stepProcessed) >= STEPS_GROUP_SIZE) {
 			int changedPolicyCount = 0;
 
 			for (int i = 0; i < STEPS_GROUP_SIZE; i++) {
-				AgentStepStatus agentStepStatus = agentStatus.getStepStatus().get(stepProcessed++);
+				AgentStepData agentStepStatus = agentData.getAgentStepData().get(stepProcessed++);
 				
-				Boolean changedPolicy = agentStepStatus.getInformation(AgentInformationType.CHANGED_POLICY, Boolean.class);
+				Boolean changedPolicy = agentStepStatus.getData(AgentDataType.CHANGED_POLICY, Boolean.class);
 				if (changedPolicy) {
 					changedPolicyCount++;
 				}

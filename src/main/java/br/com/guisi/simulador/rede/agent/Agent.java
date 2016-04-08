@@ -6,11 +6,12 @@ import javafx.application.Platform;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.SerializationUtils;
+
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
-import br.com.guisi.simulador.rede.agent.status.AgentStatus;
-import br.com.guisi.simulador.rede.agent.status.AgentStepStatus;
-import br.com.guisi.simulador.rede.agent.status.LearningProperty;
+import br.com.guisi.simulador.rede.agent.data.AgentData;
+import br.com.guisi.simulador.rede.agent.data.LearningProperty;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -23,7 +24,7 @@ public abstract class Agent {
 	@Inject
 	private EventBus eventBus;
 	
-	private AgentStatus agentStatus = new AgentStatus();
+	private AgentData agentData = new AgentData();
 	private boolean stopRequest;
 	private int step = 0;
 	
@@ -33,10 +34,9 @@ public abstract class Agent {
 
 		while (!stopRequest && isEnvironmentValid && !stoppingCriteria.wasReached(step)) {
 			synchronized (this) {
-				AgentStepStatus agentStepStatus = new AgentStepStatus(++step);
-				agentStatus.getStepStatus().add(agentStepStatus);
+				agentData.setSteps(++step);
 
-				this.runNextEpisode(agentStepStatus);
+				this.runNextEpisode();
 				
 				if (taskExecutionType.isNotifyEveryStep()) {
 					try {
@@ -60,15 +60,13 @@ public abstract class Agent {
 	}
 	
 	private void notifyAgentObservers() {
-		AgentStatus copy = new AgentStatus();
-		copy.setSteps(step);
-		copy.getStepStatus().addAll(agentStatus.getStepStatus());
+		AgentData copy = SerializationUtils.clone(agentData);
 		Platform.runLater(() -> {
 			eventBus.fire(EventType.AGENT_NOTIFICATION, copy);
 		});
 	}
 	
-	protected abstract void runNextEpisode(AgentStepStatus agentStepStatus);
+	protected abstract void runNextEpisode();
 	
 	public abstract void reset();
 	
@@ -76,6 +74,14 @@ public abstract class Agent {
 		stopRequest = true;
 	}
 	
+	public int getStep() {
+		return step;
+	}
+
+	public AgentData getAgentData() {
+		return agentData;
+	}
+
 	public abstract List<LearningProperty> getLearningProperties(Integer state);
 	
 	public abstract Branch getCurrentState();
