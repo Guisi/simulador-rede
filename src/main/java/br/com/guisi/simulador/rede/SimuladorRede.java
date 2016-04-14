@@ -18,12 +18,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.AbstractApplicationContext;
 
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
-import br.com.guisi.simulador.rede.constants.PreferenceKey;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.util.Matlab;
-import br.com.guisi.simulador.rede.util.PreferencesUtils;
 
 public class SimuladorRede extends Application {
 
@@ -33,7 +31,6 @@ public class SimuladorRede extends Application {
 	private static AbstractApplicationContext ctx;
 
 	private static Stage primaryStage;
-	private static Map<PreferenceKey, String> preferences;
 	
 	private static Map<EnvironmentKeyType, Environment> environmentMap;
 	
@@ -54,8 +51,6 @@ public class SimuladorRede extends Application {
 		initializeSpring();
 
 		SimuladorRede.primaryStage = stage;
-
-		preferences = PreferencesUtils.loadPreferences();
 
 		Controller controller = ctx.getBean(SimuladorRedeController.class, primaryStage);
 
@@ -145,10 +140,6 @@ public class SimuladorRede extends Application {
 
 	public static Stage getPrimaryStage() {
 		return primaryStage;
-	}
-
-	public static Map<PreferenceKey, String> getPreferences() {
-		return preferences;
 	}
 
 	public static Environment getEnvironment(EnvironmentKeyType environmentKeyType) {

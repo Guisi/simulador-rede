@@ -24,6 +24,8 @@ import br.com.guisi.simulador.rede.agent.data.LearningProperty;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
+import br.com.guisi.simulador.rede.constants.PropertyKey;
+import br.com.guisi.simulador.rede.constants.RandomActionType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
@@ -33,6 +35,7 @@ import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
+import br.com.guisi.simulador.rede.util.PropertiesUtils;
 
 @Named
 @Scope("prototype")
@@ -108,7 +111,8 @@ public class QLearningAgent extends Agent {
 
 		AgentAction action = null;
 		if (randomAction) {
-			action = qTable.getRandomAction(currentState, candidateSwitches, true); //TODO criar campo na tela para passar opção de randomico proporcional
+			boolean proportional = RandomActionType.PSEUDO_RANDOM_PROPORTIONAL.name().equals(PropertiesUtils.getProperty(PropertyKey.RANDOM_ACTION));
+			action = qTable.getRandomAction(currentState, candidateSwitches, proportional);
 		} else {
 			action = previousBestAction;
 		}

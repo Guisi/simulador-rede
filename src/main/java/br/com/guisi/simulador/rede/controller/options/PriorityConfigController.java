@@ -1,8 +1,5 @@
 package br.com.guisi.simulador.rede.controller.options;
 
-import java.util.Map;
-import java.util.prefs.BackingStoreException;
-
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -13,10 +10,10 @@ import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.StringUtils;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.constants.PreferenceKey;
+import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.util.DoubleTextFieldListener;
-import br.com.guisi.simulador.rede.util.PreferencesUtils;
+import br.com.guisi.simulador.rede.util.PropertiesUtils;
 
 public class PriorityConfigController extends Controller {
 	
@@ -36,12 +33,10 @@ public class PriorityConfigController extends Controller {
 	
 	@Override
 	public void initializeControllerData(Object... data) {
-		Map<PreferenceKey, String> preferences = SimuladorRede.getPreferences();
-		
-		tfPriority1.setText(preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_1));
-		tfPriority2.setText(preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_2));
-		tfPriority3.setText(preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_3));
-		tfPriority4.setText(preferences.get(PreferenceKey.PREFERENCE_KEY_PRIORITY_4));
+		tfPriority1.setText(PropertiesUtils.getProperty(PropertyKey.PRIORITY_1));
+		tfPriority2.setText(PropertiesUtils.getProperty(PropertyKey.PRIORITY_2));
+		tfPriority3.setText(PropertiesUtils.getProperty(PropertyKey.PRIORITY_3));
+		tfPriority4.setText(PropertiesUtils.getProperty(PropertyKey.PRIORITY_4));
 		
 		tfPriority1.textProperty().addListener(new DoubleTextFieldListener(tfPriority1));
 		tfPriority2.textProperty().addListener(new DoubleTextFieldListener(tfPriority2));
@@ -59,21 +54,10 @@ public class PriorityConfigController extends Controller {
 			return;
 		}
 		
-		Map<PreferenceKey, String> preferences = SimuladorRede.getPreferences();
-		
-		preferences.put(PreferenceKey.PREFERENCE_KEY_PRIORITY_1, tfPriority1.getText());
-		preferences.put(PreferenceKey.PREFERENCE_KEY_PRIORITY_2, tfPriority2.getText());
-		preferences.put(PreferenceKey.PREFERENCE_KEY_PRIORITY_3, tfPriority3.getText());
-		preferences.put(PreferenceKey.PREFERENCE_KEY_PRIORITY_4, tfPriority4.getText());
-		
-		try {
-			PreferencesUtils.savePreferences(preferences);
-		} catch (BackingStoreException e) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setContentText(e.getMessage());
-			e.printStackTrace();
-			alert.showAndWait();
-		}
+		PropertiesUtils.saveProperty(PropertyKey.PRIORITY_1, tfPriority1.getText());
+		PropertiesUtils.saveProperty(PropertyKey.PRIORITY_2, tfPriority2.getText());
+		PropertiesUtils.saveProperty(PropertyKey.PRIORITY_3, tfPriority3.getText());
+		PropertiesUtils.saveProperty(PropertyKey.PRIORITY_4, tfPriority4.getText());
 		
 		SimuladorRede.closeScene(this);
 	}

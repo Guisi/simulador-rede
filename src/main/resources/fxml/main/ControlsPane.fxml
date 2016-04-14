@@ -44,6 +44,8 @@
                         <ComboBox fx:id="cbTaskExecutionType" />
                         <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Current Switch:" />
                         <Label fx:id="lblCurrentSwitch" prefWidth="120.0" />
+                        <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Random Action:" />
+                        <ComboBox fx:id="cbRandomAction" onAction="#onCbRandomActionChange" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_LEFT" spacing="10.0">

@@ -36,10 +36,13 @@ import br.com.guisi.simulador.rede.agent.data.AgentDataType;
 import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
+import br.com.guisi.simulador.rede.constants.PropertyKey;
+import br.com.guisi.simulador.rede.constants.RandomActionType;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EventType;
+import br.com.guisi.simulador.rede.util.PropertiesUtils;
 
 public class ControlsPaneController extends Controller {
 
@@ -71,6 +74,8 @@ public class ControlsPaneController extends Controller {
 	private TextField tfStoppingCriteria;
 	@FXML
 	private Label lblCurrentSwitch;
+	@FXML
+	private ComboBox<RandomActionType> cbRandomAction;
 	
 	private LocalTime localTime;
 	private Timeline timeline;
@@ -120,6 +125,9 @@ public class ControlsPaneController extends Controller {
 			}
 		});
 		timeline.getKeyFrames().add(keyFrame);
+		
+		cbRandomAction.setItems(FXCollections.observableArrayList(RandomActionType.values()));
+		cbRandomAction.setValue(RandomActionType.valueOf(PropertiesUtils.getProperty(PropertyKey.RANDOM_ACTION)));
 	}
 	
 	@Override
@@ -187,6 +195,10 @@ public class ControlsPaneController extends Controller {
 	private void processAgentStopped() {
 		this.enableDisableScreen(false);
 		timeline.stop();
+	}
+	
+	public void onCbRandomActionChange() {
+		PropertiesUtils.saveProperty(PropertyKey.RANDOM_ACTION, cbRandomAction.getValue().name());
 	}
 	
 	/*********************************

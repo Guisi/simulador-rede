@@ -6,13 +6,14 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import br.com.guisi.simulador.rede.constants.RandomActionType;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		
+		System.out.println(RandomActionType.valueOf("PSEUDO_RANDOM-aa"));
 	}
 	
 	public static void teste() throws Exception {
