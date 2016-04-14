@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
+
 
 public class QTable extends HashMap<AgentState, AgentActionMap> {
 
@@ -187,7 +189,58 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 		return values().stream().mapToDouble(map -> map.values().stream().mapToDouble(qValue -> qValue.getReward()).average().getAsDouble()).average().getAsDouble();
 	}
 	
-	public void getBestSwitchStatus(AgentState agentState) {
+	public SwitchStatus getBestSwitchStatus(Integer switchNumber, List<Integer> otherSwitchNumbers) {
+		int votesForOpen = 0;
+		int votesForClosed = 0;
 		
+		//para cada um dos switches, verifica qual a opinião sobre o switch passado
+		for (Integer otherSwitchNumber : otherSwitchNumbers) {
+			//recupera QValue para abrir o switch
+			AgentState agentState = new AgentState(otherSwitchNumber, SwitchStatus.CLOSED);
+			AgentAction agentAction = new AgentAction(switchNumber, SwitchStatus.OPEN);
+			QValue qValueOpen = getQValue(agentState, agentAction);
+			
+			//só considera opinião deste switch caso possua um valor diferente do inicial para ambas as ações abrir/fechar
+			if (qValueOpen.isUpdated()) {
+				//recupera QValue para fechar o switch
+				agentState = new AgentState(otherSwitchNumber, SwitchStatus.OPEN);
+				agentAction = new AgentAction(switchNumber, SwitchStatus.CLOSED);
+				QValue qValueClosed = getQValue(agentState, agentAction);
+				
+				if (qValueClosed.isUpdated()) {
+					//se a recompensa para fechado for maior que a para aberto, soma um voto para fechado
+					if (qValueClosed.getReward() < qValueOpen.getReward()) {
+						votesForOpen++;
+						//senão, se a recompensa para aberto for maior, soma um voto para aberto
+					} else if (qValueOpen.getReward() < qValueClosed.getReward()) {
+						votesForClosed++;
+					} else {
+						//se as recompensas forem iguais, dá um voto aleatório
+						if (Math.random() < 0.5) {
+							votesForOpen++;
+						} else {
+							votesForClosed++;
+						}
+					}
+				}
+			}
+		}
+		
+		SwitchStatus switchStatus;
+		if (votesForClosed < votesForOpen) {
+			switchStatus = SwitchStatus.OPEN;
+		} else if (votesForOpen < votesForClosed) {
+			switchStatus = SwitchStatus.CLOSED;
+		} else {
+			if (Math.random() < 0.5) {
+				switchStatus = SwitchStatus.OPEN;
+			} else {
+				switchStatus = SwitchStatus.CLOSED;
+			}
+		}
+		
+		System.out.println("Switch " + switchNumber + " [Votes for open: " + votesForOpen + ", Votes for closed: " + votesForClosed + "] - Switch status chosen: " + switchStatus);
+		
+		return switchStatus;
 	}
 }

@@ -91,16 +91,6 @@ public class Environment implements Serializable {
 	}
 	
 	/**
-	 * Inverte estado do switch
-	 * 
-	 * @param switchNumber
-	 */
-	public void reverseSwitch(Integer switchNumber) {
-		Branch switchBranch = getBranch(switchNumber);
-		switchBranch.reverse();
-	}
-	
-	/**
 	 * Retorna o {@link NetworkNode} pelo número
 	 * @param networkNodeNumber
 	 * @return {@link NetworkNode}

@@ -14,11 +14,16 @@ public class QValue {
 	private final AgentState state;
 	private final AgentAction action;
 	private double reward;
+	private boolean updated;
 	
 	public QValue(AgentState state, AgentAction action) {
 		super();
 		this.state = state;
 		this.action = action;
+	}
+	
+	public boolean isUpdated() {
+		return updated;
 	}
 
 	public double getReward() {
@@ -27,6 +32,7 @@ public class QValue {
 
 	public void setReward(double reward) {
 		this.reward = reward;
+		this.updated = true;
 	}
 
 	public AgentState getState() {

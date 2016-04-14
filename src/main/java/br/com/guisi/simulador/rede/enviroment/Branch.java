@@ -138,6 +138,10 @@ public class Branch implements Serializable {
 	public SwitchStatus getSwitchStatus() {
 		return switchStatus;
 	}
+	
+	public void setSwitchStatus(SwitchStatus switchStatus) {
+		this.switchStatus = switchStatus;
+	}
 
 	/**
 	 * Inverte o estado do switch (aberto -> fechado / fechado -> aberto)

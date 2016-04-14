@@ -90,6 +90,10 @@ public abstract class Agent {
 		return SimuladorRede.getEnvironment(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
 	}
 	
+	public Environment getLearningEnvironment() {
+		return SimuladorRede.getEnvironment(EnvironmentKeyType.LEARNING_ENVIRONMENT);
+	}
+	
 	public Environment getInitialEnvironment() {
 		return SimuladorRede.getEnvironment(EnvironmentKeyType.INITIAL_ENVIRONMENT);
 	}

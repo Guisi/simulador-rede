@@ -33,6 +33,7 @@ import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
 import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
+import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 import br.com.guisi.simulador.rede.util.PropertiesUtils;
@@ -50,7 +51,6 @@ public class QLearningAgent extends Agent {
 	private double initialConfigRate;
 	private boolean changedPolicy;
 	private boolean isSameState;
-	
 
 	@PostConstruct
 	public void init() {
@@ -138,6 +138,9 @@ public class QLearningAgent extends Agent {
 		
 		this.currentSwitch = nextSwitch;
 		
+		//atualiza a rede de aprendizado conforme política do agente
+		this.updateNetworkFromLearning(getLearningEnvironment());
+		
 		//gera os dados do agente
 		this.generateAgentData();
 		
@@ -210,6 +213,34 @@ public class QLearningAgent extends Agent {
 	
 	private List<Load> getFeederLoadsOn(Feeder feeder) {
 		return feeder.getServedLoads().stream().filter((load) -> load.isOn()).collect(Collectors.toList());
+	}
+	
+	private void updateNetworkFromLearning(Environment environment) {
+		//monta uma lista com os números dos switches abertos/fechados
+		List<Integer> switchNumbers = new ArrayList<>();
+		environment.getSwitches().forEach(sw -> {
+			if (sw.isOpen() || sw.isClosed()) {
+				switchNumbers.add(sw.getNumber());				
+			}
+		});
+		
+		environment.getSwitches().forEach(sw -> {
+			if (sw.isOpen() || sw.isClosed()) {
+				SwitchStatus status = qTable.getBestSwitchStatus(sw.getNumber(), switchNumbers);
+				sw.setSwitchStatus(status);
+			}
+		});
+		
+		//primeiro valida se rede está radial
+		List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
+		
+		if (exceptions.isEmpty()) {
+			//executa o fluxo de potência
+			PowerFlow.execute(environment);
+			
+			//verifica loads a serem desativados caso existam restrições 
+			//this.turnOffLoadsIfNecessary(environment);
+		}
 	}
 	
 	private void generateAgentData() {
