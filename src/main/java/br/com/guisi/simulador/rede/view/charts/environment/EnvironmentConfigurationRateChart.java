@@ -16,6 +16,7 @@ public class EnvironmentConfigurationRateChart extends GenericLineChart {
 	private Double maxValue;
 	private Double average;
 	private double cumulative;
+	private int betterThanInitial;
 	
 	public EnvironmentConfigurationRateChart() {
 		super();
@@ -28,6 +29,7 @@ public class EnvironmentConfigurationRateChart extends GenericLineChart {
         getData().add(environmentConfigurationRateSeries);
         
         this.cumulative = 0d;
+        this.betterThanInitial = 0;
         
         this.updateSeriesName();
 	}
@@ -46,6 +48,7 @@ public class EnvironmentConfigurationRateChart extends GenericLineChart {
 			BigDecimal value = new BigDecimal(average).setScale(5, RoundingMode.HALF_UP);
 			sb.append("\nAverage: ").append(value.toString());
 		}
+		sb.append("\nBetter than initial: ").append(betterThanInitial);
 		environmentConfigurationRateSeries.setName(sb.toString());
 	}
 	
@@ -69,6 +72,10 @@ public class EnvironmentConfigurationRateChart extends GenericLineChart {
 			
 			cumulative += value.doubleValue();
 			average = cumulative / (double)agentStepData.getStep();
+			
+			if (value.doubleValue() > 0) {
+				betterThanInitial++;
+			}
 			
 			/*getYNumberAxis().setLowerBound(minValue < 5 ? 0 : minValue - 5);
 	        getYNumberAxis().setUpperBound(maxValue > 95 ? 100 : maxValue + 5);*/
