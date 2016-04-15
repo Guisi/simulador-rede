@@ -21,6 +21,7 @@ import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.agent.data.AgentDataType;
 import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.agent.data.LearningProperty;
+import br.com.guisi.simulador.rede.agent.data.LearningPropertyPair;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
@@ -412,29 +413,59 @@ public class QLearningAgent extends Agent {
 	}
 	
 	@Override
-	public List<LearningProperty> getLearningProperties(Integer switchNumber) {
-		List<LearningProperty> learningProperties = new ArrayList<>();
-
-		List<QValue> qValues = new ArrayList<>();
-		List<QValue> qValuesOpen = qTable.getQValues(new AgentState(switchNumber, SwitchStatus.OPEN));
-		if (qValuesOpen != null) {
-			qValues.addAll(qValuesOpen.stream().filter(qValue -> qValue.isUpdated()).collect(Collectors.toList()));
-		}
-
-		List<QValue> qValuesClosed = qTable.getQValues(new AgentState(switchNumber, SwitchStatus.CLOSED));
-		if (qValuesClosed != null) {
-			qValues.addAll(qValuesClosed.stream().filter(qValue -> qValue.isUpdated()).collect(Collectors.toList()));
-		}
+	public List<LearningPropertyPair> getLearningProperties(Integer switchNumber, boolean onlyUpdated) {
+		List<LearningPropertyPair> learningPropertyPairs = new ArrayList<>();
 		
-		for (QValue qValue : qValues) {
+		List<QValue> qValuesOpen = qTable.getQValues(new AgentState(switchNumber, SwitchStatus.OPEN));
+		List<LearningProperty> learningProperties = mountLearningProperties(qValuesOpen, onlyUpdated);
+		learningProperties.forEach(learningProperty -> {
+			LearningPropertyPair pair = new LearningPropertyPair();
+			pair.setLearningProperty1(learningProperty);
+			learningPropertyPairs.add(pair);
+		});
+		
+		List<QValue> qValuesClosed = qTable.getQValues(new AgentState(switchNumber, SwitchStatus.CLOSED));
+		learningProperties = mountLearningProperties(qValuesClosed, onlyUpdated);
+		
+		int i = 0;
+		for (LearningProperty learningProperty : learningProperties) {
+			LearningPropertyPair pair;
+			if (i < learningPropertyPairs.size()) {
+				pair = learningPropertyPairs.get(i);
+			} else {
+				pair = new LearningPropertyPair();
+				learningPropertyPairs.add(pair);
+			}
+			pair.setLearningProperty2(learningProperty);
+			i++;
+		};
+
+		return learningPropertyPairs;
+	}
+	
+	private List<LearningProperty> mountLearningProperties(List<QValue> qValues, boolean onlyUpdated) {
+		List<LearningProperty> learningProperties = new ArrayList<>();
+		
+		if (onlyUpdated) {
+			qValues = qValues.stream().filter(qValue -> qValue.isUpdated()).collect(Collectors.toList());
+		}
+
+		qValues.forEach(qValue -> {
 			String state = String.format("%02d", qValue.getState().getSwitchNumber()) + "/" + qValue.getState().getSwitchStatus().getDescription();
 			String action = String.format("%02d", qValue.getAction().getSwitchNumber()) + "/" + qValue.getAction().getSwitchStatus().getPastTenseDescription();
 			
 			BigDecimal value = new BigDecimal(qValue.getReward()).setScale(10, RoundingMode.HALF_UP);
-			LearningProperty row = new LearningProperty("Q(" + state + ", " + action + "):", value.toPlainString());
-			learningProperties.add(row);
-		}
-
+			learningProperties.add(new LearningProperty("Q(" + state + ", " + action + "):", value.toPlainString()));
+		});
+		
+		Collections.sort(learningProperties, (LearningProperty o1, LearningProperty o2) -> {
+			if (!o1.getValue().equals(o2.getValue())) {
+				return o2.getValue().compareTo(o1.getValue());
+			} else {
+				return o1.getProperty().compareTo(o2.getProperty());
+			}
+		});
+		
 		return learningProperties;
 	}
 }

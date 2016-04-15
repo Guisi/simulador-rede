@@ -1,6 +1,7 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -39,12 +40,8 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @return
 	 */
 	public List<QValue> getQValues(AgentState state) {
-		List<QValue> qValues = null;
 		AgentActionMap actionMap = get(state);
-		if (actionMap != null) {
-			qValues = new ArrayList<>(actionMap.values());
-		}
-		return qValues;
+		return actionMap != null ? new ArrayList<QValue>(actionMap.values()) : Collections.emptyList();
 	}
 	
 	/**

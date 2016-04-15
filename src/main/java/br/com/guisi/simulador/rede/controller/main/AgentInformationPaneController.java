@@ -3,7 +3,6 @@ package br.com.guisi.simulador.rede.controller.main;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import javafx.collections.FXCollections;
@@ -11,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
@@ -28,14 +28,14 @@ import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.data.AgentData;
 import br.com.guisi.simulador.rede.agent.data.AgentDataType;
 import br.com.guisi.simulador.rede.agent.data.AgentStepData;
-import br.com.guisi.simulador.rede.agent.data.LearningProperty;
+import br.com.guisi.simulador.rede.agent.data.LearningPropertyPair;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.controller.Controller;
-import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.tableview.PropertyRow;
+import br.com.guisi.simulador.rede.view.tableview.PropertyRowPair;
 import br.com.guisi.simulador.rede.view.tableview.SwitchOperationRow;
 
 public class AgentInformationPaneController extends Controller {
@@ -47,9 +47,11 @@ public class AgentInformationPaneController extends Controller {
 	@FXML
 	private TableView<SwitchOperationRow> tvSwitchesOperations;
 	@FXML
-	private TableView<PropertyRow> tvAgentLearning;
+	private TableView<PropertyRowPair> tvAgentLearning;
 	@FXML
 	private ComboBox<Integer> cbSelectedSwitch;
+	@FXML
+	private CheckBox cbOnlyPerformedActions;
 	
 	@Inject
 	private AgentControl agentControl;
@@ -151,23 +153,17 @@ public class AgentInformationPaneController extends Controller {
 		Integer selected = cbSelectedSwitch.valueProperty().get();
 		
 		if (selected != null) {
-			Branch branch = getLearningEnvironment().getBranch(selected);
+			List<LearningPropertyPair> learningProperties = agentControl.getAgent().getLearningProperties(selected, cbOnlyPerformedActions.isSelected());
 			
-			if (branch.isSwitchBranch() && !branch.hasFault() && !branch.isIsolated()) {
-				List<LearningProperty> learningProperties = agentControl.getAgent().getLearningProperties(branch.getNumber());
-				
-				Collections.sort(learningProperties, (LearningProperty o1, LearningProperty o2) -> {
-					if (!o1.getValue().equals(o2.getValue())) {
-						return o2.getValue().compareTo(o1.getValue());
-					} else {
-						return o1.getProperty().compareTo(o2.getProperty());
-					}
-				});
-				
-				for (LearningProperty learningProperty : learningProperties) {
-					PropertyRow row = new PropertyRow(learningProperty.getProperty(), learningProperty.getValue());
-					tvAgentLearning.getItems().add(row);
+			for (LearningPropertyPair learningPropertyPair : learningProperties) {
+				PropertyRowPair pair = new PropertyRowPair();
+				if (learningPropertyPair.getLearningProperty1() != null) {
+					pair.setPropertyRow1(new PropertyRow(learningPropertyPair.getLearningProperty1().getProperty(), learningPropertyPair.getLearningProperty1().getValue()));
 				}
+				if (learningPropertyPair.getLearningProperty2() != null) {
+					pair.setPropertyRow2(new PropertyRow(learningPropertyPair.getLearningProperty2().getProperty(), learningPropertyPair.getLearningProperty2().getValue()));
+				}
+				tvAgentLearning.getItems().add(pair);
 			}
 		}
 	}
@@ -213,17 +209,29 @@ public class AgentInformationPaneController extends Controller {
 		});
 		
 		tvAgentLearning.setItems(FXCollections.observableArrayList());
-		tvAgentLearning.setPlaceholder(new Label("No switch selected"));
-		TableColumn<PropertyRow, String> tcPropertyName = new TableColumn<PropertyRow, String>();
-		tcPropertyName.setCellValueFactory(cellData -> cellData.getValue().getPropertyName());
+		tvAgentLearning.setPlaceholder(new Label("No data"));
+		TableColumn<PropertyRowPair, String> tcPropertyName = new TableColumn<PropertyRowPair, String>();
+		tcPropertyName.setCellValueFactory(cellData -> cellData.getValue().getPropertyRow1() != null ? cellData.getValue().getPropertyRow1().getPropertyName() : null);
 		tcPropertyName.setStyle("-fx-alignment: center-right; -fx-font-weight: bold;");
-		tcPropertyName.prefWidthProperty().bind(tvAgentLearning.widthProperty().divide(2));
+		tcPropertyName.prefWidthProperty().bind(tvAgentLearning.widthProperty().divide(4));
 		tvAgentLearning.getColumns().add(tcPropertyName);
 		
-		TableColumn<PropertyRow, String> tcPropertyValue = new TableColumn<PropertyRow, String>();
-		tcPropertyValue.setCellValueFactory(cellData -> cellData.getValue().getPropertyValue());
+		TableColumn<PropertyRowPair, String> tcPropertyValue = new TableColumn<PropertyRowPair, String>();
+		tcPropertyValue.setCellValueFactory(cellData -> cellData.getValue().getPropertyRow1() != null ? cellData.getValue().getPropertyRow1().getPropertyValue() : null);
 		tcPropertyValue.setStyle("-fx-alignment: center-left;");
-		tcPropertyValue.prefWidthProperty().bind(tvAgentLearning.widthProperty().divide(2));
+		tcPropertyValue.prefWidthProperty().bind(tvAgentLearning.widthProperty().divide(4));
+		tvAgentLearning.getColumns().add(tcPropertyValue);
+		
+		tcPropertyName = new TableColumn<PropertyRowPair, String>();
+		tcPropertyName.setCellValueFactory(cellData -> cellData.getValue().getPropertyRow2() != null ? cellData.getValue().getPropertyRow2().getPropertyName() : null);
+		tcPropertyName.setStyle("-fx-alignment: center-right; -fx-font-weight: bold;");
+		tcPropertyName.prefWidthProperty().bind(tvAgentLearning.widthProperty().divide(4));
+		tvAgentLearning.getColumns().add(tcPropertyName);
+		
+		tcPropertyValue = new TableColumn<PropertyRowPair, String>();
+		tcPropertyValue.setCellValueFactory(cellData -> cellData.getValue().getPropertyRow2() != null ? cellData.getValue().getPropertyRow2().getPropertyValue() : null);
+		tcPropertyValue.setStyle("-fx-alignment: center-left;");
+		tcPropertyValue.prefWidthProperty().bind(tvAgentLearning.widthProperty().divide(4));
 		tvAgentLearning.getColumns().add(tcPropertyValue);
 	}
 

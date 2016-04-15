@@ -11,7 +11,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.data.AgentData;
-import br.com.guisi.simulador.rede.agent.data.LearningProperty;
+import br.com.guisi.simulador.rede.agent.data.LearningPropertyPair;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -82,7 +82,7 @@ public abstract class Agent {
 		return agentData;
 	}
 
-	public abstract List<LearningProperty> getLearningProperties(Integer state);
+	public abstract List<LearningPropertyPair> getLearningProperties(Integer switchNumber, boolean onlyUpdated);
 	
 	public abstract Branch getCurrentState();
 	

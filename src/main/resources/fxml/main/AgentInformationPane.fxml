@@ -35,6 +35,7 @@
                                        <children>
                                           <Label text="Switch:" />
                                           <ComboBox fx:id="cbSelectedSwitch" onAction="#changeCbSelectedSwitch" />
+                                          <CheckBox fx:id="cbOnlyPerformedActions" mnemonicParsing="false" onAction="#changeCbSelectedSwitch" selected="true" text="Only Performed Actions" />
                                        </children>
                                     </HBox>
                                     <TableView fx:id="tvAgentLearning" prefHeight="325.0" />
