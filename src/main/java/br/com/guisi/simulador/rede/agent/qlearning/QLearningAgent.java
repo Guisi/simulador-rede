@@ -155,10 +155,6 @@ public class QLearningAgent extends Agent {
 	 * @throws Exception
 	 */
 	private void turnOffLoadsIfNecessary(Environment environment) {
-		
-		//TODO remover
-		if (true) return;
-		
 		for (Feeder feeder : environment.getFeeders()) {
 			List<Load> turnedOffLoads = new ArrayList<>();
 			

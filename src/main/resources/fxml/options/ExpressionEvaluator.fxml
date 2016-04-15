@@ -9,7 +9,13 @@
    <children>
       <VBox fx:id="vBoxInternal" alignment="TOP_CENTER" spacing="10.0">
          <children>
-            <Button mnemonicParsing="false" onAction="#evaluateExpression" text="Evaluate" />
+            <HBox alignment="CENTER" spacing="10.0">
+               <children>
+                  <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Environment:" />
+                  <ComboBox fx:id="cbEnvironment" />
+                  <Button mnemonicParsing="false" onAction="#evaluateExpression" text="Evaluate" />
+               </children>
+            </HBox>
             <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Result:" />
             <TextArea fx:id="taEvalResult" editable="false" minHeight="-Infinity" prefHeight="150.0" />
          </children>

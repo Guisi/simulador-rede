@@ -239,7 +239,8 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 			}
 		}
 		
-		System.out.println("Switch " + switchNumber + " [Votes for open: " + votesForOpen + ", Votes for closed: " + votesForClosed + "] - Switch status chosen: " + switchStatus);
+		//TODO remover
+		//System.out.println("Switch " + switchNumber + " [Votes for open: " + votesForOpen + ", Votes for closed: " + votesForClosed + "] - Switch status chosen: " + switchStatus);
 		
 		return switchStatus;
 	}

@@ -1,5 +1,6 @@
 package br.com.guisi.simulador.rede.functions;
 
+import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 
 /**
@@ -10,6 +11,7 @@ import br.com.guisi.simulador.rede.enviroment.Environment;
 public class EvaluationObject {
 
 	private Environment environment;
+	private Agent agent;
 
 	/**
 	 * Returns the environment instance
@@ -25,6 +27,14 @@ public class EvaluationObject {
 	 */
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
+	}
+
+	public Agent getAgent() {
+		return agent;
+	}
+
+	public void setAgent(Agent agent) {
+		this.agent = agent;
 	}
 	
 }
