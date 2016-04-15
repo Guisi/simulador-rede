@@ -156,6 +156,9 @@ public class QLearningAgent extends Agent {
 	 */
 	private void turnOffLoadsIfNecessary(Environment environment) {
 		
+		//TODO remover
+		if (true) return;
+		
 		for (Feeder feeder : environment.getFeeders()) {
 			List<Load> turnedOffLoads = new ArrayList<>();
 			
@@ -226,8 +229,13 @@ public class QLearningAgent extends Agent {
 		
 		environment.getSwitches().forEach(sw -> {
 			if (sw.isOpen() || sw.isClosed()) {
-				SwitchStatus status = qTable.getBestSwitchStatus(sw.getNumber(), switchNumbers);
-				sw.setSwitchStatus(status);
+				//HEURISTICA - não pode abrir o switch mais próximo ao feeder
+				if (sw.getSwitchIndex() == 1) {
+					sw.setSwitchStatus(SwitchStatus.CLOSED);
+				} else {
+					SwitchStatus status = qTable.getBestSwitchStatus(sw.getNumber(), switchNumbers);
+					sw.setSwitchStatus(status);
+				}
 			}
 		});
 		
@@ -239,7 +247,7 @@ public class QLearningAgent extends Agent {
 			PowerFlow.execute(environment);
 			
 			//verifica loads a serem desativados caso existam restrições 
-			//this.turnOffLoadsIfNecessary(environment);
+			this.turnOffLoadsIfNecessary(environment);
 		}
 	}
 	
@@ -414,12 +422,12 @@ public class QLearningAgent extends Agent {
 		List<QValue> qValues = new ArrayList<>();
 		List<QValue> qValuesOpen = qTable.getQValues(new AgentState(switchNumber, SwitchStatus.OPEN));
 		if (qValuesOpen != null) {
-			qValues.addAll(qValuesOpen);
+			qValues.addAll(qValuesOpen.stream().filter(qValue -> qValue.isUpdated()).collect(Collectors.toList()));
 		}
 
 		List<QValue> qValuesClosed = qTable.getQValues(new AgentState(switchNumber, SwitchStatus.CLOSED));
 		if (qValuesClosed != null) {
-			qValues.addAll(qValuesClosed);
+			qValues.addAll(qValuesClosed.stream().filter(qValue -> qValue.isUpdated()).collect(Collectors.toList()));
 		}
 		
 		for (QValue qValue : qValues) {
