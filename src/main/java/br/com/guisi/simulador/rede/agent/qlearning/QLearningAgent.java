@@ -25,6 +25,7 @@ import br.com.guisi.simulador.rede.agent.data.LearningPropertyPair;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
+import br.com.guisi.simulador.rede.constants.NetworkRestrictionsTreatmentType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.constants.RandomActionType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -124,7 +125,7 @@ public class QLearningAgent extends Agent {
 		//executa o fluxo de potência
 		PowerFlow.execute(environment);
 
-		//verifica loads a serem desativados caso existam restrições 
+		//verifica loads a serem desativados caso existam restrições
 		this.turnOffLoadsIfNecessary(environment);
 		
 		//atualiza o qValue do switch
@@ -156,54 +157,57 @@ public class QLearningAgent extends Agent {
 	 * @throws Exception
 	 */
 	private void turnOffLoadsIfNecessary(Environment environment) {
-		for (Feeder feeder : environment.getFeeders()) {
-			List<Load> turnedOffLoads = new ArrayList<>();
+		if (NetworkRestrictionsTreatmentType.TURN_OFF_LOADS_TO_AVOID_RESTRICTIONS.name().equals(PropertiesUtils.getProperty(PropertyKey.NETWORK_RESTRICTIONS_TREATMENT))) {
 			
-			List<Load> onLoads = getFeederLoadsOn(feeder);
-			//primeiro desliga os loads com restrição em grupos até que não existam mais restrições
-			long brokenLoadsQuantity = getFeederBrokenLoadsQuantity(feeder);
-			while (brokenLoadsQuantity > 0) {
+			for (Feeder feeder : environment.getFeeders()) {
+				List<Load> turnedOffLoads = new ArrayList<>();
 				
-				double quantity = Math.ceil((double)brokenLoadsQuantity/2);
-				for (int i = 0; i < quantity; i++) {
-					//Verifica a menor prioridade encontrada entre os loads do feeder em questão
-					int minPriority = onLoads.stream().min(Comparator.comparing(load -> load.getPriority())).get().getPriority();
+				List<Load> onLoads = getFeederLoadsOn(feeder);
+				//primeiro desliga os loads com restrição em grupos até que não existam mais restrições
+				long brokenLoadsQuantity = getFeederBrokenLoadsQuantity(feeder);
+				while (brokenLoadsQuantity > 0) {
 					
-					//filtra por todos os loads com a menor prioridade
-					List<Load> minPriorityLoads = onLoads.stream().filter(load -> load.getPriority() == minPriority).collect(Collectors.toList());
+					double quantity = Math.ceil((double)brokenLoadsQuantity/2);
+					for (int i = 0; i < quantity; i++) {
+						//Verifica a menor prioridade encontrada entre os loads do feeder em questão
+						int minPriority = onLoads.stream().min(Comparator.comparing(load -> load.getPriority())).get().getPriority();
+						
+						//filtra por todos os loads com a menor prioridade
+						List<Load> minPriorityLoads = onLoads.stream().filter(load -> load.getPriority() == minPriority).collect(Collectors.toList());
+						
+						//desliga o load com a menor tensão
+						double minCurrent = minPriorityLoads.stream().min(Comparator.comparing(load -> load.getCurrentVoltagePU())).get().getCurrentVoltagePU();
+						Load minCurrentLoad = minPriorityLoads.stream().filter(load -> load.getCurrentVoltagePU() == minCurrent).findFirst().get();
+						
+						minCurrentLoad.turnOff();
+						turnedOffLoads.add(minCurrentLoad);
+						onLoads.remove(minCurrentLoad);
+					}
 					
-					//desliga o load com a menor tensão
-					double minCurrent = minPriorityLoads.stream().min(Comparator.comparing(load -> load.getCurrentVoltagePU())).get().getCurrentVoltagePU();
-					Load minCurrentLoad = minPriorityLoads.stream().filter(load -> load.getCurrentVoltagePU() == minCurrent).findFirst().get();
-					
-					minCurrentLoad.turnOff();
-					turnedOffLoads.add(minCurrentLoad);
-					onLoads.remove(minCurrentLoad);
-				}
-				
-				//executa o fluxo de potência
-				PowerFlow.execute(environment);
-				
-				//verifica novamente se continuam existindo loads com restrição violada
-				brokenLoadsQuantity = getFeederBrokenLoadsQuantity(feeder);
-			}
-			
-			//depois religa um a um até que alguma restrição seja criada (e reverte a ação que criou esta restrição)
-			List<Load> offLoads = new ArrayList<>(turnedOffLoads);
-			Collections.reverse(offLoads);
-			for (Load load : offLoads) {
-				load.turnOn();
-				PowerFlow.execute(environment);
-				
-				if (getFeederBrokenLoadsQuantity(feeder) > 0) {
-					load.turnOff();
+					//executa o fluxo de potência
 					PowerFlow.execute(environment);
-					break;
+					
+					//verifica novamente se continuam existindo loads com restrição violada
+					brokenLoadsQuantity = getFeederBrokenLoadsQuantity(feeder);
 				}
-				turnedOffLoads.remove(load);
+				
+				//depois religa um a um até que alguma restrição seja criada (e reverte a ação que criou esta restrição)
+				List<Load> offLoads = new ArrayList<>(turnedOffLoads);
+				Collections.reverse(offLoads);
+				for (Load load : offLoads) {
+					load.turnOn();
+					PowerFlow.execute(environment);
+					
+					if (getFeederBrokenLoadsQuantity(feeder) > 0) {
+						load.turnOff();
+						PowerFlow.execute(environment);
+						break;
+					}
+					turnedOffLoads.remove(load);
+				}
+				
+				this.turnedOffLoads.addAll(turnedOffLoads);
 			}
-			
-			this.turnedOffLoads.addAll(turnedOffLoads);
 		}
 	}
 	

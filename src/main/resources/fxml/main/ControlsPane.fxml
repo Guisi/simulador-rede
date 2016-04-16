@@ -53,6 +53,12 @@
                         <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Stop Condition:" />
                         <ComboBox fx:id="cbAgentStoppingCriteria" />
                         <TextField fx:id="tfStoppingCriteria" alignment="CENTER_RIGHT" prefWidth="70.0" />
+                        <Label alignment="CENTER" prefHeight="17.0" prefWidth="129.0" style="-fx-font-weight: bold;" text="Network Restrictions:">
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Label>
+                        <ComboBox fx:id="cbNetworkRestrictions" onAction="#onCbNetworkRestrictionsChange" />
                      </children>
                   </HBox>
                </children>

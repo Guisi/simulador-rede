@@ -82,6 +82,10 @@ public abstract class Agent {
 		return agentData;
 	}
 
+	public boolean isStopRequest() {
+		return stopRequest;
+	}
+
 	public abstract List<LearningPropertyPair> getLearningProperties(Integer switchNumber, boolean onlyUpdated);
 	
 	public abstract Branch getCurrentState();

@@ -9,7 +9,8 @@ public enum PropertyKey {
 	PRIORITY_4("1"),
 	
 	/**  */
-	RANDOM_ACTION(RandomActionType.PSEUDO_RANDOM_PROPORTIONAL.name());
+	RANDOM_ACTION(RandomActionType.PSEUDO_RANDOM_PROPORTIONAL.name()),
+	NETWORK_RESTRICTIONS_TREATMENT(NetworkRestrictionsTreatmentType.TURN_OFF_LOADS_TO_AVOID_RESTRICTIONS.name());
 	
 	private final String defaultValue;
 	
