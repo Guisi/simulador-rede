@@ -10,7 +10,7 @@ public enum PropertyKey {
 	
 	/**  */
 	RANDOM_ACTION(RandomActionType.PSEUDO_RANDOM_PROPORTIONAL.name()),
-	NETWORK_RESTRICTIONS_TREATMENT(NetworkRestrictionsTreatmentType.TURN_OFF_LOADS_TO_AVOID_RESTRICTIONS.name());
+	NETWORK_RESTRICTIONS_TREATMENT(NetworkRestrictionsTreatmentType.LOAD_SHEDDING.name());
 	
 	private final String defaultValue;
 	

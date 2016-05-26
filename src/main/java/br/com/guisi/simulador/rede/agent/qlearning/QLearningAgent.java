@@ -157,7 +157,7 @@ public class QLearningAgent extends Agent {
 	 * @throws Exception
 	 */
 	private void turnOffLoadsIfNecessary(Environment environment) {
-		if (NetworkRestrictionsTreatmentType.TURN_OFF_LOADS_TO_AVOID_RESTRICTIONS.name().equals(PropertiesUtils.getProperty(PropertyKey.NETWORK_RESTRICTIONS_TREATMENT))) {
+		if (NetworkRestrictionsTreatmentType.LOAD_SHEDDING.name().equals(PropertiesUtils.getProperty(PropertyKey.NETWORK_RESTRICTIONS_TREATMENT))) {
 			
 			for (Feeder feeder : environment.getFeeders()) {
 				List<Load> turnedOffLoads = new ArrayList<>();

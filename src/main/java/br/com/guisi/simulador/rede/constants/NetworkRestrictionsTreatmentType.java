@@ -2,7 +2,7 @@ package br.com.guisi.simulador.rede.constants;
 
 public enum NetworkRestrictionsTreatmentType {
 
-	TURN_OFF_LOADS_TO_AVOID_RESTRICTIONS("Turn off loads to avoid restrictions"),
+	LOAD_SHEDDING("Load shedding"),
 	CONSIDER_AS_NOT_SUPPLIED("Consider as not supplied");
 	
 	private final String label;
