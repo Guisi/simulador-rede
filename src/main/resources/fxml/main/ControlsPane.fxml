@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
@@ -9,7 +10,7 @@
    <children>
       <HBox alignment="CENTER_LEFT" spacing="10.0">
          <children>
-            <VBox alignment="CENTER_LEFT" spacing="10.0">
+            <VBox spacing="10.0">
                <children>
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
@@ -34,35 +35,50 @@
                         </HBox>
                      </children>
                   </HBox>
+                  <HBox alignment="CENTER_LEFT" spacing="3.0">
+                     <children>
+                        <Label style="-fx-font-weight: bold;" text="Current Switch:" />
+                        <Label fx:id="lblCurrentSwitch" prefWidth="80.0" />
+                     </children>
+                  </HBox>
                </children>
             </VBox>
-            <VBox alignment="CENTER_LEFT" spacing="5.0">
+            <GridPane hgap="5.0">
+              <columnConstraints>
+                <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="130.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="80.0" />
+                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="130.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="210.0" />
+                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="130.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="220.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
                <children>
-                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                  <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Execution Type:" GridPane.columnIndex="4" />
+                  <ComboBox fx:id="cbTaskExecutionType" prefWidth="200.0" GridPane.columnIndex="5" />
+                  <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Random Action:" GridPane.columnIndex="2" />
+                  <ComboBox fx:id="cbRandomAction" onAction="#onCbRandomActionChange" prefWidth="220.0" GridPane.columnIndex="3" />
+                  <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Stop Condition:" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="3.0" GridPane.columnIndex="5" GridPane.rowIndex="1">
                      <children>
-                        <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Execution Type:" />
-                        <ComboBox fx:id="cbTaskExecutionType" />
-                        <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Current Switch:" />
-                        <Label fx:id="lblCurrentSwitch" prefWidth="120.0" />
-                        <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Random Action:" />
-                        <ComboBox fx:id="cbRandomAction" onAction="#onCbRandomActionChange" />
-                     </children>
-                  </HBox>
-                  <HBox alignment="CENTER_LEFT" spacing="10.0">
-                     <children>
-                        <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Stop Condition:" />
-                        <ComboBox fx:id="cbAgentStoppingCriteria" />
+                        <ComboBox fx:id="cbAgentStoppingCriteria" prefWidth="127.0" />
                         <TextField fx:id="tfStoppingCriteria" alignment="CENTER_RIGHT" prefWidth="70.0" />
-                        <Label alignment="CENTER" prefHeight="17.0" prefWidth="129.0" style="-fx-font-weight: bold;" text="Network Restrictions:">
-                           <HBox.margin>
-                              <Insets left="10.0" />
-                           </HBox.margin>
-                        </Label>
-                        <ComboBox fx:id="cbNetworkRestrictions" onAction="#onCbNetworkRestrictionsChange" />
                      </children>
                   </HBox>
+                  <Label alignment="CENTER" prefHeight="17.0" prefWidth="129.0" style="-fx-font-weight: bold;" text="Network Restrictions:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <ComboBox fx:id="cbNetworkRestrictions" onAction="#onCbNetworkRestrictionsChange" prefWidth="220.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Learning Constant (α):" />
+                  <TextField fx:id="tfLearningConstant" alignment="CENTER_RIGHT" maxWidth="-Infinity" prefWidth="70.0" GridPane.columnIndex="1" />
+                  <Label alignment="CENTER" style="-fx-font-weight: bold;" text="Discount Factor (γ):" GridPane.rowIndex="1" />
+                  <TextField fx:id="tfDiscountFactor" alignment="CENTER_RIGHT" maxWidth="-Infinity" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label alignment="CENTER" style="-fx-font-weight: bold;" text="E-greedy (ε):" GridPane.rowIndex="2" />
+                  <TextField fx:id="tfEGreedy" alignment="CENTER_RIGHT" maxWidth="-Infinity" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
-            </VBox>
+            </GridPane>
          </children>
       </HBox>
    </children>

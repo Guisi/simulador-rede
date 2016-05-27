@@ -9,13 +9,13 @@ import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
-public class MinLoadCurrentVoltagePUChart extends GenericLineChart {
+public class MinLoadVoltagePUChart extends GenericLineChart {
 
 	private XYChart.Series<Number, Number> minLoadCurrentVoltageSeries;
 	private Double minValue;
 	private Double maxValue;
 	
-	public MinLoadCurrentVoltagePUChart() {
+	public MinLoadVoltagePUChart() {
 		super();
 		
         getYNumberAxis().setAutoRanging(false);
@@ -53,7 +53,7 @@ public class MinLoadCurrentVoltagePUChart extends GenericLineChart {
 	@Override
 	public void processAgentStepData(AgentStepData agentStepData) {
 		getXNumberAxis().setUpperBound(agentStepData.getStep());
-		Double minVoltage = agentStepData.getData(AgentDataType.MIN_LOAD_CURRENT_VOLTAGE_PU, Double.class);
+		Double minVoltage = agentStepData.getData(AgentDataType.MIN_LOAD_VOLTAGE_PU, Double.class);
 		
 		if (minVoltage != null && minVoltage > 0) {
 			BigDecimal value = new BigDecimal(minVoltage).setScale(5, RoundingMode.HALF_UP);

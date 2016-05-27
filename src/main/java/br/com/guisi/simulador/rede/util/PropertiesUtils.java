@@ -48,4 +48,25 @@ public class PropertiesUtils {
 			e.printStackTrace();
 		}
 	}
+	
+	public static double getDoubleValue(PropertyKey propertyKey) {
+		String value = getProperty(propertyKey);
+		try {
+			return Double.valueOf(value);
+		} catch (NumberFormatException e) {
+			return Double.valueOf(propertyKey.getDefaultValue());
+		}
+	}
+	
+	public static double getEGreedy() {
+		return getDoubleValue(PropertyKey.E_GREEDY);
+	}
+	
+	public static double getLearningConstant() {
+		return getDoubleValue(PropertyKey.LEARNING_CONSTANT);
+	}
+	
+	public static double getDiscountFactor() {
+		return getDoubleValue(PropertyKey.DISCOUNT_FACTOR);
+	}
 }

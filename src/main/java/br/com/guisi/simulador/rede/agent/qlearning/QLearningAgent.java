@@ -23,7 +23,6 @@ import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.agent.data.LearningProperty;
 import br.com.guisi.simulador.rede.agent.data.LearningPropertyPair;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
-import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.NetworkRestrictionsTreatmentType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
@@ -104,7 +103,7 @@ public class QLearningAgent extends Agent {
 		List<CandidateSwitch> candidateSwitches = this.getCandidateSwitches(environment, currentSwitch, switchStatus);
 		
 		//Se randomico menor que E-greedy, escolhe melhor acao
-		boolean randomAction = (Math.random() >= Constants.E_GREEDY);
+		boolean randomAction = (Math.random() >= PropertiesUtils.getEGreedy());
 		
 		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchStatus());
 		
@@ -296,13 +295,13 @@ public class QLearningAgent extends Agent {
 		agentStepData.putData(AgentDataType.SUPPLIED_LOADS_ACTIVE_POWER_VS_PRIORITY, environment.getSuppliedLoadsActivePowerMWVsPriority());
 		agentStepData.putData(AgentDataType.NOT_SUPPLIED_LOADS_ACTIVE_POWER_VS_PRIORITY, environment.getNotSuppliedLoadsActivePowerMWVsPriority());
 		
-		//min load current voltage pu
-		agentStepData.putData(AgentDataType.MIN_LOAD_CURRENT_VOLTAGE_PU, environment.getMinLoadCurrentVoltagePU());
+		//min load voltage pu
+		agentStepData.putData(AgentDataType.MIN_LOAD_VOLTAGE_PU, environment.getMinLoadCurrentVoltagePU());
 		
 		 //nota da configuração da rede
 		if (currentSwitch.isClosed()) {
 	        double configRate = getConfigRate(environment);
-	        agentStepData.putData(AgentDataType.ENVIRONMENT_CONFIGURATION_RATE, (initialConfigRate > 0) ? (configRate - initialConfigRate) / initialConfigRate : 0);
+	        agentStepData.putData(AgentDataType.ENVIRONMENT_REWARD, (initialConfigRate > 0) ? (configRate - initialConfigRate) / initialConfigRate : 0);
 		}
         
 		//número de switches diferentes da rede inicial
@@ -330,8 +329,11 @@ public class QLearningAgent extends Agent {
         
         double r = initialConfigRate > 0 ? (configRate - initialConfigRate) / initialConfigRate : 0;
         
+        final double learningConstant = PropertiesUtils.getLearningConstant();
+        final double discountFactor = PropertiesUtils.getDiscountFactor();
+        
         //Algoritmo Q-Learning -> calcula o novo valor para o estado/ação que estava antes
-        double value = q + Constants.LEARNING_CONSTANT * (r + (Constants.DISCOUNT_FACTOR * nextStateQ) - q);
+        double value = q + learningConstant * (r + (discountFactor * nextStateQ) - q);
         
         //atualiza sua QTable com o valor calculado pelo algoritmo
         qValue.setReward(value);

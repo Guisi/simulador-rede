@@ -173,7 +173,7 @@ public class ElementsDetailsPaneController extends AbstractEnvironmentPaneContro
 			tvLoadDetails.getItems().add(new PropertyRow("Reactive Power MVar:", df.format(load.getReactivePowerMVar())));
 			tvLoadDetails.getItems().add(new PropertyRow("Priority:", String.valueOf(load.getPriority())));
 			tvLoadDetails.getItems().add(new PropertyRow("Status:", load.isOn() ? "On" : "Off"));
-			tvLoadDetails.getItems().add(new PropertyRow("Current Voltage pu:", df.format(load.getCurrentVoltagePU())));
+			tvLoadDetails.getItems().add(new PropertyRow("Voltage pu:", df.format(load.getCurrentVoltagePU())));
 			cbLoadNumber.valueProperty().setValue(selectedLoad);
 		}
 	}
@@ -197,7 +197,7 @@ public class ElementsDetailsPaneController extends AbstractEnvironmentPaneContro
 			tvFeederDetails.getItems().add(new PropertyRow("Used active power MW:", df.format(feeder.getUsedActivePowerMW())));
 			tvFeederDetails.getItems().add(new PropertyRow("Available Active Power:", df.format(feeder.getAvailableActivePowerMW())));
 			
-			tvFeederDetails.getItems().add(new PropertyRow("Current Voltage pu:", df.format(feeder.getCurrentVoltagePU())));
+			tvFeederDetails.getItems().add(new PropertyRow("Voltage pu:", df.format(feeder.getCurrentVoltagePU())));
 			
 			cbFeederNumber.valueProperty().set(selectedFeeder);
 		}

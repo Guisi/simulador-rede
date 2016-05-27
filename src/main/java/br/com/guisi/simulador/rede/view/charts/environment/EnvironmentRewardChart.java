@@ -8,7 +8,7 @@ import br.com.guisi.simulador.rede.agent.data.AgentDataType;
 import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 
-public class EnvironmentConfigurationRateChart extends GenericLineChart {
+public class EnvironmentRewardChart extends GenericLineChart {
 
 	private XYChart.Series<Number, Number> environmentConfigurationRateSeries;
 	
@@ -18,12 +18,12 @@ public class EnvironmentConfigurationRateChart extends GenericLineChart {
 	private double cumulative;
 	private int betterThanInitial;
 	
-	public EnvironmentConfigurationRateChart() {
+	public EnvironmentRewardChart() {
 		super();
 		
 		getYNumberAxis().setAutoRanging(true);
 		getXAxis().setLabel("Iteraction");
-		getYAxis().setLabel("Environment Configuration Rate");
+		getYAxis().setLabel("Reward (% Loads Supplied)");
 		
 		environmentConfigurationRateSeries = new XYChart.Series<>();
         getData().add(environmentConfigurationRateSeries);
@@ -35,7 +35,7 @@ public class EnvironmentConfigurationRateChart extends GenericLineChart {
 	}
 	
 	private void updateSeriesName() {
-		StringBuilder sb = new StringBuilder("Environment Configuration Rate");
+		StringBuilder sb = new StringBuilder("Reward (% Loads Supplied)");
 		if (minValue != null) {
 			BigDecimal value = new BigDecimal(minValue).setScale(5, RoundingMode.HALF_UP);
 			sb.append("\nMin Value: ").append(value.toString());
@@ -54,14 +54,14 @@ public class EnvironmentConfigurationRateChart extends GenericLineChart {
 	
 	@Override
 	public String getChartTitle() {
-		return "Environment Configuration Rate";
+		return "Reward (% Loads Supplied)";
 	}
 
 	@Override
 	public void processAgentStepData(AgentStepData agentStepData) {
 		getXNumberAxis().setUpperBound(agentStepData.getStep());
 		
-		Double environmentConfigurationRate = agentStepData.getData(AgentDataType.ENVIRONMENT_CONFIGURATION_RATE, Double.class);
+		Double environmentConfigurationRate = agentStepData.getData(AgentDataType.ENVIRONMENT_REWARD, Double.class);
 		
 		if (environmentConfigurationRate != null) {
 			BigDecimal value = new BigDecimal(environmentConfigurationRate).setScale(5, RoundingMode.HALF_UP);

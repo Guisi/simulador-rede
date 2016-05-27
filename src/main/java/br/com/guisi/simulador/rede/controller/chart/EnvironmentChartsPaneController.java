@@ -20,9 +20,9 @@ import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.controller.environment.AbstractEnvironmentPaneController;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
-import br.com.guisi.simulador.rede.view.charts.environment.EnvironmentConfigurationRateChart;
+import br.com.guisi.simulador.rede.view.charts.environment.EnvironmentRewardChart;
 import br.com.guisi.simulador.rede.view.charts.environment.LoadsPowerPercentageChart;
-import br.com.guisi.simulador.rede.view.charts.environment.MinLoadCurrentVoltagePUChart;
+import br.com.guisi.simulador.rede.view.charts.environment.MinLoadVoltagePUChart;
 import br.com.guisi.simulador.rede.view.charts.environment.PowerLossChart;
 import br.com.guisi.simulador.rede.view.charts.environment.PowerLossPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.environment.RequiredSwitchOperationsChart;
@@ -87,10 +87,10 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 		lineCharts.add(new SuppliedLoadsActivePowerPercentageChart());
 		//out-of-service loads power %
 		lineCharts.add(new LoadsPowerPercentageChart(getEnvironmentKeyType()));
-		//min load current voltage PU
-		lineCharts.add(new MinLoadCurrentVoltagePUChart());
-		//environment configuration rate
-		lineCharts.add(new EnvironmentConfigurationRateChart());
+		//min load voltage PU
+		lineCharts.add(new MinLoadVoltagePUChart());
+		//environment reward
+		lineCharts.add(new EnvironmentRewardChart());
 		//required switch operations
 		lineCharts.add(new RequiredSwitchOperationsChart());
 		

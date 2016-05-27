@@ -26,8 +26,6 @@ import javafx.util.Duration;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
-
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.control.impl.StepNumberStoppingCriteria;
@@ -35,7 +33,6 @@ import br.com.guisi.simulador.rede.agent.data.AgentData;
 import br.com.guisi.simulador.rede.agent.data.AgentDataType;
 import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
-import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.NetworkRestrictionsTreatmentType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.constants.RandomActionType;
@@ -79,6 +76,13 @@ public class ControlsPaneController extends Controller {
 	private ComboBox<RandomActionType> cbRandomAction;
 	@FXML
 	private ComboBox<NetworkRestrictionsTreatmentType> cbNetworkRestrictions;
+	
+	@FXML
+	private TextField tfLearningConstant;
+	@FXML
+	private TextField tfDiscountFactor;
+	@FXML
+	private TextField tfEGreedy;
 
 	private LocalTime localTime;
 	private Timeline timeline;
@@ -103,17 +107,17 @@ public class ControlsPaneController extends Controller {
 		cbAgentStoppingCriteria.setItems(FXCollections.observableArrayList(stepNumberStoppingCriteria));
 		cbAgentStoppingCriteria.setValue(stepNumberStoppingCriteria);
 
-		tfStoppingCriteria.focusedProperty().addListener((observable, oldValue, newValue) -> {
-			if (!newValue && StringUtils.isBlank(tfStoppingCriteria.getText())) {
-				tfStoppingCriteria.setText(Constants.STOPPING_CRITERIA_STEP_NUMBER);
-			}
-		});
-
-		tfStoppingCriteria.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue.length() > 10 || !newValue.matches("\\d*")) {
-				tfStoppingCriteria.setText(oldValue);
-			}
-		});
+		// Stopping Criteria
+		this.initializeTextField(PropertyKey.STOPPING_CRITERIA_STEP_NUMBER, tfStoppingCriteria, false);
+		
+		//Learning Constant
+		this.initializeTextField(PropertyKey.LEARNING_CONSTANT, tfLearningConstant, true);
+		
+		//Discount Factor
+		this.initializeTextField(PropertyKey.DISCOUNT_FACTOR, tfDiscountFactor, true);
+		
+		//E-Greedy
+		this.initializeTextField(PropertyKey.E_GREEDY, tfEGreedy, true);
 
 		timeline = new Timeline();
 		timeline.setCycleCount(Timeline.INDEFINITE);
@@ -133,6 +137,23 @@ public class ControlsPaneController extends Controller {
 		
 		cbNetworkRestrictions.setItems(FXCollections.observableArrayList(NetworkRestrictionsTreatmentType.values()));
 		cbNetworkRestrictions.setValue(NetworkRestrictionsTreatmentType.valueOf(PropertiesUtils.getProperty(PropertyKey.NETWORK_RESTRICTIONS_TREATMENT)));
+	}
+	
+	private void initializeTextField(PropertyKey propertyKey, TextField textField, boolean decimal) {
+		textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+			if (!newValue) {
+				try {
+					if (decimal) {
+						Double.valueOf(textField.getText());
+					} else {
+						Integer.valueOf(textField.getText());
+					}
+				} catch (NumberFormatException e) {
+					textField.setText(PropertiesUtils.getProperty(propertyKey));
+				}
+				PropertiesUtils.saveProperty(propertyKey, textField.getText());
+			}
+		});
 	}
 
 	@Override
@@ -168,7 +189,10 @@ public class ControlsPaneController extends Controller {
 		localTime = LocalTime.MIN;
 		lblTimer.setText(localTime.toString());
 		timeline.stop();
-		tfStoppingCriteria.setText(Constants.STOPPING_CRITERIA_STEP_NUMBER);
+		tfStoppingCriteria.setText(PropertiesUtils.getProperty(PropertyKey.STOPPING_CRITERIA_STEP_NUMBER));
+		tfLearningConstant.setText(String.valueOf(PropertiesUtils.getLearningConstant()));
+		tfDiscountFactor.setText(String.valueOf(PropertiesUtils.getDiscountFactor()));
+		tfEGreedy.setText(String.valueOf(PropertiesUtils.getEGreedy()));
 	}
 
 	private void processEnvironmentLoaded() {

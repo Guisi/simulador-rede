@@ -91,9 +91,9 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 					if (load.getFeeder() == null) {
 						msg = "Not connected to a feeder";
 					} else if (load.isCurrentVoltageAboveLimit()) {
-						msg = "Current voltage above limit (" + load.getCurrentVoltagePU() + ")";
+						msg = "Voltage above limit (" + load.getCurrentVoltagePU() + ")";
 					} else if (load.isCurrentVoltageBelowLimit()) {
-						msg = "Current voltage below limit (" + load.getCurrentVoltagePU() + ")";
+						msg = "Voltage below limit (" + load.getCurrentVoltagePU() + ")";
 					}
 				}
 				if (msg != null) {

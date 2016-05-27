@@ -12,7 +12,9 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(Math.random());
+		String newValue = "0.0100a";
+		
+		System.out.println(newValue.matches("^\\d+(\\.\\d{1,5})?$"));
 	}
 	
 	public static void teste() throws Exception {
