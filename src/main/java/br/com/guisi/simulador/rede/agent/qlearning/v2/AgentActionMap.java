@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.agent.qlearning;
+package br.com.guisi.simulador.rede.agent.qlearning.v2;
 
 import java.util.HashMap;
 

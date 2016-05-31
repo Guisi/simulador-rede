@@ -1,32 +1,49 @@
-package br.com.guisi.simulador.rede.agent.qlearning;
+package br.com.guisi.simulador.rede.agent.qlearning.v1;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 
-/**
- * Classe representando a chave da QTable
- * É representado pelo par: número da branch switch / status do switch (aberto ou fechado)
- * 
- * @author Guisi
- */
-public class AgentState {
+public class CandidateSwitch implements Comparable<CandidateSwitch> {
 
-	private final Integer switchNumber;
-	private final SwitchStatus switchStatus;
+	private Integer distance;
+	private Integer switchNumber;
+	private SwitchStatus switchStatus;
 	
-	public AgentState(Integer switchNumber, SwitchStatus switchStatus) {
+	public CandidateSwitch(Integer distance, Integer switchNumber, SwitchStatus switchStatus) {
 		super();
+		this.distance = distance;
 		this.switchNumber = switchNumber;
 		this.switchStatus = switchStatus;
+	}
+
+	public Integer getDistance() {
+		return distance;
+	}
+
+	public void setDistance(Integer distance) {
+		this.distance = distance;
 	}
 
 	public Integer getSwitchNumber() {
 		return switchNumber;
 	}
 
+	public void setSwitchNumber(Integer switchNumber) {
+		this.switchNumber = switchNumber;
+	}
+
 	public SwitchStatus getSwitchStatus() {
 		return switchStatus;
+	}
+
+	public void setSwitchStatus(SwitchStatus switchStatus) {
+		this.switchStatus = switchStatus;
+	}
+
+	@Override
+	public int compareTo(CandidateSwitch o) {
+		return distance.compareTo(o.getDistance());
 	}
 
 	@Override
@@ -46,7 +63,7 @@ public class AgentState {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AgentState other = (AgentState) obj;
+		CandidateSwitch other = (CandidateSwitch) obj;
 		if (switchNumber == null) {
 			if (other.switchNumber != null)
 				return false;
@@ -56,7 +73,7 @@ public class AgentState {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);

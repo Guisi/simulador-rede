@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.agent.qlearning;
+package br.com.guisi.simulador.rede.agent.qlearning.v1;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -39,9 +39,24 @@ import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 import br.com.guisi.simulador.rede.util.PropertiesUtils;
 
-@Named
+/**
+ * Q-Learning Agent Versão 1
+ * 
+ * Interage fazendo uma mudança de switch por vez, alternando entre aberto / fechado
+ * Modelo da tabela: S -> Switch Origem / Estado deste SW
+ *                   A -> Switch Destino / Estado deste SW
+ * A política do agente é dada por votação de cada SW Origem, qual o estado do SW destino tem maior valor na tabela Q
+ * 
+ * Para realizar a ação, o agente seleciona como candidatos todos os switches com estado inverso ao estado do switch atual,
+ * com exceção de alguns que são eliminados devido a algumas heurísticas utilizadas
+ * 
+ * @author Guisi
+ *
+ */
+
+@Named("qLearningAgentV1")
 @Scope("prototype")
-public class QLearningAgent extends Agent {
+public class QLearningAgentV1 extends Agent {
 	
 	private final Random RANDOM = new Random(System.currentTimeMillis());
 

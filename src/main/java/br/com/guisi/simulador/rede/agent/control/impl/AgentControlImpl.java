@@ -14,7 +14,6 @@ import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.Agent;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
-import br.com.guisi.simulador.rede.agent.qlearning.QLearningAgent;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
 import br.com.guisi.simulador.rede.enviroment.Environment;
@@ -81,7 +80,7 @@ public class AgentControlImpl implements AgentControl {
 	@Override
 	public Agent getAgent() {
 		if (agent == null) {
-			agent = context.getBean(QLearningAgent.class);
+			agent = (Agent) context.getBean("qLearningAgentV2");
 		}
 		return agent;
 	}

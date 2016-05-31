@@ -31,6 +31,8 @@ public class Branch implements Serializable {
 	private double activeLossMW;
 	private double reactiveLossMVar;
 	
+	private boolean inCluster = false;
+	
 	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, 
 			double reactance, SwitchStatus switchStatus, boolean switchBranch, boolean fault) {
 		this.number = number;
@@ -249,6 +251,14 @@ public class Branch implements Serializable {
 
 	public void setSwitchIndex(int switchIndex) {
 		this.switchIndex = switchIndex;
+	}
+
+	public boolean isInCluster() {
+		return inCluster;
+	}
+
+	public void setInCluster(boolean inCluster) {
+		this.inCluster = inCluster;
 	}
 
 	@Override

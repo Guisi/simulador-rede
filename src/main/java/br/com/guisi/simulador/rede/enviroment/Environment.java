@@ -146,6 +146,47 @@ public class Environment implements Serializable {
 	}
 	
 	/**
+	 * Retorna os switches fechados próximos a branch passada, conforme quantidade informada
+	 * @param branch
+	 * @param visitedBranches
+	 * @param visitedNetworkNodes
+	 * @param quantity
+	 * @return
+	 */
+	public List<SwitchDistance> getClosedSwitches(Branch branch, int quantity) {
+		return EnvironmentUtils.getClosedSwitches(branch, quantity);
+	}
+	
+	/**
+	 * Retorna uma lista com os switches que são tie-switches
+	 * Para ser considerado um tie-switch, o switch precisa está ligando dois loads on
+	 * que não estejam ligados ao mesmo feeder
+	 * @return
+	 */
+	public List<Branch> getTieSwitches() {
+		List<Branch> tieSws = new ArrayList<>();
+		
+		List<Branch> openSws = getSwitches().stream().filter(sw -> sw.isOpen()).collect(Collectors.toList());
+		openSws.forEach(branch -> {
+			NetworkNode nodeFrom = branch.getNodeFrom();
+			NetworkNode nodeTo = branch.getNodeTo();
+			
+			//se conecta dois loads on
+			if (nodeFrom.isOn() && nodeFrom.isLoad() && nodeTo.isOn() && nodeTo.isLoad()) {
+				Load loadFrom = (Load) nodeFrom;
+				Load loadTo = (Load) nodeTo;
+				
+				//se algum dos loads conectados não possui feeder ou os loads possui feeders diferentes
+				if (loadFrom.getFeeder() == null || loadTo.getFeeder() == null || !loadFrom.getFeeder().equals(loadTo.getFeeder())) {
+					tieSws.add(branch);
+				}
+			}
+		});
+
+		return tieSws;
+	}
+	
+	/**
 	 * Returns a {@link Map<Integer, NetworkNode>} with all nodes
 	 * @return {@link Map<Integer, NetworkNode>}
 	 */

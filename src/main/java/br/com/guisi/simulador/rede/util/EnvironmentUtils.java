@@ -8,6 +8,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -387,6 +389,7 @@ public class EnvironmentUtils {
 
 		distance++;
 		List<SwitchDistance> closestSwitches = new ArrayList<>();
+
 		for (NetworkNode networkNode : branch.getConnectedNodes()) {
 			
 			//se ainda não visitou este node
@@ -438,6 +441,48 @@ public class EnvironmentUtils {
 		};
 		return count;
 	}
+
+	public static List<SwitchDistance> getClosedSwitches(Branch branch, int quantity) {
+		return getClosedSwitchesRecursive(branch, new ArrayList<Branch>(), new ArrayList<NetworkNode>(), 0, quantity, 0);
+	}
+	
+	private static List<SwitchDistance> getClosedSwitchesRecursive(Branch branch, List<Branch> visitedBranches, List<NetworkNode> visitedNetworkNodes, int quantityAdded, int quantity, int distance) {
+		List<SwitchDistance> switches = new ArrayList<>();
+		
+		distance++;
+		if (quantityAdded < quantity) {
+			for (NetworkNode networkNode : branch.getConnectedNodes()) {
+				
+				//se ainda não visitou este node
+				if (!visitedNetworkNodes.contains(networkNode)) {
+					visitedNetworkNodes.add(networkNode);
+					
+					for (Branch connectedBranch : networkNode.getBranches()) {
+	
+						//verifica se ainda não visitou este branch
+						if (!visitedBranches.contains(connectedBranch)) {
+							visitedBranches.add(connectedBranch);
+	
+							if (connectedBranch.isClosed() && !connectedBranch.isInCluster()) {
+								
+								//se encontrou o switch, adiciona na lista
+								if (connectedBranch.isSwitchBranch()) {
+									switches.add(new SwitchDistance(distance, connectedBranch));
+									quantityAdded++;
+								}
+							
+								//continua navegação até que chega ao final do ramo da rede
+								List<SwitchDistance> lst = getClosedSwitchesRecursive(connectedBranch, new ArrayList<Branch>(visitedBranches), 
+										new ArrayList<NetworkNode>(visitedNetworkNodes), quantityAdded, quantity, distance);
+								switches.addAll(lst);
+							}
+						}
+					}
+				}
+			}
+		}
+		return switches;
+	}
 	
 	public static void main(String[] args) {
 		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
@@ -446,22 +491,58 @@ public class EnvironmentUtils {
 		try {
 			environment = EnvironmentUtils.getEnvironmentFromFile(f);
 			
-			EnvironmentUtils.updateEnvironmentConnections(environment);
+			//isola as faltas
+			EnvironmentUtils.isolateFaultSwitches(environment);
+			PowerFlow.execute(environment);
 			
-			Branch branch = environment.getBranch(18);
+			List<Branch> tieSwitches = environment.getTieSwitches();
 			
-			System.out.println(branch.getSwitchIndex());
+			Collections.sort(tieSwitches, new Comparator<Branch>() {
+				@Override
+				public int compare(Branch branch1, Branch branch2) {
+					Load loadFrom1 = (Load)branch1.getNodeFrom();
+					Load loadTo1 = (Load)branch1.getNodeTo();
+					
+					Load loadFrom2 = (Load)branch2.getNodeFrom();
+					Load loadTo2 = (Load)branch2.getNodeTo();
+					
+					if ( (loadFrom1.getFeeder() == null || loadTo1.getFeeder() == null) && (loadFrom2.getFeeder() != null && loadTo2.getFeeder() != null) ) {
+						return -1;
+					} else if ( (loadFrom2.getFeeder() == null || loadTo2.getFeeder() == null) && (loadFrom1.getFeeder() != null && loadTo1.getFeeder() != null) ) {
+						return 1;
+					} else if (loadFrom1.getFeeder() == null || loadTo1.getFeeder() == null || loadFrom2.getFeeder() == null || loadTo2.getFeeder() == null) {
+						Feeder feeder1 = loadFrom1.getFeeder() != null ? loadFrom1.getFeeder() : loadTo1.getFeeder();
+						Feeder feeder2 = loadFrom2.getFeeder() != null ? loadFrom2.getFeeder() : loadTo2.getFeeder();
+						
+						return feeder1.getUsedActivePowerMW() < feeder2.getUsedActivePowerMW() ? -1 : 1;
+					}
+					return 0;
+				}
+			});
 			
-			/*long ini = System.currentTimeMillis();
-			List<SwitchDistance> switchesDistances = getSwitchesDistances(branch, SwitchStatus.OPEN);
-			long fim = System.currentTimeMillis();
-			System.out.println("Tempo: " + (fim-ini));
+			for (Branch tieSw : tieSwitches) {
+				System.out.println("Tie-sw: " + tieSw.getNumber());
+				List<SwitchDistance> switches = environment.getClosedSwitches(tieSw, 2);
+				
+				while (switches.size() > 4) {
+					Integer max = switches.stream().max(Comparator.comparing(sw -> sw.getDistance())).get().getDistance();
+					List<SwitchDistance> switchesToRemove = switches.stream().filter(sw -> sw.getDistance().equals(max)).collect(Collectors.toList());
+					SwitchDistance switchToRemove = switchesToRemove.get(new Random(System.currentTimeMillis()).nextInt(switchesToRemove.size()));
+					switches.remove(switchToRemove);
+				}
+				
+				switches.forEach(sw -> sw.getTheSwitch().setInCluster(true));
+
+				System.out.println("Cluster Switches: ");
+				for (SwitchDistance switchDistance : switches) {
+					System.out.print(switchDistance.getTheSwitch().getNumber() + "(" + switchDistance.getDistance() + ")" + ", ");
+				}
+				System.out.println();
+				System.out.println();
+			}
 			
-			for (SwitchDistance switchDistance : switchesDistances) {
-				System.out.println("Switch: " + switchDistance.getTheSwitch().getNumber() + " - Distance: " + switchDistance.getDistance());
-			}*/
+			Matlab.disconnectMatlabProxy();
 			
-			//EnvironmentUtils.validateEnvironment(environment);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

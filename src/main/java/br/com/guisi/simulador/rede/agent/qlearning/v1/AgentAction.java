@@ -1,49 +1,32 @@
-package br.com.guisi.simulador.rede.agent.qlearning;
+package br.com.guisi.simulador.rede.agent.qlearning.v1;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 
-public class CandidateSwitch implements Comparable<CandidateSwitch> {
+/**
+ * Classe representando uma ação do agente
+ * É representado pelo par: número da branch switch para onde o agente vai / status do switch após a interação do agente (aberto ou fechado)
+ * 
+ * @author Guisi
+ */
+public class AgentAction {
 
-	private Integer distance;
-	private Integer switchNumber;
-	private SwitchStatus switchStatus;
+	private final Integer switchNumber;
+	private final SwitchStatus switchStatus;
 	
-	public CandidateSwitch(Integer distance, Integer switchNumber, SwitchStatus switchStatus) {
+	public AgentAction(Integer switchNumber, SwitchStatus switchStatus) {
 		super();
-		this.distance = distance;
 		this.switchNumber = switchNumber;
 		this.switchStatus = switchStatus;
-	}
-
-	public Integer getDistance() {
-		return distance;
-	}
-
-	public void setDistance(Integer distance) {
-		this.distance = distance;
 	}
 
 	public Integer getSwitchNumber() {
 		return switchNumber;
 	}
-
-	public void setSwitchNumber(Integer switchNumber) {
-		this.switchNumber = switchNumber;
-	}
-
+	
 	public SwitchStatus getSwitchStatus() {
 		return switchStatus;
-	}
-
-	public void setSwitchStatus(SwitchStatus switchStatus) {
-		this.switchStatus = switchStatus;
-	}
-
-	@Override
-	public int compareTo(CandidateSwitch o) {
-		return distance.compareTo(o.getDistance());
 	}
 
 	@Override
@@ -63,7 +46,7 @@ public class CandidateSwitch implements Comparable<CandidateSwitch> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CandidateSwitch other = (CandidateSwitch) obj;
+		AgentAction other = (AgentAction) obj;
 		if (switchNumber == null) {
 			if (other.switchNumber != null)
 				return false;
@@ -78,4 +61,5 @@ public class CandidateSwitch implements Comparable<CandidateSwitch> {
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
 	}
+	
 }
