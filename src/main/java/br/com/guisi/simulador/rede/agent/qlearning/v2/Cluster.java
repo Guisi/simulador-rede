@@ -1,27 +1,31 @@
 package br.com.guisi.simulador.rede.agent.qlearning.v2;
 
+import java.io.Serializable;
 import java.util.List;
 
 import br.com.guisi.simulador.rede.enviroment.Branch;
 
-public class Cluster {
+public class Cluster implements Serializable {
 
-	private Integer tieSwitchNumber;
-	private List<Branch> switches;
+	private static final long serialVersionUID = 1L;
+
+	private Branch tieSwitch;
+	private List<Branch> closedSwitches;
 	
-	public Integer getTieSwitchNumber() {
-		return tieSwitchNumber;
+	public Branch getTieSwitch() {
+		return tieSwitch;
 	}
-	
-	public void setTieSwitchNumber(Integer tieSwitchNumber) {
-		this.tieSwitchNumber = tieSwitchNumber;
+
+	public void setTieSwitch(Branch tieSwitch) {
+		this.tieSwitch = tieSwitch;
 	}
-	
-	public List<Branch> getSwitches() {
-		return switches;
+
+	public List<Branch> getClosedSwitches() {
+		return closedSwitches;
 	}
-	
-	public void setSwitches(List<Branch> switches) {
-		this.switches = switches;
+
+	public void setClosedSwitches(List<Branch> closedSwitches) {
+		this.closedSwitches = closedSwitches;
 	}
+
 }

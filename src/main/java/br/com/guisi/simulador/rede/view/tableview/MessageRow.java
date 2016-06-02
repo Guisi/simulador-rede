@@ -5,13 +5,13 @@ import java.io.Serializable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class BrokenConstraintRow implements Serializable {
+public class MessageRow implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	private StringProperty message;
 	
-	public BrokenConstraintRow() {
+	public MessageRow() {
 		this.message = new SimpleStringProperty();
 	}
 	

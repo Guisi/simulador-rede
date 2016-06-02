@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import br.com.guisi.simulador.rede.agent.qlearning.v2.Cluster;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PriorityUtils;
 
@@ -33,6 +34,7 @@ public class Environment implements Serializable {
 	private final List<Branch> switches;
 	private final List<Branch> faults;
 	private Map<BranchKey, Branch> branchFromToMap;
+	private List<Cluster> clusters;
 	
 	private final Random RANDOM = new Random(System.currentTimeMillis());
 	
@@ -143,18 +145,6 @@ public class Environment implements Serializable {
 	 */
 	public List<SwitchDistance> getSwitchesDistances(Branch currentSwitch, SwitchStatus switchStatus) {
 		return EnvironmentUtils.getSwitchesDistances(currentSwitch, switchStatus);
-	}
-	
-	/**
-	 * Retorna os switches fechados próximos a branch passada, conforme quantidade informada
-	 * @param branch
-	 * @param visitedBranches
-	 * @param visitedNetworkNodes
-	 * @param quantity
-	 * @return
-	 */
-	public List<SwitchDistance> getClosedSwitches(Branch branch, int quantity) {
-		return EnvironmentUtils.getClosedSwitches(branch, quantity);
 	}
 	
 	/**
@@ -426,4 +416,13 @@ public class Environment implements Serializable {
 		
 		return hasOpenSwitch;
 	}
+
+	public List<Cluster> getClusters() {
+		return clusters;
+	}
+
+	public void setClusters(List<Cluster> clusters) {
+		this.clusters = clusters;
+	}
+	
 }

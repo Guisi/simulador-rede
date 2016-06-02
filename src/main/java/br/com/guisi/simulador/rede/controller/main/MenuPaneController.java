@@ -16,6 +16,7 @@ import javafx.stage.FileChooser;
 import javax.annotation.PostConstruct;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.agent.qlearning.v2.Cluster;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneController;
@@ -163,6 +164,9 @@ public class MenuPaneController extends Controller {
 				alert.setContentText(sb.toString());
 				alert.showAndWait();
 			}
+			
+			List<Cluster> clusters = EnvironmentUtils.mountClusters(environment);
+			environment.setClusters(clusters);
 			
 			SimuladorRede.setEnvironment(environment);
 			

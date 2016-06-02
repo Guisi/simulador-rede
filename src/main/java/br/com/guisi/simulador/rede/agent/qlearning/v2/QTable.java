@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 
 
@@ -50,14 +51,13 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param candidateSwitches Transições possíveis
 	 * @return
 	 */
-	private List<QValueEvaluator> getQValuesEvaluators(AgentState state, List<CandidateSwitch> candidateSwitches) {
+	private List<QValueEvaluator> getQValuesEvaluators(AgentState state, List<Branch> candidateSwitches) {
 		List<QValueEvaluator> qValues = new ArrayList<>();
-		for (CandidateSwitch candidateSwitch : candidateSwitches) {
-			AgentAction action = new AgentAction(candidateSwitch.getSwitchNumber(), candidateSwitch.getSwitchStatus());
+		for (Branch candidateSwitch : candidateSwitches) {
+			AgentAction action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getSwitchStatus());
 			
 			QValueEvaluator evaluator = new QValueEvaluator();
 			evaluator.setQValue(getQValue(state, action));
-			evaluator.setDistance(candidateSwitch.getDistance());
 			qValues.add(evaluator);
 		}
 		return qValues;
@@ -103,7 +103,7 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param state
 	 * @return
 	 */
-	public AgentAction getBestAction(AgentState state, List<CandidateSwitch> candidateSwitches) {
+	public AgentAction getBestAction(AgentState state, List<Branch> candidateSwitches) {
 		List<QValueEvaluator> qValues = this.getQValuesEvaluators(state, candidateSwitches);
 
 		//Verifica o maior valor de recompensa
@@ -124,7 +124,7 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param candidateSwitches Transições possíveis
 	 * @return
 	 */
-	public AgentAction getRandomAction(AgentState state, List<CandidateSwitch> candidateSwitches, boolean proportional) {
+	public AgentAction getRandomAction(AgentState state, List<Branch> candidateSwitches, boolean proportional) {
 		AgentAction action = null;
 		
 		//se é randômico proporcional
@@ -171,8 +171,8 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 		
 		if (action == null) {
 			//se não escolheu um no randomico proporcional, escolhe um dos candidatos aleatoriamente
-			CandidateSwitch candidateSwitch = candidateSwitches.get(new Random(System.currentTimeMillis()).nextInt(candidateSwitches.size()));
-			action = new AgentAction(candidateSwitch.getSwitchNumber(), candidateSwitch.getSwitchStatus());
+			Branch candidateSwitch = candidateSwitches.get(new Random(System.currentTimeMillis()).nextInt(candidateSwitches.size()));
+			action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getSwitchStatus());
 		}
 		
 		return action;
@@ -235,9 +235,6 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 				switchStatus = SwitchStatus.CLOSED;
 			}
 		}
-		
-		//TODO remover
-		//System.out.println("Switch " + switchNumber + " [Votes for open: " + votesForOpen + ", Votes for closed: " + votesForClosed + "] - Switch status chosen: " + switchStatus);
 		
 		return switchStatus;
 	}

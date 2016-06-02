@@ -18,6 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import br.com.guisi.simulador.rede.agent.qlearning.v2.Cluster;
 import br.com.guisi.simulador.rede.constants.Status;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.BranchKey;
@@ -443,36 +444,60 @@ public class EnvironmentUtils {
 	}
 
 	public static List<SwitchDistance> getClosedSwitches(Branch branch, int quantity) {
-		return getClosedSwitchesRecursive(branch, new ArrayList<Branch>(), new ArrayList<NetworkNode>(), 0, quantity, 0);
+		List<SwitchDistance> switchDistancesFrom = getClosedSwitchesRecursive(branch.getNodeFrom(), new ArrayList<Branch>(), new ArrayList<NetworkNode>(), 0, quantity, 0);
+		List<SwitchDistance> switchDistancesTo = getClosedSwitchesRecursive(branch.getNodeTo(), new ArrayList<Branch>(), new ArrayList<NetworkNode>(), 0, quantity, 0);
+		
+		if (switchDistancesFrom.size() > quantity && switchDistancesTo.size() >= quantity) {
+			switchDistancesFrom = reduceClosedSwitches(switchDistancesFrom, quantity);
+		}
+		
+		if (switchDistancesTo.size() > quantity && switchDistancesFrom.size() >= quantity) {
+			switchDistancesTo = reduceClosedSwitches(switchDistancesTo, quantity);
+		}
+		
+		switchDistancesFrom.addAll(switchDistancesTo);
+		
+		return switchDistancesFrom;
 	}
 	
-	private static List<SwitchDistance> getClosedSwitchesRecursive(Branch branch, List<Branch> visitedBranches, List<NetworkNode> visitedNetworkNodes, int quantityAdded, int quantity, int distance) {
+	private static List<SwitchDistance> reduceClosedSwitches(List<SwitchDistance> switchDistances, int quantity) {
+		//mantém somente a quantidade de switches na lista passada
+		while (switchDistances.size() > quantity) {
+			Integer max = switchDistances.stream().max(Comparator.comparing(sw -> sw.getDistance())).get().getDistance();
+			List<SwitchDistance> switchesToRemove = switchDistances.stream().filter(sw -> sw.getDistance().equals(max)).collect(Collectors.toList());
+			SwitchDistance switchToRemove = switchesToRemove.get(new Random(System.currentTimeMillis()).nextInt(switchesToRemove.size()));
+			switchDistances.remove(switchToRemove);
+		}
+		return switchDistances;
+	}
+	
+	private static List<SwitchDistance> getClosedSwitchesRecursive(NetworkNode networkNode, List<Branch> visitedBranches, List<NetworkNode> visitedNetworkNodes, int quantityAdded, int quantity, int distance) {
 		List<SwitchDistance> switches = new ArrayList<>();
 		
 		distance++;
 		if (quantityAdded < quantity) {
-			for (NetworkNode networkNode : branch.getConnectedNodes()) {
+
+			//se ainda não visitou este node
+			if (!visitedNetworkNodes.contains(networkNode)) {
+				visitedNetworkNodes.add(networkNode);
 				
-				//se ainda não visitou este node
-				if (!visitedNetworkNodes.contains(networkNode)) {
-					visitedNetworkNodes.add(networkNode);
-					
-					for (Branch connectedBranch : networkNode.getBranches()) {
-	
-						//verifica se ainda não visitou este branch
-						if (!visitedBranches.contains(connectedBranch)) {
-							visitedBranches.add(connectedBranch);
-	
-							if (connectedBranch.isClosed() && !connectedBranch.isInCluster()) {
-								
-								//se encontrou o switch, adiciona na lista
-								if (connectedBranch.isSwitchBranch()) {
-									switches.add(new SwitchDistance(distance, connectedBranch));
-									quantityAdded++;
-								}
+				for (Branch connectedBranch : networkNode.getBranches()) {
+
+					//verifica se ainda não visitou este branch
+					if (!visitedBranches.contains(connectedBranch)) {
+						visitedBranches.add(connectedBranch);
+
+						if (connectedBranch.isClosed() && !connectedBranch.isInCluster()) {
 							
+							//se encontrou o switch, adiciona na lista
+							if (connectedBranch.isSwitchBranch()) {
+								switches.add(new SwitchDistance(distance, connectedBranch));
+								quantityAdded++;
+							}
+			
+							for (NetworkNode connectedNetworkNode : connectedBranch.getConnectedNodes()) {
 								//continua navegação até que chega ao final do ramo da rede
-								List<SwitchDistance> lst = getClosedSwitchesRecursive(connectedBranch, new ArrayList<Branch>(visitedBranches), 
+								List<SwitchDistance> lst = getClosedSwitchesRecursive(connectedNetworkNode, new ArrayList<Branch>(visitedBranches), 
 										new ArrayList<NetworkNode>(visitedNetworkNodes), quantityAdded, quantity, distance);
 								switches.addAll(lst);
 							}
@@ -484,8 +509,60 @@ public class EnvironmentUtils {
 		return switches;
 	}
 	
+	/**
+	 * Monta uma lista com os clusters definidos no ambiente
+	 * @param environment
+	 * @return
+	 */
+	public static List<Cluster> mountClusters(Environment environment) {
+		List<Cluster> clusters = new ArrayList<>();
+		
+		List<Branch> tieSwitches = environment.getTieSwitches();
+		
+		//ordena pelos switches em que um dos nodes não esteja energizado, e o node energizado esteja no feeder com menor demanda
+		Collections.sort(tieSwitches, new Comparator<Branch>() {
+			@Override
+			public int compare(Branch branch1, Branch branch2) {
+				Load loadFrom1 = (Load)branch1.getNodeFrom();
+				Load loadTo1 = (Load)branch1.getNodeTo();
+				
+				Load loadFrom2 = (Load)branch2.getNodeFrom();
+				Load loadTo2 = (Load)branch2.getNodeTo();
+				
+				if ( (loadFrom1.getFeeder() == null || loadTo1.getFeeder() == null) && (loadFrom2.getFeeder() != null && loadTo2.getFeeder() != null) ) {
+					return -1;
+				} else if ( (loadFrom2.getFeeder() == null || loadTo2.getFeeder() == null) && (loadFrom1.getFeeder() != null && loadTo1.getFeeder() != null) ) {
+					return 1;
+				} else if (loadFrom1.getFeeder() == null || loadTo1.getFeeder() == null || loadFrom2.getFeeder() == null || loadTo2.getFeeder() == null) {
+					Feeder feeder1 = loadFrom1.getFeeder() != null ? loadFrom1.getFeeder() : loadTo1.getFeeder();
+					Feeder feeder2 = loadFrom2.getFeeder() != null ? loadFrom2.getFeeder() : loadTo2.getFeeder();
+					
+					return feeder1.getUsedActivePowerMW() < feeder2.getUsedActivePowerMW() ? -1 : 1;
+				}
+				return 0;
+			}
+		});
+		
+		//para cada tie-sw, escolhe os switches fechados próximos para criar o cluster
+		for (Branch tieSw : tieSwitches) {
+			//busca switches próximos
+			List<SwitchDistance> switchDistances = EnvironmentUtils.getClosedSwitches(tieSw, 2);
+			
+			//marca como participantes do cluster
+			switchDistances.forEach(sw -> sw.getTheSwitch().setInCluster(true));
+			
+			Cluster cluster = new Cluster();
+			cluster.setTieSwitch(tieSw);
+			cluster.setClosedSwitches(new ArrayList<>());
+			switchDistances.forEach(sd -> cluster.getClosedSwitches().add(sd.getTheSwitch()));
+			clusters.add(cluster);
+		}
+		
+		return clusters;
+	}
+	
 	public static void main(String[] args) {
-		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		/*File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {
@@ -545,6 +622,6 @@ public class EnvironmentUtils {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 }

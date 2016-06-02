@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,13 +25,10 @@ import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.NetworkRestrictionsTreatmentType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
-import br.com.guisi.simulador.rede.constants.RandomActionType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
-import br.com.guisi.simulador.rede.enviroment.NetworkNode;
-import br.com.guisi.simulador.rede.enviroment.SwitchDistance;
 import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
@@ -65,7 +61,6 @@ public class QLearningAgentV2 extends Agent {
 	private Branch currentSwitch;
 	private Set<Load> turnedOffLoads;
 	
-	private List<Cluster> clusters;
 	private double initialConfigRate;
 	private boolean changedPolicy;
 
@@ -89,8 +84,6 @@ public class QLearningAgentV2 extends Agent {
 		}
 		
 		this.initialConfigRate = getConfigRate(environment);
-		
-		this.clusters = this.getClusters(environment, this.currentSwitch);
 	}
 	
 	private double getConfigRate(Environment environment) {
@@ -113,20 +106,34 @@ public class QLearningAgentV2 extends Agent {
 		turnedOffLoads.forEach(load -> load.turnOn());
 		turnedOffLoads.clear();
 		
+		//Lista dos clusters onde estão os switches candidatos
+		List<Cluster> clusters = environment.getClusters();
+		
+		//Se randomico menor que E-greedy, escolhe melhor acao
+		boolean randomAction = (Math.random() >= PropertiesUtils.getEGreedy());
+		
+		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchStatus());
+		
 		//se o switch atual está aberto ou é falta, seleciona switch fechado para abrir em algum cluster
-		if (currentSwitch.isOpen()) {
+		if (currentSwitch.isOpen() || currentSwitch.hasFault()) {
+			List<Branch> candidateSwitches = new ArrayList<>();
+			clusters.forEach(cluster -> {
+				candidateSwitches.addAll(cluster.getClosedSwitches().stream().filter(branch -> branch.isClosed()).collect(Collectors.toList()));
+				if (cluster.getTieSwitch().isClosed()) {
+					candidateSwitches.add(cluster.getTieSwitch());
+				}
+			});
+			
+			//guarda melhor ação antes de atualiza tabela Q para verificar se mudou política
+			AgentAction previousBestAction = qTable.getBestAction(currentState, candidateSwitches);
 			
 		} else {
 			
 		}
 		
-		//Se randomico menor que E-greedy, escolhe melhor acao
-		/*boolean randomAction = (Math.random() >= PropertiesUtils.getEGreedy());
 		
-		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchStatus());
 		
-		//guarda melhor ação antes de atualiza tabela Q para verificar se mudou política
-		AgentAction previousBestAction = qTable.getBestAction(currentState, candidateSwitches);
+		/*
 
 		AgentAction action = null;
 		if (randomAction) {
@@ -353,64 +360,6 @@ public class QLearningAgentV2 extends Agent {
         //atualiza sua QTable com o valor calculado pelo algoritmo
         qValue.setReward(value);
 	}
-	
-	private List<Cluster> getClusters(Environment environment, Branch currentSwitch) {
-		List<Cluster> clusters = new ArrayList<>();
-		
-		List<Branch> tieSwitches = environment.getTieSwitches();
-		
-		//ordena pelos switches em que um dos nodes não esteja energizado, e o node energizado esteja no feeder com menor demanda
-		Collections.sort(tieSwitches, new Comparator<Branch>() {
-			@Override
-			public int compare(Branch branch1, Branch branch2) {
-				Load loadFrom1 = (Load)branch1.getNodeFrom();
-				Load loadTo1 = (Load)branch1.getNodeTo();
-				
-				Load loadFrom2 = (Load)branch2.getNodeFrom();
-				Load loadTo2 = (Load)branch2.getNodeTo();
-				
-				if ( (loadFrom1.getFeeder() == null || loadTo1.getFeeder() == null) && (loadFrom2.getFeeder() != null && loadTo2.getFeeder() != null) ) {
-					return -1;
-				} else if ( (loadFrom2.getFeeder() == null || loadTo2.getFeeder() == null) && (loadFrom1.getFeeder() != null && loadTo1.getFeeder() != null) ) {
-					return 1;
-				} else if (loadFrom1.getFeeder() == null || loadTo1.getFeeder() == null || loadFrom2.getFeeder() == null || loadTo2.getFeeder() == null) {
-					Feeder feeder1 = loadFrom1.getFeeder() != null ? loadFrom1.getFeeder() : loadTo1.getFeeder();
-					Feeder feeder2 = loadFrom2.getFeeder() != null ? loadFrom2.getFeeder() : loadTo2.getFeeder();
-					
-					return feeder1.getUsedActivePowerMW() < feeder2.getUsedActivePowerMW() ? -1 : 1;
-				}
-				return 0;
-			}
-		});
-		
-		//para cada tie-sw, escolhe os switches fechados próximos para criar o cluster
-		for (Branch tieSw : tieSwitches) {
-			//busca switches próximos
-			List<SwitchDistance> switchDistances = environment.getClosedSwitches(tieSw, 2);
-			
-			//mantém somente 4 switches na lista
-			while (switchDistances.size() > 4) {
-				Integer max = switchDistances.stream().max(Comparator.comparing(sw -> sw.getDistance())).get().getDistance();
-				List<SwitchDistance> switchesToRemove = switchDistances.stream().filter(sw -> sw.getDistance().equals(max)).collect(Collectors.toList());
-				SwitchDistance switchToRemove = switchesToRemove.get(new Random(System.currentTimeMillis()).nextInt(switchesToRemove.size()));
-				switchDistances.remove(switchToRemove);
-			}
-			
-			//marca como participantes do cluster
-			switchDistances.forEach(sw -> sw.getTheSwitch().setInCluster(true));
-			
-			Cluster cluster = new Cluster();
-			cluster.setTieSwitchNumber(tieSw.getNumber());
-			cluster.setSwitches(new ArrayList<>());
-			cluster.getSwitches().add(tieSw);
-			switchDistances.forEach(sd -> cluster.getSwitches().add(sd.getTheSwitch()));
-			clusters.add(cluster);
-		}
-		
-		return clusters;
-	}
-	
-
 	
 	@Override
 	public Branch getCurrentState() {

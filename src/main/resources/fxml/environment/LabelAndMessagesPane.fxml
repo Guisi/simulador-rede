@@ -71,6 +71,15 @@
                         </AnchorPane>
                      </content>
                   </Tab>
+                  <Tab text="Clusters">
+                     <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="170.0" prefWidth="750.0">
+                           <children>
+                              <TableView fx:id="tvClusters" prefHeight="140.0" prefWidth="750.0" />
+                           </children>
+                        </AnchorPane>
+                     </content>
+                  </Tab>
                </tabs>
             </TabPane>
          </content>
