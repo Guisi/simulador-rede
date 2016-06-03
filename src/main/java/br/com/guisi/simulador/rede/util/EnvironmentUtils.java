@@ -447,12 +447,12 @@ public class EnvironmentUtils {
 		List<SwitchDistance> switchDistancesFrom = getClosedSwitchesRecursive(branch.getNodeFrom(), new ArrayList<Branch>(), new ArrayList<NetworkNode>(), 0, quantity, 0);
 		List<SwitchDistance> switchDistancesTo = getClosedSwitchesRecursive(branch.getNodeTo(), new ArrayList<Branch>(), new ArrayList<NetworkNode>(), 0, quantity, 0);
 		
-		if (switchDistancesFrom.size() > quantity && switchDistancesTo.size() >= quantity) {
-			switchDistancesFrom = reduceClosedSwitches(switchDistancesFrom, quantity);
-		}
-		
-		if (switchDistancesTo.size() > quantity && switchDistancesFrom.size() >= quantity) {
-			switchDistancesTo = reduceClosedSwitches(switchDistancesTo, quantity);
+		if (switchDistancesFrom.size() + switchDistancesTo.size() > (quantity * 2)) {
+			int maxFrom = quantity * 2 - switchDistancesTo.size();
+			switchDistancesFrom = reduceClosedSwitches(switchDistancesFrom, maxFrom);
+			
+			int maxTo = quantity * 2 - switchDistancesFrom.size();
+			switchDistancesTo = reduceClosedSwitches(switchDistancesTo, maxTo);
 		}
 		
 		switchDistancesFrom.addAll(switchDistancesTo);
@@ -487,7 +487,7 @@ public class EnvironmentUtils {
 					if (!visitedBranches.contains(connectedBranch)) {
 						visitedBranches.add(connectedBranch);
 
-						if (connectedBranch.isClosed() && !connectedBranch.isInCluster()) {
+						if (connectedBranch.isClosed() && connectedBranch.getCluster() == null) {
 							
 							//se encontrou o switch, adiciona na lista
 							if (connectedBranch.isSwitchBranch()) {
@@ -544,18 +544,21 @@ public class EnvironmentUtils {
 		});
 		
 		//para cada tie-sw, escolhe os switches fechados próximos para criar o cluster
+		int clusterNumber = 1;
 		for (Branch tieSw : tieSwitches) {
 			//busca switches próximos
 			List<SwitchDistance> switchDistances = EnvironmentUtils.getClosedSwitches(tieSw, 2);
 			
-			//marca como participantes do cluster
-			switchDistances.forEach(sw -> sw.getTheSwitch().setInCluster(true));
-			
 			Cluster cluster = new Cluster();
-			cluster.setTieSwitch(tieSw);
-			cluster.setClosedSwitches(new ArrayList<>());
-			switchDistances.forEach(sd -> cluster.getClosedSwitches().add(sd.getTheSwitch()));
+			cluster.setNumber(clusterNumber++);
+			cluster.setInitialTieSwitch(tieSw);
+			cluster.setSwitches(new ArrayList<>());
+			switchDistances.add(new SwitchDistance(0, tieSw));
+			switchDistances.forEach(sd -> cluster.getSwitches().add(sd.getTheSwitch()));
 			clusters.add(cluster);
+			
+			//marca como participantes do cluster
+			cluster.getSwitches().forEach(sw -> sw.setCluster(cluster));
 		}
 		
 		return clusters;

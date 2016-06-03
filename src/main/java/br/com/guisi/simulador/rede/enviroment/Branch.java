@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import br.com.guisi.simulador.rede.agent.qlearning.v2.Cluster;
+
 
 /**
  * Classe representando uma branch
@@ -31,7 +33,7 @@ public class Branch implements Serializable {
 	private double activeLossMW;
 	private double reactiveLossMVar;
 	
-	private boolean inCluster = false;
+	private Cluster cluster;
 	
 	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, 
 			double reactance, SwitchStatus switchStatus, boolean switchBranch, boolean fault) {
@@ -252,13 +254,13 @@ public class Branch implements Serializable {
 	public void setSwitchIndex(int switchIndex) {
 		this.switchIndex = switchIndex;
 	}
-
-	public boolean isInCluster() {
-		return inCluster;
+	
+	public Cluster getCluster() {
+		return cluster;
 	}
 
-	public void setInCluster(boolean inCluster) {
-		this.inCluster = inCluster;
+	public void setCluster(Cluster cluster) {
+		this.cluster = cluster;
 	}
 
 	@Override

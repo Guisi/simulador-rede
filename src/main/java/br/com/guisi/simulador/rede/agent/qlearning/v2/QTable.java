@@ -64,27 +64,12 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	}
 	
 	/**
-	 * Retorna uma lista de {@link QValue} contendo os valores da tabela Q para as transições passadas
-	 * @param state Estado onde o agente se encontra
-	 * @param candidateSwitches Transições possíveis
-	 * @return
-	 */
-	private List<QValue> getQValues(AgentState state, List<CandidateSwitch> candidateSwitches) {
-		List<QValue> qValues = new ArrayList<>();
-		for (CandidateSwitch candidateSwitch : candidateSwitches) {
-			AgentAction action = new AgentAction(candidateSwitch.getSwitchNumber(), candidateSwitch.getSwitchStatus());
-			qValues.add(getQValue(state, action));
-		}
-		return qValues;
-	}
-	
-	/**
 	 * Retorna o melhor valor de recompensa para o estado passado
 	 * @param state
 	 * @return
 	 */
-	public synchronized QValue getBestQValue(AgentState state, List<CandidateSwitch> candidateSwitches) {
-		List<QValue> qValues = this.getQValues(state, candidateSwitches);
+	public synchronized QValue getBestQValue(AgentState state) {
+		List<QValue> qValues = this.getQValues(state);
 
 		//Verifica o maior valor de recompensa
 		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();

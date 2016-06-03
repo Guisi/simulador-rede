@@ -167,7 +167,8 @@ public class Environment implements Serializable {
 				Load loadTo = (Load) nodeTo;
 				
 				//se algum dos loads conectados não possui feeder ou os loads possui feeders diferentes
-				if (loadFrom.getFeeder() == null || loadTo.getFeeder() == null || !loadFrom.getFeeder().equals(loadTo.getFeeder())) {
+				if ( (loadFrom.getFeeder() != null || loadTo.getFeeder() != null) 
+						|| (loadFrom.getFeeder() != null && loadTo.getFeeder() != null && !loadFrom.getFeeder().equals(loadTo.getFeeder())) ) {
 					tieSws.add(branch);
 				}
 			}

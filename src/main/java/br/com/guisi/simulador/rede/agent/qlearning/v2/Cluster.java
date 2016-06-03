@@ -9,23 +9,32 @@ public class Cluster implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Branch tieSwitch;
-	private List<Branch> closedSwitches;
+	private Integer number;
+	private Branch initialTieSwitch;
+	private List<Branch> switches;
 	
-	public Branch getTieSwitch() {
-		return tieSwitch;
+	public Integer getNumber() {
+		return number;
 	}
 
-	public void setTieSwitch(Branch tieSwitch) {
-		this.tieSwitch = tieSwitch;
+	public void setNumber(Integer number) {
+		this.number = number;
 	}
 
-	public List<Branch> getClosedSwitches() {
-		return closedSwitches;
+	public Branch getInitialTieSwitch() {
+		return initialTieSwitch;
 	}
 
-	public void setClosedSwitches(List<Branch> closedSwitches) {
-		this.closedSwitches = closedSwitches;
+	public void setInitialTieSwitch(Branch initialTieSwitch) {
+		this.initialTieSwitch = initialTieSwitch;
+	}
+
+	public List<Branch> getSwitches() {
+		return switches;
+	}
+
+	public void setSwitches(List<Branch> closedSwitches) {
+		this.switches = closedSwitches;
 	}
 
 }

@@ -25,6 +25,7 @@ import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.NetworkRestrictionsTreatmentType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
+import br.com.guisi.simulador.rede.constants.RandomActionType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
@@ -63,6 +64,7 @@ public class QLearningAgentV2 extends Agent {
 	
 	private double initialConfigRate;
 	private boolean changedPolicy;
+	private Cluster currentCluster;
 
 	@PostConstruct
 	public void init() {
@@ -114,38 +116,41 @@ public class QLearningAgentV2 extends Agent {
 		
 		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchStatus());
 		
+		AgentAction action = null;
+		Branch nextSwitch = null;
+		AgentAction previousBestAction = null;
+		final List<Branch> candidateSwitches = new ArrayList<>();
+		
 		//se o switch atual está aberto ou é falta, seleciona switch fechado para abrir em algum cluster
 		if (currentSwitch.isOpen() || currentSwitch.hasFault()) {
-			List<Branch> candidateSwitches = new ArrayList<>();
+			
 			clusters.forEach(cluster -> {
-				candidateSwitches.addAll(cluster.getClosedSwitches().stream().filter(branch -> branch.isClosed()).collect(Collectors.toList()));
-				if (cluster.getTieSwitch().isClosed()) {
-					candidateSwitches.add(cluster.getTieSwitch());
-				}
+				candidateSwitches.addAll(cluster.getSwitches().stream().filter(branch -> branch.isClosed()).collect(Collectors.toList()));
 			});
 			
 			//guarda melhor ação antes de atualiza tabela Q para verificar se mudou política
-			AgentAction previousBestAction = qTable.getBestAction(currentState, candidateSwitches);
+			previousBestAction = qTable.getBestAction(currentState, candidateSwitches);
 			
+			if (randomAction) {
+				boolean proportional = RandomActionType.PSEUDO_RANDOM_PROPORTIONAL.name().equals(PropertiesUtils.getProperty(PropertyKey.RANDOM_ACTION));
+				action = qTable.getRandomAction(currentState, candidateSwitches, proportional);
+			} else {
+				action = previousBestAction;
+			}
+			
+			nextSwitch = environment.getBranch(action.getSwitchNumber());
+			nextSwitch.reverse();
+			
+			//guarda o cluster atual
+			this.currentCluster = nextSwitch.getCluster();
 		} else {
+			//recupera o tie-sw do cluster atual 
+			nextSwitch = this.currentCluster.getSwitches().stream().filter(sw -> sw.isOpen()).findFirst().get();
+			nextSwitch.reverse();
 			
+			action = new AgentAction(nextSwitch.getNumber(), SwitchStatus.OPEN);
 		}
 		
-		
-		
-		/*
-
-		AgentAction action = null;
-		if (randomAction) {
-			boolean proportional = RandomActionType.PSEUDO_RANDOM_PROPORTIONAL.name().equals(PropertiesUtils.getProperty(PropertyKey.RANDOM_ACTION));
-			action = qTable.getRandomAction(currentState, candidateSwitches, proportional);
-		} else {
-			action = previousBestAction;
-		}
-		
-		Branch nextSwitch = environment.getBranch(action.getSwitchNumber());
-		nextSwitch.reverse();
-
 		//executa o fluxo de potência
 		PowerFlow.execute(environment);
 
@@ -155,9 +160,13 @@ public class QLearningAgentV2 extends Agent {
 		//atualiza o qValue do switch
 		this.updateQValue(environment, currentState, action);
 		
-		//verifica se mudou política
-		AgentAction newBestAction = qTable.getBestAction(currentState, candidateSwitches);
-		this.changedPolicy = !previousBestAction.equals(newBestAction);
+		//verifica se mudou política, apenas quando abre um switch
+		if (currentSwitch.isOpen() || currentSwitch.hasFault()) {
+			AgentAction newBestAction = qTable.getBestAction(currentState, candidateSwitches);
+			this.changedPolicy = !previousBestAction.equals(newBestAction);
+		} else {
+			this.changedPolicy = false;
+		}
 		
 		this.currentSwitch = nextSwitch;
 		
@@ -169,7 +178,7 @@ public class QLearningAgentV2 extends Agent {
 		
 		//gera os dados dos ambientes
 		this.generateEnvironmentData(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
-		this.generateEnvironmentData(EnvironmentKeyType.LEARNING_ENVIRONMENT);*/
+		this.generateEnvironmentData(EnvironmentKeyType.LEARNING_ENVIRONMENT);
 	}
 	
 	/**
@@ -337,13 +346,9 @@ public class QLearningAgentV2 extends Agent {
         
 		double q = qValue.getReward();
         
-        //recupera os possíveis candidatos para a próxima iteração
-		Branch nextSwitch = environment.getBranch(action.getSwitchNumber());
-		//List<CandidateSwitch> candidateSwitches = this.getCandidateSwitches(environment, nextSwitch, action.getSwitchStatus());
-
 		//recupera em sua QTable o melhor valor para o estado para o qual se moveu
 		AgentState nextState = new AgentState(action.getSwitchNumber(), action.getSwitchStatus());
-		QValue bestNextQValue = qTable.getBestQValue(nextState, null);
+		QValue bestNextQValue = qTable.getBestQValue(nextState);
         double nextStateQ = bestNextQValue != null ? bestNextQValue.getReward() : 0;
         
         //recupera a recompensa retornada pelo ambiente por ter realizado a ação
