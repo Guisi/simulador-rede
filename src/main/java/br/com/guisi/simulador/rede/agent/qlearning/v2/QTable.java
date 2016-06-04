@@ -46,6 +46,21 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	}
 	
 	/**
+	 * Retorna uma lista de {@link QValue} contendo os valores da tabela Q para as transições passadas
+	 * @param state Estado onde o agente se encontra
+	 * @param candidateSwitches Transições possíveis
+	 * @return
+	 */
+	private List<QValue> getQValues(AgentState state, List<Branch> candidateSwitches) {
+		List<QValue> qValues = new ArrayList<>();
+		for (Branch candidateSwitch : candidateSwitches) {
+			AgentAction action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getReverseStatus());
+			qValues.add(getQValue(state, action));
+		}
+		return qValues;
+	}
+	
+	/**
 	 * Retorna uma lista de {@link QValueEvaluator} contendo os valores para as transições passadas
 	 * @param state Estado onde o agente se encontra
 	 * @param candidateSwitches Transições possíveis
@@ -54,7 +69,7 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	private List<QValueEvaluator> getQValuesEvaluators(AgentState state, List<Branch> candidateSwitches) {
 		List<QValueEvaluator> qValues = new ArrayList<>();
 		for (Branch candidateSwitch : candidateSwitches) {
-			AgentAction action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getSwitchStatus());
+			AgentAction action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getReverseStatus());
 			
 			QValueEvaluator evaluator = new QValueEvaluator();
 			evaluator.setQValue(getQValue(state, action));
@@ -68,8 +83,8 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param state
 	 * @return
 	 */
-	public synchronized QValue getBestQValue(AgentState state) {
-		List<QValue> qValues = this.getQValues(state);
+	public synchronized QValue getBestQValue(AgentState state, List<Branch> candidateSwitches) {
+		List<QValue> qValues = this.getQValues(state, candidateSwitches);
 
 		//Verifica o maior valor de recompensa
 		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
@@ -157,7 +172,7 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 		if (action == null) {
 			//se não escolheu um no randomico proporcional, escolhe um dos candidatos aleatoriamente
 			Branch candidateSwitch = candidateSwitches.get(new Random(System.currentTimeMillis()).nextInt(candidateSwitches.size()));
-			action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getSwitchStatus());
+			action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getReverseStatus());
 		}
 		
 		return action;

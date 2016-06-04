@@ -1,6 +1,8 @@
 package br.com.guisi.simulador.rede.controller.main;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import javafx.fxml.FXML;
@@ -10,6 +12,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -18,6 +21,7 @@ import javax.annotation.PostConstruct;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.qlearning.v2.Cluster;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
+import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.controller.chart.EnvironmentChartsPaneController;
 import br.com.guisi.simulador.rede.controller.chart.LearningChartsPaneController;
@@ -30,6 +34,7 @@ import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
+import br.com.guisi.simulador.rede.util.PropertiesUtils;
 
 public class MenuPaneController extends Controller {
 
@@ -90,6 +95,15 @@ public class MenuPaneController extends Controller {
 		learningEnvironmentChartsPaneController = getController(EnvironmentChartsPaneController.class, EnvironmentKeyType.LEARNING_ENVIRONMENT);
 		
 		learningChartsPaneController = getController(LearningChartsPaneController.class);
+		
+		String lastEnvironmentFile = PropertiesUtils.getProperty(PropertyKey.LAST_ENVIRONMENT_FILE);
+		if (lastEnvironmentFile != null && Files.exists(Paths.get(lastEnvironmentFile))) {
+			menuEnvironment.getItems().add(new SeparatorMenuItem());
+			
+			MenuItem lastEnvironmentItem = new MenuItem(Paths.get(lastEnvironmentFile).getFileName().toString());
+			lastEnvironmentItem.setOnAction(event -> this.loadLastEnvironment());
+			menuEnvironment.getItems().add(lastEnvironmentItem);
+		}
 	}
 	
 	@Override
@@ -108,6 +122,14 @@ public class MenuPaneController extends Controller {
 		}
 	}
 	
+	private void loadLastEnvironment() {
+		String lastEnvironmentFile = PropertiesUtils.getProperty(PropertyKey.LAST_ENVIRONMENT_FILE);
+		if (lastEnvironmentFile != null && Files.exists(Paths.get(lastEnvironmentFile))) {
+			xlsFile = new File(lastEnvironmentFile);
+			this.loadEnvironmentFromFile(xlsFile);
+		}
+	}
+	
 	/**
 	 * Abre diálogo de seleção de arquivo
 	 */
@@ -121,7 +143,6 @@ public class MenuPaneController extends Controller {
 		xlsFile = fileChooser.showOpenDialog(null);
 		
 		if (xlsFile != null) {
-			this.fireEvent(EventType.RESET_SCREEN);
 			this.loadEnvironmentFromFile(xlsFile);
 		}
 	}
@@ -137,6 +158,8 @@ public class MenuPaneController extends Controller {
 	 */
 	private void loadEnvironmentFromFile(File xlsFile) {
 		try {
+			this.fireEvent(EventType.RESET_SCREEN);
+
 			Environment environment = EnvironmentUtils.getEnvironmentFromFile(xlsFile);
 			
 			boolean powerFlowSuccess = false;
@@ -169,6 +192,8 @@ public class MenuPaneController extends Controller {
 			environment.setClusters(clusters);
 			
 			SimuladorRede.setEnvironment(environment);
+			
+			PropertiesUtils.saveProperty(PropertyKey.LAST_ENVIRONMENT_FILE, xlsFile.getAbsolutePath());
 			
 			this.fireEvent(EventType.ENVIRONMENT_LOADED);
 

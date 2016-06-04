@@ -21,7 +21,10 @@ public enum PropertyKey {
 	LEARNING_CONSTANT("0.1"),
 	
 	/* Fator de desconto (gamma) */
-	DISCOUNT_FACTOR("0.9");
+	DISCOUNT_FACTOR("0.9"),
+	
+	/** Environment */
+	LAST_ENVIRONMENT_FILE(null);
 	
 	private final String defaultValue;
 	
