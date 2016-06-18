@@ -62,9 +62,11 @@ public class QLearningAgentV2 extends Agent {
 	private Branch currentSwitch;
 	private Set<Load> turnedOffLoads;
 	
-	private double initialConfigRate;
+	private double lastIterationConfigRate;
+	private double lastLearningConfigRate;
 	private boolean changedPolicy;
 	private Cluster currentCluster;
+	private boolean isRadial;
 
 	@PostConstruct
 	public void init() {
@@ -85,7 +87,9 @@ public class QLearningAgentV2 extends Agent {
 			this.currentSwitch = environment.getRandomSwitch();
 		}
 		
-		this.initialConfigRate = getConfigRate(environment);
+		this.lastIterationConfigRate = getConfigRate(environment);
+		this.lastLearningConfigRate = this.lastIterationConfigRate;
+		this.isRadial = true;
 	}
 	
 	private double getConfigRate(Environment environment) {
@@ -110,24 +114,45 @@ public class QLearningAgentV2 extends Agent {
 		
 		//Se randomico menor que E-greedy, escolhe melhor acao
 		boolean randomAction = (Math.random() >= PropertiesUtils.getEGreedy());
+		boolean proportional = RandomActionType.PSEUDO_RANDOM_PROPORTIONAL.name().equals(PropertiesUtils.getProperty(PropertyKey.RANDOM_ACTION));
 		
 		AgentState currentState = new AgentState(currentSwitch.getNumber(), currentSwitch.getSwitchStatus());
 		
 		AgentAction action = null;
 		Branch nextSwitch = null;
-		AgentAction previousBestAction = null;
 		final List<Branch> candidateSwitches = this.getCandidateSwitches(environment.getClusters(), this.currentSwitch, this.currentCluster);
 		
-		//se o switch atual está fechado ou é falta, seleciona switch fechado para abrir em algum cluster
-		if (currentSwitch.isClosed() || currentSwitch.hasFault()) {
-			//guarda melhor ação antes de atualiza tabela Q para verificar se mudou política
-			previousBestAction = qTable.getBestAction(currentState, candidateSwitches);
+		//se o switch atual está fechado ou é falta, seleciona switch aberto para fechar em algum cluster
+		if (currentSwitch.hasFault() || isRadial) {
+			if (randomAction) {
+				action = qTable.getRandomAction(currentState, candidateSwitches, proportional);
+			} else {
+				action = qTable.getBestAction(currentState, candidateSwitches);
+			}
 			
+			nextSwitch = environment.getBranch(action.getSwitchNumber());
+			nextSwitch.reverse();
+			
+			//guarda o cluster atual
+			this.currentCluster = nextSwitch.getCluster();
+		} else {
+			if (randomAction) {
+				action = qTable.getRandomAction(currentState, candidateSwitches, proportional);
+			} else {
+				action = qTable.getBestAction(currentState, candidateSwitches);
+			}
+			
+			nextSwitch = environment.getBranch(action.getSwitchNumber());
+			nextSwitch.reverse();
+		}
+		
+		//se o switch atual está fechado ou é falta, seleciona switch fechado para abrir em algum cluster
+		/*if (currentSwitch.isClosed() || currentSwitch.hasFault()) {
 			if (randomAction) {
 				boolean proportional = RandomActionType.PSEUDO_RANDOM_PROPORTIONAL.name().equals(PropertiesUtils.getProperty(PropertyKey.RANDOM_ACTION));
 				action = qTable.getRandomAction(currentState, candidateSwitches, proportional);
 			} else {
-				action = previousBestAction;
+				action = qTable.getBestAction(currentState, candidateSwitches);
 			}
 			
 			nextSwitch = environment.getBranch(action.getSwitchNumber());
@@ -140,24 +165,28 @@ public class QLearningAgentV2 extends Agent {
 			nextSwitch.reverse();
 			
 			action = new AgentAction(nextSwitch.getNumber(), nextSwitch.getSwitchStatus());
-		}
+		}*/
 		
-		//executa o fluxo de potência
-		PowerFlow.execute(environment);
-
-		//verifica loads a serem desativados caso existam restrições
-		this.turnOffLoadsIfNecessary(environment);
+		//primeiro valida se rede está radial
+		List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
+		
+		this.isRadial = exceptions.isEmpty();
+		if (isRadial) {
+			//executa o fluxo de potência
+			PowerFlow.execute(environment);
+	
+			//verifica loads a serem desativados caso existam restrições
+			this.turnOffLoadsIfNecessary(environment);
+		} else {
+			//se estiver nao radial, desliga todos os loads para que o % de atendimento seja 0 
+			environment.getLoads().forEach(load -> {
+				this.turnedOffLoads.add(load);
+				load.turnOff();
+			});
+		}
 		
 		//atualiza o qValue do switch
 		this.updateQValue(environment, currentState, action);
-		
-		//verifica se mudou política, apenas quando abre um switch
-		if (currentSwitch.isClosed() || currentSwitch.hasFault()) {
-			AgentAction newBestAction = qTable.getBestAction(currentState, candidateSwitches);
-			this.changedPolicy = !previousBestAction.equals(newBestAction);
-		} else {
-			this.changedPolicy = false;
-		}
 		
 		this.currentSwitch = nextSwitch;
 		
@@ -168,11 +197,30 @@ public class QLearningAgentV2 extends Agent {
 		this.generateAgentData();
 		
 		//gera os dados dos ambientes
-		this.generateEnvironmentData(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
-		this.generateEnvironmentData(EnvironmentKeyType.LEARNING_ENVIRONMENT);
+		this.generateEnvironmentData(EnvironmentKeyType.INTERACTION_ENVIRONMENT, lastIterationConfigRate);
+		this.generateEnvironmentData(EnvironmentKeyType.LEARNING_ENVIRONMENT, lastLearningConfigRate);
+		
+		this.lastIterationConfigRate = getConfigRate(getInteractionEnvironment());
+		this.lastLearningConfigRate = getConfigRate(getLearningEnvironment());
 	}
 	
 	private List<Branch> getCandidateSwitches(List<Cluster> clusters, Branch currentSwitch, Cluster currentCluster) {
+		List<Branch> candidateSwitches = new ArrayList<>();
+		
+		if (currentSwitch.hasFault() || isRadial) {
+			//monta lista dos switches abertos
+			clusters.forEach(cluster -> {
+				candidateSwitches.addAll(cluster.getSwitches().stream().filter(branch -> branch.isOpen()).collect(Collectors.toList()));
+			});
+		} else {
+			//monta lista dos switches fechados do cluster como candidatos
+			candidateSwitches.addAll( currentCluster.getSwitches().stream().filter(branch -> branch.isClosed()).collect(Collectors.toList()) );
+		}
+		
+		return candidateSwitches;
+	}
+	
+	/*private List<Branch> getCandidateSwitches(List<Cluster> clusters, Branch currentSwitch, Cluster currentCluster) {
 		List<Branch> candidateSwitches = new ArrayList<>();
 		
 		//se o switch atual está fechado ou é falta, seleciona switch fechado para abrir em algum cluster
@@ -184,7 +232,7 @@ public class QLearningAgentV2 extends Agent {
 			candidateSwitches.add(currentCluster.getSwitches().stream().filter(sw -> !sw.equals(currentSwitch) && sw.isOpen()).findFirst().get());
 		}
 		return candidateSwitches;
-	}
+	}*/
 	
 	/**
 	 * Desliga loads se existirem restrições
@@ -266,10 +314,16 @@ public class QLearningAgentV2 extends Agent {
 			});
 		});
 		
+		this.changedPolicy = false;
 		environment.getClusters().forEach(cluster -> {
 			cluster.getSwitches().forEach(sw -> {
 				if (sw.isOpen() || sw.isClosed()) {
 					SwitchStatus status = qTable.getBestSwitchStatus(sw.getNumber(), switchNumbers);
+					
+					if (!sw.getSwitchStatus().equals(status)) {
+						this.changedPolicy = true;
+					}
+
 					sw.setSwitchStatus(status);
 				}
 			});
@@ -301,7 +355,7 @@ public class QLearningAgentV2 extends Agent {
 		agentStepData.putData(AgentDataType.QVALUES_AVERAGE, qTable.getQValuesAverage());
 	}
 	
-	private void generateEnvironmentData(EnvironmentKeyType environmentKeyType) {
+	private void generateEnvironmentData(EnvironmentKeyType environmentKeyType, double lastConfigRate) {
 		Environment environment = SimuladorRede.getEnvironment(environmentKeyType);
 		
 		AgentStepData agentStepData = new AgentStepData(getStep());
@@ -337,7 +391,7 @@ public class QLearningAgentV2 extends Agent {
 		 //nota da configuração da rede
 		if (currentSwitch.isClosed()) {
 	        double configRate = getConfigRate(environment);
-	        agentStepData.putData(AgentDataType.ENVIRONMENT_REWARD, (initialConfigRate > 0) ? (configRate - initialConfigRate) / initialConfigRate : 0);
+	        agentStepData.putData(AgentDataType.ENVIRONMENT_REWARD, (lastConfigRate > 0) ? (configRate - lastConfigRate) / lastConfigRate : 0);
 		}
         
 		//número de switches diferentes da rede inicial
@@ -362,7 +416,7 @@ public class QLearningAgentV2 extends Agent {
         //recupera a recompensa retornada pelo ambiente por ter realizado a ação
         double configRate = getConfigRate(environment);
         
-        double r = initialConfigRate > 0 ? (configRate - initialConfigRate) / initialConfigRate : 0;
+        double r = lastIterationConfigRate > 0 ? (configRate - lastIterationConfigRate) / lastIterationConfigRate : 0;
         
         final double learningConstant = PropertiesUtils.getLearningConstant();
         final double discountFactor = PropertiesUtils.getDiscountFactor();

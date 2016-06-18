@@ -407,15 +407,15 @@ public class Environment implements Serializable {
 	 */
 	public boolean isValidForReconfiguration() {
 		//valida se existem switches abertos, pois se todos os switches estiverem fechados, não há como reconfigurar
-		boolean hasOpenSwitch = false;
+		/*boolean hasOpenSwitch = false;
 		for (Branch switc : switches) {
 			if (switc.isOpen()) {
 				hasOpenSwitch = true;
 				break;
 			}
-		}
+		}*/
 		
-		return hasOpenSwitch;
+		return true;
 	}
 
 	public List<Cluster> getClusters() {
