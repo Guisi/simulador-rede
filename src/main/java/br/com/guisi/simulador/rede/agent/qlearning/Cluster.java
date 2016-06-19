@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.agent.qlearning.v2;
+package br.com.guisi.simulador.rede.agent.qlearning;
 
 import java.io.Serializable;
 import java.util.List;

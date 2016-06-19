@@ -65,7 +65,6 @@ public class Feeder extends NetworkNode {
 
 	@Override
 	public String toString() {
-		return "Feeder [nodeNumber=" + nodeNumber + ", x=" + x + ", y=" + y + ", activePower=" + activePowerKW + ", reactivePower=" + reactivePowerKVar + ", status=" + status 
-				+ ", feederColor=" + feederColor + ", loadColor=" + loadColor + "]";
+		return "Feeder [nodeNumber=" + nodeNumber + "]";
 	}
 }

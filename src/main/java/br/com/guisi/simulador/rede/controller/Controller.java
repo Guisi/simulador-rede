@@ -83,4 +83,8 @@ public abstract class Controller implements EventListener {
 	
 	protected void onSetStage(Stage stage) {
 	}
+	
+	public String getControllerKey() {
+		return getClass().getSimpleName().toUpperCase();
+	}
 }

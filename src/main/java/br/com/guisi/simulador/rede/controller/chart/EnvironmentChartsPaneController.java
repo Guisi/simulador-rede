@@ -137,5 +137,10 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 	public Node getView() {
 		return root;
 	}
+	
+	@Override
+	public String getControllerKey() {
+		return super.getControllerKey() + "_" + getEnvironmentKeyType().name();
+	}
 
 }

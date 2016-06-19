@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import br.com.guisi.simulador.rede.agent.qlearning.v2.Cluster;
+import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
 
 
 /**
@@ -28,6 +28,7 @@ public class Branch implements Serializable {
 	private boolean switchBranch;
 	private SwitchStatus switchStatus;
 	private int switchIndex;
+	private boolean tieSwitchCandidate;
 	
 	private double instantCurrent;
 	private double activeLossMW;
@@ -263,6 +264,14 @@ public class Branch implements Serializable {
 		this.cluster = cluster;
 	}
 
+	public boolean isTieSwitchCandidate() {
+		return tieSwitchCandidate;
+	}
+
+	public void setTieSwitchCandidate(boolean tieSwitchCandidate) {
+		this.tieSwitchCandidate = tieSwitchCandidate;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -290,6 +299,10 @@ public class Branch implements Serializable {
 
 	@Override
 	public String toString() {
+		return "Branch [number=" + number + "]";
+	}
+	
+	public String toStringReflection() {
 		return ToStringBuilder.reflectionToString(this);
 	}
 	

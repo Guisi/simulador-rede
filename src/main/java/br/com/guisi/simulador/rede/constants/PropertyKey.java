@@ -24,7 +24,14 @@ public enum PropertyKey {
 	DISCOUNT_FACTOR("0.9"),
 	
 	/** Environment */
-	LAST_ENVIRONMENT_FILE(null);
+	LAST_ENVIRONMENT_FILE(null),
+	ZOOM_SLIDER("0.5"),
+	
+	/** Tamanhos/posições das janelas */
+	WINDOW_POSITION_X(null),
+	WINDOW_POSITION_Y(null),
+	WINDOW_WIDTH(null),
+	WINDOW_HEIGHT(null);
 	
 	private final String defaultValue;
 	

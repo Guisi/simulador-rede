@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import br.com.guisi.simulador.rede.agent.qlearning.v2.Cluster;
+import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PriorityUtils;
 

@@ -2,6 +2,8 @@ package br.com.guisi.simulador.rede.constants;
 
 public interface Constants {
 
+	String CONTROLLER_KEY = "CONTROLLER_KEY";
+	
 	/** network interface */
 	int NETWORK_PANE_PADDING = 30;
 	int NETWORK_GRID_SIZE_PX = 70;

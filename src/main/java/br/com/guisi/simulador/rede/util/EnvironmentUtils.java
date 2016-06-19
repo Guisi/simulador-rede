@@ -18,7 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import br.com.guisi.simulador.rede.agent.qlearning.v2.Cluster;
+import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
 import br.com.guisi.simulador.rede.constants.Status;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.BranchKey;
@@ -267,7 +267,7 @@ public class EnvironmentUtils {
 	public static List<NonRadialNetworkException> validateRadialState(Environment environment) {
 		List<NonRadialNetworkException> exceptions = new ArrayList<>();
 		
-		environment.getNetworkNodeMap().values().forEach((node) -> {
+		for (NetworkNode node : environment.getNetworkNodeMap().values()) {
 			try {
 				node.getBranches().forEach(branch -> {
 					validateRadialStateRecursive(node, branch, node, new ArrayList<>());
@@ -275,14 +275,17 @@ public class EnvironmentUtils {
 				
 				if (node.isFeeder()) {
 					Feeder feeder = (Feeder) node;
-					feeder.getBranches().forEach(branch -> {
-						checkIfExistsConnectedFeedersRecursive(feeder, branch, feeder);
-					});
+					List<NetworkNode> checkedNodes = new ArrayList<>();
+					checkedNodes.add(feeder);
+					
+					for (Branch branch : feeder.getBranches()) {
+						checkIfExistsConnectedFeedersRecursive(feeder, feeder, branch, checkedNodes);
+					};
 				}
 			} catch (NonRadialNetworkException e) {
 				exceptions.add(e);
 			}
-		});
+		};
 		
 		return exceptions;
 	}
@@ -318,26 +321,29 @@ public class EnvironmentUtils {
 	/**
 	 * Verifica se existe algum feeder conectado a outro dentro da rede,
 	 * ou seja, nesse caso alguns loads estariam sendo alimentados por mais de um feeder
-	 * @param observedFeeder
+	 * @param node
 	 * @param branch
-	 * @param lastNetworkNode
+	 * @param checkedNodes
 	 * @throws IllegalStateException
 	 */
-	private static void checkIfExistsConnectedFeedersRecursive(Feeder observedFeeder, Branch branch, NetworkNode lastNetworkNode) throws IllegalStateException {
+	private static void checkIfExistsConnectedFeedersRecursive(Feeder observedFeeder, NetworkNode node, Branch branch, List<NetworkNode> checkedNodes) throws IllegalStateException {
 		if (branch.isClosed()) {
-			branch.getConnectedNodes().forEach(networkNode -> {
-				if (!lastNetworkNode.equals(networkNode)) {
-					if (networkNode.isFeeder()) {
-						throw new NonRadialNetworkException("Os feeders " + observedFeeder.getNodeNumber() + " e " + networkNode.getNodeNumber() + " estão conectados.", observedFeeder);
+			
+			for (NetworkNode connectedNode : branch.getConnectedNodes()) {
+				if (!checkedNodes.contains(connectedNode)) {
+					checkedNodes.add(connectedNode);
+
+					if (connectedNode.isFeeder()) {
+						throw new NonRadialNetworkException("Os feeders " + observedFeeder.getNodeNumber() + " e " + connectedNode.getNodeNumber() + " estão conectados.", node);
 					}
 					
-					networkNode.getBranches().forEach(connectedBranch -> {
+					for (Branch connectedBranch : connectedNode.getBranches()) {
 						if (!connectedBranch.equals(branch)) {
-							checkIfExistsConnectedFeedersRecursive(observedFeeder, connectedBranch, networkNode);
+							checkIfExistsConnectedFeedersRecursive(observedFeeder, connectedNode, connectedBranch, checkedNodes);
 						}
-					});
+					};
 				}
-			});
+			};
 		}
 	}
 	
@@ -359,6 +365,45 @@ public class EnvironmentUtils {
 				});
 			}
 		});
+	}
+	
+	public static void validateTieSwitches(Environment environment) {
+		environment.getSwitches().forEach((branch) -> {
+			if (branch.isOpen() || branch.isClosed()) {
+				List<Branch> checkedBranches = new ArrayList<>();
+				checkedBranches.add(branch);
+				
+				Feeder feeder = findFeederRecursive(branch, branch.getNodeFrom(), checkedBranches);
+				if (feeder != null) {
+					feeder = findFeederRecursive(branch, branch.getNodeTo(), checkedBranches);
+				}
+				
+				branch.setTieSwitchCandidate(feeder != null);
+			}
+		});
+	}
+	
+	private static Feeder findFeederRecursive(Branch branch, NetworkNode node, List<Branch> checkedBranches) {
+		for (Branch connectedBranch : node.getBranches()) {
+			if (!checkedBranches.contains(connectedBranch)) {
+				checkedBranches.add(connectedBranch);
+
+				for (NetworkNode connectedNode : connectedBranch.getConnectedNodes()) {
+					if (!connectedNode.equals(node)) {
+						
+						if (connectedNode.isFeeder()) {
+							return (Feeder) connectedNode;
+						}
+
+						Feeder feeder = findFeederRecursive(connectedBranch, connectedNode, checkedBranches);
+						if (feeder != null) {
+							return feeder;
+						}
+					}
+				}
+			}
+		};
+		return null;
 	}
 
 	/**
@@ -490,7 +535,7 @@ public class EnvironmentUtils {
 						if (connectedBranch.isClosed() && connectedBranch.getCluster() == null) {
 							
 							//se encontrou o switch, adiciona na lista
-							if (connectedBranch.isSwitchBranch()) {
+							if (connectedBranch.isSwitchBranch() && connectedBranch.isTieSwitchCandidate()) {
 								switches.add(new SwitchDistance(distance, connectedBranch));
 								quantityAdded++;
 							}
@@ -565,7 +610,7 @@ public class EnvironmentUtils {
 	}
 	
 	public static void main(String[] args) {
-		/*File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {
@@ -573,58 +618,17 @@ public class EnvironmentUtils {
 			
 			//isola as faltas
 			EnvironmentUtils.isolateFaultSwitches(environment);
-			PowerFlow.execute(environment);
 			
-			List<Branch> tieSwitches = environment.getTieSwitches();
+			EnvironmentUtils.validateTieSwitches(environment);
 			
-			Collections.sort(tieSwitches, new Comparator<Branch>() {
-				@Override
-				public int compare(Branch branch1, Branch branch2) {
-					Load loadFrom1 = (Load)branch1.getNodeFrom();
-					Load loadTo1 = (Load)branch1.getNodeTo();
-					
-					Load loadFrom2 = (Load)branch2.getNodeFrom();
-					Load loadTo2 = (Load)branch2.getNodeTo();
-					
-					if ( (loadFrom1.getFeeder() == null || loadTo1.getFeeder() == null) && (loadFrom2.getFeeder() != null && loadTo2.getFeeder() != null) ) {
-						return -1;
-					} else if ( (loadFrom2.getFeeder() == null || loadTo2.getFeeder() == null) && (loadFrom1.getFeeder() != null && loadTo1.getFeeder() != null) ) {
-						return 1;
-					} else if (loadFrom1.getFeeder() == null || loadTo1.getFeeder() == null || loadFrom2.getFeeder() == null || loadTo2.getFeeder() == null) {
-						Feeder feeder1 = loadFrom1.getFeeder() != null ? loadFrom1.getFeeder() : loadTo1.getFeeder();
-						Feeder feeder2 = loadFrom2.getFeeder() != null ? loadFrom2.getFeeder() : loadTo2.getFeeder();
-						
-						return feeder1.getUsedActivePowerMW() < feeder2.getUsedActivePowerMW() ? -1 : 1;
-					}
-					return 0;
+			environment.getSwitches().forEach((branch) -> {
+				if (branch.isOpen() || branch.isClosed()) {
+					System.out.println("Branch " + branch.getNumber() + ": " + branch.isTieSwitchCandidate());
 				}
 			});
 			
-			for (Branch tieSw : tieSwitches) {
-				System.out.println("Tie-sw: " + tieSw.getNumber());
-				List<SwitchDistance> switches = environment.getClosedSwitches(tieSw, 2);
-				
-				while (switches.size() > 4) {
-					Integer max = switches.stream().max(Comparator.comparing(sw -> sw.getDistance())).get().getDistance();
-					List<SwitchDistance> switchesToRemove = switches.stream().filter(sw -> sw.getDistance().equals(max)).collect(Collectors.toList());
-					SwitchDistance switchToRemove = switchesToRemove.get(new Random(System.currentTimeMillis()).nextInt(switchesToRemove.size()));
-					switches.remove(switchToRemove);
-				}
-				
-				switches.forEach(sw -> sw.getTheSwitch().setInCluster(true));
-
-				System.out.println("Cluster Switches: ");
-				for (SwitchDistance switchDistance : switches) {
-					System.out.print(switchDistance.getTheSwitch().getNumber() + "(" + switchDistance.getDistance() + ")" + ", ");
-				}
-				System.out.println();
-				System.out.println();
-			}
-			
-			Matlab.disconnectMatlabProxy();
-			
 		} catch (Exception e) {
 			e.printStackTrace();
-		}*/
+		}
 	}
 }

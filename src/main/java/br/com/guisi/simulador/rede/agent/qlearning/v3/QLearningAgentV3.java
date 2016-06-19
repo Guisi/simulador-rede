@@ -1,4 +1,4 @@
-package br.com.guisi.simulador.rede.agent.qlearning.v2;
+package br.com.guisi.simulador.rede.agent.qlearning.v3;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -38,26 +38,14 @@ import br.com.guisi.simulador.rede.util.PowerFlow;
 import br.com.guisi.simulador.rede.util.PropertiesUtils;
 
 /**
- * Q-Learning Agent Versão 2
- * 
- * Interage escolhendo um cluster (um conjunto de 5 switches onde o switch central é um tie-sw), 
- * fazendo a mudança de um par de switches dentro deste cluster, abrindo um switch e fechando o tie-sw
- * 
- * Modelo da tabela: S -> Switch Origem / Estado deste SW
- *                   A -> Switch Destino / Estado deste SW
- * A política do agente é dada por votação de cada SW Origem, qual o estado do SW destino tem maior valor na tabela Q
- * 
- * Para realizar a ação, o agente escolhe um switch fechado dentro de algum dos clusters para abrir, 
- * abre este switch e atualiza o aprendizado.
- * Em seguida escolhe um dos switches abertos dentro do mesmo cluster para fechar,
- * fecha este switch e atualiza o aprendizado
+ * Q-Learning Agent Versão 3
  * 
  * @author Guisi
  *
  */
-@Named("qLearningAgentV2")
+@Named("qLearningAgentV3")
 @Scope("prototype")
-public class QLearningAgentV2 extends Agent {
+public class QLearningAgentV3 extends Agent {
 	
 	private QTable qTable;
 	private Branch currentSwitch;

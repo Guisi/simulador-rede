@@ -1,8 +1,10 @@
 package br.com.guisi.simulador.rede.enviroment;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.Status;
@@ -23,7 +25,7 @@ public abstract class NetworkNode implements Serializable {
 	protected double reactivePowerKVar;
 	protected double currentVoltagePU;
 	protected Status status;
-	protected Set<Branch> branches = new HashSet<>();
+	protected List<Branch> branches = new ArrayList<>();
 	
 	public NetworkNode(Integer nodeNumber, Integer x, Integer y, double activePowerKW, double reactivePowerKVar, Status status) {
 		super();
@@ -36,7 +38,9 @@ public abstract class NetworkNode implements Serializable {
 	}
 
 	public void addBranch(Branch branch) {
-		branches.add(branch);
+		if (!branches.contains(branch)) {
+			branches.add(branch);
+		}
 	}
 	
 	/**
@@ -94,10 +98,10 @@ public abstract class NetworkNode implements Serializable {
 	}
 
 	/**
-	 * Retorna um {@link Set<Branch>} com os branches ligados neste nó
-	 * @return {@link Set<Branch>}
+	 * Retorna um {@link List<Branch>} com os branches ligados neste nó
+	 * @return {@link List<Branch>}
 	 */
-	public Set<Branch> getBranches() {
+	public List<Branch> getBranches() {
 		return branches;
 	}
 	
@@ -181,5 +185,9 @@ public abstract class NetworkNode implements Serializable {
 		if (nodeNumber != other.nodeNumber)
 			return false;
 		return true;
+	}
+	
+	public String toStringReflection() {
+		return ToStringBuilder.reflectionToString(this);
 	}
 }

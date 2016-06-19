@@ -15,11 +15,12 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import javax.annotation.PostConstruct;
 
 import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.agent.qlearning.v2.Cluster;
+import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.controller.Controller;
@@ -107,6 +108,12 @@ public class MenuPaneController extends Controller {
 	}
 	
 	@Override
+	protected void onSetStage(Stage stage) {
+		super.onSetStage(stage);
+		stage.setOnShown(event -> loadLastEnvironment());
+	}
+	
+	@Override
 	public void initializeControllerData(Object... data) {
 	}
 	
@@ -170,6 +177,9 @@ public class MenuPaneController extends Controller {
 			if (exceptions.isEmpty()) {
 				//isola as faltas
 				EnvironmentUtils.isolateFaultSwitches(environment);
+				
+				//marca switches que podem ser tie-sw
+				EnvironmentUtils.validateTieSwitches(environment);
 				
 				//executa o fluxo de potência
 				try {

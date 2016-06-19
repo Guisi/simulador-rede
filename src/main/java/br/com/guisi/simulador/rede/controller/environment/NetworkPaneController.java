@@ -19,9 +19,11 @@ import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
+import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EnvironmentEventData;
 import br.com.guisi.simulador.rede.events.EventType;
+import br.com.guisi.simulador.rede.util.PropertiesUtils;
 import br.com.guisi.simulador.rede.view.custom.BranchStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkPane;
@@ -65,13 +67,17 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 		zoomSlider.setBlockIncrement(0.1);
 		zoomSlider.setMin(0.1);
 		zoomSlider.setMax(2);
-		zoomSlider.setMinWidth(150);
-		zoomSlider.setMaxWidth(150);
-		zoomSlider.setPrefWidth(150);
+		zoomSlider.setMinWidth(300);
+		zoomSlider.setMaxWidth(300);
+		zoomSlider.setPrefWidth(300);
 		root.getChildren().add(zoomSlider);
 		
 		//bind do slider para o zoom do pane da rede
 		zoomingPane.zoomFactorProperty().bind(zoomSlider.valueProperty());
+		
+		zoomSlider.valueProperty().addListener((v, oldValue, newValue) -> {
+			PropertiesUtils.saveProperty(PropertyKey.ZOOM_SLIDER, getEnvironmentKeyType().name(), String.valueOf(newValue));
+		});
 		
 		root.getChildren().add(zoomingPane);
 	}
@@ -98,7 +104,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 		root.setVisible(false);
 		networkPane.reset();
 		this.stepProcessed = 0;
-		zoomSlider.setValue(0.7);
+		zoomSlider.setValue(PropertiesUtils.getDoubleProperty(PropertyKey.ZOOM_SLIDER, getEnvironmentKeyType().name()));
 	}
 	
 	private void onEnvironmentLoaded() {

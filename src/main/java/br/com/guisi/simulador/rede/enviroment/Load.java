@@ -1,7 +1,5 @@
 package br.com.guisi.simulador.rede.enviroment;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import br.com.guisi.simulador.rede.constants.Status;
 
 /**
@@ -59,8 +57,7 @@ public class Load extends NetworkNode {
 
 	@Override
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
+		return "Load [nodeNumber=" + nodeNumber + ", feeder=" + (feeder != null ? feeder.getNodeNumber() : "null") + "]";
 	}
-
 	
 }

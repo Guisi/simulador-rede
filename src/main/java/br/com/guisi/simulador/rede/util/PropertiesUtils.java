@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
+
 import br.com.guisi.simulador.rede.constants.PropertyKey;
 
 public class PropertiesUtils {
@@ -24,7 +26,7 @@ public class PropertiesUtils {
 	}
 	
 	private static void loadProperties() {
-		simulatorProperties = new Properties();
+		simulatorProperties = new OrderedProperties();
 		if (Files.exists(Paths.get(SIMULATOR_PROPERTIES))) {
 			try {
 				simulatorProperties.load(new FileInputStream(SIMULATOR_PROPERTIES));
@@ -35,13 +37,23 @@ public class PropertiesUtils {
 	}
 	
 	public static String getProperty(PropertyKey propertyKey) {
-		Properties prop = getInstance();
-		return prop.getProperty(propertyKey.name(), propertyKey.getDefaultValue());
+		return getProperty(propertyKey, null);
 	}
 	
-	public static void saveProperty(PropertyKey key, String value) {
+	public static String getProperty(PropertyKey propertyKey, String keySuffix) {
 		Properties prop = getInstance();
-		prop.put(key.name(), value);
+		String key = propertyKey.name() + (StringUtils.isNotBlank(keySuffix) ? "_" + keySuffix : "");
+		return prop.getProperty(key, propertyKey.getDefaultValue());
+	}
+	
+	public static void saveProperty(PropertyKey propertyKey, String value) {
+		saveProperty(propertyKey, null, value);
+	}
+	
+	public static void saveProperty(PropertyKey propertyKey, String keySuffix, String value) {
+		Properties prop = getInstance();
+		String key = propertyKey.name() + (StringUtils.isNotBlank(keySuffix) ? "_" + keySuffix : "");
+		prop.put(key, value);
 		try {
 			prop.store(new FileOutputStream(SIMULATOR_PROPERTIES), null);
 		} catch (IOException e) {
@@ -49,8 +61,12 @@ public class PropertiesUtils {
 		}
 	}
 	
-	public static double getDoubleValue(PropertyKey propertyKey) {
-		String value = getProperty(propertyKey);
+	public static double getDoubleProperty(PropertyKey propertyKey) {
+		return getDoubleProperty(propertyKey, null);
+	}
+	
+	public static double getDoubleProperty(PropertyKey propertyKey, String keySuffix) {
+		String value = getProperty(propertyKey, keySuffix);
 		try {
 			return Double.valueOf(value);
 		} catch (NumberFormatException e) {
@@ -59,14 +75,14 @@ public class PropertiesUtils {
 	}
 	
 	public static double getEGreedy() {
-		return getDoubleValue(PropertyKey.E_GREEDY);
+		return getDoubleProperty(PropertyKey.E_GREEDY);
 	}
 	
 	public static double getLearningConstant() {
-		return getDoubleValue(PropertyKey.LEARNING_CONSTANT);
+		return getDoubleProperty(PropertyKey.LEARNING_CONSTANT);
 	}
 	
 	public static double getDiscountFactor() {
-		return getDoubleValue(PropertyKey.DISCOUNT_FACTOR);
+		return getDoubleProperty(PropertyKey.DISCOUNT_FACTOR);
 	}
 }
