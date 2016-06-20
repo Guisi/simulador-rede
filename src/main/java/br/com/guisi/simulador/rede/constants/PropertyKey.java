@@ -26,6 +26,7 @@ public enum PropertyKey {
 	/** Environment */
 	LAST_ENVIRONMENT_FILE(null),
 	ZOOM_SLIDER("0.5"),
+	SPLIT_PANE_DIVIDER("0.5"),
 	
 	/** Tamanhos/posições das janelas */
 	WINDOW_POSITION_X(null),
