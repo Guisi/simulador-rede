@@ -1,6 +1,8 @@
 package br.com.guisi.simulador.rede.controller.environment;
 
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
@@ -18,6 +20,7 @@ import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.util.PropertiesUtils;
 
+
 @Named
 @Scope("prototype")
 public class EnvironmentController extends AbstractEnvironmentPaneController {
@@ -34,6 +37,8 @@ public class EnvironmentController extends AbstractEnvironmentPaneController {
 	private FunctionsPaneController functionsPaneController;
 	private LabelAndMessagesPaneController labelAndMessagesPaneController;
 	
+	private ChangeListener<Number> dividerListener;
+	
 	public EnvironmentController(EnvironmentKeyType environmentKeyType) {
 		super(environmentKeyType);
 	}
@@ -44,8 +49,6 @@ public class EnvironmentController extends AbstractEnvironmentPaneController {
 		splitPane = new SplitPane();
 		splitPane.getStyleClass().add("scrollPane");
 		root.getChildren().add(splitPane);
-		
-		splitPane.getDividers();
 		
 		scrollPaneLeft = new ScrollPane();
 		scrollPaneLeft.setHbarPolicy(ScrollBarPolicy.NEVER);
@@ -97,10 +100,19 @@ public class EnvironmentController extends AbstractEnvironmentPaneController {
 		splitPane.prefHeightProperty().bind(stage.getScene().heightProperty());
 		stage.setHeight(800);
 		
-		DoubleProperty dividerPositionProperty = splitPane.getDividers().get(0).positionProperty();
-		dividerPositionProperty.setValue(PropertiesUtils.getDoubleProperty(PropertyKey.SPLIT_PANE_DIVIDER, getEnvironmentKeyType().name()));
-		dividerPositionProperty.addListener((observable, oldValue, newValue) -> { 
-			PropertiesUtils.saveProperty(PropertyKey.SPLIT_PANE_DIVIDER, getEnvironmentKeyType().name(), String.valueOf(newValue));
+		stage.setOnShown(event -> {
+			DoubleProperty dividerPositionProperty = splitPane.getDividers().get(0).positionProperty();
+			splitPane.setDividerPosition(0, PropertiesUtils.getDoubleProperty(PropertyKey.SPLIT_PANE_DIVIDER, getEnvironmentKeyType().name()));
+			
+			if (dividerListener == null) {
+				dividerListener = new ChangeListener<Number>() {
+					@Override
+					public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+						PropertiesUtils.saveProperty(PropertyKey.SPLIT_PANE_DIVIDER, getEnvironmentKeyType().name(), String.valueOf(newValue));
+					}
+				};
+				dividerPositionProperty.addListener(dividerListener);
+			}
 		});
 	}
 	
