@@ -23,16 +23,14 @@ import javafx.stage.FileChooser;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.data.AgentData;
 import br.com.guisi.simulador.rede.agent.data.AgentDataType;
 import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.agent.data.LearningPropertyPair;
+import br.com.guisi.simulador.rede.agent.data.LearningState;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
-import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.controller.Controller;
-import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.tableview.PropertyRow;
 import br.com.guisi.simulador.rede.view.tableview.PropertyRowPair;
@@ -49,7 +47,7 @@ public class AgentInformationPaneController extends Controller {
 	@FXML
 	private TableView<PropertyRowPair> tvAgentLearning;
 	@FXML
-	private ComboBox<Integer> cbSelectedSwitch;
+	private ComboBox<LearningState> cbSelectedState;
 	@FXML
 	private CheckBox cbOnlyPerformedActions;
 	
@@ -89,8 +87,8 @@ public class AgentInformationPaneController extends Controller {
 		tvSwitchesOperations.getItems().clear();
 		tvAgentLearning.getItems().clear();
 		
-		cbSelectedSwitch.setValue(null);
-		cbSelectedSwitch.setItems(FXCollections.observableArrayList());
+		cbSelectedState.setValue(null);
+		cbSelectedState.setItems(FXCollections.observableArrayList());
 	}
 	
 	private void processEnvironmentLoaded() {
@@ -99,11 +97,11 @@ public class AgentInformationPaneController extends Controller {
 		tvSwitchesOperations.prefWidthProperty().bind(getStage().getScene().widthProperty());
 		tvAgentLearning.prefWidthProperty().bind(getStage().getScene().widthProperty());
 		
-		getLearningEnvironment().getSwitches().forEach(sw -> cbSelectedSwitch.getItems().add(sw.getNumber()));
+		cbSelectedState.getItems().addAll(agentControl.getAgent().getLearningStates());
 	}
 	
 	private void processAgentRunning() {
-		cbSelectedSwitch.valueProperty().setValue(null);
+		cbSelectedState.valueProperty().setValue(null);
 	}
 
 	private void processAgentNotification(Object data) {
@@ -147,10 +145,10 @@ public class AgentInformationPaneController extends Controller {
 		}
 	}
 	
-	public void changeCbSelectedSwitch() {
+	public void changeCbSelectedState() {
 		tvAgentLearning.getItems().clear();
 		
-		Integer selected = cbSelectedSwitch.valueProperty().get();
+		LearningState selected = cbSelectedState.valueProperty().get();
 		
 		if (selected != null) {
 			List<LearningPropertyPair> learningProperties = agentControl.getAgent().getLearningProperties(selected, cbOnlyPerformedActions.isSelected());
@@ -166,10 +164,6 @@ public class AgentInformationPaneController extends Controller {
 				tvAgentLearning.getItems().add(pair);
 			}
 		}
-	}
-	
-	private Environment getLearningEnvironment() {
-		return SimuladorRede.getEnvironment(EnvironmentKeyType.LEARNING_ENVIRONMENT);
 	}
 	
 	@Override

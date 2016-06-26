@@ -80,7 +80,7 @@ public class AgentControlImpl implements AgentControl {
 	@Override
 	public Agent getAgent() {
 		if (agent == null) {
-			agent = (Agent) context.getBean("qLearningAgentV2");
+			agent = (Agent) context.getBean("qLearningAgentV3");
 		}
 		return agent;
 	}

@@ -30,9 +30,7 @@ import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.control.impl.StepNumberStoppingCriteria;
 import br.com.guisi.simulador.rede.agent.data.AgentData;
-import br.com.guisi.simulador.rede.agent.data.AgentDataType;
-import br.com.guisi.simulador.rede.agent.data.AgentStepData;
-import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
+import br.com.guisi.simulador.rede.agent.qlearning.v3.AgentState;
 import br.com.guisi.simulador.rede.constants.NetworkRestrictionsTreatmentType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.constants.RandomActionType;
@@ -71,7 +69,7 @@ public class ControlsPaneController extends Controller {
 	@FXML
 	private TextField tfStoppingCriteria;
 	@FXML
-	private Label lblCurrentSwitch;
+	private Label lblCurrentState;
 	@FXML
 	private ComboBox<RandomActionType> cbRandomAction;
 	@FXML
@@ -198,9 +196,19 @@ public class ControlsPaneController extends Controller {
 	private void processEnvironmentLoaded() {
 		root.setVisible(true);
 
-		Branch currentState = agentControl.getAgent().getCurrentState();
+		setCurrentStateLabel();		
+	}
+	
+	private void setCurrentStateLabel() {
+		Object currentState = agentControl.getAgent().getCurrentState();
 		if (currentState != null) {
-			lblCurrentSwitch.setText(currentState.getNumber().toString() + " (" + currentState.getSwitchStatus().getDescription() + ")");
+			if (currentState instanceof Branch) {
+				Branch branch = (Branch) currentState;
+				lblCurrentState.setText(branch.getNumber().toString() + " (" + branch.getSwitchStatus().getDescription() + ")");
+			} else if (currentState instanceof AgentState) {
+				AgentState agentState = (AgentState) currentState;
+				lblCurrentState.setText( "ClusterNumber=" + agentState.getClusterNumber() + ", " + agentState.getSwitches() );
+			}
 		}
 	}
 
@@ -210,11 +218,7 @@ public class ControlsPaneController extends Controller {
 		if (agentData != null) {
 			lblSteps.setText(String.valueOf(agentData.getSteps()));
 
-			AgentStepData agentStepStatus = agentData.getAgentStepData().get(agentData.getAgentStepData().size() - 1);
-			SwitchOperation switchOperation = agentStepStatus.getData(AgentDataType.SWITCH_OPERATION, SwitchOperation.class);
-			if (switchOperation != null) {
-				lblCurrentSwitch.setText(switchOperation.getSwitchNumber() + " (" + switchOperation.getSwitchState().getDescription() + ")");
-			}
+			setCurrentStateLabel();
 		}
 	}
 

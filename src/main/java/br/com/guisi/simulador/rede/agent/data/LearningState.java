@@ -1,22 +1,18 @@
-package br.com.guisi.simulador.rede.agent.qlearning.v3;
+package br.com.guisi.simulador.rede.agent.data;
 
 import java.util.Map;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 
 /**
- * Classe representando uma ação do agente
- * 
  * @author Guisi
  */
-public class AgentAction {
+public class LearningState {
 
 	private final Integer clusterNumber;
 	private final Map<Integer, SwitchStatus> switches;
 
-	public AgentAction(Integer clusterNumber, Map<Integer, SwitchStatus> switches) {
+	public LearningState(Integer clusterNumber, Map<Integer, SwitchStatus> switches) {
 		super();
 		this.clusterNumber = clusterNumber;
 		this.switches = switches;
@@ -29,7 +25,7 @@ public class AgentAction {
 	public Integer getClusterNumber() {
 		return clusterNumber;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -47,7 +43,7 @@ public class AgentAction {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AgentAction other = (AgentAction) obj;
+		LearningState other = (LearningState) obj;
 		if (clusterNumber == null) {
 			if (other.clusterNumber != null)
 				return false;
@@ -63,7 +59,7 @@ public class AgentAction {
 
 	@Override
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this);
+		return "ClusterNumber=" + clusterNumber + ", " + switches;
 	}
-	
+
 }

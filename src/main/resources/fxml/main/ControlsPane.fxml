@@ -35,12 +35,6 @@
                         </HBox>
                      </children>
                   </HBox>
-                  <HBox alignment="CENTER_LEFT" spacing="3.0">
-                     <children>
-                        <Label style="-fx-font-weight: bold;" text="Current Switch:" />
-                        <Label fx:id="lblCurrentSwitch" prefWidth="80.0" />
-                     </children>
-                  </HBox>
                </children>
             </VBox>
             <GridPane hgap="5.0">
@@ -79,6 +73,12 @@
                   <TextField fx:id="tfEGreedy" alignment="CENTER_RIGHT" maxWidth="-Infinity" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
             </GridPane>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER_LEFT" spacing="3.0">
+         <children>
+            <Label style="-fx-font-weight: bold;" text="Current State:" />
+            <Label fx:id="lblCurrentState" />
          </children>
       </HBox>
    </children>

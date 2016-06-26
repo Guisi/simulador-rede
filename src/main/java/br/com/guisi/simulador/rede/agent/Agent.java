@@ -12,9 +12,9 @@ import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.data.AgentData;
 import br.com.guisi.simulador.rede.agent.data.LearningPropertyPair;
+import br.com.guisi.simulador.rede.agent.data.LearningState;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.TaskExecutionType;
-import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventBus;
 import br.com.guisi.simulador.rede.events.EventType;
@@ -86,9 +86,11 @@ public abstract class Agent {
 		return stopRequest;
 	}
 
-	public abstract List<LearningPropertyPair> getLearningProperties(Integer switchNumber, boolean onlyUpdated);
+	public abstract List<LearningState> getLearningStates();
 	
-	public abstract Branch getCurrentState();
+	public abstract List<LearningPropertyPair> getLearningProperties(LearningState learningState, boolean onlyUpdated);
+	
+	public abstract Object getCurrentState();
 	
 	public Environment getInteractionEnvironment() {
 		return SimuladorRede.getEnvironment(EnvironmentKeyType.INTERACTION_ENVIRONMENT);

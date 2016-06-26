@@ -1,9 +1,12 @@
 package br.com.guisi.simulador.rede.agent.qlearning;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 
 public class Cluster implements Serializable {
 
@@ -35,6 +38,12 @@ public class Cluster implements Serializable {
 
 	public void setSwitches(List<Branch> closedSwitches) {
 		this.switches = closedSwitches;
+	}
+	
+	public Map<Integer, SwitchStatus> getSwitchesMap() {
+		Map<Integer, SwitchStatus> switchMap = new HashMap<>();
+		switches.forEach(sw -> switchMap.put(sw.getNumber(), sw.getSwitchStatus()));
+		return switchMap;
 	}
 
 }

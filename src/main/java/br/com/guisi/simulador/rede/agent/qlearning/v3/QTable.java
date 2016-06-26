@@ -1,18 +1,14 @@
 package br.com.guisi.simulador.rede.agent.qlearning.v3;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import br.com.guisi.simulador.rede.enviroment.Branch;
-import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 
-
-public class QTable extends HashMap<AgentState, AgentActionMap> {
+public class QTable extends HashMap<AgentStateAction, QValue> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -22,15 +18,11 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @return
 	 */
 	public QValue getQValue(AgentState state, AgentAction action) {
-		AgentActionMap actionMap = get(state);
-		if (actionMap == null) {
-			actionMap = new AgentActionMap();
-			put(state, actionMap);
-		}
-		QValue qValue = actionMap.get(action);
+		AgentStateAction agentStateAction = new AgentStateAction(state, action);
+		QValue qValue = get(agentStateAction);
 		if (qValue == null) {
 			qValue = new QValue(state, action);
-			actionMap.put(action, qValue);
+			put(agentStateAction, qValue);
 		}
 		return qValue;
 	}
@@ -41,41 +33,38 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @return
 	 */
 	public List<QValue> getQValues(AgentState state) {
-		AgentActionMap actionMap = get(state);
-		return actionMap != null ? new ArrayList<QValue>(actionMap.values()) : Collections.emptyList();
+		return values().stream().filter(qValue -> qValue.getState().equals(state)).collect(Collectors.toList());
 	}
 	
 	/**
 	 * Retorna uma lista de {@link QValue} contendo os valores da tabela Q para as transições passadas
-	 * @param state Estado onde o agente se encontra
-	 * @param candidateSwitches Transições possíveis
 	 * @return
 	 */
-	private List<QValue> getQValues(AgentState state, List<Branch> candidateSwitches) {
+	private List<QValue> getQValues(AgentState state, List<AgentAction> agentActions) {
 		List<QValue> qValues = new ArrayList<>();
-		for (Branch candidateSwitch : candidateSwitches) {
-			AgentAction action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getReverseStatus());
-			qValues.add(getQValue(state, action));
-		}
+		
+		agentActions.forEach(action -> {
+			qValues.add( getQValue(state, action) );
+		});
+		
 		return qValues;
 	}
 	
 	/**
 	 * Retorna uma lista de {@link QValueEvaluator} contendo os valores para as transições passadas
-	 * @param state Estado onde o agente se encontra
-	 * @param candidateSwitches Transições possíveis
 	 * @return
 	 */
-	private List<QValueEvaluator> getQValuesEvaluators(AgentState state, List<Branch> candidateSwitches) {
-		List<QValueEvaluator> qValues = new ArrayList<>();
-		for (Branch candidateSwitch : candidateSwitches) {
-			AgentAction action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getReverseStatus());
-			
+	private List<QValueEvaluator> getQValuesEvaluators(AgentState state, List<AgentAction> agentActions) {
+		List<QValue> qValues = getQValues(state, agentActions);
+
+		List<QValueEvaluator> qValueEvaluators = new ArrayList<>();
+		qValues.forEach(qValue -> {
 			QValueEvaluator evaluator = new QValueEvaluator();
-			evaluator.setQValue(getQValue(state, action));
-			qValues.add(evaluator);
-		}
-		return qValues;
+			evaluator.setQValue(qValue);
+			qValueEvaluators.add(evaluator);
+		});
+		
+		return qValueEvaluators;
 	}
 	
 	/**
@@ -83,8 +72,8 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param state
 	 * @return
 	 */
-	public synchronized QValue getBestQValue(AgentState state, List<Branch> candidateSwitches) {
-		List<QValue> qValues = this.getQValues(state, candidateSwitches);
+	public synchronized QValue getBestQValue(AgentState state, List<AgentAction> agentActions) {
+		List<QValue> qValues = this.getQValues(state, agentActions);
 
 		//Verifica o maior valor de recompensa
 		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
@@ -103,17 +92,17 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param state
 	 * @return
 	 */
-	public AgentAction getBestAction(AgentState state, List<Branch> candidateSwitches) {
-		List<QValueEvaluator> qValues = this.getQValuesEvaluators(state, candidateSwitches);
+	public AgentAction getBestAction(AgentState state, List<AgentAction> agentActions) {
+		List<QValueEvaluator> qValueEvalutors = getQValuesEvaluators(state, agentActions);
 
 		//Verifica o maior valor de recompensa
-		double max = qValues.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
+		double max = qValueEvalutors.stream().max(Comparator.comparing(value -> value.getReward())).get().getReward();
 		
 		//filtra por todas as acoes cuja recompensa seja igual a maior
-		qValues = qValues.stream().filter(valor -> valor.getReward() == max).collect(Collectors.toList());
+		qValueEvalutors = qValueEvalutors.stream().filter(valor -> valor.getReward() == max).collect(Collectors.toList());
 		
 		//retorna uma das melhores acoes aleatoriamente
-		QValueEvaluator evaluator = qValues.get(new Random(System.currentTimeMillis()).nextInt(qValues.size()));
+		QValueEvaluator evaluator = qValueEvalutors.get(new Random(System.currentTimeMillis()).nextInt(qValueEvalutors.size()));
 		
 		return evaluator.getQValue().getAction();
 	}
@@ -124,12 +113,12 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @param candidateSwitches Transições possíveis
 	 * @return
 	 */
-	public AgentAction getRandomAction(AgentState state, List<Branch> candidateSwitches, boolean proportional) {
+	public AgentAction getRandomAction(AgentState state, List<AgentAction> agentActions, boolean proportional) {
 		AgentAction action = null;
 		
 		//se é randômico proporcional
 		if (proportional) {
-			List<QValueEvaluator> qValues = this.getQValuesEvaluators(state, candidateSwitches);
+			List<QValueEvaluator> qValues = getQValuesEvaluators(state, agentActions);
 			
 			boolean hasNegativeQ = qValues.stream().anyMatch(value -> value.getReward() < 0);
 			
@@ -171,8 +160,7 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 		
 		if (action == null) {
 			//se não escolheu um no randomico proporcional, escolhe um dos candidatos aleatoriamente
-			Branch candidateSwitch = candidateSwitches.get(new Random(System.currentTimeMillis()).nextInt(candidateSwitches.size()));
-			action = new AgentAction(candidateSwitch.getNumber(), candidateSwitch.getReverseStatus());
+			action = agentActions.get(new Random(System.currentTimeMillis()).nextInt(agentActions.size()));
 		}
 		
 		return action;
@@ -183,59 +171,6 @@ public class QTable extends HashMap<AgentState, AgentActionMap> {
 	 * @return
 	 */
 	public double getQValuesAverage() {
-		return values().stream().mapToDouble(map -> map.values().stream().mapToDouble(qValue -> qValue.getReward()).average().getAsDouble()).average().getAsDouble();
-	}
-	
-	public SwitchStatus getBestSwitchStatus(Integer switchNumber, List<Integer> otherSwitchNumbers) {
-		int votesForOpen = 0;
-		int votesForClosed = 0;
-		
-		double qValueOpenSum = 0;
-		double qValueClosedSum = 0;
-		
-		//para cada um dos switches, verifica qual a opinião sobre o switch passado
-		for (Integer otherSwitchNumber : otherSwitchNumbers) {
-			//recupera QValue para abrir o switch
-			AgentState agentState = new AgentState(otherSwitchNumber, SwitchStatus.CLOSED);
-			AgentAction agentAction = new AgentAction(switchNumber, SwitchStatus.OPEN);
-			QValue qValueOpen = getQValue(agentState, agentAction);
-			qValueOpenSum += qValueOpen.getReward();
-			
-			//recupera QValue para fechar o switch
-			agentState = new AgentState(otherSwitchNumber, SwitchStatus.OPEN);
-			agentAction = new AgentAction(switchNumber, SwitchStatus.CLOSED);
-			QValue qValueClosed = getQValue(agentState, agentAction);
-			qValueClosedSum += qValueClosed.getReward();
-			
-			//só considera opinião deste switch caso possua um valor diferente do inicial para ambas as ações abrir/fechar
-			if (qValueOpen.isUpdated() && qValueClosed.isUpdated()) {
-				//se a recompensa para fechado for maior que a para aberto, soma um voto para fechado
-				if (qValueClosed.getReward() < qValueOpen.getReward()) {
-					votesForOpen++;
-					//senão, se a recompensa para aberto for maior, soma um voto para aberto
-				} else if (qValueOpen.getReward() < qValueClosed.getReward()) {
-					votesForClosed++;
-				}
-			}
-		}
-		
-		SwitchStatus switchStatus;
-		if (votesForClosed < votesForOpen) {
-			switchStatus = SwitchStatus.OPEN;
-		} else if (votesForOpen < votesForClosed) {
-			switchStatus = SwitchStatus.CLOSED;
-		} else {
-			if (qValueOpenSum < qValueClosedSum) {
-				switchStatus = SwitchStatus.CLOSED;
-			} else if (qValueClosedSum < qValueOpenSum) {
-				switchStatus = SwitchStatus.OPEN;
-			} else if (Math.random() < 0.5) {
-				switchStatus = SwitchStatus.OPEN;
-			} else {
-				switchStatus = SwitchStatus.CLOSED;
-			}
-		}
-		
-		return switchStatus;
+		return values().stream().mapToDouble(qValue -> qValue.getReward()).average().getAsDouble();
 	}
 }

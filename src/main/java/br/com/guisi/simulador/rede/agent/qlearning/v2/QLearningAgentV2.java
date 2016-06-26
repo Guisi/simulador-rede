@@ -21,6 +21,7 @@ import br.com.guisi.simulador.rede.agent.data.AgentDataType;
 import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.agent.data.LearningProperty;
 import br.com.guisi.simulador.rede.agent.data.LearningPropertyPair;
+import br.com.guisi.simulador.rede.agent.data.LearningState;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
 import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
@@ -402,6 +403,12 @@ public class QLearningAgentV2 extends Agent {
 	}
 	
 	@Override
+	public List<LearningPropertyPair> getLearningProperties(LearningState learningState, boolean onlyUpdated) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/*@Override
 	public List<LearningPropertyPair> getLearningProperties(Integer switchNumber, boolean onlyUpdated) {
 		List<LearningPropertyPair> learningPropertyPairs = new ArrayList<>();
 		
@@ -430,7 +437,7 @@ public class QLearningAgentV2 extends Agent {
 		};
 
 		return learningPropertyPairs;
-	}
+	}*/
 	
 	private List<LearningProperty> mountLearningProperties(List<QValue> qValues, boolean onlyUpdated) {
 		List<LearningProperty> learningProperties = new ArrayList<>();
@@ -456,5 +463,11 @@ public class QLearningAgentV2 extends Agent {
 		});
 		
 		return learningProperties;
+	}
+	
+	@Override
+	public List<LearningState> getLearningStates() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

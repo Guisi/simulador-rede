@@ -152,9 +152,9 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 		networkPane.setSnapToPixel(false);
 		
 		//Desenha a posição inicial do agent
-		Branch currentState = agentControl.getAgent().getCurrentState();
-		if (currentState != null) {
-			networkPane.changeAgentCirclePosition(currentState.getNumber());
+		Object currentState = agentControl.getAgent().getCurrentState();
+		if (currentState != null && currentState instanceof Branch) {
+			networkPane.changeAgentCirclePosition( ((Branch) currentState).getNumber() );
 		}
 	}
 	
