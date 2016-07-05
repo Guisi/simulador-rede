@@ -592,7 +592,7 @@ public class EnvironmentUtils {
 		int clusterNumber = 1;
 		for (Branch tieSw : tieSwitches) {
 			//busca switches próximos
-			List<SwitchDistance> switchDistances = EnvironmentUtils.getClosedSwitches(tieSw, 2);
+			List<SwitchDistance> switchDistances = EnvironmentUtils.getClosedSwitches(tieSw, 3);
 			
 			Cluster cluster = new Cluster();
 			cluster.setNumber(clusterNumber++);

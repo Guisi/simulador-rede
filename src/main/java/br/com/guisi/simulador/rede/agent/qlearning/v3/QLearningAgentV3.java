@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -113,11 +114,49 @@ public class QLearningAgentV3 extends Agent {
 		}
 		
 		//efetiva a transição
+		Map<Integer, SwitchStatus> clusterStatus = new HashMap<Integer, SwitchStatus>();
 		for (Entry<Integer, SwitchStatus> entry : action.getSwitches().entrySet()) {
 			Branch branch = environment.getBranch(entry.getKey());
+			clusterStatus.put(branch.getNumber(), branch.getSwitchStatus());
 			branch.setSwitchStatus(entry.getValue());
 		}
 		
+		executePowerFlow(environment);
+		
+		//atualiza o qValue do switch
+		this.updateQValue(environment, this.currentState, action);
+		
+		//verifica se mudou melhor ação
+		AgentAction newBestAction = qTable.getBestAction(this.currentState, agentActions);
+		this.changedPolicy = !bestAction.equals(newBestAction);
+		
+		//se escolheu ação aleatória e não mudou política, desfaz ação
+		if (randomAction && !this.changedPolicy) {
+			//reativa loads desativados
+			turnedOffLoads.forEach(load -> load.turnOn());
+			turnedOffLoads.clear();
+
+			for (Entry<Integer, SwitchStatus> entry : clusterStatus.entrySet()) {
+				Branch branch = environment.getBranch(entry.getKey());
+				branch.setSwitchStatus(entry.getValue());
+			}
+			
+			executePowerFlow(environment);
+			
+			this.currentState = new AgentState(action.getClusterNumber(), clusterStatus);
+			
+		} else {
+			this.currentState = new AgentState(action.getClusterNumber(), action.getSwitches());
+		}
+		
+		//gera os dados do agente
+		this.generateAgentData();
+		
+		//gera os dados dos ambientes
+		this.generateEnvironmentData(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
+	}
+	
+	private void executePowerFlow(Environment environment) {
 		//primeiro valida se rede está radial
 		List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
 		
@@ -136,21 +175,6 @@ public class QLearningAgentV3 extends Agent {
 				load.turnOff();
 			});
 		}
-		
-		//atualiza o qValue do switch
-		this.updateQValue(environment, this.currentState, action);
-		
-		//verifica se mudou melhor ação
-		AgentAction newBestAction = qTable.getBestAction(this.currentState, agentActions);
-		this.changedPolicy = !bestAction.equals(newBestAction);
-		
-		this.currentState = new AgentState(action.getClusterNumber(), action.getSwitches());
-		
-		//gera os dados do agente
-		this.generateAgentData();
-		
-		//gera os dados dos ambientes
-		this.generateEnvironmentData(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
 	}
 	
 	/**
@@ -333,6 +357,7 @@ public class QLearningAgentV3 extends Agent {
 			closedSwitchMap.keySet().forEach(key -> closedSwitchMap.put(key, SwitchStatus.CLOSED));
 			agentActions.add(new AgentAction(cluster.getNumber(), closedSwitchMap));
 			
+			//uma combinação para cada branch do cluster onde este está aberto e os demais fechados
 			List<Branch> clusterSws = cluster.getSwitches();
 			for (Branch branch : clusterSws) {
 				final Map<Integer, SwitchStatus> switchMap = cluster.getSwitchesMap();
