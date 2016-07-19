@@ -131,7 +131,7 @@ public class QLearningAgentV3 extends Agent {
 		this.changedPolicy = !bestAction.equals(newBestAction);
 		
 		//se escolheu ação aleatória e não mudou política, desfaz ação
-		if (randomAction && !this.changedPolicy) {
+		/*if (randomAction && !this.changedPolicy) {
 			//reativa loads desativados
 			turnedOffLoads.forEach(load -> load.turnOn());
 			turnedOffLoads.clear();
@@ -147,13 +147,18 @@ public class QLearningAgentV3 extends Agent {
 			
 		} else {
 			this.currentState = new AgentState(action.getClusterNumber(), action.getSwitches());
-		}
+		}*/
+		this.currentState = new AgentState(action.getClusterNumber(), action.getSwitches());
+		
+		//atualiza learning environment de acordo com aprendizado do agente
+		this.updateNetworkFromLearning(getLearningEnvironment());
 		
 		//gera os dados do agente
 		this.generateAgentData();
 		
 		//gera os dados dos ambientes
 		this.generateEnvironmentData(EnvironmentKeyType.INTERACTION_ENVIRONMENT);
+		this.generateEnvironmentData(EnvironmentKeyType.LEARNING_ENVIRONMENT);
 	}
 	
 	private void executePowerFlow(Environment environment) {
@@ -245,12 +250,55 @@ public class QLearningAgentV3 extends Agent {
 		return feeder.getServedLoads().stream().filter((load) -> load.isOn()).collect(Collectors.toList());
 	}
 	
+	private void updateNetworkFromLearning(Environment environment) {
+		List<Cluster> clusters = environment.getClusters();
+		
+		//para cada cluster
+		for (Cluster cluster : clusters) {
+			
+			//filtra pelos qValues cuja ação é alterar o cluster
+			List<QValue> values = qTable.values().stream()
+					.filter(qValue -> qValue.getAction().getClusterNumber().equals(cluster.getNumber())).collect(Collectors.toList());
+
+			//cria um mapa somando as recompensas para cada possível combinação (action) deste cluster
+			Map<AgentAction, Double> totals = new HashMap<>(); 
+			for (QValue qValue : values) {
+				AgentAction action = qValue.getAction();
+				Double value = totals.get(action);
+				if (value == null) {
+					value = 0d;
+				}
+				value += qValue.getReward();
+				totals.put(action, value);
+			}
+			
+			Double max = totals.entrySet().stream().max(Comparator.comparing(entry -> entry.getValue())).get().getValue();
+			
+			List<Entry<AgentAction, Double>> bestActions = totals.entrySet().stream().filter(entry -> entry.getValue().equals(max)).collect(Collectors.toList());
+			
+			Entry<AgentAction, Double> bestAction = bestActions.get(new Random(System.currentTimeMillis()).nextInt(bestActions.size()));
+			
+			for (Entry<Integer, SwitchStatus> entry : bestAction.getKey().getSwitches().entrySet()) {
+				Branch branch = environment.getBranch(entry.getKey());
+				branch.setSwitchStatus(entry.getValue());
+			}
+		}
+		
+		//primeiro valida se rede está radial
+		List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
+		
+		if (exceptions.isEmpty()) {
+			//executa o fluxo de potência
+			PowerFlow.execute(environment);
+			
+			//verifica loads a serem desativados caso existam restrições 
+			this.turnOffLoadsIfNecessary(environment);
+		}
+	}
+	
 	private void generateAgentData() {
 		AgentStepData agentStepData = new AgentStepData(getStep());
 		getAgentData().getAgentStepData().add(agentStepData);
-		
-		//atualiza status com o switch alterado
-		//agentStepData.putData(AgentDataType.SWITCH_OPERATION, new SwitchOperation(currentSwitch.getNumber(), currentSwitch.getSwitchStatus()));
 		
 		 //trocou política
 		agentStepData.putData(AgentDataType.CHANGED_POLICY, this.changedPolicy);

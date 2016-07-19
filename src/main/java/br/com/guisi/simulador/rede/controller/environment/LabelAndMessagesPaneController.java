@@ -158,7 +158,8 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 			
 			environment.getClusters().forEach(cluster -> {
 				StringBuilder sb = new StringBuilder();
-				sb.append("Initial Tie-switch: " + cluster.getInitialTieSwitch().getNumber());
+				sb.append("Nº: ").append(cluster.getNumber());
+				sb.append(" - Initial Tie-switch: " + cluster.getInitialTieSwitch().getNumber());
 				sb.append(" - Closed switches: ");
 				for (Iterator<Branch> iterator = cluster.getSwitches().iterator(); iterator.hasNext();) {
 					Branch sw = iterator.next();
