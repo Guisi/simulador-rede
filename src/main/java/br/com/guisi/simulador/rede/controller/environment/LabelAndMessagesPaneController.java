@@ -28,6 +28,8 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 	private TableView<MessageRow> tvBrokenConstraints;
 	@FXML
 	private TableView<MessageRow> tvClusters;
+	@FXML
+	private TableView<MessageRow> tvSwitchOperations;
 	
 	@PostConstruct
 	public void initializeController() {
@@ -100,6 +102,17 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 		tcCluster.setStyle("-fx-alignment: center-left; -fx-text-fill: red;");
 		tcCluster.setPrefWidth(590);
 		tvClusters.getColumns().add(tcCluster);
+		
+		// tabela de switch operations
+		tvSwitchOperations.setItems(FXCollections.observableArrayList());
+		tvSwitchOperations.setPlaceholder(new Label("No switch operations required"));
+
+		TableColumn<MessageRow, String> tcSwitchOperations = new TableColumn<MessageRow, String>();
+		tcSwitchOperations.setText("Switch operations required in comparison to initial environment");
+		tcSwitchOperations.setCellValueFactory(cellData -> cellData.getValue().getMessage());
+		tcSwitchOperations.setStyle("-fx-alignment: center-left;");
+		tcSwitchOperations.setPrefWidth(600);
+		tvSwitchOperations.getColumns().add(tcSwitchOperations);
 	}
 	
 	/**

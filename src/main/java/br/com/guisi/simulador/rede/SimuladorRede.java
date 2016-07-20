@@ -62,7 +62,7 @@ public class SimuladorRede extends Application {
 
 		Scene scene = new Scene((Parent) controller.getView());
 		primaryStage.setScene(scene);
-		primaryStage.setTitle("Simulador");
+		primaryStage.setTitle("Eletric Network Reconfiguration Simulator");
 		primaryStage.getIcons().add(new Image("/img/bolt.png"));
 		scene.getStylesheets().add("/css/estilo.css");
 		primaryStage.setMaximized(true);
