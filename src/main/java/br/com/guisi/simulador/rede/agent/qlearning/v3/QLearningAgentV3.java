@@ -84,7 +84,8 @@ public class QLearningAgentV3 extends Agent {
         double suppliedActivePowerPercentage = environment.getSuppliedActivePowerPercentage();
 		return (100 - activePowerLossPercentage) * suppliedActivePowerPercentage;*/
 		
-		return environment.getSuppliedActivePowerPercentage();
+		//return environment.getSuppliedActivePowerPercentage();
+		return environment.getSuppliedLoadsActivePowerVsPriorityPercentage();
 	}
 	
 	/**

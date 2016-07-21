@@ -291,6 +291,14 @@ public class Environment implements Serializable {
 	public double getSuppliedActivePowerDemandMW() {
 		return loads.stream().filter((load) -> load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW()).sum();
 	}
+	
+	/**
+	 * Retorna a soma da demanda de potência ativa de todos os loads atendidos da rede versus a prioridade
+	 * @return
+	 */
+	public double getSuppliedActivePowerDemandMWVsPriority() {
+		return loads.stream().filter((load) -> load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW() * PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
+	}
 
 	/**
 	 * Retorna o percentual de potência atendida em relação ao total de demanda da rede
@@ -325,6 +333,14 @@ public class Environment implements Serializable {
 	 */
 	public double getTotalActivePowerDemandMW() {
 		return loads.stream().mapToDouble((load) -> load.getActivePowerMW()).sum();
+	}
+	
+	/**
+	 * Retorna a soma da demanda de potência ativa de todos os loads da rede
+	 * @return
+	 */
+	public double getTotalActivePowerDemandMWVsPriority() {
+		return loads.stream().mapToDouble((load) -> load.getActivePowerMW() * PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
 	}
 	
 	/**
@@ -381,6 +397,13 @@ public class Environment implements Serializable {
 	 */
 	public double getSuppliedLoadsActivePowerMWVsPriority() {
 		return loads.stream().filter((load) -> load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW() * PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
+	}
+	
+	public double getSuppliedLoadsActivePowerVsPriorityPercentage() {
+		double suppliedActivePower = getSuppliedActivePowerDemandMWVsPriority();
+		Double totalActivePowerDemand = getTotalActivePowerDemandMWVsPriority();
+		BigDecimal value = totalActivePowerDemand.doubleValue() > 0 ? new BigDecimal(suppliedActivePower / totalActivePowerDemand * 100).setScale(5, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+		return value.doubleValue();
 	}
 	
 	/**
