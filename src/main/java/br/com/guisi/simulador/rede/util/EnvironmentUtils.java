@@ -487,6 +487,17 @@ public class EnvironmentUtils {
 		};
 		return count;
 	}
+	
+	public static List<Integer> getDifferentSwitchStates(Environment environment1, Environment environment2) {
+		List<Integer> differentSwitches = new ArrayList<>();
+		for (Branch branch : environment1.getBranches()) {
+			Branch otherBranch = environment2.getBranch(branch.getNumber());
+			if (!branch.getSwitchStatus().equals(otherBranch.getSwitchStatus())) {
+				differentSwitches.add(branch.getNumber());
+			}
+		};
+		return differentSwitches;
+	}
 
 	public static List<SwitchDistance> getClosedSwitches(Branch branch, int quantity) {
 		List<SwitchDistance> switchDistancesFrom = getClosedSwitchesRecursive(branch.getNodeFrom(), new ArrayList<Branch>(), new ArrayList<NetworkNode>(), 0, quantity, 0);

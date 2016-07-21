@@ -28,7 +28,8 @@ public class PowerFlow {
 		EnvironmentUtils.updateEnvironmentConnections(environment);
 
 		//executa power flow
-		return executePowerFlow(environment);
+		//TODO remover return executePowerFlow(environment);
+		return true;
 	}
 	
 	public static void resetPowerFlowValues(Environment environment) {

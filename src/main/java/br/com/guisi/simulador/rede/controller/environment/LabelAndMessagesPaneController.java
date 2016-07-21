@@ -37,7 +37,8 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 		
 		this.listenToEvent(EventType.RESET_SCREEN,
 				EventType.ENVIRONMENT_LOADED,
-				EventType.POWER_FLOW_COMPLETED);
+				EventType.POWER_FLOW_COMPLETED,
+				EventType.AGENT_STOPPED);
 	}
 	
 	@Override
@@ -50,6 +51,7 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 			case POWER_FLOW_COMPLETED: this.updateWarningsBrokenConstraints(); break;
 			case RESET_SCREEN: this.resetScreen(); break;
 			case ENVIRONMENT_LOADED: this.processEnvironmentLoaded(); break;
+			case AGENT_STOPPED: this.processAgentStopped(); break;
 			default: break;
 		}
 	}
@@ -188,6 +190,10 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 				tvClusters.getItems().add(row);
 			});
 		}
+	}
+	
+	private void processAgentStopped() {
+		
 	}
 	
 	@Override

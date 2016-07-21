@@ -8,12 +8,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -55,7 +53,6 @@ public class QLearningAgentV3 extends Agent {
 	
 	private QTable qTable;
 	private AgentState currentState;
-	private Set<Load> turnedOffLoads;
 	
 	private boolean changedPolicy;
 	private boolean isRadial;
@@ -69,7 +66,6 @@ public class QLearningAgentV3 extends Agent {
 	@Override
 	public void reset() {
 		this.qTable = new QTable();
-		this.turnedOffLoads = new LinkedHashSet<>();
 		
 		Environment environment = getInteractionEnvironment();
 
@@ -80,10 +76,6 @@ public class QLearningAgentV3 extends Agent {
 	}
 	
 	private double getConfigRate(Environment environment) {
-		/*double activePowerLossPercentage = environment.getActivePowerLostPercentage();
-        double suppliedActivePowerPercentage = environment.getSuppliedActivePowerPercentage();
-		return (100 - activePowerLossPercentage) * suppliedActivePowerPercentage;*/
-		
 		//return environment.getSuppliedActivePowerPercentage();
 		return environment.getSuppliedLoadsActivePowerVsPriorityPercentage();
 	}
@@ -96,8 +88,7 @@ public class QLearningAgentV3 extends Agent {
 		Environment environment = getInteractionEnvironment();
 		
 		//reativa loads desativados no episódio anterior
-		turnedOffLoads.forEach(load -> load.turnOn());
-		turnedOffLoads.clear();
+		environment.turnOnAllLoads();
 		
 		//Se randomico menor que E-greedy, escolhe melhor acao
 		boolean randomAction = (Math.random() >= PropertiesUtils.getEGreedy());
@@ -122,7 +113,7 @@ public class QLearningAgentV3 extends Agent {
 			branch.setSwitchStatus(entry.getValue());
 		}
 		
-		executePowerFlow(environment);
+		this.executePowerFlow(environment);
 		
 		//atualiza o qValue do switch
 		this.updateQValue(environment, this.currentState, action);
@@ -142,7 +133,7 @@ public class QLearningAgentV3 extends Agent {
 				branch.setSwitchStatus(entry.getValue());
 			}
 			
-			executePowerFlow(environment);
+			this.executePowerFlow(environment);
 			
 			this.currentState = new AgentState(action.getClusterNumber(), clusterStatus);
 			
@@ -176,10 +167,7 @@ public class QLearningAgentV3 extends Agent {
 			this.turnOffLoadsIfNecessary(environment);
 		} else {
 			//se estiver nao radial, desliga todos os loads para que o % de atendimento seja 0 
-			environment.getLoads().forEach(load -> {
-				this.turnedOffLoads.add(load);
-				load.turnOff();
-			});
+			environment.turnOffAllLoads();
 		}
 	}
 	
@@ -237,8 +225,6 @@ public class QLearningAgentV3 extends Agent {
 					}
 					turnedOffLoads.remove(load);
 				}
-				
-				this.turnedOffLoads.addAll(turnedOffLoads);
 			}
 		}
 	}
@@ -285,16 +271,7 @@ public class QLearningAgentV3 extends Agent {
 			}
 		}
 		
-		//primeiro valida se rede está radial
-		List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
-		
-		if (exceptions.isEmpty()) {
-			//executa o fluxo de potência
-			PowerFlow.execute(environment);
-			
-			//verifica loads a serem desativados caso existam restrições 
-			this.turnOffLoadsIfNecessary(environment);
-		}
+		this.executePowerFlow(environment);
 	}
 	
 	private void generateAgentData() {

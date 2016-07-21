@@ -68,7 +68,6 @@ public class Environment implements Serializable {
 				faults.add(branch);
 			}
 		});
-		
 	}
 	
 	/**
@@ -439,6 +438,14 @@ public class Environment implements Serializable {
 		}*/
 		
 		return true;
+	}
+	
+	public void turnOffAllLoads() {
+		getLoads().forEach(load -> load.turnOff() );
+	}
+	
+	public void turnOnAllLoads() {
+		getLoads().forEach(load -> load.turnOn());
 	}
 
 	public List<Cluster> getClusters() {
