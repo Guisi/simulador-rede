@@ -1,6 +1,5 @@
 package br.com.guisi.simulador.rede.agent.qlearning.v3;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -459,41 +458,5 @@ public class QLearningAgentV3 extends Agent {
 		});
 		
 		return learningProperties;
-	}
-	
-	public static void main(String[] args) {
-		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
-		Environment environment = null;
-		
-		try {
-			environment = EnvironmentUtils.getEnvironmentFromFile(f);
-			
-			//isola as faltas
-			EnvironmentUtils.isolateFaultSwitches(environment);
-			
-			EnvironmentUtils.validateTieSwitches(environment);
-			
-			try {
-				PowerFlow.execute(environment);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			List<Cluster> clusters = EnvironmentUtils.mountClusters(environment);
-			environment.setClusters(clusters);
-			
-			List<AgentState> states = new ArrayList<>();
-			for (Cluster cluster : clusters) {
-				AgentState agentState = new AgentState(cluster.getNumber(), cluster.getSwitchesMap());
-				states.add(agentState);
-			}
-			
-			AgentState randomState = states.get(new Random(System.currentTimeMillis()).nextInt(states.size()));
-			
-			getAgentActions(environment, randomState);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 }

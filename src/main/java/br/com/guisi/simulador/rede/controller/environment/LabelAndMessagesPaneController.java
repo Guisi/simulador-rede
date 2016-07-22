@@ -1,6 +1,7 @@
 package br.com.guisi.simulador.rede.controller.environment;
 
 import java.util.Iterator;
+import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -13,9 +14,12 @@ import javafx.scene.layout.VBox;
 
 import javax.annotation.PostConstruct;
 
+import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EventType;
+import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.view.tableview.MessageRow;
 
 public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneController {
@@ -102,7 +106,7 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 		TableColumn<MessageRow, String> tcCluster = new TableColumn<MessageRow, String>();
 		tcCluster.setCellValueFactory(cellData -> cellData.getValue().getMessage());
 		tcCluster.setStyle("-fx-alignment: center-left; -fx-text-fill: red;");
-		tcCluster.setPrefWidth(590);
+		tcCluster.setPrefWidth(600);
 		tvClusters.getColumns().add(tcCluster);
 		
 		// tabela de switch operations
@@ -193,7 +197,21 @@ public class LabelAndMessagesPaneController extends AbstractEnvironmentPaneContr
 	}
 	
 	private void processAgentStopped() {
+		tvSwitchOperations.getItems().clear();
 		
+		Environment initialEnvironment = SimuladorRede.getEnvironment(EnvironmentKeyType.INITIAL_ENVIRONMENT);
+		List<Integer> differentSwitches = EnvironmentUtils.getDifferentSwitchStates(getEnvironment(), initialEnvironment);
+		for (Integer swNumber : differentSwitches) {
+			Branch initial = initialEnvironment.getBranch(swNumber);
+			Branch current = getEnvironment().getBranch(swNumber);
+
+			StringBuilder sb = new StringBuilder();
+			sb.append("Switch ").append(swNumber).append(": ").append(initial.getSwitchStatus()).append(" --> ").append(current.getSwitchStatus());
+			
+			MessageRow row = new MessageRow();
+			row.getMessage().setValue(sb.toString());
+			tvSwitchOperations.getItems().add(row);
+		}
 	}
 	
 	@Override
