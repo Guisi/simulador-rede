@@ -1,20 +1,57 @@
 package br.com.guisi.simulador.rede;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
+
+import com.google.common.collect.Lists;
 
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		String newValue = "0.0100a";
+		int i = 51;
 		
-		System.out.println(newValue.matches("^\\d+(\\.\\d{1,5})?$"));
+		System.out.println( i / 50 + 1 );
+		
+		/*List<Set<SwitchState>> listas = new ArrayList<>();
+		
+		for (int i = 0; i < 16; i++) {
+			Set<SwitchState> states = new LinkedHashSet<>();
+			states.add(new SwitchState(i, SwitchStatus.OPEN));
+			states.add(new SwitchState(i, SwitchStatus.CLOSED));
+			listas.add(states);
+		}
+		
+		Set<List<SwitchState>> result = Sets.cartesianProduct(listas);
+		System.out.println(result.size());*/
+		
+		/*List<List<SwitchState>> listas = new ArrayList<>();
+
+		int[] arr = {72, 66, 63, 64, 13, 12, 11};
+		
+		for (int i : arr) {
+			List<SwitchState> states = new ArrayList<>();
+			states.add(new SwitchState(i, SwitchStatus.OPEN));
+			states.add(new SwitchState(i, SwitchStatus.CLOSED));
+			listas.add(states);
+		}
+		
+		List<List<SwitchState>> result = Lists.cartesianProduct(listas);
+		System.out.println(result.size());
+		
+		for (List<SwitchState> list : result) {
+			if (list.stream().filter(st -> st.getStatus() == SwitchStatus.OPEN).count() < 2) { 
+				System.out.println(list);
+			}
+		}*/
 	}
 	
 	public static void teste() throws Exception {

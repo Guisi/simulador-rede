@@ -1,24 +1,17 @@
 package br.com.guisi.simulador.rede.view.charts.learning;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 import javafx.scene.chart.XYChart;
 import br.com.guisi.simulador.rede.agent.data.AgentData;
 import br.com.guisi.simulador.rede.agent.data.AgentDataType;
 import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
+import br.com.guisi.simulador.rede.view.charts.LineChartSeries;
 
 public class PolicyChangeChart extends GenericLineChart {
 
-	private XYChart.Series<Number, Number> policyChangeSeries;
+	private LineChartSeries policyChangeSeries;
 	
 	private int STEPS_GROUP_SIZE = 10;
-	
-	private Integer minValue;
-	private Integer maxValue;
-	private Double average;
-	private int cumulative;
 	private int stepProcessed;
 	
 	public PolicyChangeChart() {
@@ -30,30 +23,9 @@ public class PolicyChangeChart extends GenericLineChart {
 		
 		getXNumberAxis().setTickUnit(STEPS_GROUP_SIZE);
 		
-		policyChangeSeries = new XYChart.Series<>();
-		Data<Number, Number> chartData = new XYChart.Data<>(0, 0);
-		policyChangeSeries.getData().add(chartData);
-        getData().add(policyChangeSeries);
-        
-        this.cumulative = 0;
-        this.stepProcessed = 0;
-        
-        this.updateSeriesName();
-	}
-	
-	private void updateSeriesName() {
-		StringBuilder sb = new StringBuilder("Policy Change (Every 10 steps)");
-		if (minValue != null) {
-			sb.append("\nMin Value: ").append(minValue.toString());
-		}
-		if (maxValue != null) {
-			sb.append("\nMax Value: ").append(maxValue.toString());
-		}
-		if (average != null) {
-			BigDecimal value = new BigDecimal(average).setScale(2, RoundingMode.HALF_UP);
-			sb.append("\nAverage: ").append(value.toString());
-		}
-		policyChangeSeries.setName(sb.toString());
+		policyChangeSeries = new LineChartSeries("Policy Change (Every 10 steps)", Double.class);
+		policyChangeSeries.getSeries().getData().add(new XYChart.Data<>(0, 0));
+		addLineChartSeries(policyChangeSeries);
 	}
 	
 	@Override
@@ -77,16 +49,9 @@ public class PolicyChangeChart extends GenericLineChart {
 				}
 			}
 			
-			Data<Number, Number> chartData = new XYChart.Data<>(stepProcessed, changedPolicyCount);
-			policyChangeSeries.getData().add(chartData);
-			minValue = minValue != null ? Math.min(minValue, changedPolicyCount) : changedPolicyCount;
-			maxValue = maxValue != null ? Math.max(maxValue, changedPolicyCount) : changedPolicyCount;
-			cumulative += changedPolicyCount;
-			average = (double) cumulative / (double) (stepProcessed / STEPS_GROUP_SIZE);
+			policyChangeSeries.updateValues(stepProcessed, changedPolicyCount);
 			
 			getXNumberAxis().setUpperBound(stepProcessed);
-			
-			this.updateSeriesName();
 		}
 	}
 }

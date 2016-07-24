@@ -7,10 +7,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -39,6 +41,8 @@ import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.PowerFlow;
 import br.com.guisi.simulador.rede.util.PropertiesUtils;
+
+import com.google.common.collect.Sets;
 
 /**
  * Q-Learning Agent Versão 3
@@ -75,8 +79,8 @@ public class QLearningAgentV3 extends Agent {
 	}
 	
 	private double getConfigRate(Environment environment) {
-		//return environment.getSuppliedActivePowerPercentage();
-		return environment.getSuppliedLoadsActivePowerVsPriorityPercentage();
+		return environment.getSuppliedActivePowerPercentage();
+		//return environment.getSuppliedLoadsActivePowerVsPriorityPercentage();
 	}
 	
 	/**
@@ -122,10 +126,9 @@ public class QLearningAgentV3 extends Agent {
 		this.changedPolicy = !bestAction.equals(newBestAction);
 		
 		//se escolheu ação aleatória e não mudou política, desfaz ação
-		/*if (randomAction && !this.changedPolicy) {
+		if (randomAction && !this.changedPolicy) {
 			//reativa loads desativados
-			turnedOffLoads.forEach(load -> load.turnOn());
-			turnedOffLoads.clear();
+			environment.turnOnAllLoads();
 
 			for (Entry<Integer, SwitchStatus> entry : clusterStatus.entrySet()) {
 				Branch branch = environment.getBranch(entry.getKey());
@@ -138,8 +141,8 @@ public class QLearningAgentV3 extends Agent {
 			
 		} else {
 			this.currentState = new AgentState(action.getClusterNumber(), action.getSwitches());
-		}*/
-		this.currentState = new AgentState(action.getClusterNumber(), action.getSwitches());
+		}
+		//this.currentState = new AgentState(action.getClusterNumber(), action.getSwitches());
 		
 		//atualiza learning environment de acordo com aprendizado do agente
 		this.updateNetworkFromLearning(getLearningEnvironment());
@@ -270,6 +273,7 @@ public class QLearningAgentV3 extends Agent {
 			}
 		}
 		
+		environment.turnOnAllLoads();
 		this.executePowerFlow(environment);
 	}
 	
@@ -377,18 +381,22 @@ public class QLearningAgentV3 extends Agent {
 		List<Cluster> clusters = environment.getClusters();
 		for (Cluster cluster : clusters) {
 
-			//todos fechados
-			final Map<Integer, SwitchStatus> closedSwitchMap = cluster.getSwitchesMap();
-			closedSwitchMap.keySet().forEach(key -> closedSwitchMap.put(key, SwitchStatus.CLOSED));
-			agentActions.add(new AgentAction(cluster.getNumber(), closedSwitchMap));
+			List<Set<SwitchState>> list = new ArrayList<>();
 			
-			//uma combinação para cada branch do cluster onde este está aberto e os demais fechados
-			List<Branch> clusterSws = cluster.getSwitches();
-			for (Branch branch : clusterSws) {
-				final Map<Integer, SwitchStatus> switchMap = cluster.getSwitchesMap();
-				switchMap.keySet().forEach(key -> switchMap.put(key, SwitchStatus.CLOSED));
-				switchMap.put(branch.getNumber(), SwitchStatus.OPEN);
-				
+			List<Branch> switches = cluster.getSwitches();
+			for (Branch sw : switches) {
+				Set<SwitchState> states = new LinkedHashSet<>();
+				states.add(new SwitchState(sw.getNumber(), SwitchStatus.OPEN));
+				states.add(new SwitchState(sw.getNumber(), SwitchStatus.CLOSED));
+				list.add(states);
+			}
+			
+			Set<List<SwitchState>> result = Sets.cartesianProduct(list);
+			result = result.stream().filter(lst -> lst.stream().filter(st -> st.getStatus() == SwitchStatus.OPEN).count() <= 1).collect(Collectors.toSet());
+			
+			for (List<SwitchState> res : result) {
+				Map<Integer, SwitchStatus> switchMap = new HashMap<>();
+				res.forEach(r -> switchMap.put(r.getNumber(), r.getStatus()));
 				agentActions.add(new AgentAction(cluster.getNumber(), switchMap));
 			}
 		}

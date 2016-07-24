@@ -95,6 +95,7 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 		lineCharts.add(new RequiredSwitchOperationsChart());
 		
 		lineCharts.forEach((chart) -> {
+			chart.updateSeriesInfo();
 			Tab tab = new Tab(chart.getChartTitle());
 			tab.setContent(chart);
 			tabPaneCharts.getTabs().add(tab);
@@ -118,6 +119,9 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 			//para os casos onde o chart processa o AgentStatus a sua forma
 			lineCharts.forEach((chart) -> {
 				chart.processAgentData(agentData);
+				chart.updateSeriesInfo();
+				chart.getXNumberAxis().setUpperBound(agentData.getSteps());
+				chart.getXNumberAxis().setTickUnit(agentData.getSteps() / 50 + 1);
 			});
 			
 			//para os casos onde o chart espera somente o step atual
@@ -127,6 +131,9 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 				
 				lineCharts.forEach((chart) -> {
 					chart.processAgentStepData(agentStepData);
+					chart.updateSeriesInfo();
+					chart.getXNumberAxis().setUpperBound(agentStepData.getStep());
+					chart.getXNumberAxis().setTickUnit(agentStepData.getStep() / 50 + 1);
 				});
 			}
 			stepProcessed = environmentStepData.size();

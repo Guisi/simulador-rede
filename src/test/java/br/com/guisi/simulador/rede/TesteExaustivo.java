@@ -2,64 +2,113 @@ package br.com.guisi.simulador.rede;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.n52.matlab.control.MatlabConnectionException;
+import org.n52.matlab.control.MatlabInvocationException;
 
 import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.SwitchStatus;
+import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import br.com.guisi.simulador.rede.util.EnvironmentUtils;
+import br.com.guisi.simulador.rede.util.Matlab;
 import br.com.guisi.simulador.rede.util.PowerFlow;
+
+import com.google.common.collect.Sets;
 
 public class TesteExaustivo {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException {
+		Counter counter = new Counter();
+		
 		Environment environment = loadEnvironment();
 		
-		List<Cluster> clusters = environment.getClusters();
+		List<Branch> switches = environment.getSwitches();
 		
-		Map<Integer, List<Map<Integer, SwitchStatus>>> combinationsMap = new HashMap<>();
+		switches = switches.stream().filter(sw -> sw.isOpen()  
+				|| (Arrays.asList(15, 7, 13, 22, 23, 26, 27, 29, 33, 60, 66, 63, 62, 56, 54).contains(sw.getNumber())) ).collect(Collectors.toList());
 		
-		int i = 0;
-		for (Cluster cluster : clusters) {
-			i++;
-
-			if (i != 2 && i != 3) continue;
-			
-			List<Map<Integer, SwitchStatus>> list = new ArrayList<>();
-			//todos fechados
-			final Map<Integer, SwitchStatus> closedSwitchMap = cluster.getSwitchesMap();
-			closedSwitchMap.keySet().forEach(key -> closedSwitchMap.put(key, SwitchStatus.CLOSED));
-			list.add(closedSwitchMap);
-			
-			for (Branch branch : cluster.getSwitches()) {
-				final Map<Integer, SwitchStatus> switchMap = cluster.getSwitchesMap();
-				switchMap.keySet().forEach(key -> switchMap.put(key, SwitchStatus.CLOSED));
-				switchMap.put(branch.getNumber(), SwitchStatus.OPEN);
-				list.add(switchMap);
-			}
-			
-			combinationsMap.put(cluster.getNumber(), list);
+		List<Set<SwitchState>> listas = new ArrayList<>();
+		for (Branch sw : switches) {
+			Set<SwitchState> states = new LinkedHashSet<>();
+			states.add(new SwitchState(sw.getNumber(), SwitchStatus.OPEN));
+			states.add(new SwitchState(sw.getNumber(), SwitchStatus.CLOSED));
+			listas.add(states);
 		}
 		
-		Set<Entry<Integer, List<Map<Integer, SwitchStatus>>>> entrySet = combinationsMap.entrySet();
+		Set<List<SwitchState>> result = Sets.cartesianProduct(listas);
+		System.out.println("Total de combinações: " + result.size());
+		System.out.println();
 		
-		for (Entry<Integer, List<Map<Integer, SwitchStatus>>> entry : entrySet) {
-			List<Map<Integer, SwitchStatus>> lst = entry.getValue();
-			for (Map<Integer, SwitchStatus> map : lst) {
-				System.out.println(entry.getKey() + ": " + map);
+		BestConfiguration best = new BestConfiguration();
+		
+		//result.parallelStream().forEach(list -> {
+		for (List<SwitchState> list : result) {
+			
+			Predicate<SwitchState> predicate = sw -> sw.getStatus() == SwitchStatus.OPEN;
+			long count = list.stream().filter(predicate).count();
+			
+			if (count < 8) {
+			
+				for (SwitchState switchState : list) {
+					Branch branch = environment.getBranch(switchState.getNumber());
+					branch.setSwitchStatus(switchState.getStatus());
+				}
+	
+				boolean isRadial = executePowerFlow(environment);
+				
+				if (isRadial) {
+					double percentage = environment.getSuppliedActivePowerPercentage();
+					best.setBestConfiguration(percentage, list);
+				}
 			}
-			System.out.println();
+			
+			counter.increment();
+		//});
 		}
+		
+		System.out.println();
+		System.out.println("FINISHED!!!!!!!!!!!");
+		System.out.println();
+		System.out.println("Best % Supplied Active Power: " + best.getMaxPercentage());
+		System.out.println("Best configuration: " + best.getBestConfiguration());
+		
+		
+		System.out.println();
+		System.out.println("Tempo: " + counter.getTempo() + " ms");
+		
+		Matlab.disconnectMatlabProxy();
+	}
+	
+	private static boolean executePowerFlow(Environment environment) {
+		//primeiro valida se rede está radial
+		List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
+		
+		boolean isRadial = exceptions.isEmpty();
+		
+		if (isRadial) {
+			//executa o fluxo de potência
+			try {
+				PowerFlow.execute(environment);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				System.out.println();
+			}
+		}
+		
+		return isRadial;
 	}
 	
 	private static Environment loadEnvironment() {
-		//File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
-		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
+		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		//File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {
@@ -83,5 +132,102 @@ public class TesteExaustivo {
 			e.printStackTrace();
 		}
 		return environment;
+	}
+}
+
+class Counter {
+	private long ini = System.currentTimeMillis();
+	private int cont;
+
+	public synchronized void increment() {
+		cont++;
+		
+		if (cont % 1000 == 0) {
+			System.out.println("Processou: " + cont);
+			System.out.println("Tempo: " + (System.currentTimeMillis() - ini) + " ms");
+			System.out.println();
+		}
+	}
+	
+	public long getTempo() {
+		return System.currentTimeMillis() - ini;
+	}
+}
+
+class BestConfiguration {
+	
+	private double maxPercentage = 0d;
+	private List<SwitchState> bestConfiguration = null;
+
+	public double getMaxPercentage() {
+		return maxPercentage;
+	}
+	
+	public List<SwitchState> getBestConfiguration() {
+		return bestConfiguration;
+	}
+
+	public synchronized void setBestConfiguration(double percentage, List<SwitchState> bestConfiguration) {
+		if (percentage > this.maxPercentage) {
+			this.maxPercentage = percentage;
+			this.bestConfiguration = bestConfiguration;
+			
+			System.out.println("Best % Supplied Active Power: " + maxPercentage);
+			System.out.println("Best configuration: " + bestConfiguration);
+			System.out.println();
+		}
+	}
+}
+
+class SwitchState {
+	private Integer number;
+	private SwitchStatus status;
+	
+	public SwitchState(Integer number, SwitchStatus status) {
+		super();
+		this.number = number;
+		this.status = status;
+	}
+	public Integer getNumber() {
+		return number;
+	}
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
+	public SwitchStatus getStatus() {
+		return status;
+	}
+	public void setStatus(SwitchStatus status) {
+		this.status = status;
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((number == null) ? 0 : number.hashCode());
+		result = prime * result + ((status == null) ? 0 : status.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SwitchState other = (SwitchState) obj;
+		if (number == null) {
+			if (other.number != null)
+				return false;
+		} else if (!number.equals(other.number))
+			return false;
+		if (status != other.status)
+			return false;
+		return true;
+	}
+	@Override
+	public String toString() {
+		return "[" + number + ", " + status + "]";
 	}
 }
