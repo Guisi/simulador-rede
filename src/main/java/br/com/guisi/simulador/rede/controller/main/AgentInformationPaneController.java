@@ -63,7 +63,8 @@ public class AgentInformationPaneController extends Controller {
 		this.listenToEvent(EventType.RESET_SCREEN,
 				EventType.ENVIRONMENT_LOADED,
 				EventType.AGENT_NOTIFICATION,
-				EventType.AGENT_RUNNING);
+				EventType.AGENT_RUNNING,
+				EventType.CLUSTERS_UPDATED);
 	}
 	
 	@Override
@@ -77,6 +78,7 @@ public class AgentInformationPaneController extends Controller {
 			case ENVIRONMENT_LOADED: this.processEnvironmentLoaded(); break;
 			case AGENT_NOTIFICATION : this.processAgentNotification(data); break;
 			case AGENT_RUNNING : this.processAgentRunning(); break;
+			case CLUSTERS_UPDATED: processClustersUpdated(); break;
 			default: break;
 		}
 	}
@@ -97,6 +99,11 @@ public class AgentInformationPaneController extends Controller {
 		tvSwitchesOperations.prefWidthProperty().bind(getStage().getScene().widthProperty());
 		tvAgentLearning.prefWidthProperty().bind(getStage().getScene().widthProperty());
 		
+		cbSelectedState.getItems().addAll(agentControl.getAgent().getLearningStates());
+	}
+	
+	private void processClustersUpdated() {
+		cbSelectedState.getItems().clear();
 		cbSelectedState.getItems().addAll(agentControl.getAgent().getLearningStates());
 	}
 	

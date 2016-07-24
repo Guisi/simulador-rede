@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
+import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.constants.Status;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.BranchKey;
@@ -571,6 +572,9 @@ public class EnvironmentUtils {
 	 * @return
 	 */
 	public static List<Cluster> mountClusters(Environment environment) {
+		//reseta branches removendo cluster relacionado
+		environment.getBranches().forEach(branch -> branch.setCluster(null));
+		
 		List<Cluster> clusters = new ArrayList<>();
 		
 		List<Branch> tieSwitches = environment.getTieSwitches();
@@ -603,7 +607,8 @@ public class EnvironmentUtils {
 		int clusterNumber = 1;
 		for (Branch tieSw : tieSwitches) {
 			//busca switches próximos
-			List<SwitchDistance> switchDistances = EnvironmentUtils.getClosedSwitches(tieSw, 4);
+			Integer clusterMaxSize = Integer.valueOf(PropertiesUtils.getProperty(PropertyKey.CLUSTER_MAX_SIZE));
+			List<SwitchDistance> switchDistances = EnvironmentUtils.getClosedSwitches(tieSw, (clusterMaxSize -1) / 2);
 			
 			Cluster cluster = new Cluster();
 			cluster.setNumber(clusterNumber++);

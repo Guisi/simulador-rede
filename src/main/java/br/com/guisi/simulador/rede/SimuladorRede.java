@@ -1,6 +1,7 @@
 package br.com.guisi.simulador.rede;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javafx.application.Application;
@@ -18,12 +19,14 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
+import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.controller.main.SimuladorRedeController;
 import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.util.EnvironmentUtils;
 import br.com.guisi.simulador.rede.util.Matlab;
 import br.com.guisi.simulador.rede.util.PropertiesUtils;
 
@@ -193,6 +196,13 @@ public class SimuladorRede extends Application {
 		for (EnvironmentKeyType type : EnvironmentKeyType.values()) {
 			environmentMap.put(type, SerializationUtils.clone(environment));
 		}
+	}
+	
+	public static void updateClusters() {
+		environmentMap.values().forEach(environment -> {
+			List<Cluster> clusters = EnvironmentUtils.mountClusters(environment);
+			environment.setClusters(clusters);
+		});
 	}
 
 	public static AbstractApplicationContext getCtx() {

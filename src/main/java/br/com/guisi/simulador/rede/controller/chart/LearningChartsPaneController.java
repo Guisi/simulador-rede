@@ -95,10 +95,10 @@ public class LearningChartsPaneController extends Controller {
 		if (agentData != null) {
 			//para os casos onde o chart processa o AgentStatus a sua forma
 			lineCharts.forEach((chart) -> {
-				chart.processAgentData(agentData);
-				chart.updateSeriesInfo();
 				chart.getXNumberAxis().setUpperBound(agentData.getSteps());
 				chart.getXNumberAxis().setTickUnit(agentData.getSteps() / 50 + 1);
+				chart.processAgentData(agentData);
+				chart.updateSeriesInfo();
 			});
 			
 			//para os casos onde o chart espera somente o step atual
@@ -106,10 +106,10 @@ public class LearningChartsPaneController extends Controller {
 				AgentStepData agentStepStatus = agentData.getAgentStepData().get(i);
 				
 				lineCharts.forEach((chart) -> {
-					chart.processAgentStepData(agentStepStatus);
-					chart.updateSeriesInfo();
 					chart.getXNumberAxis().setUpperBound(agentStepStatus.getStep());
 					chart.getXNumberAxis().setTickUnit(agentStepStatus.getStep() / 50 + 1);
+					chart.processAgentStepData(agentStepStatus);
+					chart.updateSeriesInfo();
 				});
 			}
 			stepProcessed = agentData.getAgentStepData().size();

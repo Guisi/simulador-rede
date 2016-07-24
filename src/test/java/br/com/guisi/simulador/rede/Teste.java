@@ -17,9 +17,7 @@ import com.google.common.collect.Lists;
 public class Teste {
 
 	public static void main(String[] args) throws Exception {
-		int i = 51;
-		
-		System.out.println( i / 50 + 1 );
+		System.out.println(String.valueOf(true));
 		
 		/*List<Set<SwitchState>> listas = new ArrayList<>();
 		

@@ -118,10 +118,10 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 		if (agentData != null) {
 			//para os casos onde o chart processa o AgentStatus a sua forma
 			lineCharts.forEach((chart) -> {
-				chart.processAgentData(agentData);
-				chart.updateSeriesInfo();
 				chart.getXNumberAxis().setUpperBound(agentData.getSteps());
 				chart.getXNumberAxis().setTickUnit(agentData.getSteps() / 50 + 1);
+				chart.processAgentData(agentData);
+				chart.updateSeriesInfo();
 			});
 			
 			//para os casos onde o chart espera somente o step atual
@@ -130,10 +130,10 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 				AgentStepData agentStepData = environmentStepData.get(i);
 				
 				lineCharts.forEach((chart) -> {
-					chart.processAgentStepData(agentStepData);
-					chart.updateSeriesInfo();
 					chart.getXNumberAxis().setUpperBound(agentStepData.getStep());
 					chart.getXNumberAxis().setTickUnit(agentStepData.getStep() / 50 + 1);
+					chart.processAgentStepData(agentStepData);
+					chart.updateSeriesInfo();
 				});
 			}
 			stepProcessed = environmentStepData.size();

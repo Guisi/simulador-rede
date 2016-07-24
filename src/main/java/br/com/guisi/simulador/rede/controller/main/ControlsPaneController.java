@@ -15,6 +15,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -26,6 +27,7 @@ import javafx.util.Duration;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.agent.control.AgentControl;
 import br.com.guisi.simulador.rede.agent.control.StoppingCriteria;
 import br.com.guisi.simulador.rede.agent.control.impl.StepNumberStoppingCriteria;
@@ -74,6 +76,10 @@ public class ControlsPaneController extends Controller {
 	private ComboBox<RandomActionType> cbRandomAction;
 	@FXML
 	private ComboBox<NetworkRestrictionsTreatmentType> cbNetworkRestrictions;
+	@FXML
+	private CheckBox cbUndoRandomAction;
+	@FXML
+	private ComboBox<Integer> cbClusterMaxSize;
 	
 	@FXML
 	private TextField tfLearningConstant;
@@ -87,7 +93,12 @@ public class ControlsPaneController extends Controller {
 
 	@PostConstruct
 	public void initializeController() {
-		this.listenToEvent(EventType.RESET_SCREEN, EventType.ENVIRONMENT_LOADED, EventType.AGENT_RUNNING, EventType.AGENT_STOPPED, EventType.AGENT_NOTIFICATION);
+		this.listenToEvent(EventType.RESET_SCREEN, 
+						   EventType.ENVIRONMENT_LOADED,
+						   EventType.AGENT_RUNNING,
+						   EventType.AGENT_STOPPED,
+						   EventType.AGENT_NOTIFICATION,
+						   EventType.CLUSTERS_UPDATED);
 
 		Image imageCheck = new Image(getClass().getResourceAsStream("/img/check.png"));
 		btnRunAgent.setGraphic(new ImageView(imageCheck));
@@ -97,9 +108,6 @@ public class ControlsPaneController extends Controller {
 
 		Image imageReset = new Image(getClass().getResourceAsStream("/img/reset.png"));
 		btnResetAgent.setGraphic(new ImageView(imageReset));
-
-		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
-		cbTaskExecutionType.setValue(TaskExecutionType.STEP_BY_STEP);
 
 		StepNumberStoppingCriteria stepNumberStoppingCriteria = new StepNumberStoppingCriteria();
 		cbAgentStoppingCriteria.setItems(FXCollections.observableArrayList(stepNumberStoppingCriteria));
@@ -130,11 +138,26 @@ public class ControlsPaneController extends Controller {
 		});
 		timeline.getKeyFrames().add(keyFrame);
 		
+		cbTaskExecutionType.setItems(FXCollections.observableArrayList(Arrays.asList(TaskExecutionType.values())));
+		cbTaskExecutionType.setValue(TaskExecutionType.valueOf(PropertiesUtils.getProperty(PropertyKey.TASK_EXECUTION_TYPE)));
+		
 		cbRandomAction.setItems(FXCollections.observableArrayList(RandomActionType.values()));
 		cbRandomAction.setValue(RandomActionType.valueOf(PropertiesUtils.getProperty(PropertyKey.RANDOM_ACTION)));
 		
 		cbNetworkRestrictions.setItems(FXCollections.observableArrayList(NetworkRestrictionsTreatmentType.values()));
 		cbNetworkRestrictions.setValue(NetworkRestrictionsTreatmentType.valueOf(PropertiesUtils.getProperty(PropertyKey.NETWORK_RESTRICTIONS_TREATMENT)));
+		
+		cbUndoRandomAction.setSelected(Boolean.valueOf(PropertiesUtils.getProperty(PropertyKey.UNDO_RANDOM_ACTION)));
+		cbUndoRandomAction.selectedProperty().addListener((observable, oldValue, newValue) -> PropertiesUtils.saveProperty(PropertyKey.UNDO_RANDOM_ACTION, String.valueOf(newValue)));
+		
+		cbClusterMaxSize.setItems(FXCollections.observableArrayList(3, 5, 7, 9, 11));
+		cbClusterMaxSize.setValue(Integer.valueOf(PropertiesUtils.getProperty(PropertyKey.CLUSTER_MAX_SIZE)));
+		cbClusterMaxSize.valueProperty().addListener((observable, oldValue, newValue) -> {
+			PropertiesUtils.saveProperty(PropertyKey.CLUSTER_MAX_SIZE, String.valueOf(newValue));
+			SimuladorRede.updateClusters();
+			this.fireEvent(EventType.CLUSTERS_UPDATED);
+		});
+			
 	}
 	
 	private void initializeTextField(PropertyKey propertyKey, TextField textField, boolean decimal) {
@@ -161,23 +184,26 @@ public class ControlsPaneController extends Controller {
 	@Override
 	public void onEvent(EventType eventType, Object data) {
 		switch (eventType) {
-		case RESET_SCREEN:
-			this.resetScreen();
-			break;
-		case ENVIRONMENT_LOADED:
-			this.processEnvironmentLoaded();
-			break;
-		case AGENT_RUNNING:
-			this.processAgentRunning();
-			break;
-		case AGENT_STOPPED:
-			this.processAgentStopped(data);
-			break;
-		case AGENT_NOTIFICATION:
-			this.processAgentNotification(data);
-			break;
-		default:
-			break;
+			case RESET_SCREEN:
+				this.resetScreen();
+				break;
+			case ENVIRONMENT_LOADED:
+				this.processEnvironmentLoaded();
+				break;
+			case AGENT_RUNNING:
+				this.processAgentRunning();
+				break;
+			case AGENT_STOPPED:
+				this.processAgentStopped(data);
+				break;
+			case AGENT_NOTIFICATION:
+				this.processAgentNotification(data);
+				break;
+			case CLUSTERS_UPDATED:
+				this.processClustersUpdated();
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -191,6 +217,12 @@ public class ControlsPaneController extends Controller {
 		tfLearningConstant.setText(String.valueOf(PropertiesUtils.getLearningConstant()));
 		tfDiscountFactor.setText(String.valueOf(PropertiesUtils.getDiscountFactor()));
 		tfEGreedy.setText(String.valueOf(PropertiesUtils.getEGreedy()));
+		cbClusterMaxSize.setDisable(false);
+	}
+	
+	private void processClustersUpdated() {
+		agentControl.reset();
+		setCurrentStateLabel();
 	}
 
 	private void processEnvironmentLoaded() {
@@ -231,10 +263,16 @@ public class ControlsPaneController extends Controller {
 		tfStoppingCriteria.setDisable(disable);
 		cbRandomAction.setDisable(disable);
 		cbNetworkRestrictions.setDisable(disable);
+		tfDiscountFactor.setDisable(disable);
+		tfEGreedy.setDisable(disable);
+		tfLearningConstant.setDisable(disable);
+		tfStoppingCriteria.setDisable(disable);
+		cbUndoRandomAction.setDisable(disable);
 	}
 
 	private void processAgentRunning() {
 		this.enableDisableScreen(true);
+		cbClusterMaxSize.setDisable(true);
 		timeline.playFromStart();
 	}
 
@@ -256,6 +294,10 @@ public class ControlsPaneController extends Controller {
 	
 	public void onCbNetworkRestrictionsChange() {
 		PropertiesUtils.saveProperty(PropertyKey.NETWORK_RESTRICTIONS_TREATMENT, cbNetworkRestrictions.getValue().name());
+	}
+	
+	public void onCbTaskExecutionTypeChange() {
+		PropertiesUtils.saveProperty(PropertyKey.TASK_EXECUTION_TYPE, cbTaskExecutionType.getValue().name());
 	}
 
 	/*********************************

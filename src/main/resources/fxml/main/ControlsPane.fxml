@@ -53,7 +53,7 @@
               </rowConstraints>
                <children>
                   <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Execution Type:" GridPane.columnIndex="4" />
-                  <ComboBox fx:id="cbTaskExecutionType" prefWidth="200.0" GridPane.columnIndex="5" />
+                  <ComboBox fx:id="cbTaskExecutionType" onAction="#onCbTaskExecutionTypeChange" prefWidth="200.0" GridPane.columnIndex="5" />
                   <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Random Action:" GridPane.columnIndex="2" />
                   <ComboBox fx:id="cbRandomAction" onAction="#onCbRandomActionChange" prefWidth="220.0" GridPane.columnIndex="3" />
                   <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Stop Condition:" GridPane.columnIndex="4" GridPane.rowIndex="1" />
@@ -71,6 +71,10 @@
                   <TextField fx:id="tfDiscountFactor" alignment="CENTER_RIGHT" maxWidth="-Infinity" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label alignment="CENTER" style="-fx-font-weight: bold;" text="E-greedy (ε):" GridPane.rowIndex="2" />
                   <TextField fx:id="tfEGreedy" alignment="CENTER_RIGHT" maxWidth="-Infinity" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <CheckBox fx:id="cbUndoRandomAction" mnemonicParsing="false" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  <Label alignment="CENTER" prefHeight="17.0" prefWidth="129.0" style="-fx-font-weight: bold;" text="Undo Random Action:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <Label alignment="CENTER" prefWidth="100.0" style="-fx-font-weight: bold;" text="Cluster Max Size:" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                  <ComboBox fx:id="cbClusterMaxSize" prefWidth="127.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                </children>
             </GridPane>
          </children>

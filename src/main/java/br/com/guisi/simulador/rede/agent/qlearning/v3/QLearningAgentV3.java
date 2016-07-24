@@ -126,7 +126,8 @@ public class QLearningAgentV3 extends Agent {
 		this.changedPolicy = !bestAction.equals(newBestAction);
 		
 		//se escolheu ação aleatória e não mudou política, desfaz ação
-		if (randomAction && !this.changedPolicy) {
+		Boolean undoRandomAction = Boolean.valueOf(PropertiesUtils.getProperty(PropertyKey.UNDO_RANDOM_ACTION));
+		if (undoRandomAction && randomAction && !this.changedPolicy) {
 			//reativa loads desativados
 			environment.turnOnAllLoads();
 

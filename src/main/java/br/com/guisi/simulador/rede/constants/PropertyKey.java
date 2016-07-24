@@ -9,9 +9,12 @@ public enum PropertyKey {
 	PRIORITY_4("1"),
 	
 	/** Agent Options */
+	TASK_EXECUTION_TYPE(TaskExecutionType.STEP_BY_STEP.name()),
 	RANDOM_ACTION(RandomActionType.PSEUDO_RANDOM_PROPORTIONAL.name()),
 	NETWORK_RESTRICTIONS_TREATMENT(NetworkRestrictionsTreatmentType.LOAD_SHEDDING.name()),
 	STOPPING_CRITERIA_STEP_NUMBER("1000"),
+	UNDO_RANDOM_ACTION("true"),
+	CLUSTER_MAX_SIZE("7"),
 	
 	/** Q-Learning */
 	/* E-greedy de 90% */
