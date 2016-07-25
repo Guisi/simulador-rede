@@ -116,8 +116,8 @@ public class TesteExaustivoClusters {
 	}
 	
 	private static Environment loadEnvironment() {
-		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
-		//File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
+		//File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {

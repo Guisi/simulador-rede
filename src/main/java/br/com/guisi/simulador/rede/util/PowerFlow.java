@@ -3,6 +3,7 @@ package br.com.guisi.simulador.rede.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.math3.complex.Complex;
 import org.n52.matlab.control.MatlabConnectionException;
@@ -17,8 +18,21 @@ import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
+import cern.colt.matrix.tdouble.DoubleFactory2D;
+import cern.colt.matrix.tdouble.DoubleMatrix2D;
+import edu.cornell.pserc.jpower.Djp_jpoption;
+import edu.cornell.pserc.jpower.jpc.Bus;
+import edu.cornell.pserc.jpower.jpc.Gen;
+import edu.cornell.pserc.jpower.jpc.JPC;
+import edu.cornell.pserc.jpower.pf.Djp_rundcpf;
 
 public class PowerFlow {
+	
+	private static final Map<String, Double> options = Djp_jpoption.jpoption();
+	
+	static {
+		options.put("VERBOSE", 0.0);
+	}
 	
 	public static boolean execute(Environment environment) {
 		//zera os valores do power flow anterior
@@ -65,8 +79,14 @@ public class PowerFlow {
 				activeBranches.add(branch);
 			}
 		});
-		
-		double[][] mpcBus = mountMpcBus(activeNodes);
+
+		//return executePowerFlowMatlab(environment, activeNodes, activeBranches);
+		return executePowerFlowJPower(environment, activeNodes, activeBranches);
+	}
+	
+	@SuppressWarnings("unused")
+	private static boolean executePowerFlowMatlab(Environment environment, List<NetworkNode> activeNodes, List<Branch> activeBranches) {
+		double[][] mpcBus = mountMpcBus(activeNodes, Constants.TENSAO_REFERENCIA_PU);
 		
 		double[][] mpcGen = mountMpcGen(environment.getFeeders());
 		
@@ -127,7 +147,75 @@ public class PowerFlow {
 		}
 	}
 	
-	private static double[][] mountMpcBus(List<NetworkNode> activeNodes) {
+	private static boolean executePowerFlowJPower(Environment environment, List<NetworkNode> activeNodes, List<Branch> activeBranches) {
+		JPC jpc = getJPowerCase(environment, activeNodes, activeBranches);
+		
+		jpc = Djp_rundcpf.rundcpf(jpc, options);
+		
+		if (jpc.success) {
+			//recupera informacoes das cargas
+			DoubleMatrix2D mpcBus = jpc.bus.toMatrix();
+
+			for (int i = 0; i < mpcBus.rows(); i++) {
+				Integer nodeNumber = (int) mpcBus.get(i, 0);
+				NetworkNode node = environment.getNetworkNode(nodeNumber);
+				node.setCurrentVoltagePU(mpcBus.get(i, 7)); //tensão
+			}
+			
+			DoubleMatrix2D mpcBranch = jpc.branch.toMatrix();
+			
+			for (int i = 0; i < mpcBranch.rows(); i++) {
+				double sAtual = new Complex(mpcBranch.get(i, 13), mpcBranch.get(i, 14)).abs();
+				
+				Integer nodeFrom = (int) mpcBranch.get(i, 0);
+				Integer nodeTo = (int) mpcBranch.get(i, 1);
+				
+				Branch branch = environment.getBranch(environment.getNetworkNode(nodeFrom), environment.getNetworkNode(nodeTo));
+				if (branch != null) {
+					double actualCurrent = (sAtual / (branch.getNodeTo().getCurrentVoltagePU() * Constants.TENSAO_BASE)) * Constants.POTENCIA_BASE;
+					branch.setInstantCurrent(actualCurrent);
+					
+					double lossMW = Math.abs(mpcBranch.get(i, 13) + mpcBranch.get(i, 15));
+					branch.setActiveLossMW(lossMW);
+					
+					double lossMVar = Math.abs(mpcBranch.get(i, 14) + mpcBranch.get(i, 16));
+					branch.setReactiveLossMVar(lossMVar);
+				}
+			}
+		}
+		
+		return jpc.success;
+	}
+	
+	private static JPC getJPowerCase(Environment environment, List<NetworkNode> activeNodes, List<Branch> activeBranches) {
+
+		JPC jpc = new JPC();
+
+		/* JPOWER Case Format : Version 2 */
+		jpc.version = "2";
+
+		/* system MVA base */
+		jpc.baseMVA = 1;
+
+		/* bus data */
+		//	bus_i	type	Pd	Qd	Gs	Bs	area	Vm	Va	baseKV	zone	Vmax	Vmin
+		double[][] mpcBus = mountMpcBus(activeNodes, Constants.TENSAO_REFERENCIA_PU_JPOWER);
+		jpc.bus = Bus.fromMatrix( DoubleFactory2D.dense.make(mpcBus));
+
+		/* generator data */
+		//	bus	Pg	Qg	Qmax	Qmin	Vg	mBase	status	Pmax	Pmin	Pc1	Pc2	Qc1min	Qc1max	Qc2min	Qc2max	ramp_ag	ramp_10	ramp_30	ramp_q	apf
+		double[][] mpcGen = mountMpcGen(environment.getFeeders());
+		jpc.gen = Gen.fromMatrix( DoubleFactory2D.dense.make(mpcGen) );
+
+		/* branch data */
+		//	fbus	tbus	r	x	b	rateA	rateB	rateC	ratio	angle	status	angmin	angmax
+		double[][] mpcBranch = mountMpcBranch(activeBranches);
+		jpc.branch = edu.cornell.pserc.jpower.jpc.Branch.fromMatrix( DoubleFactory2D.dense.make(mpcBranch) );
+
+		return jpc;
+	}
+	
+	private static double[][] mountMpcBus(List<NetworkNode> activeNodes, double tensaoReferencia) {
 		double[] nodeNums = new double[activeNodes.size()];
 		double[] nodeTypes = new double[activeNodes.size()];
 		double[] loadActivePowerMW = new double[activeNodes.size()];
@@ -161,7 +249,7 @@ public class PowerFlow {
 			area[i] = 1;
 			
 			//voltage magnitude (Vm) (p.u.)
-			voltageMagnitude[i] = Constants.TENSAO_REFERENCIA_PU;
+			voltageMagnitude[i] = tensaoReferencia;
 			
 			//Tensão de Barra em kV
 			double base = Constants.TENSAO_BASE / 1000;
@@ -350,6 +438,5 @@ public class PowerFlow {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
 }

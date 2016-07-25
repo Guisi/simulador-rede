@@ -19,8 +19,9 @@ import br.com.guisi.simulador.rede.util.PowerFlow;
 public class TesteMatPower {
 
 	public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException {
-		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan-1feeder.xlsx");
-		//File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
+		//File f = new File("C:/Users/Guisi/Desktop/modelo-zidan-1feeder.xlsx");
+		//File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan-1feeder.xlsx");
+		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {
@@ -51,6 +52,7 @@ public class TesteMatPower {
 				return o1.getNumber().compareTo(o2.getNumber());
 			});
 			
+			System.out.println();
 			System.out.println("Branch    |   Instant Current   |   ActiveLossMW    |    ReactiveLossMVar");
 			for (Branch branch : branches) {
 				System.out.println(branch.getNumber() + "    |    "

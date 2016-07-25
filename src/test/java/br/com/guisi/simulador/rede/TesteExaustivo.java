@@ -6,11 +6,9 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.n52.matlab.control.MatlabConnectionException;
-import org.n52.matlab.control.MatlabInvocationException;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
 import br.com.guisi.simulador.rede.enviroment.Branch;
@@ -25,10 +23,13 @@ import com.google.common.collect.Sets;
 
 public class TesteExaustivo {
 
-	public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException {
-		Counter counter = new Counter();
-		
+	public static void main(String[] args) throws Exception {
 		Environment environment = loadEnvironment();
+		
+		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+        config.setMaxIdle(100);
+        config.setMaxTotal(100);
+        EnvironmentPool pool = new EnvironmentPool(new EnvironmentFactory(environment), config);
 		
 		List<Branch> switches = environment.getSwitches();
 		
@@ -48,31 +49,40 @@ public class TesteExaustivo {
 		System.out.println();
 		
 		BestConfiguration best = new BestConfiguration();
+		Counter counter = new Counter();
 		
-		//result.parallelStream().forEach(list -> {
-		for (List<SwitchState> list : result) {
+		result.parallelStream().forEach(list -> {
+		//for (List<SwitchState> list : result) {
 			
-			Predicate<SwitchState> predicate = sw -> sw.getStatus() == SwitchStatus.OPEN;
-			long count = list.stream().filter(predicate).count();
+			try {
+				Environment env = pool.borrowObject();
 			
-			if (count < 8) {
-			
-				for (SwitchState switchState : list) {
-					Branch branch = environment.getBranch(switchState.getNumber());
-					branch.setSwitchStatus(switchState.getStatus());
-				}
-	
-				boolean isRadial = executePowerFlow(environment);
+				//Predicate<SwitchState> predicate = sw -> sw.getStatus() == SwitchStatus.OPEN;
+				//long count = list.stream().filter(predicate).count();
 				
-				if (isRadial) {
-					double percentage = environment.getSuppliedActivePowerPercentage();
-					best.setBestConfiguration(percentage, list);
-				}
+				//if (count < 8) {
+				
+					for (SwitchState switchState : list) {
+						Branch branch = env.getBranch(switchState.getNumber());
+						branch.setSwitchStatus(switchState.getStatus());
+					}
+		
+					boolean isRadial = executePowerFlow(env);
+					
+					if (isRadial) {
+						double percentage = env.getSuppliedActivePowerPercentage();
+						best.setBestConfiguration(percentage, list);
+					}
+				//}
+				
+				counter.increment();
+				
+				pool.returnObject(env);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
-			counter.increment();
-		//});
-		}
+		});
+		//}
 		
 		System.out.println();
 		System.out.println("FINISHED!!!!!!!!!!!");
@@ -107,8 +117,8 @@ public class TesteExaustivo {
 	}
 	
 	private static Environment loadEnvironment() {
-		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
-		//File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
+		//File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {
@@ -144,7 +154,8 @@ class Counter {
 		
 		if (cont % 1000 == 0) {
 			System.out.println("Processou: " + cont);
-			System.out.println("Tempo: " + (System.currentTimeMillis() - ini) + " ms");
+			long tempo = System.currentTimeMillis() - ini;
+			System.out.println("Tempo: " + tempo + " ms - Media: " + ((double)tempo)/(double)cont);
 			System.out.println();
 		}
 	}
