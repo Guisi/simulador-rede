@@ -1,5 +1,7 @@
 package br.com.guisi.simulador.rede;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -13,7 +15,7 @@ import org.n52.matlab.control.MatlabProxyFactoryOptions;
 import org.n52.matlab.control.extensions.MatlabNumericArray;
 import org.n52.matlab.control.extensions.MatlabTypeConverter;
 
-public class MatPowerTest {
+public class MatPowerMock1FeederTest {
 	
 	//Tensão de referencia em pu (VRef) (perguntar pro Fausto)
 	private static final double TENSAO_REFERENCIA_PU = 1.02;
@@ -31,15 +33,6 @@ public class MatPowerTest {
 	private static final double TENSAO_MIN_PU = 0.9;
 	
 	public static void main(String[] args) throws MatlabConnectionException, MatlabInvocationException {
-		/*double[][] mpcBus = getMpcBus();
-		
-		for (int x = 0; x < mpcBus.length; x++) {
-			for (int y = 0; y < mpcBus[x].length; y++) {
-				System.out.print(mpcBus[x][y] + ";");
-			}
-			System.out.println();
-		}*/
-		
 		runMatPower();
 	}
 	
@@ -76,6 +69,8 @@ public class MatPowerTest {
 		for (int i = 0; i < mpsBus.length; i++) {
 			Integer nodeNumber = (int) mpcBus[i][0];
 			actualVoltageMap.put(nodeNumber, mpsBus[i][7]);
+			
+			System.out.println(nodeNumber + ": " + new BigDecimal(mpsBus[i][7]).setScale(10, RoundingMode.HALF_UP).doubleValue());
 		}
 		
 		MatlabNumericArray array = processor.getNumericArray("ret.branch");
@@ -89,15 +84,15 @@ public class MatPowerTest {
 			
 			Double voltagePu = actualVoltageMap.get(loadTo);
 			if (voltagePu != null) {
-				System.out.println( (sAtual / (voltagePu * TENSAO_BASE)) * POTENCIA_BASE);
+				//System.out.println( (sAtual / (voltagePu * TENSAO_BASE)) * POTENCIA_BASE);
 			}
 			
 			double loss = Math.abs(es[13] + es[15]);
-			System.out.println(loss);
+			//System.out.println(loss);
 			losses += loss;
 		}
 		
-		System.out.println("Losses: " + losses);
+		//System.out.println("Losses: " + losses);
 		
 		proxy.eval("rmpath('matpower5.1')");
 
@@ -111,23 +106,18 @@ public class MatPowerTest {
 	 */
 	private static double[][] getMpcBus() {
 		//numeros dos loads/feeders
-		double[] loadNums = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,68,69,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,70};
+		double[] loadNums = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,68,69};
 		
 		//tipos dos loads/feeders
 		double[] loadTypes = new double[loadNums.length];
 		Arrays.fill(loadTypes, 1); //loads
 		loadTypes[0] = 3; //feeders serao marcados com 3
-		loadTypes[69] = 3;
 		
 		//cargas em megawatts (Pd) (se a carga estiver desligada, zerar)
-		double[] loadsPowerMW = {0, 0.108, 0.0648, 0.162, 0.081, 0.01944, 0.01944, 0.01404, 0.0171, 0.0216, 0.01728, 0.054, 0.1134, 0.027, 0.0432, 0.108, 0.0432, 0.0648, 0.0432, 0.0162, 0.01404, 0.0324, 0.0972,
-				0.054, 0.0648, 0.108, 0.0864, 0.108, 0.108, 0.1296, 0.1134, 0.0864, 0.0648, 0.01404, 0.01728, 0.054, 0.0432, 0.0648, 0.0432, 0.0324, 0.162, 0.0648, 0.1296, 0.0972, 0.01944, 0.01728,
-				0.108, 0.0648, 0.0972, 0.11016, 0.108, 0.1512, 0.0648, 0.0216, 0.0432, 0.03888, 0.0324, 0.04644, 0.0864, 0.2592, 0.135, 0.027, 0.0108, 0.162, 0.054, 0.0324, 0.1404, 0.162, 0.027, 0};
+		double[] loadsPowerMW = {0, 0.108, 0.0648, 0.162, 0.081, 0.01944, 0.01944, 0.01404, 0.0171, 0.0216, 0.01728, 0.054, 0.1134, 0.027, 0.0432, 0.108, 0.0432};
 	
 		//cargas em MVar (Qd) (se a carga estiver desligada, zerar) (perguntar pro Fausto de onde tirou)
-		double[] loadsPowerMVar = {0, 0.081, 0.036, 0.117, 0.045, 0.00975, 0.01275, 0.009, 0.00975, 0.009, 0.00825, 0.036, 0.081, 0.0135, 0.0225, 0.054, 0.027, 0.027, 0.0225, 0.00825, 0.0063, 0.018, 0.045,
-				0.027, 0.036, 0.072, 0.0585, 0.054, 0.0495, 0.063, 0.063, 0.045, 0.036, 0.0072, 0.00885, 0.027, 0.0252, 0.036, 0.027, 0.0225, 0.09, 0.0315, 0.063, 0.054, 0.009, 0.009, 0.045,
-				0.036, 0.063, 0.0594, 0.063, 0.081, 0.036, 0.0099, 0.027, 0.0216, 0.018, 0.027, 0.045, 0.108, 0.099, 0.009, 0.0045, 0.117, 0.027, 0.018, 0.108, 0.117, 0.0135, 0};
+		double[] loadsPowerMVar = {0, 0.081, 0.036, 0.117, 0.045, 0.00975, 0.01275, 0.009, 0.00975, 0.009, 0.00825, 0.036, 0.081, 0.0135, 0.0225, 0.054, 0.027};
 		
 		//Gs e bs zerado
 		double[] gs = new double[loadNums.length];
@@ -187,19 +177,19 @@ public class MatPowerTest {
 	private static double[][] getMpcGen() {
 		
 		//Barras de geração de injeção de potência (serao os numeros dos feeders)
-		double[] busG = {1, 70, 13, 27, 40, 22, 43};
+		double[] busG = {1};
 		
 		//Potência Injetada em MW (Pg)
-		double[] potenciaGeradaMW = {0.1, 4, 0.5, 0.5, 0.5, 0.5, 0.5};
+		double[] potenciaGeradaMW = {0.1};
 		
 		//Potência Injetada em MVar (Qg)
-		double[] potenciaGeradaMVar = {2, 2, 0, 0, 0, 0, 0};
+		double[] potenciaGeradaMVar = {2};
 		
 		//Potência máxima de cada geração em MVar
-		double[] qMax = {2, 2, 0, 0, 0, 0, 0};
+		double[] qMax = {2};
 		
 		//Potência mínima de cada geração em MVar
-		double[] qMin = {0.5, 0.5, 0, 0, 0, 0, 0};
+		double[] qMin = {0.5};
 		
 		//Voltage magnitude setpoint (vg) (p.u.) - para cada load/feeder
 		double[] vmSetpoint = new double[busG.length];
@@ -210,13 +200,13 @@ public class MatPowerTest {
 		Arrays.fill(mBase, POTENCIA_BASE / 1000000);
 		
 		//Status dos pontos de entrega de potência e de Geração distribuída (DG)
-		double[] statusG = {1, 1, 0, 0, 0, 0, 0};
+		double[] statusG = {1};
 		
 		//Potência máxima de cada geração em MW
-		double[] pMax = {0.1, 6, 0.5, 0.5, 0.5, 0.5, 0.5};
+		double[] pMax = {0.1};
 		
 		//Potência mínima de cada geração em MW
-		double[] pMin = {0.1, 2, 0, 0, 0, 0, 0};
+		double[] pMin = {0.1};
 		
 		
 		//variavel mpc.gen do matpower
@@ -238,23 +228,16 @@ public class MatPowerTest {
 	
 	private static double[][] getMpcBranch() {
 		//branch De
-		double[] branchFrom = {1, 2, 3, 4, 5, 6, 7, 8, 4, 10, 11, 12, 13, 14, 7, 68, 1, 16, 17, 18, 19, 20, 21, 17, 23, 24, 25, 26,
-						 27, 28, 70, 30, 31, 32, 33, 34, 35, 36, 37, 32, 39, 40, 41, 42, 40, 44, 42, 35, 47, 48, 49, 70, 51, 
-						 52, 53, 54, 55, 52, 57, 58, 59, 55, 61, 62, 63, 62, 65, 66, 67, 9, 29, 45};
+		double[] branchFrom = {1, 2, 3, 4, 5, 6, 7, 8, 4, 10, 11, 12, 13, 14, 7, 68};
 		
 		//branch Para
-		double[] branchTo = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 68, 69, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
-							 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
-							 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 15, 50, 64, 60};
+		double[] branchTo = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 68, 69};
 		
 		//Impedância de base
 		double zb = Math.pow(TENSAO_BASE, 2)/POTENCIA_BASE;
 		
 		//resistência em ohms
-		double[] resistenciaOhms = {1.097, 1.463, 0.731, 0.366, 1.828, 1.097, 0.731, 0.731, 1.080, 1.620, 1.080, 1.350, 0.810, 1.944, 1.080, 1.620, 1.097, 0.366, 1.463, 0.914, 0.914, 1.133, 0.475,
-		 2.214, 1.620, 1.080, 0.540, 0.540, 1.080, 1.080, 0.366, 0.731, 0.731, 0.804, 1.170, 0.768, 0.731, 1.097, 1.463, 1.080, 0.540, 1.080, 1.836, 1.296, 1.188, 0.540,
-		 1.080, 0.540, 1.080, 1.080, 1.080, 0.366, 1.463, 1.463, 0.914, 1.097, 1.097, 0.270, 0.270, 0.810, 1.296, 1.188, 1.188, 0.810, 1.620, 1.080, 0.540, 1.080, 0.454, 
-		 0.681, 0.681, 0.254};
+		double[] resistenciaOhms = {1.097, 1.463, 0.731, 0.366, 1.828, 1.097, 0.731, 0.731, 1.080, 1.620, 1.080, 1.350, 0.810, 1.944, 1.080, 1.620};
 		
 		//Vetor R [pu]
 		double[] resistenciaPu = new double[resistenciaOhms.length];
@@ -263,9 +246,7 @@ public class MatPowerTest {
 		}
 		
 		//reatância em ohms
-		double[] reatanciaOhms = {1.074, 1.432, 0.716, 0.358, 1.790, 1.074, 0.716, 0.716, 0.734, 1.101, 0.734, 0.917, 0.550, 1.321, 0.734, 1.101, 1.074, 0.358, 1.432, 0.895, 0.787, 1.110, 0.465, 1.505,
-								  1.110, 0.734, 0.367, 0.367, 0.734, 0.734, 0.358, 0.716, 0.716, 0.787, 1.145, 0.752, 0.716, 1.074, 1.432, 0.734, 0.367, 0.734, 1.248, 0.881, 0.807, 0.367, 0.734, 0.367,
-								  0.734, 0.734, 0.734, 0.358, 1.432, 1.432, 0.895, 1.074, 1.074, 0.183, 0.183, 0.550, 0.881, 0.807, 0.807, 0.550, 1.101, 0.734, 0.367, 0.734, 0.363, 0.545, 0.545, 0.203};
+		double[] reatanciaOhms = {1.074, 1.432, 0.716, 0.358, 1.790, 1.074, 0.716, 0.716, 0.734, 1.101, 0.734, 0.917, 0.550, 1.321, 0.734, 1.101};
 		
 		//Vetor X [pu]
 		double[] reatanciaPu = new double[reatanciaOhms.length];
@@ -277,10 +258,7 @@ public class MatPowerTest {
 		double[] bsh = new double[branchFrom.length];
 		
 		//Corrente máxima em cada branch (Imax)
-		double[] correnteMaxBranch = {270, 270, 270, 270, 270, 270, 270, 270, 208, 208, 208, 208, 208, 208, 208, 208, 270, 270, 270, 270, 270, 
-									  270, 270, 208, 208, 208, 208, 208, 208, 208, 270, 270, 270, 270, 270, 270, 270, 270, 270, 208, 208, 208,
-									  208, 208, 208, 208, 208, 208, 208, 208, 208, 270, 270, 270, 270, 270, 270, 208, 208, 208, 208, 208, 208,
-									  208, 208, 208, 208, 208, 234, 234, 234, 234};
+		double[] correnteMaxBranch = {270, 270, 270, 270, 270, 270, 270, 270, 208, 208, 208, 208, 208, 208, 208, 208};
 		
 		//Capacidade máxima em potência [MVA] (Smax)
 		double[] correnteMaxBranchMVA = new double[correnteMaxBranch.length];
@@ -295,8 +273,7 @@ public class MatPowerTest {
 		double[] angle = new double[branchFrom.length];
 		
 		//Status Branch
-		double[] statusBranch = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-								 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
+		double[] statusBranch = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 		
 		//angulo minimo
 		double[] anguloMin = new double[branchFrom.length];

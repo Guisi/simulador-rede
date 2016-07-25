@@ -373,7 +373,7 @@ public class QLearningAgentV3 extends Agent {
 			states.add(agentState);
 		}
 		
-		return states.get(new Random(System.currentTimeMillis()).nextInt(states.size()));
+		return states.isEmpty() ? null : states.get(new Random(System.currentTimeMillis()).nextInt(states.size()));
 	}
 	
 	private static List<AgentAction> getAgentActions(Environment environment, AgentState agentState) {
