@@ -104,7 +104,7 @@ public class MatPowerMock1FeederTest {
 	 * Dados dos loads
 	 * @return
 	 */
-	private static double[][] getMpcBus() {
+	public static double[][] getMpcBus() {
 		//numeros dos loads/feeders
 		double[] loadNums = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,68,69};
 		
@@ -174,7 +174,7 @@ public class MatPowerMock1FeederTest {
 	 * Dados dos feeders
 	 * @return
 	 */
-	private static double[][] getMpcGen() {
+	public static double[][] getMpcGen() {
 		
 		//Barras de geração de injeção de potência (serao os numeros dos feeders)
 		double[] busG = {1};
@@ -226,7 +226,7 @@ public class MatPowerMock1FeederTest {
 		return mpcGen;
 	}
 	
-	private static double[][] getMpcBranch() {
+	public static double[][] getMpcBranch() {
 		//branch De
 		double[] branchFrom = {1, 2, 3, 4, 5, 6, 7, 8, 4, 10, 11, 12, 13, 14, 7, 68};
 		
