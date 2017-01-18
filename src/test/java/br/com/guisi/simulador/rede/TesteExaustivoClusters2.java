@@ -46,7 +46,7 @@ public class TesteExaustivoClusters2 {
 			}
 			
 			Set<List<SwitchState>> result = Sets.cartesianProduct(list);
-			result = result.stream().filter(lst -> lst.stream().filter(st -> st.getStatus() == SwitchStatus.OPEN).count() <= 2).collect(Collectors.toSet());
+			result = result.stream().filter(lst -> lst.stream().filter(st -> st.getStatus() == SwitchStatus.OPEN).count() <= 4).collect(Collectors.toSet());
 			
 			for (List<SwitchState> res : result) {
 				Map<Integer, SwitchStatus> switchMap = new HashMap<>();
@@ -133,8 +133,8 @@ public class TesteExaustivoClusters2 {
 	}
 	
 	private static Environment loadEnvironment() {
-		//File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
-		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
+		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		//File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {

@@ -3,12 +3,6 @@ package br.com.guisi.simulador.rede.controller.chart;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.scene.Node;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
@@ -21,6 +15,7 @@ import br.com.guisi.simulador.rede.controller.environment.AbstractEnvironmentPan
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.view.charts.GenericLineChart;
 import br.com.guisi.simulador.rede.view.charts.environment.EnvironmentRewardChart;
+import br.com.guisi.simulador.rede.view.charts.environment.InstantCurrentBarChart;
 import br.com.guisi.simulador.rede.view.charts.environment.LoadsPowerPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.environment.MinLoadVoltagePUChart;
 import br.com.guisi.simulador.rede.view.charts.environment.PowerLossChart;
@@ -28,6 +23,12 @@ import br.com.guisi.simulador.rede.view.charts.environment.PowerLossPercentageCh
 import br.com.guisi.simulador.rede.view.charts.environment.RequiredSwitchOperationsChart;
 import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsActivePowerPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsPercentageChart;
+import br.com.guisi.simulador.rede.view.charts.environment.VoltageBarChart;
+import javafx.scene.Node;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 @Named
 @Scope("prototype")
@@ -38,6 +39,9 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 	
 	private List<GenericLineChart> lineCharts;
 	private int stepProcessed;
+	
+	private VoltageBarChart voltageBarChart;
+	private InstantCurrentBarChart instantCurrentBarChart;
 	
 	public EnvironmentChartsPaneController(EnvironmentKeyType environmentKeyType) {
 		super(environmentKeyType);
@@ -100,6 +104,21 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 			tab.setContent(chart);
 			tabPaneCharts.getTabs().add(tab);
 		});
+		
+		//voltage magnitude in p.u.
+		voltageBarChart = new VoltageBarChart();
+		Tab tab = new Tab(voltageBarChart.getChartTitle());
+		tab.setContent(voltageBarChart);
+		tabPaneCharts.getTabs().add(tab);
+		voltageBarChart.updateChart(getEnvironment());
+		
+		//instant current in A.
+		instantCurrentBarChart = new InstantCurrentBarChart();
+		tab = new Tab(instantCurrentBarChart.getChartTitle());
+		tab.setContent(instantCurrentBarChart);
+		tabPaneCharts.getTabs().add(tab);
+		instantCurrentBarChart.updateChart(getEnvironment());
+		
 	}
 	
 	private void resetScreen() {
@@ -137,6 +156,9 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 				});
 			}
 			stepProcessed = environmentStepData.size();
+			
+			voltageBarChart.updateChart(getEnvironment());
+			instantCurrentBarChart.updateChart(getEnvironment());
 		}
 	}
 	

@@ -58,6 +58,10 @@
     -fx-shape: null;
 }
 
-.thick-chart .chart-series-line {    
+.thick-chart .chart-series-line {
 	-fx-stroke-width: 1px;
+}
+
+.bar-chart .chart-vertical-grid-lines {
+	-fx-stroke: transparent;
 }

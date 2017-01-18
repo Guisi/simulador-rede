@@ -33,8 +33,10 @@ public class TesteExaustivo {
 		
 		List<Branch> switches = environment.getSwitches();
 		
-		switches = switches.stream().filter(sw -> sw.isOpen()  
-				|| (Arrays.asList(15, 7, 13, 22, 23, 26, 27, 29, 33, 60, 66, 63, 62, 56, 54).contains(sw.getNumber())) ).collect(Collectors.toList());
+		/*switches = switches.stream().filter(sw -> sw.isOpen()  
+				|| (Arrays.asList(15, 7, 13, 22, 23, 26, 27, 29, 33, 60, 66, 63, 62, 56, 54).contains(sw.getNumber())) ).collect(Collectors.toList());*/
+		
+		switches = switches.stream().filter(sw -> !(Arrays.asList(2, 39, 18, 53, 54, 58, 45, 20, 30).contains(sw.getNumber())) ).collect(Collectors.toList());
 		
 		List<Set<SwitchState>> listas = new ArrayList<>();
 		for (Branch sw : switches) {
@@ -117,8 +119,8 @@ public class TesteExaustivo {
 	}
 	
 	private static Environment loadEnvironment() {
-		//File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
-		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
+		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		//File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {

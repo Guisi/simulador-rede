@@ -23,10 +23,10 @@ public class PowerLossPercentageChart extends GenericLineChart {
 		getYAxis().setLabel("% Losses");
 		
 		activePowerLossSeries = new LineChartSeries("Active Power Lost %", Double.class);
-		addLineChartSeries(activePowerLossSeries);
+		addChartSeries(activePowerLossSeries);
         
         reactivePowerLossSeries = new LineChartSeries("Reactive Power Lost (MVar)", Double.class);
-        addLineChartSeries(reactivePowerLossSeries);
+        addChartSeries(reactivePowerLossSeries);
 	}
 	
 	@Override

@@ -20,7 +20,7 @@ public class SuppliedLoadsActivePowerPercentageChart extends GenericLineChart {
 		getYNumberAxis().setUpperBound(100);
 		
 		suppliedLoadsPercentageSeries = new LineChartSeries(getChartTitle(), Double.class);
-		addLineChartSeries(suppliedLoadsPercentageSeries);
+		addChartSeries(suppliedLoadsPercentageSeries);
 	}
 	
 	@Override

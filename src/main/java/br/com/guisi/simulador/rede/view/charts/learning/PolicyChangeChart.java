@@ -25,7 +25,7 @@ public class PolicyChangeChart extends GenericLineChart {
 		
 		policyChangeSeries = new LineChartSeries("Policy Change (Every 10 steps)", Double.class);
 		policyChangeSeries.getSeries().getData().add(new XYChart.Data<>(0, 0));
-		addLineChartSeries(policyChangeSeries);
+		addChartSeries(policyChangeSeries);
 	}
 	
 	@Override

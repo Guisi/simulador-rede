@@ -18,7 +18,7 @@ public class EnvironmentRewardChart extends GenericLineChart {
 		getYNumberAxis().setAutoRanging(true);
 
 		environmentConfigurationRateSeries = new LineChartSeries(getChartTitle(), Double.class);
-		addLineChartSeries(environmentConfigurationRateSeries);
+		addChartSeries(environmentConfigurationRateSeries);
 	}
 	
 	@Override

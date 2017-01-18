@@ -393,7 +393,7 @@ public class QLearningAgentV3 extends Agent {
 			}
 			
 			Set<List<SwitchState>> result = Sets.cartesianProduct(list);
-			result = result.stream().filter(lst -> lst.stream().filter(st -> st.getStatus() == SwitchStatus.OPEN).count() <= 1).collect(Collectors.toSet());
+			result = result.stream().filter(lst -> lst.stream().filter(st -> st.getStatus() == SwitchStatus.OPEN).count() <= 2).collect(Collectors.toSet());
 			
 			for (List<SwitchState> res : result) {
 				Map<Integer, SwitchStatus> switchMap = new HashMap<>();

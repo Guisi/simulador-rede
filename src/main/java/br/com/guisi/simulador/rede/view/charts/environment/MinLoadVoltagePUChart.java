@@ -25,7 +25,7 @@ public class MinLoadVoltagePUChart extends GenericLineChart {
 		getYAxis().setLabel("Min Load Current Voltage (PU)");
 		
 		minLoadCurrentVoltageSeries = new LineChartSeries("Min Load Current Voltage (PU)", Double.class);
-        addLineChartSeries(minLoadCurrentVoltageSeries);
+        addChartSeries(minLoadCurrentVoltageSeries);
 	}
 	
 	@Override

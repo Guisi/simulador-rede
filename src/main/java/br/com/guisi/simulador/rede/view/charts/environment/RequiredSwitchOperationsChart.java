@@ -17,7 +17,7 @@ public class RequiredSwitchOperationsChart extends GenericLineChart {
 		getYAxis().setLabel("Required Switch Operations");
 		
 		requiredSwitchOperationsSeries = new LineChartSeries("Required Switch Operations", Integer.class);
-		addLineChartSeries(requiredSwitchOperationsSeries);
+		addChartSeries(requiredSwitchOperationsSeries);
 	}
 	
 	@Override

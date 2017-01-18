@@ -32,19 +32,19 @@ public class LoadsPowerPercentageChart extends GenericLineChart {
 		getYAxis().setLabel("% Loads Power");
 		
 		suppliedActivePowerSeries = new LineChartSeries("Supplied Loads Active Power %", Double.class);
-		addLineChartSeries(suppliedActivePowerSeries);
+		addChartSeries(suppliedActivePowerSeries);
         suppliedReactivePowerSeries = new LineChartSeries("Supplied Loads Reactive Power %", Double.class);
-        addLineChartSeries(suppliedReactivePowerSeries);
+        addChartSeries(suppliedReactivePowerSeries);
 		
 		notSuppliedActivePowerSeries = new LineChartSeries("Not Supplied Loads Active Power %", Double.class);
-		addLineChartSeries(notSuppliedActivePowerSeries);
+		addChartSeries(notSuppliedActivePowerSeries);
         notSuppliedReactivePowerSeries = new LineChartSeries("Not Supplied Loads Reactive Power %", Double.class);
-        addLineChartSeries(notSuppliedReactivePowerSeries);
+        addChartSeries(notSuppliedReactivePowerSeries);
 		
 		outOfServiceActivePowerSeries = new LineChartSeries("Out-of-service Loads Active Power %", Double.class);
-		addLineChartSeries(outOfServiceActivePowerSeries);
+		addChartSeries(outOfServiceActivePowerSeries);
         outOfServiceReactivePowerSeries = new LineChartSeries("Out-of-service Loads Reactive Power %", Double.class);
-        addLineChartSeries(outOfServiceReactivePowerSeries);
+        addChartSeries(outOfServiceReactivePowerSeries);
 	}
 	
 	@Override

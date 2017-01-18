@@ -42,7 +42,7 @@ public abstract class GenericLineChart extends LineChart<Number, Number> {
 		return (NumberAxis) this.getYAxis();
 	}
 
-	protected void addLineChartSeries(LineChartSeries lineChartSeries) {
+	protected void addChartSeries(LineChartSeries lineChartSeries) {
 		this.seriesList.add(lineChartSeries);
 		getData().add(lineChartSeries.getSeries());
 	}
