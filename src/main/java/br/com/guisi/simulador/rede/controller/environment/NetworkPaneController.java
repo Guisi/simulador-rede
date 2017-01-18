@@ -1,9 +1,7 @@
 package br.com.guisi.simulador.rede.controller.environment;
 
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Slider;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
 import javax.annotation.PostConstruct;
@@ -24,7 +22,6 @@ import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.events.EnvironmentEventData;
 import br.com.guisi.simulador.rede.events.EventType;
 import br.com.guisi.simulador.rede.util.PropertiesUtils;
-import br.com.guisi.simulador.rede.view.custom.BranchStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkPane;
 import br.com.guisi.simulador.rede.view.custom.ZoomingPane;
@@ -137,14 +134,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 		
 		//Desenha Branches
 		for (Branch branch : getEnvironment().getBranches()) {
-			EventHandler<MouseEvent> mouseClicked = (event) -> {
-				Node node = (Node) event.getSource();
-				while (!(node instanceof BranchStackPane)) {
-					node = node.getParent();
-				}
-				this.fireEvent(EventType.BRANCH_SELECTED, new EnvironmentEventData(getEnvironmentKeyType(), ((BranchStackPane) node).getBranchNum()));
-			};
-			networkPane.drawBranch(branch, getEnvironment().getSizeX(), getEnvironment().getSizeY(), mouseClicked);
+			networkPane.drawBranch(branch, getEnvironment().getSizeX(), getEnvironment().getSizeY(), this, getEnvironmentKeyType());
 		}
 		
 		//Desenha grid

@@ -7,7 +7,11 @@ import java.util.Map;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -25,11 +29,14 @@ import javafx.scene.text.TextBoundsType;
 import br.com.guisi.simulador.rede.SimuladorRede;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
+import br.com.guisi.simulador.rede.controller.Controller;
 import br.com.guisi.simulador.rede.enviroment.Branch;
 import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
+import br.com.guisi.simulador.rede.events.EnvironmentEventData;
+import br.com.guisi.simulador.rede.events.EventType;
 
 public class NetworkPane extends Pane {
 
@@ -224,11 +231,30 @@ public class NetworkPane extends Pane {
 		return stack;
 	}
 		
-	public void drawBranch(Branch branch, int sizeX, int sizeY, EventHandler<MouseEvent> mouseClicked) {
+	public void drawBranch(Branch branch, int sizeX, int sizeY, Controller controller, EnvironmentKeyType environmentKeyType) {
 		BranchStackPane sp = new BranchStackPane(branch.getNumber());
 		branchPaneMap.put(branch.getNumber(), sp);
 		getChildren().add(sp);
 		sp.toBack();
+		
+		final ContextMenu contextMenu = new ContextMenu();
+		MenuItem item1 = new MenuItem("Criar falta branch " + branch.getNumber());
+		item1.setOnAction(event -> {
+	        System.out.println("Criando falta");
+		});
+		contextMenu.getItems().addAll(item1);
+		
+		EventHandler<MouseEvent> mouseClicked = (event) -> {
+			if (event.getButton() == MouseButton.PRIMARY) {
+				Node node = (Node) event.getSource();
+				while (!(node instanceof BranchStackPane)) {
+					node = node.getParent();
+				}
+				controller.fireEvent(EventType.BRANCH_SELECTED, new EnvironmentEventData(environmentKeyType, ((BranchStackPane) node).getBranchNum()));
+			} else if (event.getButton() == MouseButton.SECONDARY) {
+				contextMenu.show(sp, event.getScreenX(), event.getScreenY());
+			}
+		};
 
 		int x1 = branch.getNodeTo().getX() - 1;
 		int y1 = sizeY - branch.getNodeTo().getY();
@@ -247,7 +273,7 @@ public class NetworkPane extends Pane {
 			startX -= Constants.BRANCH_TYPE_PX * 1.5;
 			endX -= Constants.BRANCH_TYPE_PX * 1.5;
 		}
-
+		
 		/** agrupa rectangle e text */
 		VBox box = new VBox();
 		box.setAlignment(Pos.CENTER);
