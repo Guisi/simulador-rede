@@ -4,6 +4,17 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.constants.Constants;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
+import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.enviroment.Feeder;
+import br.com.guisi.simulador.rede.enviroment.Load;
+import br.com.guisi.simulador.rede.enviroment.NetworkNode;
+import br.com.guisi.simulador.rede.events.EnvironmentEventData;
+import br.com.guisi.simulador.rede.events.EventType;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -26,17 +37,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
-import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.constants.Constants;
-import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
-import br.com.guisi.simulador.rede.controller.Controller;
-import br.com.guisi.simulador.rede.enviroment.Branch;
-import br.com.guisi.simulador.rede.enviroment.Environment;
-import br.com.guisi.simulador.rede.enviroment.Feeder;
-import br.com.guisi.simulador.rede.enviroment.Load;
-import br.com.guisi.simulador.rede.enviroment.NetworkNode;
-import br.com.guisi.simulador.rede.events.EnvironmentEventData;
-import br.com.guisi.simulador.rede.events.EventType;
 
 public class NetworkPane extends Pane {
 
@@ -175,6 +175,20 @@ public class NetworkPane extends Pane {
 			} else {
 				rect.setStroke(Color.GRAY);
 			}
+		} else {
+			rect.setWidth(Constants.BRANCH_TYPE_PX * 4);
+			rect.setHeight(Constants.BRANCH_TYPE_PX * 3);
+			Image img = new Image(getClass().getResourceAsStream("/img/fault-bolt.png"));
+			ImagePattern imagePattern = new ImagePattern(img);
+			rect.setFill(imagePattern);
+			rect.setStrokeWidth(0);
+			
+			VBox box = (VBox) rect.getParent();
+			box.setPadding(new Insets(0, 0, 0, 0));
+			
+			branchPane.setLayoutX(branchPane.getLayoutX() - Constants.BRANCH_TYPE_PX / 2);
+			
+			box.getChildren().remove(txt);
 		}
 	}
 	
@@ -238,9 +252,10 @@ public class NetworkPane extends Pane {
 		sp.toBack();
 		
 		final ContextMenu contextMenu = new ContextMenu();
-		MenuItem item1 = new MenuItem("Criar falta branch " + branch.getNumber());
+		MenuItem item1 = new MenuItem("Criar falta");
 		item1.setOnAction(event -> {
-	        System.out.println("Criando falta");
+			getEnvironment().addFault(branch.getNumber());
+	        controller.fireEvent(EventType.FAULT_CREATED, branch);
 		});
 		contextMenu.getItems().addAll(item1);
 		
@@ -296,14 +311,14 @@ public class NetworkPane extends Pane {
 		sp.setLayoutY(Math.min(l.getEndY(), l.getStartY()));
 
 		/** Label branch */
+		DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_2);
+		String power = " (" + df.format(branch.getMaxCurrent()) + ")";
+		Text text = new Text(power);
+		text.setFont(Font.font(10));
+		text.setBoundsType(TextBoundsType.VISUAL);
+		text.setOnMouseClicked(mouseClicked);
+		sp.setBranchText(text);
 		if (!branch.hasFault()) {
-			DecimalFormat df = new DecimalFormat(Constants.DECIMAL_FORMAT_2);
-			String power = " (" + df.format(branch.getMaxCurrent()) + ")";
-			Text text = new Text(power);
-			text.setFont(Font.font(10));
-			text.setBoundsType(TextBoundsType.VISUAL);
-			text.setOnMouseClicked(mouseClicked);
-			sp.setBranchText(text);
 			box.getChildren().add(text);
 		}
 

@@ -91,6 +91,15 @@ public class Environment implements Serializable {
 		return faults.isEmpty() ? null : faults.get(RANDOM.nextInt(faults.size()));
 	}
 	
+	public void addFault(Integer branchNumber) {
+		Branch branch = getBranch(branchNumber);
+		branch.setSwitchStatus(SwitchStatus.FAULT);
+		
+		if (!faults.contains(branch)) {
+			faults.add(branch);
+		}
+	}
+	
 	/**
 	 * Retorna o {@link NetworkNode} pelo número
 	 * @param networkNodeNumber

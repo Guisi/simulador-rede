@@ -1,8 +1,6 @@
 package br.com.guisi.simulador.rede.controller.environment;
 
-import javafx.scene.Node;
-import javafx.scene.control.Slider;
-import javafx.scene.layout.VBox;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -15,16 +13,26 @@ import br.com.guisi.simulador.rede.agent.data.AgentData;
 import br.com.guisi.simulador.rede.agent.data.AgentDataType;
 import br.com.guisi.simulador.rede.agent.data.AgentStepData;
 import br.com.guisi.simulador.rede.agent.data.SwitchOperation;
+import br.com.guisi.simulador.rede.agent.qlearning.Cluster;
 import br.com.guisi.simulador.rede.constants.Constants;
 import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
 import br.com.guisi.simulador.rede.constants.PropertyKey;
 import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.events.EnvironmentEventData;
 import br.com.guisi.simulador.rede.events.EventType;
+import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
+import br.com.guisi.simulador.rede.util.EnvironmentUtils;
+import br.com.guisi.simulador.rede.util.PowerFlow;
 import br.com.guisi.simulador.rede.util.PropertiesUtils;
 import br.com.guisi.simulador.rede.view.custom.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkPane;
 import br.com.guisi.simulador.rede.view.custom.ZoomingPane;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Slider;
+import javafx.scene.layout.VBox;
 
 @Named
 @Scope("prototype")
@@ -52,7 +60,8 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 				EventType.FEEDER_SELECTED,
 				EventType.BRANCH_SELECTED,
 				EventType.AGENT_NOTIFICATION,
-				EventType.AGENT_STOPPED);
+				EventType.AGENT_STOPPED,
+				EventType.FAULT_CREATED);
 		
 		root = new VBox();
 		
@@ -93,6 +102,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 			case BRANCH_SELECTED: this.processBranchSelected(data); break;
 			case AGENT_NOTIFICATION : this.processAgentNotification(data); break;
 			case AGENT_STOPPED: this.processAgentStop(); break;
+			case FAULT_CREATED: this.processFaultCreated(data); break;
 			default: break;
 		}
 	}
@@ -197,6 +207,47 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 		
 		//atualiza status dos feeders na tela
 		getEnvironment().getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
+	}
+	
+	private void processFaultCreated(Object data) {
+		Branch branch = (Branch) data;
+		
+		//primeiro valida se rede está radial
+		Environment environment = getEnvironment();
+
+		List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
+		if (exceptions.isEmpty()) {
+			//isola as faltas
+			EnvironmentUtils.isolateFaultSwitches(environment);
+			
+			//marca switches que podem ser tie-sw
+			EnvironmentUtils.validateTieSwitches(environment);
+			
+			//executa o fluxo de potência
+			try {
+				PowerFlow.execute(environment);
+			} catch (Exception e) {
+				e.printStackTrace();
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setContentText(e.getMessage());
+				alert.showAndWait();
+			}
+		} else {
+			Alert alert = new Alert(AlertType.ERROR);
+			StringBuilder sb = new StringBuilder();
+			exceptions.forEach(ex -> sb.append(ex.getMessage()).append("\n")); 
+			alert.setContentText(sb.toString());
+			alert.showAndWait();
+		}
+		
+		List<Cluster> clusters = EnvironmentUtils.mountClusters(environment);
+		environment.setClusters(clusters);
+		
+		networkPane.updateBranchDrawing(branch);
+
+		//atualiza status dos nós na tela
+		getEnvironment().getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
+		getEnvironment().getBranches().forEach((brc) -> networkPane.updateBranchDrawing(brc));
 	}
 	
 	@Override
