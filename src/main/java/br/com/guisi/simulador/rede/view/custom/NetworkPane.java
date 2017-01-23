@@ -186,7 +186,7 @@ public class NetworkPane extends Pane {
 			VBox box = (VBox) rect.getParent();
 			box.setPadding(new Insets(0, 0, 0, 0));
 			
-			branchPane.setLayoutX(branchPane.getLayoutX() - Constants.BRANCH_TYPE_PX / 2);
+			//branchPane.setLayoutX(branchPane.getLayoutX() - Constants.BRANCH_TYPE_PX / 2);
 			
 			box.getChildren().remove(txt);
 		}
