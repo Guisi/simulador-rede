@@ -172,7 +172,7 @@ public class ElementsDetailsPaneController extends AbstractEnvironmentPaneContro
 			tvLoadDetails.getItems().add(new PropertyRow("Active Power MW:", df.format(load.getActivePowerMW())));
 			tvLoadDetails.getItems().add(new PropertyRow("Reactive Power MVar:", df.format(load.getReactivePowerMVar())));
 			tvLoadDetails.getItems().add(new PropertyRow("Priority:", String.valueOf(load.getPriority())));
-			tvLoadDetails.getItems().add(new PropertyRow("Status:", load.isOn() ? "On" : "Off"));
+			tvLoadDetails.getItems().add(new PropertyRow("Status:", load.isOn() ? "On" : load.isIsolated() ? "Isolated" : "Off"));
 			tvLoadDetails.getItems().add(new PropertyRow("Voltage pu:", df.format(load.getCurrentVoltagePU())));
 			cbLoadNumber.valueProperty().setValue(selectedLoad);
 		}

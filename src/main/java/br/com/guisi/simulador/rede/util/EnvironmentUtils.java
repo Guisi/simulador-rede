@@ -349,9 +349,10 @@ public class EnvironmentUtils {
 	}
 	
 	public static void isolateFaultSwitches(Environment environment) {
-		environment.getBranches().stream().filter(branch -> branch.isIsolated()).forEach((brc) -> brc.setSwitchStatus(brc.getStatusBeforeFault()));
+		environment.getBranches().stream().filter(branch -> branch.isIsolated())
+			.forEach((brc) -> brc.setSwitchStatus(brc.getStatusBeforeFault()));
 		
-		environment.getLoads().forEach((load) -> load.setStatus(Status.ON));
+		environment.getNetworkNodes().forEach((node) -> node.setStatus(Status.ON));
 		
 		environment.getFaults().forEach((branch) -> isolateNextSwitchesRecursive(branch, null));
 	}
@@ -634,7 +635,8 @@ public class EnvironmentUtils {
 	}
 	
 	public static void main(String[] args) {
-		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		//File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.xlsx");
+		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		Environment environment = null;
 		
 		try {

@@ -4,17 +4,6 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import br.com.guisi.simulador.rede.SimuladorRede;
-import br.com.guisi.simulador.rede.constants.Constants;
-import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
-import br.com.guisi.simulador.rede.controller.Controller;
-import br.com.guisi.simulador.rede.enviroment.Branch;
-import br.com.guisi.simulador.rede.enviroment.Environment;
-import br.com.guisi.simulador.rede.enviroment.Feeder;
-import br.com.guisi.simulador.rede.enviroment.Load;
-import br.com.guisi.simulador.rede.enviroment.NetworkNode;
-import br.com.guisi.simulador.rede.events.EnvironmentEventData;
-import br.com.guisi.simulador.rede.events.EventType;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -37,6 +26,17 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
+import br.com.guisi.simulador.rede.SimuladorRede;
+import br.com.guisi.simulador.rede.constants.Constants;
+import br.com.guisi.simulador.rede.constants.EnvironmentKeyType;
+import br.com.guisi.simulador.rede.controller.Controller;
+import br.com.guisi.simulador.rede.enviroment.Branch;
+import br.com.guisi.simulador.rede.enviroment.Environment;
+import br.com.guisi.simulador.rede.enviroment.Feeder;
+import br.com.guisi.simulador.rede.enviroment.Load;
+import br.com.guisi.simulador.rede.enviroment.NetworkNode;
+import br.com.guisi.simulador.rede.events.EnvironmentEventData;
+import br.com.guisi.simulador.rede.events.EventType;
 
 public class NetworkPane extends Pane {
 
@@ -84,7 +84,7 @@ public class NetworkPane extends Pane {
 		shape.setStroke(selected ? Color.DARKORANGE : Color.BLACK);
 		shape.setStrokeWidth(selected ? 2 : 1);
 		
-		Color networkNodeColor = !load.isOff() ? Color.web(load.getColor()) : Color.BLACK;
+		Color networkNodeColor = load.isOn() ? Color.web(load.getColor()) : load.isIsolated() ? Color.WHITE : Color.BLACK;
 		Text txt = networkNodePane.getNetworkNodeText();
 		if (load.isSupplied()) {
 			txt.setFont(Font.font("Verdana", FontWeight.NORMAL, 11));
@@ -122,7 +122,7 @@ public class NetworkPane extends Pane {
 		shape.setStroke(selected ? Color.DARKORANGE : Color.BLACK);
 		shape.setStrokeWidth(selected ? 2 : 1);
 		
-		Color networkNodeColor = Color.web(feeder.getFeederColor());
+		Color networkNodeColor = feeder.isOn() ? Color.web(feeder.getFeederColor()) : Color.WHITE;
 		Text txt = networkNodePane.getNetworkNodeText();
 		txt.setFill(feeder.isPowerOverflow() ? Color.RED : Color.BLACK);
 		txt.setFont(Font.font("Verdana", feeder.isPowerOverflow() ? FontWeight.BOLD : FontWeight.NORMAL, 11));

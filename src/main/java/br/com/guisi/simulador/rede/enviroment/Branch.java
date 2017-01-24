@@ -48,6 +48,8 @@ public class Branch implements Serializable {
 		this.reactance = reactance;
 		this.switchStatus = switchStatus;
 		this.switchBranch = switchBranch;
+		
+		this.statusBeforeFault = SwitchStatus.OPEN;
 	}
 	
 	/**

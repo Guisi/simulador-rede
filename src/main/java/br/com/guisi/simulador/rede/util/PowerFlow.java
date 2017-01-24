@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.complex.Complex;
 import org.n52.matlab.control.MatlabConnectionException;
@@ -18,6 +19,7 @@ import br.com.guisi.simulador.rede.enviroment.Environment;
 import br.com.guisi.simulador.rede.enviroment.Feeder;
 import br.com.guisi.simulador.rede.enviroment.Load;
 import br.com.guisi.simulador.rede.enviroment.NetworkNode;
+import br.com.guisi.simulador.rede.exception.NonRadialNetworkException;
 import cern.colt.matrix.tdouble.DoubleFactory2D;
 import cern.colt.matrix.tdouble.DoubleMatrix2D;
 import edu.cornell.pserc.jpower.Djp_jpoption;
@@ -61,7 +63,7 @@ public class PowerFlow {
 		/*monta lista somente com os nodes que sejam feeders ou que estejam conectados a um feeder*/
 		List<NetworkNode> activeNodes = new ArrayList<>();
 		environment.getNetworkNodes().forEach((networkNode) -> {
-			if (networkNode.isFeeder() || ((Load)networkNode).getFeeder() != null) {
+			if (!networkNode.isIsolated() && (networkNode.isFeeder() || ((Load)networkNode).getFeeder() != null) ) {
 				activeNodes.add(networkNode);
 			}
 		});
@@ -79,9 +81,12 @@ public class PowerFlow {
 				activeBranches.add(branch);
 			}
 		});
+		
+		List<Feeder> activeFeeders = new ArrayList<>();
+		activeFeeders.addAll(environment.getFeeders().stream().filter(feeder -> feeder.isOn()).collect(Collectors.toList()));
 
 		//return executePowerFlowMatlab(environment, activeNodes, activeBranches);
-		return executePowerFlowJPower(environment, activeNodes, activeBranches);
+		return executePowerFlowJPower(environment, activeFeeders, activeNodes, activeBranches);
 	}
 	
 	@SuppressWarnings("unused")
@@ -147,8 +152,8 @@ public class PowerFlow {
 		}
 	}
 	
-	private static boolean executePowerFlowJPower(Environment environment, List<NetworkNode> activeNodes, List<Branch> activeBranches) {
-		JPC jpc = getJPowerCase(environment, activeNodes, activeBranches);
+	private static boolean executePowerFlowJPower(Environment environment, List<Feeder> feeders, List<NetworkNode> activeNodes, List<Branch> activeBranches) {
+		JPC jpc = getJPowerCase(feeders, activeNodes, activeBranches);
 		
 		jpc = Djp_rundcpf.rundcpf(jpc, options);
 		
@@ -187,7 +192,7 @@ public class PowerFlow {
 		return jpc.success;
 	}
 	
-	private static JPC getJPowerCase(Environment environment, List<NetworkNode> activeNodes, List<Branch> activeBranches) {
+	private static JPC getJPowerCase(List<Feeder> feeders, List<NetworkNode> activeNodes, List<Branch> activeBranches) {
 
 		JPC jpc = new JPC();
 
@@ -204,7 +209,7 @@ public class PowerFlow {
 
 		/* generator data */
 		//	bus	Pg	Qg	Qmax	Qmin	Vg	mBase	status	Pmax	Pmin	Pc1	Pc2	Qc1min	Qc1max	Qc2min	Qc2max	ramp_ag	ramp_10	ramp_30	ramp_q	apf
-		double[][] mpcGen = mountMpcGen(environment.getFeeders());
+		double[][] mpcGen = mountMpcGen(feeders);
 		jpc.gen = Gen.fromMatrix( DoubleFactory2D.dense.make(mpcGen) );
 
 		/* branch data */
@@ -426,15 +431,24 @@ public class PowerFlow {
 	}
 	
 	public static void main(String[] args) {
-		File f = new File("C:/Users/Guisi/Desktop/modelo-zidan.csv");
+		File f = new File("C:/Users/p9924018/Desktop/Pesquisa/modelo-zidan.xlsx");
 		
 		try {
 			Environment environment = EnvironmentUtils.getEnvironmentFromFile(f);
 			
-			executePowerFlow(environment);
+			//primeiro valida se rede está radial
+			List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
 			
-			Matlab.disconnectMatlabProxy();
-			
+			if (exceptions.isEmpty()) {
+				//isola as faltas
+				EnvironmentUtils.isolateFaultSwitches(environment);
+				
+				//marca switches que podem ser tie-sw
+				EnvironmentUtils.validateTieSwitches(environment);
+				
+				//executa o fluxo de potência
+				PowerFlow.execute(environment);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

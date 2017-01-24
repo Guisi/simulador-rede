@@ -405,7 +405,7 @@ public class Environment implements Serializable {
 	 * @return
 	 */
 	public double getNotSuppliedLoadsVsPriority() {
-		return loads.stream().filter((load) -> !load.isSupplied()).mapToDouble((load) -> PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
+		return loads.stream().filter((load) -> load.isOn() && !load.isSupplied()).mapToDouble((load) -> PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
 	}
 	
 	/**
@@ -428,7 +428,7 @@ public class Environment implements Serializable {
 	 * @return
 	 */
 	public double getNotSuppliedLoadsActivePowerMWVsPriority() {
-		return loads.stream().filter((load) -> !load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW() * PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
+		return loads.stream().filter((load) -> load.isOn() && !load.isSupplied()).mapToDouble((load) -> load.getActivePowerMW() * PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
 	}
 	
 	/**

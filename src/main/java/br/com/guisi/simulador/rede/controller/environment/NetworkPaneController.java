@@ -2,6 +2,12 @@ package br.com.guisi.simulador.rede.controller.environment;
 
 import java.util.List;
 
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Slider;
+import javafx.scene.layout.VBox;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -28,11 +34,6 @@ import br.com.guisi.simulador.rede.util.PropertiesUtils;
 import br.com.guisi.simulador.rede.view.custom.NetworkNodeStackPane;
 import br.com.guisi.simulador.rede.view.custom.NetworkPane;
 import br.com.guisi.simulador.rede.view.custom.ZoomingPane;
-import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Slider;
-import javafx.scene.layout.VBox;
 
 @Named
 @Scope("prototype")
@@ -193,6 +194,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 
 				//atualiza status dos nós na tela
 				getEnvironment().getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
+				getEnvironment().getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
 			}
 		}
 		
@@ -204,6 +206,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 
 		//atualiza status dos loads na tela
 		getEnvironment().getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
+		getEnvironment().getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
 		
 		//atualiza status dos feeders na tela
 		getEnvironment().getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
@@ -252,6 +255,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 		
 		//atualiza status dos nós na tela
 		getEnvironment().getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
+		getEnvironment().getFeeders().forEach((feeder) -> networkPane.updateFeederDrawing(feeder));
 		getEnvironment().getBranches().forEach((brc) -> networkPane.updateBranchDrawing(brc));
 	}
 	
