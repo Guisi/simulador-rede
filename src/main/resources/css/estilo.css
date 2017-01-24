@@ -59,7 +59,7 @@
 }
 
 .thick-chart .chart-series-line {
-	-fx-stroke-width: 1px;
+	-fx-stroke-width: 2px;
 }
 
 .bar-chart .chart-vertical-grid-lines {

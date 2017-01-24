@@ -24,6 +24,7 @@ import br.com.guisi.simulador.rede.view.charts.environment.RequiredSwitchOperati
 import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsActivePowerPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.environment.VoltageBarChart;
+import br.com.guisi.simulador.rede.view.charts.environment.VoltageLineChart;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -41,6 +42,7 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 	private int stepProcessed;
 	
 	private VoltageBarChart voltageBarChart;
+	private VoltageLineChart voltageLineChart;
 	private InstantCurrentBarChart instantCurrentBarChart;
 	
 	public EnvironmentChartsPaneController(EnvironmentKeyType environmentKeyType) {
@@ -119,6 +121,13 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 		tabPaneCharts.getTabs().add(tab);
 		instantCurrentBarChart.updateChart(getEnvironment());
 		
+		//voltage magnitude in p.u.
+		voltageLineChart = new VoltageLineChart();
+		tab = new Tab(voltageLineChart.getChartTitle());
+		tab.setContent(voltageLineChart);
+		tabPaneCharts.getTabs().add(tab);
+		voltageLineChart.updateChart(getEnvironment());
+		
 	}
 	
 	private void resetScreen() {
@@ -158,6 +167,7 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 			stepProcessed = environmentStepData.size();
 			
 			voltageBarChart.updateChart(getEnvironment());
+			voltageLineChart.updateChart(getEnvironment());
 			instantCurrentBarChart.updateChart(getEnvironment());
 		}
 	}

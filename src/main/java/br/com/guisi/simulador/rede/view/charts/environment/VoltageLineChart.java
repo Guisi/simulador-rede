@@ -1,28 +1,28 @@
 package br.com.guisi.simulador.rede.view.charts.environment;
 
 import br.com.guisi.simulador.rede.enviroment.Environment;
-import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
-public class VoltageBarChart extends BarChart<String, Number> {
+public class VoltageLineChart extends LineChart<String, Number> {
 
 	private XYChart.Series<String, Number> series;
 	private XYChart.Series<String, Number> series2;
 	private XYChart.Series<String, Number> series3;
 	
-	public VoltageBarChart() {
+	public VoltageLineChart() {
 		super(new CategoryAxis(), new NumberAxis());
 		
 		this.setPrefHeight(300);
         this.setLegendVisible(false);
         this.setAnimated(false);
-        this.getStyleClass().add("bar-chart");
+        this.getStyleClass().add("thick-chart");
+        this.setCreateSymbols(false);
 
 		getYNumberAxis().setAutoRanging(true);
 		getXAxis().setLabel("Load Number");
-		setBarGap(0);
 		
 		getYAxis().setLabel(getChartTitle());
 		
@@ -52,7 +52,7 @@ public class VoltageBarChart extends BarChart<String, Number> {
 		series.getData().clear();
 		series2.getData().clear();
 		series3.getData().clear();
-		environment.getLoads().stream().filter(load -> load.getNodeNumber() < 40).forEach(load -> {
+		environment.getLoads().forEach(load -> {
 			Data<String, Number> chartData = new XYChart.Data<>(load.getNodeNumber().toString(), load.getCurrentVoltagePU());
 			series.getData().add(chartData);
 			
