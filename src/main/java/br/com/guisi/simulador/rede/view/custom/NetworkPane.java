@@ -84,7 +84,7 @@ public class NetworkPane extends Pane {
 		shape.setStroke(selected ? Color.DARKORANGE : Color.BLACK);
 		shape.setStrokeWidth(selected ? 2 : 1);
 		
-		Color networkNodeColor = load.isOn() ? Color.web(load.getColor()) : Color.BLACK;
+		Color networkNodeColor = !load.isOff() ? Color.web(load.getColor()) : Color.BLACK;
 		Text txt = networkNodePane.getNetworkNodeText();
 		if (load.isSupplied()) {
 			txt.setFont(Font.font("Verdana", FontWeight.NORMAL, 11));
@@ -167,6 +167,7 @@ public class NetworkPane extends Pane {
 		
 		Rectangle rect = branchPane.getSwitchRectangle();
 		rect.setVisible(branch.isSwitchBranch() || branch.hasFault());
+		VBox box = (VBox) rect.getParent();
 		if (!branch.hasFault()) {
 			rect.setFill(branch.isClosed() ? Color.BLACK : Color.WHITE);
 			rect.setStrokeWidth(1);
@@ -175,6 +176,12 @@ public class NetworkPane extends Pane {
 			} else {
 				rect.setStroke(Color.GRAY);
 			}
+			rect.setWidth(Constants.BRANCH_TYPE_PX * 2);
+			rect.setHeight(Constants.BRANCH_TYPE_PX);
+			box.setPadding(new Insets(0, 0, Constants.BRANCH_TYPE_PX, 0));
+			if (!box.getChildren().contains(txt)) {
+				box.getChildren().add(0, txt);
+			}
 		} else {
 			rect.setWidth(Constants.BRANCH_TYPE_PX * 4);
 			rect.setHeight(Constants.BRANCH_TYPE_PX * 3);
@@ -182,14 +189,12 @@ public class NetworkPane extends Pane {
 			ImagePattern imagePattern = new ImagePattern(img);
 			rect.setFill(imagePattern);
 			rect.setStrokeWidth(0);
-			
-			VBox box = (VBox) rect.getParent();
 			box.setPadding(new Insets(0, 0, 0, 0));
-			
-			//branchPane.setLayoutX(branchPane.getLayoutX() - Constants.BRANCH_TYPE_PX / 2);
-			
 			box.getChildren().remove(txt);
 		}
+		
+		branchPane.getItemCreateFault().setVisible(!branch.hasFault());
+		branchPane.getItemRemoveFault().setVisible(branch.hasFault());
 	}
 	
 	public void changeAgentCirclePosition(Integer newBranchNumber) {
@@ -252,12 +257,23 @@ public class NetworkPane extends Pane {
 		sp.toBack();
 		
 		final ContextMenu contextMenu = new ContextMenu();
-		MenuItem item1 = new MenuItem("Criar falta");
-		item1.setOnAction(event -> {
+		MenuItem itemCreateFault = new MenuItem("Criar falta");
+		itemCreateFault.setVisible(!branch.hasFault());
+		itemCreateFault.setOnAction(event -> {
 			getEnvironment().addFault(branch.getNumber());
 	        controller.fireEvent(EventType.FAULT_CREATED, branch);
 		});
-		contextMenu.getItems().addAll(item1);
+		contextMenu.getItems().addAll(itemCreateFault);
+		sp.setItemCreateFault(itemCreateFault);
+
+		MenuItem itemRemoveFault = new MenuItem("Remover falta");
+		itemRemoveFault.setVisible(branch.hasFault());
+		itemRemoveFault.setOnAction(event -> {
+			getEnvironment().removeFault(branch.getNumber());
+	        controller.fireEvent(EventType.FAULT_CREATED, branch);
+		});
+		contextMenu.getItems().addAll(itemRemoveFault);
+		sp.setItemRemoveFault(itemRemoveFault);
 		
 		EventHandler<MouseEvent> mouseClicked = (event) -> {
 			if (event.getButton() == MouseButton.PRIMARY) {

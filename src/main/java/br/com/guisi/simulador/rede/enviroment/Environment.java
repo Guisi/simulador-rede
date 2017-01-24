@@ -93,11 +93,20 @@ public class Environment implements Serializable {
 	
 	public void addFault(Integer branchNumber) {
 		Branch branch = getBranch(branchNumber);
+		if (branch.isClosed() || branch.isOpen()) { 
+			branch.setStatusBeforeFault(branch.getSwitchStatus());
+		}
 		branch.setSwitchStatus(SwitchStatus.FAULT);
 		
 		if (!faults.contains(branch)) {
 			faults.add(branch);
 		}
+	}
+	
+	public void removeFault(Integer branchNumber) {
+		Branch branch = getBranch(branchNumber);
+		branch.setSwitchStatus(branch.getStatusBeforeFault());
+		faults.remove(branch);
 	}
 	
 	/**
@@ -340,7 +349,7 @@ public class Environment implements Serializable {
 	 * @return
 	 */
 	public double getTotalActivePowerDemandMW() {
-		return loads.stream().mapToDouble((load) -> load.getActivePowerMW()).sum();
+		return loads.stream().filter(load -> !load.isIsolated()).mapToDouble((load) -> load.getActivePowerMW()).sum();
 	}
 	
 	/**
@@ -348,7 +357,7 @@ public class Environment implements Serializable {
 	 * @return
 	 */
 	public double getTotalActivePowerDemandMWVsPriority() {
-		return loads.stream().mapToDouble((load) -> load.getActivePowerMW() * PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
+		return loads.stream().filter(load -> !load.isIsolated()).mapToDouble((load) -> load.getActivePowerMW() * PriorityUtils.getPriorityValue(load.getPriority()) ).sum();
 	}
 	
 	/**
@@ -380,7 +389,7 @@ public class Environment implements Serializable {
 	 * @return
 	 */
 	public double getTotalReactivePowerDemandMVar() {
-		return loads.stream().mapToDouble((load) -> load.getReactivePowerMVar()).sum();
+		return loads.stream().filter(load -> !load.isIsolated()).mapToDouble((load) -> load.getReactivePowerMVar()).sum();
 	}
 	
 	/**

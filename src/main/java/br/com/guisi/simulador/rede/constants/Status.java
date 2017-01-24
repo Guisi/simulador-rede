@@ -6,5 +6,5 @@ package br.com.guisi.simulador.rede.constants;
  * @author douglas.guisi
  */
 public enum Status {
-	ON, OFF;
+	ON, OFF, ISOLATED;
 }

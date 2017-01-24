@@ -1,6 +1,7 @@
 package br.com.guisi.simulador.rede.view.custom;
 
 import javafx.scene.Node;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -13,6 +14,8 @@ public class BranchStackPane extends StackPane {
 	private Text branchText;
 	private Rectangle switchRectangle;
 	private Circle agentCircle;
+	private MenuItem itemCreateFault;
+	private MenuItem itemRemoveFault;
 	
 	public BranchStackPane(Integer branchNum) {
 		this.branchNum = branchNum;
@@ -58,5 +61,21 @@ public class BranchStackPane extends StackPane {
 			}
 		}
 		throw new IllegalStateException("No way! A BranchStackPane always have a Line!");
+	}
+
+	public MenuItem getItemCreateFault() {
+		return itemCreateFault;
+	}
+
+	public void setItemCreateFault(MenuItem itemCreateFault) {
+		this.itemCreateFault = itemCreateFault;
+	}
+
+	public MenuItem getItemRemoveFault() {
+		return itemRemoveFault;
+	}
+
+	public void setItemRemoveFault(MenuItem itemRemoveFault) {
+		this.itemRemoveFault = itemRemoveFault;
 	}
 }

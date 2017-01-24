@@ -34,6 +34,8 @@ public class Branch implements Serializable {
 	private double activeLossMW;
 	private double reactiveLossMVar;
 	
+	private SwitchStatus statusBeforeFault;
+	
 	private Cluster cluster;
 	
 	public Branch(Integer number, NetworkNode node1, NetworkNode node2, double maxCurrent, double resistance, 
@@ -270,6 +272,14 @@ public class Branch implements Serializable {
 
 	public void setTieSwitchCandidate(boolean tieSwitchCandidate) {
 		this.tieSwitchCandidate = tieSwitchCandidate;
+	}
+
+	public SwitchStatus getStatusBeforeFault() {
+		return statusBeforeFault;
+	}
+
+	public void setStatusBeforeFault(SwitchStatus statusBeforeFault) {
+		this.statusBeforeFault = statusBeforeFault;
 	}
 
 	@Override

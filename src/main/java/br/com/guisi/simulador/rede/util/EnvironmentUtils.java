@@ -349,16 +349,24 @@ public class EnvironmentUtils {
 	}
 	
 	public static void isolateFaultSwitches(Environment environment) {
+		environment.getBranches().stream().filter(branch -> branch.isIsolated()).forEach((brc) -> brc.setSwitchStatus(brc.getStatusBeforeFault()));
+		
+		environment.getLoads().forEach((load) -> load.setStatus(Status.ON));
+		
 		environment.getFaults().forEach((branch) -> isolateNextSwitchesRecursive(branch, null));
 	}
 	
 	private static void isolateNextSwitchesRecursive(Branch branch, NetworkNode lastNetworkNode) {
 		branch.getConnectedNodes().forEach((networkNode) -> {
 			if (lastNetworkNode == null || !lastNetworkNode.equals(networkNode)) {
+				networkNode.setStatus(Status.ISOLATED);
 				networkNode.getBranches().forEach((connectedBranch) -> {
 					if (!connectedBranch.equals(branch)) {
 						if (connectedBranch.isSwitchBranch()) {
-							connectedBranch.isolateSwitch();
+							if (!connectedBranch.hasFault() && !connectedBranch.isIsolated()) {
+								connectedBranch.setStatusBeforeFault(connectedBranch.getSwitchStatus());
+								connectedBranch.isolateSwitch();
+							}
 						} else {
 							isolateNextSwitchesRecursive(connectedBranch, networkNode);
 						}

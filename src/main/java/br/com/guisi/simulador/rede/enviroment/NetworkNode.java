@@ -68,6 +68,22 @@ public abstract class NetworkNode implements Serializable {
 	}
 	
 	/**
+	 * Retorna se este nó está desligado
+	 * @return boolean
+	 */
+	public boolean isOff() {
+		return Status.OFF.equals(status);
+	}
+	
+	/**
+	 * Retorna se este nó está isolado por alguma falta
+	 * @return boolean
+	 */
+	public boolean isIsolated() {
+		return Status.ISOLATED.equals(status);
+	}
+	
+	/**
 	 * Desliga o load
 	 */
 	public void turnOff() {
@@ -145,6 +161,10 @@ public abstract class NetworkNode implements Serializable {
 		return status;
 	}
 	
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
 	/**
 	 * Voltagem atual em PU
 	 * @return

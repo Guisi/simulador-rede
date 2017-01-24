@@ -210,12 +210,11 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 	}
 	
 	private void processFaultCreated(Object data) {
-		Branch branch = (Branch) data;
-		
 		//primeiro valida se rede está radial
 		Environment environment = getEnvironment();
 
 		List<NonRadialNetworkException> exceptions = EnvironmentUtils.validateRadialState(environment);
+		boolean powerFlowSuccess = false;
 		if (exceptions.isEmpty()) {
 			//isola as faltas
 			EnvironmentUtils.isolateFaultSwitches(environment);
@@ -225,7 +224,7 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 			
 			//executa o fluxo de potência
 			try {
-				PowerFlow.execute(environment);
+				powerFlowSuccess = PowerFlow.execute(environment);
 			} catch (Exception e) {
 				e.printStackTrace();
 				Alert alert = new Alert(AlertType.ERROR);
@@ -240,11 +239,17 @@ public class NetworkPaneController extends AbstractEnvironmentPaneController {
 			alert.showAndWait();
 		}
 		
+		if (powerFlowSuccess) {
+			this.fireEvent(EventType.POWER_FLOW_COMPLETED);
+		} else {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setContentText("Newton's method power flow did not converge");
+			alert.showAndWait();
+		}
+		
 		List<Cluster> clusters = EnvironmentUtils.mountClusters(environment);
 		environment.setClusters(clusters);
 		
-		networkPane.updateBranchDrawing(branch);
-
 		//atualiza status dos nós na tela
 		getEnvironment().getLoads().forEach((load) -> networkPane.updateLoadDrawing(load));
 		getEnvironment().getBranches().forEach((brc) -> networkPane.updateBranchDrawing(brc));
