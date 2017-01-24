@@ -3,6 +3,12 @@ package br.com.guisi.simulador.rede.controller.chart;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.Node;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 
@@ -25,11 +31,6 @@ import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsActivePo
 import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.environment.VoltageBarChart;
 import br.com.guisi.simulador.rede.view.charts.environment.VoltageLineChart;
-import javafx.scene.Node;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 @Named
 @Scope("prototype")
@@ -53,6 +54,7 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 	public void initializeController() {
 		this.listenToEvent(EventType.RESET_SCREEN,
 						   EventType.ENVIRONMENT_LOADED,
+						   EventType.POWER_FLOW_COMPLETED,
 						   EventType.AGENT_NOTIFICATION);
 		
 		root = new VBox();
@@ -75,6 +77,7 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 			case RESET_SCREEN: this.resetScreen(); break;
 			case ENVIRONMENT_LOADED: this.processEnvironmentLoaded(); break;
 			case AGENT_NOTIFICATION: this.processAgentNotification(data); break;
+			case POWER_FLOW_COMPLETED: this.processPowerflowCompleted(); break;
 			default: break;
 		}
 	}
@@ -165,11 +168,13 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 				});
 			}
 			stepProcessed = environmentStepData.size();
-			
-			voltageBarChart.updateChart(getEnvironment());
-			voltageLineChart.updateChart(getEnvironment());
-			instantCurrentBarChart.updateChart(getEnvironment());
 		}
+	}
+	
+	private void processPowerflowCompleted() {
+		voltageBarChart.updateChart(getEnvironment());
+		voltageLineChart.updateChart(getEnvironment());
+		instantCurrentBarChart.updateChart(getEnvironment());
 	}
 	
 	@Override
