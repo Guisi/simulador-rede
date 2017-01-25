@@ -459,11 +459,11 @@ public class Environment implements Serializable {
 	}
 	
 	public void turnOffAllLoads() {
-		getLoads().forEach(load -> load.turnOff() );
+		getLoads().stream().filter(load -> load.isOn()).forEach(load -> load.turnOff() );
 	}
 	
 	public void turnOnAllLoads() {
-		getLoads().forEach(load -> load.turnOn());
+		getLoads().stream().filter(load -> load.isOff()).forEach(load -> load.turnOn());
 	}
 
 	public List<Cluster> getClusters() {

@@ -9,14 +9,12 @@ import javafx.scene.chart.XYChart;
 public class VoltageLineChart extends LineChart<String, Number> {
 
 	private XYChart.Series<String, Number> series;
-	private XYChart.Series<String, Number> series2;
-	private XYChart.Series<String, Number> series3;
 	
 	public VoltageLineChart() {
 		super(new CategoryAxis(), new NumberAxis());
 		
 		this.setPrefHeight(300);
-        this.setLegendVisible(false);
+        this.setLegendVisible(true);
         this.setAnimated(false);
         this.getStyleClass().add("thick-chart");
         this.setCreateSymbols(false);
@@ -28,12 +26,6 @@ public class VoltageLineChart extends LineChart<String, Number> {
 		
 		series = new XYChart.Series<>();
 		getData().add(series);
-		
-		series2 = new XYChart.Series<>();
-		getData().add(series2);
-		
-		series3 = new XYChart.Series<>();
-		getData().add(series3);
 	}
 	
 	public CategoryAxis getXNumberAxis() {
@@ -45,22 +37,24 @@ public class VoltageLineChart extends LineChart<String, Number> {
 	}
 	
 	public String getChartTitle() {
-		return "Voltage Magnitude in p.u.";
+		return "Voltage Magnitude in p.u. (Line)";
 	}
 	
 	public void updateChart(Environment environment) {
 		series.getData().clear();
-		series2.getData().clear();
-		series3.getData().clear();
+		series.setName("Current");
 		environment.getLoads().forEach(load -> {
 			Data<String, Number> chartData = new XYChart.Data<>(load.getNodeNumber().toString(), load.getCurrentVoltagePU());
 			series.getData().add(chartData);
-			
-			chartData = new XYChart.Data<>(load.getNodeNumber().toString(), (load.getCurrentVoltagePU() / 2));
-			series2.getData().add(chartData);
-			
-			chartData = new XYChart.Data<>(load.getNodeNumber().toString(), (load.getCurrentVoltagePU() * 2));
-			series3.getData().add(chartData);
 		});
+	}
+	
+	public void saveCurrentSeries(String title) {
+		XYChart.Series<String, Number> seriesSave = new XYChart.Series<>();
+		seriesSave.setName(title);
+		series.getData().forEach(data -> seriesSave.getData().add( new XYChart.Data<>(data.getXValue(), data.getYValue()) ));
+		getData().add(getData().size()-1, seriesSave);
+		
+		series.setName("");
 	}
 }

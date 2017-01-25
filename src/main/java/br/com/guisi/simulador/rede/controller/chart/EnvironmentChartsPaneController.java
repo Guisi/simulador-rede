@@ -2,12 +2,7 @@ package br.com.guisi.simulador.rede.controller.chart;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javafx.scene.Node;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
@@ -31,6 +26,14 @@ import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsActivePo
 import br.com.guisi.simulador.rede.view.charts.environment.SuppliedLoadsPercentageChart;
 import br.com.guisi.simulador.rede.view.charts.environment.VoltageBarChart;
 import br.com.guisi.simulador.rede.view.charts.environment.VoltageLineChart;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 @Named
 @Scope("prototype")
@@ -110,27 +113,87 @@ public class EnvironmentChartsPaneController extends AbstractEnvironmentPaneCont
 			tabPaneCharts.getTabs().add(tab);
 		});
 		
+		this.createVoltageBarChart();
+		
+		this.createVoltageLineChart();
+		
+		this.createInstantCurrentBarChart();
+	}
+	
+	private void createVoltageLineChart() {
+		//voltage magnitude in p.u.
+		voltageLineChart = new VoltageLineChart();
+		
+		Button button = new Button("Save current series");
+		button.setOnAction(event -> {
+			TextInputDialog dialog = new TextInputDialog("");
+			dialog.setTitle("Save current series");
+			dialog.setHeaderText("Save current series");
+			dialog.setContentText("Give this series a name:");
+			Optional<String> result = dialog.showAndWait();
+			result.ifPresent(name -> voltageLineChart.saveCurrentSeries(name));
+		});
+		
+		Tab tab = new Tab(voltageLineChart.getChartTitle());
+		VBox vBox = new VBox();
+		tab.setContent(vBox);
+		voltageLineChart.prefHeightProperty().bind(tabPaneCharts.heightProperty());
+		vBox.setAlignment(Pos.CENTER_RIGHT);
+		vBox.getChildren().add(button);
+		vBox.getChildren().add(voltageLineChart);
+		
+		tabPaneCharts.getTabs().add(tab);
+		voltageLineChart.updateChart(getEnvironment());
+	}
+	
+	private void createVoltageBarChart() {
 		//voltage magnitude in p.u.
 		voltageBarChart = new VoltageBarChart();
 		Tab tab = new Tab(voltageBarChart.getChartTitle());
-		tab.setContent(voltageBarChart);
 		tabPaneCharts.getTabs().add(tab);
-		voltageBarChart.updateChart(getEnvironment());
 		
+		Button button = new Button("Save current series");
+		button.setOnAction(event -> {
+			TextInputDialog dialog = new TextInputDialog("");
+			dialog.setTitle("Save current series");
+			dialog.setHeaderText("Save current series");
+			dialog.setContentText("Give this series a name:");
+			Optional<String> result = dialog.showAndWait();
+			result.ifPresent(name -> voltageBarChart.saveCurrentSeries(name));
+		});
+		
+		VBox vBox = new VBox();
+		voltageBarChart.prefHeightProperty().bind(tabPaneCharts.heightProperty());
+		vBox.setAlignment(Pos.CENTER_RIGHT);
+		vBox.getChildren().add(button);
+		vBox.getChildren().add(voltageBarChart);
+		tab.setContent(vBox);
+		voltageBarChart.updateChart(getEnvironment());
+	}
+	
+	private void createInstantCurrentBarChart() {
 		//instant current in A.
 		instantCurrentBarChart = new InstantCurrentBarChart();
-		tab = new Tab(instantCurrentBarChart.getChartTitle());
-		tab.setContent(instantCurrentBarChart);
+		Tab tab = new Tab(instantCurrentBarChart.getChartTitle());
 		tabPaneCharts.getTabs().add(tab);
 		instantCurrentBarChart.updateChart(getEnvironment());
 		
-		//voltage magnitude in p.u.
-		voltageLineChart = new VoltageLineChart();
-		tab = new Tab(voltageLineChart.getChartTitle());
-		tab.setContent(voltageLineChart);
-		tabPaneCharts.getTabs().add(tab);
-		voltageLineChart.updateChart(getEnvironment());
+		Button button = new Button("Save current series");
+		button.setOnAction(event -> {
+			TextInputDialog dialog = new TextInputDialog("");
+			dialog.setTitle("Save current series");
+			dialog.setHeaderText("Save current series");
+			dialog.setContentText("Give this series a name:");
+			Optional<String> result = dialog.showAndWait();
+			result.ifPresent(name -> instantCurrentBarChart.saveCurrentSeries(name));
+		});
 		
+		VBox vBox = new VBox();
+		instantCurrentBarChart.prefHeightProperty().bind(tabPaneCharts.heightProperty());
+		vBox.setAlignment(Pos.CENTER_RIGHT);
+		vBox.getChildren().add(button);
+		vBox.getChildren().add(instantCurrentBarChart);
+		tab.setContent(vBox);
 	}
 	
 	private void resetScreen() {
