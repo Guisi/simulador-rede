@@ -257,7 +257,7 @@ public class NetworkPane extends Pane {
 		sp.toBack();
 		
 		final ContextMenu contextMenu = new ContextMenu();
-		MenuItem itemCreateFault = new MenuItem("Criar falta");
+		MenuItem itemCreateFault = new MenuItem("Create Fault");
 		itemCreateFault.setVisible(!branch.hasFault());
 		itemCreateFault.setOnAction(event -> {
 			getEnvironment().addFault(branch.getNumber());
@@ -266,7 +266,7 @@ public class NetworkPane extends Pane {
 		contextMenu.getItems().addAll(itemCreateFault);
 		sp.setItemCreateFault(itemCreateFault);
 
-		MenuItem itemRemoveFault = new MenuItem("Remover falta");
+		MenuItem itemRemoveFault = new MenuItem("Remove Fault");
 		itemRemoveFault.setVisible(branch.hasFault());
 		itemRemoveFault.setOnAction(event -> {
 			getEnvironment().removeFault(branch.getNumber());
